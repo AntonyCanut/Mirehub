@@ -1,0 +1,355 @@
+/* Claude Session Panel */
+.claude-panel {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.claude-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.claude-panel-header h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.claude-panel-empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.claude-launch-btn {
+  height: 24px;
+  padding: 0 10px;
+  background: var(--claude-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.claude-launch-btn:hover {
+  opacity: 0.85;
+}
+
+/* Claude Config */
+.claude-config {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.claude-prompt-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 12px;
+  font-family: 'Menlo', monospace;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  resize: vertical;
+  outline: none;
+}
+
+.claude-prompt-input:focus {
+  border-color: var(--claude-color);
+}
+
+.claude-prompt-input::placeholder {
+  color: var(--text-muted);
+}
+
+.claude-config-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.claude-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.claude-toggle input[type='checkbox'] {
+  accent-color: var(--claude-color);
+}
+
+.claude-delay-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.claude-delay-input input {
+  width: 50px;
+  height: 24px;
+  padding: 0 6px;
+  font-size: 12px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.claude-start-btn {
+  width: 100%;
+  height: 30px;
+  margin-top: 8px;
+  background: var(--claude-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.claude-start-btn:hover {
+  opacity: 0.85;
+}
+
+/* Sessions List */
+.claude-sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.claude-sessions-empty {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-align: center;
+  padding: 8px;
+}
+
+.claude-session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+}
+
+.claude-session-item--running {
+  border-color: var(--claude-color);
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.claude-session-item--flashing {
+  animation: flash 0.5s ease-in-out 6;
+  border-color: var(--warning);
+  background: rgba(250, 179, 135, 0.05);
+}
+
+.claude-session-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.claude-session-status {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.claude-session-status--running {
+  color: var(--claude-color);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.claude-session-status--completed {
+  color: var(--success);
+}
+
+.claude-session-status--failed {
+  color: var(--danger);
+}
+
+.claude-session-status--paused {
+  color: var(--warning);
+}
+
+.claude-session-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: 'Menlo', monospace;
+}
+
+.claude-stop-btn {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.claude-stop-btn:hover {
+  background: var(--danger);
+  color: white;
+}
+
+/* Auto-Clauder */
+.autoclaude-panel {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.autoclaude-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.autoclaude-header h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.autoclaude-count {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.autoclaude-template-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.autoclaude-template-selector label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.autoclaude-select {
+  flex: 1;
+  height: 26px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.autoclaude-preview-btn {
+  height: 26px;
+  padding: 0 10px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.autoclaude-preview-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.autoclaude-preview {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-family: 'Menlo', monospace;
+  color: var(--text-secondary);
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.autoclaude-empty {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-align: center;
+  padding: 8px;
+}
+
+.autoclaude-project-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+
+.autoclaude-project-item:hover {
+  background: var(--bg-surface);
+}
+
+.autoclaude-project-name {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.autoclaude-apply-btn {
+  height: 22px;
+  padding: 0 8px;
+  background: var(--claude-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.autoclaude-apply-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

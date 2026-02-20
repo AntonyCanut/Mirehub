@@ -1,0 +1,311 @@
+/* Multi-Agent View */
+.multiagent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-primary);
+}
+
+.multiagent-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Toolbar */
+.multiagent-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+}
+
+.multiagent-tabs {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+.multiagent-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.multiagent-tab:hover {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+}
+
+.multiagent-tab--active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.multiagent-tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.multiagent-tab-dot--idle {
+  background: var(--text-muted);
+}
+
+.multiagent-tab-dot--running {
+  background: var(--claude-color);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.multiagent-tab-dot--completed {
+  background: var(--success);
+}
+
+.multiagent-tab-dot--failed {
+  background: var(--danger);
+}
+
+.multiagent-tab-close {
+  width: 14px;
+  height: 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.1s ease;
+}
+
+.multiagent-tab:hover .multiagent-tab-close {
+  opacity: 1;
+}
+
+.multiagent-tab-close:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.multiagent-add {
+  height: 24px;
+  padding: 0 10px;
+  background: var(--claude-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.multiagent-add:hover {
+  opacity: 0.85;
+}
+
+/* Prompt Bar */
+.multiagent-prompt-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.multiagent-prompt-input {
+  flex: 1;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--claude-color);
+  border-radius: 6px;
+  outline: none;
+}
+
+.multiagent-prompt-go {
+  height: 28px;
+  padding: 0 14px;
+  background: var(--claude-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.multiagent-prompt-cancel {
+  height: 28px;
+  padding: 0 10px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Grid Layout */
+.multiagent-grid {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.multiagent-grid--1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.multiagent-grid--2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.multiagent-grid--3 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.multiagent-grid--3 > :first-child {
+  grid-row: span 2;
+}
+
+.multiagent-grid--4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* Pane */
+.multiagent-pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.multiagent-pane--active {
+  box-shadow: inset 0 0 0 2px var(--claude-color);
+}
+
+.multiagent-pane-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+}
+
+.multiagent-pane-status {
+  font-size: 8px;
+}
+
+.multiagent-pane-status--running {
+  color: var(--claude-color);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.multiagent-pane-status--completed {
+  color: var(--success);
+}
+
+.multiagent-pane-status--failed {
+  color: var(--danger);
+}
+
+.multiagent-pane-status--idle {
+  color: var(--text-muted);
+}
+
+.multiagent-pane-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.multiagent-pane-prompt {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.multiagent-pane-terminal {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Placeholder */
+.multiagent-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: var(--text-muted);
+  background: var(--bg-primary);
+  grid-column: 1 / -1;
+}
+
+.multiagent-placeholder p {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.multiagent-placeholder-sub {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: var(--text-muted) !important;
+}
+
+.multiagent-start-btn {
+  margin-top: 8px;
+  height: 32px;
+  padding: 0 20px;
+  background: var(--claude-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.multiagent-start-btn:hover {
+  opacity: 0.85;
+}

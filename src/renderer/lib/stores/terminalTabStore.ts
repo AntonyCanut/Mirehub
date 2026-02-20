@@ -1,0 +1,559 @@
+import { create } from 'zustand'
+
+// --- Pane tree types ---
+
+export interface PaneLeaf {
+  type: 'leaf'
+  id: string
+  sessionId: string | null
+  initialCommand: string | null
+}
+
+export interface PaneSplit {
+  type: 'split'
+  id: string
+  direction: 'horizontal' | 'vertical'
+  children: [PaneNode, PaneNode]
+  ratio: number // 0..1, first child gets ratio, second gets 1-ratio
+}
+
+export type PaneNode = PaneLeaf | PaneSplit
+
+// --- Tab types ---
+
+export interface TerminalTabData {
+  id: string
+  label: string
+  color: string | null
+  hasActivity: boolean
+  paneTree: PaneNode
+  activePaneId: string
+  zoomedPaneId: string | null
+  workspaceId: string
+  cwd: string
+  initialCommand: string | null
+}
+
+// --- Store ---
+
+interface TerminalTabState {
+  tabs: TerminalTabData[]
+  activeTabId: string | null
+}
+
+interface TerminalTabActions {
+  createTab: (workspaceId: string, cwd: string, label?: string, initialCommand?: string) => string
+  createSplitTab: (workspaceId: string, cwd: string, label: string, leftCommand: string | null, rightCommand: string | null) => string
+  closeTab: (id: string) => void
+  setActiveTab: (id: string) => void
+  renameTab: (id: string, label: string) => void
+  setTabColor: (id: string, color: string | null) => void
+  setTabActivity: (id: string, hasActivity: boolean) => void
+  reorderTabs: (fromIndex: number, toIndex: number) => void
+  activateNext: (workspaceId?: string) => void
+  activatePrev: (workspaceId?: string) => void
+  activateByIndex: (index: number, workspaceId?: string) => void
+  activateFirstInWorkspace: (workspaceId: string) => void
+  closeOtherTabs: (id: string) => void
+
+  // Pane actions
+  splitPane: (tabId: string, paneId: string, direction: 'horizontal' | 'vertical') => string | null
+  closePane: (tabId: string, paneId: string) => void
+  setActivePane: (tabId: string, paneId: string) => void
+  setPaneSessionId: (tabId: string, paneId: string, sessionId: string) => void
+  resizePane: (tabId: string, splitId: string, ratio: number) => void
+  toggleZoomPane: (tabId: string, paneId: string) => void
+  focusDirection: (tabId: string, direction: 'left' | 'right' | 'up' | 'down') => void
+}
+
+type TerminalTabStore = TerminalTabState & TerminalTabActions
+
+let nextTabNumber = 1
+
+function generateId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function createLeafPane(initialCommand?: string): PaneLeaf {
+  return { type: 'leaf', id: generateId('pane'), sessionId: null, initialCommand: initialCommand ?? null }
+}
+
+// Count leaf panes in a tree
+function countLeaves(node: PaneNode): number {
+  if (node.type === 'leaf') return 1
+  return countLeaves(node.children[0]) + countLeaves(node.children[1])
+}
+
+// Collect all leaf pane ids
+function collectLeafIds(node: PaneNode): string[] {
+  if (node.type === 'leaf') return [node.id]
+  return [...collectLeafIds(node.children[0]), ...collectLeafIds(node.children[1])]
+}
+
+// Find a pane by id in the tree and return it
+function findPane(node: PaneNode, paneId: string): PaneLeaf | null {
+  if (node.type === 'leaf') return node.id === paneId ? node : null
+  return findPane(node.children[0], paneId) || findPane(node.children[1], paneId)
+}
+
+// Replace a node in the tree (returns a new tree)
+function replaceNode(tree: PaneNode, targetId: string, replacement: PaneNode): PaneNode {
+  if (tree.id === targetId) return replacement
+  if (tree.type === 'leaf') return tree
+  return {
+    ...tree,
+    children: [
+      replaceNode(tree.children[0], targetId, replacement),
+      replaceNode(tree.children[1], targetId, replacement),
+    ],
+  }
+}
+
+// Remove a leaf from the tree: replace the parent split with the sibling
+function removeLeaf(tree: PaneNode, paneId: string): PaneNode | null {
+  if (tree.type === 'leaf') {
+    return tree.id === paneId ? null : tree
+  }
+
+  const [left, right] = tree.children
+
+  // Check if direct children are the target
+  if (left.id === paneId) return right
+  if (right.id === paneId) return left
+
+  // Recurse
+  const newLeft = removeLeaf(left, paneId)
+  const newRight = removeLeaf(right, paneId)
+
+  if (newLeft === null) return right
+  if (newRight === null) return left
+
+  return { ...tree, children: [newLeft, newRight] }
+}
+
+// Get approximate position of a leaf pane for directional focus
+interface PaneRect {
+  id: string
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+function computePaneRects(
+  node: PaneNode,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): PaneRect[] {
+  if (node.type === 'leaf') {
+    return [{ id: node.id, x, y, w, h }]
+  }
+
+  const { direction, ratio, children } = node
+  if (direction === 'horizontal') {
+    const leftW = w * ratio
+    const rightW = w * (1 - ratio)
+    return [
+      ...computePaneRects(children[0], x, y, leftW, h),
+      ...computePaneRects(children[1], x + leftW, y, rightW, h),
+    ]
+  } else {
+    const topH = h * ratio
+    const bottomH = h * (1 - ratio)
+    return [
+      ...computePaneRects(children[0], x, y, w, topH),
+      ...computePaneRects(children[1], x, y + topH, w, bottomH),
+    ]
+  }
+}
+
+export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
+  tabs: [],
+  activeTabId: null,
+
+  createTab: (workspaceId: string, cwd: string, label?: string, initialCommand?: string) => {
+    const pane = createLeafPane(initialCommand)
+    const id = generateId('tab')
+    const tabLabel = label || `Terminal ${nextTabNumber++}`
+    const tab: TerminalTabData = {
+      id,
+      label: tabLabel,
+      color: null,
+      hasActivity: false,
+      paneTree: pane,
+      activePaneId: pane.id,
+      zoomedPaneId: null,
+      workspaceId,
+      cwd,
+      initialCommand: initialCommand ?? null,
+    }
+    set((state) => ({
+      tabs: [...state.tabs, tab],
+      activeTabId: id,
+    }))
+    return id
+  },
+
+  createSplitTab: (workspaceId: string, cwd: string, label: string, leftCommand: string | null, rightCommand: string | null) => {
+    const leftPane = createLeafPane(leftCommand ?? undefined)
+    const rightPane = createLeafPane(rightCommand ?? undefined)
+    const splitNode: PaneSplit = {
+      type: 'split',
+      id: generateId('split'),
+      direction: 'horizontal',
+      children: [leftPane, rightPane],
+      ratio: 0.5,
+    }
+    const id = generateId('tab')
+    const tab: TerminalTabData = {
+      id,
+      label,
+      color: null,
+      hasActivity: false,
+      paneTree: splitNode,
+      activePaneId: rightPane.id,
+      zoomedPaneId: null,
+      workspaceId,
+      cwd,
+      initialCommand: null,
+    }
+    set((state) => ({
+      tabs: [...state.tabs, tab],
+      activeTabId: id,
+    }))
+    return id
+  },
+
+  closeTab: (id: string) => {
+    const { tabs, activeTabId } = get()
+    const index = tabs.findIndex((t) => t.id === id)
+    if (index === -1) return
+
+    const newTabs = tabs.filter((t) => t.id !== id)
+
+    let newActiveId = activeTabId
+    if (activeTabId === id) {
+      if (newTabs.length === 0) {
+        newActiveId = null
+      } else if (index >= newTabs.length) {
+        newActiveId = newTabs[newTabs.length - 1]!.id
+      } else {
+        newActiveId = newTabs[index]!.id
+      }
+    }
+
+    set({ tabs: newTabs, activeTabId: newActiveId })
+  },
+
+  setActiveTab: (id: string) => {
+    set((state) => ({
+      activeTabId: id,
+      tabs: state.tabs.map((t) => (t.id === id ? { ...t, hasActivity: false } : t)),
+    }))
+  },
+
+  renameTab: (id: string, label: string) => {
+    set((state) => ({
+      tabs: state.tabs.map((t) => (t.id === id ? { ...t, label } : t)),
+    }))
+  },
+
+  setTabColor: (id: string, color: string | null) => {
+    set((state) => ({
+      tabs: state.tabs.map((t) => (t.id === id ? { ...t, color } : t)),
+    }))
+  },
+
+  setTabActivity: (id: string, hasActivity: boolean) => {
+    const { activeTabId } = get()
+    if (id === activeTabId) return
+    set((state) => ({
+      tabs: state.tabs.map((t) => (t.id === id ? { ...t, hasActivity } : t)),
+    }))
+  },
+
+  reorderTabs: (fromIndex: number, toIndex: number) => {
+    set((state) => {
+      const newTabs = [...state.tabs]
+      const [moved] = newTabs.splice(fromIndex, 1)
+      if (!moved) return state
+      newTabs.splice(toIndex, 0, moved)
+      return { tabs: newTabs }
+    })
+  },
+
+  activateNext: (workspaceId?: string) => {
+    const { tabs, activeTabId } = get()
+    const scopedTabs = workspaceId ? tabs.filter((t) => t.workspaceId === workspaceId) : tabs
+    if (scopedTabs.length <= 1) return
+    const index = scopedTabs.findIndex((t) => t.id === activeTabId)
+    const nextIndex = (index + 1) % scopedTabs.length
+    const nextTab = scopedTabs[nextIndex]
+    if (nextTab) get().setActiveTab(nextTab.id)
+  },
+
+  activatePrev: (workspaceId?: string) => {
+    const { tabs, activeTabId } = get()
+    const scopedTabs = workspaceId ? tabs.filter((t) => t.workspaceId === workspaceId) : tabs
+    if (scopedTabs.length <= 1) return
+    const index = scopedTabs.findIndex((t) => t.id === activeTabId)
+    const prevIndex = (index - 1 + scopedTabs.length) % scopedTabs.length
+    const prevTab = scopedTabs[prevIndex]
+    if (prevTab) get().setActiveTab(prevTab.id)
+  },
+
+  activateByIndex: (index: number, workspaceId?: string) => {
+    const { tabs } = get()
+    const scopedTabs = workspaceId ? tabs.filter((t) => t.workspaceId === workspaceId) : tabs
+    const tab = scopedTabs[index]
+    if (tab) get().setActiveTab(tab.id)
+  },
+
+  activateFirstInWorkspace: (workspaceId: string) => {
+    const { tabs } = get()
+    const workspaceTabs = tabs.filter((t) => t.workspaceId === workspaceId)
+    if (workspaceTabs.length > 0) {
+      get().setActiveTab(workspaceTabs[0]!.id)
+    }
+  },
+
+  closeOtherTabs: (id: string) => {
+    set((state) => ({
+      tabs: state.tabs.filter((t) => t.id === id),
+      activeTabId: id,
+    }))
+  },
+
+  // --- Pane actions ---
+
+  splitPane: (tabId: string, paneId: string, direction: 'horizontal' | 'vertical') => {
+    const { tabs } = get()
+    const tab = tabs.find((t) => t.id === tabId)
+    if (!tab) return null
+
+    // Check max 4 panes
+    if (countLeaves(tab.paneTree) >= 4) return null
+
+    const targetPane = findPane(tab.paneTree, paneId)
+    if (!targetPane) return null
+
+    const newPane = createLeafPane()
+    const splitNode: PaneSplit = {
+      type: 'split',
+      id: generateId('split'),
+      direction,
+      children: [{ ...targetPane }, newPane],
+      ratio: 0.5,
+    }
+
+    const newTree = replaceNode(tab.paneTree, paneId, splitNode)
+    set((state) => ({
+      tabs: state.tabs.map((t) =>
+        t.id === tabId
+          ? { ...t, paneTree: newTree, activePaneId: newPane.id, zoomedPaneId: null }
+          : t,
+      ),
+    }))
+
+    return newPane.id
+  },
+
+  closePane: (tabId: string, paneId: string) => {
+    const { tabs } = get()
+    const tab = tabs.find((t) => t.id === tabId)
+    if (!tab) return
+
+    // If only one pane, close the tab
+    if (countLeaves(tab.paneTree) <= 1) {
+      get().closeTab(tabId)
+      return
+    }
+
+    const newTree = removeLeaf(tab.paneTree, paneId)
+    if (!newTree) return
+
+    // If we closed the active pane, pick another one
+    let newActivePaneId = tab.activePaneId
+    if (tab.activePaneId === paneId) {
+      const leaves = collectLeafIds(newTree)
+      newActivePaneId = leaves[0] ?? tab.activePaneId
+    }
+
+    set((state) => ({
+      tabs: state.tabs.map((t) =>
+        t.id === tabId
+          ? {
+              ...t,
+              paneTree: newTree,
+              activePaneId: newActivePaneId,
+              zoomedPaneId: t.zoomedPaneId === paneId ? null : t.zoomedPaneId,
+            }
+          : t,
+      ),
+    }))
+  },
+
+  setActivePane: (tabId: string, paneId: string) => {
+    set((state) => ({
+      tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, activePaneId: paneId } : t)),
+    }))
+  },
+
+  setPaneSessionId: (tabId: string, paneId: string, sessionId: string) => {
+    set((state) => ({
+      tabs: state.tabs.map((t) => {
+        if (t.id !== tabId) return t
+        const updateSession = (node: PaneNode): PaneNode => {
+          if (node.type === 'leaf') {
+            return node.id === paneId ? { ...node, sessionId } : node
+          }
+          return {
+            ...node,
+            children: [updateSession(node.children[0]), updateSession(node.children[1])],
+          }
+        }
+        return { ...t, paneTree: updateSession(t.paneTree) }
+      }),
+    }))
+  },
+
+  resizePane: (tabId: string, splitId: string, ratio: number) => {
+    const clampedRatio = Math.max(0.1, Math.min(0.9, ratio))
+    set((state) => ({
+      tabs: state.tabs.map((t) => {
+        if (t.id !== tabId) return t
+        const updateRatio = (node: PaneNode): PaneNode => {
+          if (node.type === 'leaf') return node
+          if (node.id === splitId) return { ...node, ratio: clampedRatio }
+          return {
+            ...node,
+            children: [updateRatio(node.children[0]), updateRatio(node.children[1])],
+          }
+        }
+        return { ...t, paneTree: updateRatio(t.paneTree) }
+      }),
+    }))
+  },
+
+  toggleZoomPane: (tabId: string, paneId: string) => {
+    set((state) => ({
+      tabs: state.tabs.map((t) => {
+        if (t.id !== tabId) return t
+        return {
+          ...t,
+          zoomedPaneId: t.zoomedPaneId === paneId ? null : paneId,
+          activePaneId: paneId,
+        }
+      }),
+    }))
+  },
+
+  focusDirection: (tabId: string, direction: 'left' | 'right' | 'up' | 'down') => {
+    const { tabs } = get()
+    const tab = tabs.find((t) => t.id === tabId)
+    if (!tab) return
+
+    const rects = computePaneRects(tab.paneTree, 0, 0, 1, 1)
+    const current = rects.find((r) => r.id === tab.activePaneId)
+    if (!current) return
+
+    const cx = current.x + current.w / 2
+    const cy = current.y + current.h / 2
+
+    let best: PaneRect | null = null
+    let bestDist = Infinity
+
+    for (const r of rects) {
+      if (r.id === current.id) continue
+      const rx = r.x + r.w / 2
+      const ry = r.y + r.h / 2
+
+      let valid = false
+      switch (direction) {
+        case 'left':
+          valid = rx < cx
+          break
+        case 'right':
+          valid = rx > cx
+          break
+        case 'up':
+          valid = ry < cy
+          break
+        case 'down':
+          valid = ry > cy
+          break
+      }
+
+      if (valid) {
+        const dist = Math.abs(rx - cx) + Math.abs(ry - cy)
+        if (dist < bestDist) {
+          bestDist = dist
+          best = r
+        }
+      }
+    }
+
+    if (best) {
+      get().setActivePane(tabId, best.id)
+    }
+  },
+}))
+
+// Export utility for components
+export { countLeaves, collectLeafIds, computePaneRects }
+export type { PaneRect }
+
+// Compute split divider positions for flat rendering
+export interface SplitDividerInfo {
+  splitId: string
+  direction: 'horizontal' | 'vertical'
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export function computeSplitDividers(
+  node: PaneNode,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): SplitDividerInfo[] {
+  if (node.type === 'leaf') return []
+
+  const { direction, ratio, children } = node
+  const dividers: SplitDividerInfo[] = []
+
+  if (direction === 'horizontal') {
+    const leftW = w * ratio
+    const rightW = w * (1 - ratio)
+    dividers.push({
+      splitId: node.id,
+      direction: 'horizontal',
+      x: x + leftW,
+      y,
+      w: 0,
+      h,
+    })
+    dividers.push(...computeSplitDividers(children[0], x, y, leftW, h))
+    dividers.push(...computeSplitDividers(children[1], x + leftW, y, rightW, h))
+  } else {
+    const topH = h * ratio
+    const bottomH = h * (1 - ratio)
+    dividers.push({
+      splitId: node.id,
+      direction: 'vertical',
+      x,
+      y: y + topH,
+      w,
+      h: 0,
+    })
+    dividers.push(...computeSplitDividers(children[0], x, y, w, topH))
+    dividers.push(...computeSplitDividers(children[1], x, y + topH, w, bottomH))
+  }
+
+  return dividers
+}
