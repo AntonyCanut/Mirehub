@@ -579,6 +579,7 @@ export function KanbanBoard() {
                     onClick={() => setSelectedTask(task)}
                     onDelete={() => deleteTask(task.id)}
                     onContextMenu={(e) => handleContextMenu(e, task)}
+                    onUpdate={(data) => updateTask(task.id, data)}
                     projects={workspaceProjects}
                   />
                 ))}
@@ -607,6 +608,7 @@ export function KanbanBoard() {
                   onClick={() => setSelectedTask(task)}
                   onDelete={() => deleteTask(task.id)}
                   onContextMenu={(e) => handleContextMenu(e, task)}
+                  onUpdate={(data) => updateTask(task.id, data)}
                   projects={workspaceProjects}
                 />
               ))}
@@ -682,6 +684,7 @@ function KanbanCard({
   onClick,
   onDelete,
   onContextMenu,
+  onUpdate,
   projects,
 }: {
   task: KanbanTask
@@ -690,9 +693,79 @@ function KanbanCard({
   onClick: () => void
   onDelete: () => void
   onContextMenu: (e: React.MouseEvent) => void
+  onUpdate: (data: Partial<KanbanTask>) => void
   projects: Array<{ id: string; name: string }>
 }) {
   const { t } = useI18n()
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleValue, setTitleValue] = useState(task.title)
+  const [editingDesc, setEditingDesc] = useState(false)
+  const [descValue, setDescValue] = useState(task.description)
+  const titleRef = useRef<HTMLInputElement>(null)
+  const descRef = useRef<HTMLTextAreaElement>(null)
+  const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => { setTitleValue(task.title) }, [task.title])
+  useEffect(() => { setDescValue(task.description) }, [task.description])
+
+  useEffect(() => {
+    if (editingTitle && titleRef.current) {
+      titleRef.current.focus()
+      titleRef.current.select()
+    }
+  }, [editingTitle])
+
+  useEffect(() => {
+    if (editingDesc && descRef.current) {
+      descRef.current.focus()
+    }
+  }, [editingDesc])
+
+  const saveTitle = useCallback(() => {
+    const trimmed = titleValue.trim()
+    if (trimmed && trimmed !== task.title) {
+      onUpdate({ title: trimmed })
+    } else {
+      setTitleValue(task.title)
+    }
+    setEditingTitle(false)
+  }, [titleValue, task.title, onUpdate])
+
+  const saveDesc = useCallback(() => {
+    if (descValue !== task.description) {
+      onUpdate({ description: descValue })
+    }
+    setEditingDesc(false)
+  }, [descValue, task.description, onUpdate])
+
+  // Delayed single-click: allows double-click to cancel opening the detail panel
+  const handleCardClick = useCallback(() => {
+    if (editingTitle || editingDesc) return
+    clickTimeoutRef.current = setTimeout(() => {
+      clickTimeoutRef.current = null
+      onClick()
+    }, 250)
+  }, [editingTitle, editingDesc, onClick])
+
+  const cancelPendingClick = useCallback(() => {
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current)
+      clickTimeoutRef.current = null
+    }
+  }, [])
+
+  const handleTitleDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    cancelPendingClick()
+    setEditingTitle(true)
+  }, [cancelPendingClick])
+
+  const handleDescDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    cancelPendingClick()
+    setEditingDesc(true)
+  }, [cancelPendingClick])
+
   const priorityColors: Record<string, string> = {
     low: '#6c7086',
     medium: '#89b4fa',
@@ -707,9 +780,9 @@ function KanbanCard({
   return (
     <div
       className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${isOverdue ? ' kanban-card--overdue' : ''}`}
-      draggable
+      draggable={!editingTitle && !editingDesc}
       onDragStart={onDragStart}
-      onClick={onClick}
+      onClick={handleCardClick}
       onContextMenu={onContextMenu}
     >
       <div className="kanban-card-header">
@@ -717,7 +790,22 @@ function KanbanCard({
           className="kanban-card-priority"
           style={{ backgroundColor: priorityColors[task.priority] }}
         />
-        <span className="kanban-card-title">{task.title}</span>
+        {editingTitle ? (
+          <input
+            ref={titleRef}
+            className="kanban-card-title-input"
+            value={titleValue}
+            onChange={(e) => setTitleValue(e.target.value)}
+            onBlur={saveTitle}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveTitle()
+              if (e.key === 'Escape') { setTitleValue(task.title); setEditingTitle(false) }
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <span className="kanban-card-title" onDoubleClick={handleTitleDoubleClick}>{task.title}</span>
+        )}
         <button
           className="kanban-card-delete"
           onClick={(e) => { e.stopPropagation(); onDelete() }}
@@ -726,8 +814,26 @@ function KanbanCard({
           &times;
         </button>
       </div>
-      {task.description && (
-        <p className="kanban-card-desc">{task.description}</p>
+      {editingDesc ? (
+        <textarea
+          ref={descRef}
+          className="kanban-card-desc-edit"
+          value={descValue}
+          onChange={(e) => setDescValue(e.target.value)}
+          onBlur={saveDesc}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') { setDescValue(task.description); setEditingDesc(false) }
+          }}
+          onClick={(e) => e.stopPropagation()}
+          rows={3}
+        />
+      ) : (
+        <p
+          className="kanban-card-desc"
+          onDoubleClick={handleDescDoubleClick}
+        >
+          {task.description || t('kanban.noDescription')}
+        </p>
       )}
       {/* Labels */}
       {task.labels && task.labels.length > 0 && (

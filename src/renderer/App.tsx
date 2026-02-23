@@ -24,6 +24,7 @@ import { useWorkspaceStore } from './lib/stores/workspaceStore'
 import { useTerminalTabStore } from './lib/stores/terminalTabStore'
 import { useViewStore } from './lib/stores/viewStore'
 import { useAppUpdateStore } from './lib/stores/appUpdateStore'
+import { useClaudeStore } from './lib/stores/claudeStore'
 import { useI18n } from './lib/i18n'
 import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 
@@ -134,6 +135,12 @@ export function App() {
   useEffect(() => {
     return initUpdateListener()
   }, [initUpdateListener])
+
+  // Initialize Claude activity listeners (workspace "Working" / "Done" tags)
+  const initClaudeListeners = useClaudeStore((s) => s.initListeners)
+  useEffect(() => {
+    return initClaudeListeners()
+  }, [initClaudeListeners])
 
   // Global keyboard shortcuts
   useEffect(() => {

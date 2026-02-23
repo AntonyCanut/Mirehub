@@ -54,6 +54,17 @@ function persistSessionHistory(history: ClaudeSession[]): void {
   } catch { /* ignore in non-browser environments */ }
 }
 
+// Stale "working" detection: if no new "working" signal in 45s,
+// Claude has likely stopped (PreToolUse hook fires every ~30s when active)
+const workingStaleTimers: Record<string, ReturnType<typeof setTimeout>> = {}
+
+function clearWorkingStaleTimer(workspaceId: string): void {
+  if (workingStaleTimers[workspaceId]) {
+    clearTimeout(workingStaleTimers[workspaceId])
+    delete workingStaleTimers[workspaceId]
+  }
+}
+
 export const useClaudeStore = create<ClaudeStore>((set, get) => ({
   sessions: [],
   sessionHistory: loadSessionHistory(),
@@ -80,10 +91,34 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
   },
 
   stopSession: async (sessionId) => {
+    const session = get().sessions.find((s) => s.id === sessionId)
     await window.mirehub.claude.stop(sessionId)
     set((state) => ({
       sessions: state.sessions.filter((s) => s.id !== sessionId),
     }))
+    // Clear workspace "Working" status when session is stopped
+    if (session) {
+      try {
+        const { useWorkspaceStore } = await import('./workspaceStore')
+        const { projects } = useWorkspaceStore.getState()
+        const project = projects.find((p: { id: string }) => p.id === session.projectId)
+        if (project) {
+          clearWorkingStaleTimer(project.workspaceId)
+          set({
+            workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [project.workspaceId]: 'finished' },
+          })
+          const wsId = project.workspaceId
+          setTimeout(() => {
+            const current = get().workspaceClaudeStatus[wsId]
+            if (current === 'finished') {
+              set({
+                workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [wsId]: 'idle' },
+              })
+            }
+          }, 30000)
+        }
+      } catch { /* best-effort */ }
+    }
   },
 
   refreshSessions: async () => {
@@ -166,7 +201,21 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
         set({
           workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [workspaceId]: 'working' },
         })
+        // Reset stale detection timer — if no new "working" signal in 45s,
+        // Claude has likely stopped working (PreToolUse hook fires every ~30s)
+        clearWorkingStaleTimer(workspaceId)
+        const staleWsId = workspaceId
+        workingStaleTimers[staleWsId] = setTimeout(() => {
+          const current = get().workspaceClaudeStatus[staleWsId]
+          if (current === 'working') {
+            set({
+              workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [staleWsId]: 'idle' },
+            })
+          }
+          delete workingStaleTimers[staleWsId]
+        }, 45000)
       } else if (data.status === 'done') {
+        clearWorkingStaleTimer(workspaceId)
         set({
           workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [workspaceId]: 'finished' },
         })
@@ -221,6 +270,21 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
               flashingWorkspaceId: state.flashingWorkspaceId === project.workspaceId ? null : state.flashingWorkspaceId,
             }))
           }, 5000)
+
+          // Clear workspace "Working" status when session ends
+          clearWorkingStaleTimer(project.workspaceId)
+          set({
+            workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [project.workspaceId]: 'finished' },
+          })
+          const statusWsId = project.workspaceId
+          setTimeout(() => {
+            const current = get().workspaceClaudeStatus[statusWsId]
+            if (current === 'finished') {
+              set({
+                workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [statusWsId]: 'idle' },
+              })
+            }
+          }, 30000)
         }
       }
 
@@ -241,6 +305,10 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
     return () => {
       unsub()
       unsubActivity()
+      // Clear all stale detection timers
+      for (const wsId of Object.keys(workingStaleTimers)) {
+        clearWorkingStaleTimer(wsId)
+      }
     }
   },
 }))

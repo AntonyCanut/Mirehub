@@ -342,6 +342,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: default;
+}
+
+.kanban-card-title-input {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 2px 4px;
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
 }
 
 .kanban-card-delete {
@@ -372,6 +387,23 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  cursor: default;
+}
+
+.kanban-card-desc-edit {
+  font-size: 11px;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-top: 2px;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 4px 6px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .kanban-card-footer {
