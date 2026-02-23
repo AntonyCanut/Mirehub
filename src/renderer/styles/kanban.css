@@ -1020,6 +1020,18 @@
   border-radius: 10px;
 }
 
+.kanban-attachment-chip--image {
+  height: auto;
+  padding: 4px 8px;
+}
+
+.kanban-attachment-chip-preview {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
 .kanban-attachment-chip-remove {
   width: 14px;
   height: 14px;

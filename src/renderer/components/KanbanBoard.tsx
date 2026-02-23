@@ -7,6 +7,39 @@ import type { ContextMenuItem } from './ContextMenu'
 import type { KanbanStatus, KanbanTask, PromptTemplate } from '../../shared/types/index'
 import '../styles/kanban.css'
 
+interface PendingClipboardImage {
+  dataBase64: string
+  filename: string
+  mimeType: string
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result as string
+      resolve(result.split(',')[1]!) // strip data:...;base64, prefix
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+function getClipboardImageMimeType(type: string): string {
+  if (type === 'image/png') return 'image/png'
+  if (type === 'image/jpeg') return 'image/jpeg'
+  if (type === 'image/gif') return 'image/gif'
+  if (type === 'image/webp') return 'image/webp'
+  return 'image/png' // default
+}
+
+function getClipboardImageExtension(mimeType: string): string {
+  if (mimeType === 'image/jpeg') return '.jpg'
+  if (mimeType === 'image/gif') return '.gif'
+  if (mimeType === 'image/webp') return '.webp'
+  return '.png'
+}
+
 const COLUMNS: { status: KanbanStatus; labelKey: string; color: string }[] = [
   { status: 'TODO', labelKey: 'kanban.todo', color: '#89b4fa' },
   { status: 'WORKING', labelKey: 'kanban.working', color: '#fab387' },
@@ -49,6 +82,7 @@ export function KanbanBoard() {
     setDragged,
     sendToClaude,
     attachFiles,
+    attachFromClipboard,
     removeAttachment,
   } = useKanbanStore()
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -59,6 +93,7 @@ export function KanbanBoard() {
   const [newLabels, setNewLabels] = useState<string[]>([])
   const [newDueDate, setNewDueDate] = useState('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
+  const [pendingClipboardImages, setPendingClipboardImages] = useState<PendingClipboardImage[]>([])
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([])
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null)
 
@@ -175,6 +210,23 @@ export function KanbanBoard() {
     }
   }, [])
 
+  const handleCreateModalPaste = useCallback(async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault()
+        const blob = item.getAsFile()
+        if (!blob) continue
+        const mimeType = getClipboardImageMimeType(item.type)
+        const ext = getClipboardImageExtension(mimeType)
+        const filename = `clipboard-${Date.now()}${ext}`
+        const dataBase64 = await blobToBase64(blob)
+        setPendingClipboardImages((prev) => [...prev, { dataBase64, filename, mimeType }])
+      }
+    }
+  }, [])
+
   const handleCreate = useCallback(async () => {
     if (!activeWorkspaceId || !newTitle.trim()) return
     await createTask(
@@ -200,7 +252,17 @@ export function KanbanBoard() {
           await window.mirehub.kanban.attachFile(newest.id, activeWorkspaceId, filePath)
         } catch { /* best-effort */ }
       }
-      // Reload tasks to get updated attachments
+    }
+    // Attach pending clipboard images
+    if (newest && pendingClipboardImages.length > 0) {
+      for (const img of pendingClipboardImages) {
+        try {
+          await window.mirehub.kanban.attachFromClipboard(newest.id, activeWorkspaceId, img.dataBase64, img.filename, img.mimeType)
+        } catch { /* best-effort */ }
+      }
+    }
+    // Reload tasks to get updated attachments
+    if (newest && (pendingAttachments.length > 0 || pendingClipboardImages.length > 0)) {
       await loadTasks(activeWorkspaceId)
     }
     setNewTitle('')
@@ -210,8 +272,9 @@ export function KanbanBoard() {
     setNewLabels([])
     setNewDueDate('')
     setPendingAttachments([])
+    setPendingClipboardImages([])
     setShowCreateForm(false)
-  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newDueDate, pendingAttachments, createTask, updateTask, loadTasks])
+  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newDueDate, pendingAttachments, pendingClipboardImages, createTask, updateTask, loadTasks])
 
   const handleDragStart = useCallback(
     (taskId: string) => {
@@ -359,7 +422,7 @@ export function KanbanBoard() {
 
       {showCreateForm && (
         <div className="modal-overlay" onClick={() => setShowCreateForm(false)}>
-          <div className="kanban-create-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="kanban-create-modal" onClick={(e) => e.stopPropagation()} onPaste={handleCreateModalPaste}>
             <div className="kanban-create-modal-header">
               <h3>{t('kanban.newTaskTitle')}</h3>
               <button className="kanban-create-modal-close" onClick={() => setShowCreateForm(false)}>&times;</button>
@@ -448,14 +511,30 @@ export function KanbanBoard() {
               >
                 + {t('kanban.attachFiles')}{pendingAttachments.length > 0 ? ` (${pendingAttachments.length})` : ''}
               </button>
-              {pendingAttachments.length > 0 && (
+              {(pendingAttachments.length > 0 || pendingClipboardImages.length > 0) && (
                 <div className="kanban-create-attachments">
                   {pendingAttachments.map((fp, i) => (
-                    <span key={`${fp}-${i}`} className="kanban-attachment-chip">
+                    <span key={`file-${i}`} className="kanban-attachment-chip">
                       {fp.split('/').pop()}
                       <button
                         className="kanban-attachment-chip-remove"
                         onClick={() => setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))}
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                  {pendingClipboardImages.map((img, i) => (
+                    <span key={`clip-${i}`} className="kanban-attachment-chip kanban-attachment-chip--image">
+                      <img
+                        src={`data:${img.mimeType};base64,${img.dataBase64}`}
+                        alt={img.filename}
+                        className="kanban-attachment-chip-preview"
+                      />
+                      {img.filename}
+                      <button
+                        className="kanban-attachment-chip-remove"
+                        onClick={() => setPendingClipboardImages((prev) => prev.filter((_, idx) => idx !== i))}
                       >
                         &times;
                       </button>
@@ -574,6 +653,7 @@ export function KanbanBoard() {
             onStatusChange={(status) => updateTaskStatus(selectedTask.id, status)}
             onSendToClaude={() => handleSendToClaude(selectedTask)}
             onAttachFiles={() => attachFiles(selectedTask.id)}
+            onAttachFromClipboard={(dataBase64, filename, mimeType) => attachFromClipboard(selectedTask.id, dataBase64, filename, mimeType)}
             onRemoveAttachment={(attachmentId) => removeAttachment(selectedTask.id, attachmentId)}
             projects={workspaceProjects}
           />
@@ -703,6 +783,7 @@ function TaskDetailPanel({
   onStatusChange,
   onSendToClaude,
   onAttachFiles,
+  onAttachFromClipboard,
   onRemoveAttachment,
   projects,
 }: {
@@ -713,6 +794,7 @@ function TaskDetailPanel({
   onStatusChange: (status: KanbanStatus) => void
   onSendToClaude: () => void
   onAttachFiles: () => void
+  onAttachFromClipboard: (dataBase64: string, filename: string, mimeType: string) => void
   onRemoveAttachment: (attachmentId: string) => void
   projects: Array<{ id: string; name: string }>
 }) {
@@ -781,6 +863,23 @@ function TaskDetailPanel({
     onUpdate({ labels: updated })
   }, [taskLabels, onUpdate])
 
+  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault()
+        const blob = item.getAsFile()
+        if (!blob) continue
+        const mimeType = getClipboardImageMimeType(item.type)
+        const ext = getClipboardImageExtension(mimeType)
+        const filename = `clipboard-${Date.now()}${ext}`
+        const dataBase64 = await blobToBase64(blob)
+        onAttachFromClipboard(dataBase64, filename, mimeType)
+      }
+    }
+  }, [onAttachFromClipboard])
+
   const handleDueDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     onUpdate({ dueDate: value ? new Date(value).getTime() : undefined })
@@ -791,7 +890,7 @@ function TaskDetailPanel({
     : ''
 
   return (
-    <div className="kanban-detail">
+    <div className="kanban-detail" onPaste={handlePaste} tabIndex={-1}>
       <div className="kanban-detail-header">
         <span className="kanban-detail-id">#{task.id.slice(0, 8)}</span>
         <button className="kanban-detail-close" onClick={onClose}>&times;</button>

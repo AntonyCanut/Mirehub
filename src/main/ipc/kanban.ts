@@ -301,6 +301,47 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
   )
 
   ipcMain.handle(
+    IPC_CHANNELS.KANBAN_ATTACH_FROM_CLIPBOARD,
+    async (
+      _event,
+      {
+        taskId,
+        workspaceId,
+        dataBase64,
+        filename,
+        mimeType,
+      }: { taskId: string; workspaceId: string; dataBase64: string; filename: string; mimeType: string },
+    ) => {
+      const attachDir = getAttachmentsDir(taskId)
+      const attachId = uuid()
+      const storedPath = path.join(attachDir, `${attachId}-${filename}`)
+
+      const buffer = Buffer.from(dataBase64, 'base64')
+      fs.writeFileSync(storedPath, buffer)
+
+      const attachment: KanbanAttachment = {
+        id: attachId,
+        filename,
+        storedPath,
+        mimeType,
+        size: buffer.length,
+        addedAt: Date.now(),
+      }
+
+      const tasks = readKanbanTasks(workspaceId)
+      const task = tasks.find((t) => t.id === taskId)
+      if (task) {
+        if (!task.attachments) task.attachments = []
+        task.attachments.push(attachment)
+        task.updatedAt = Date.now()
+        writeKanbanTasks(workspaceId, tasks)
+      }
+
+      return attachment
+    },
+  )
+
+  ipcMain.handle(
     IPC_CHANNELS.KANBAN_REMOVE_ATTACHMENT,
     async (
       _event,

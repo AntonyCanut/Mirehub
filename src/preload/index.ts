@@ -213,6 +213,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_SELECT_FILES),
     attachFile: (taskId: string, workspaceId: string, filePath: string): Promise<KanbanAttachment> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_ATTACH_FILE, { taskId, workspaceId, filePath }),
+    attachFromClipboard: (taskId: string, workspaceId: string, dataBase64: string, filename: string, mimeType: string): Promise<KanbanAttachment> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_ATTACH_FROM_CLIPBOARD, { taskId, workspaceId, dataBase64, filename, mimeType }),
     removeAttachment: (taskId: string, workspaceId: string, attachmentId: string): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_REMOVE_ATTACHMENT, { taskId, workspaceId, attachmentId }),
   },

@@ -494,6 +494,7 @@ export const IPC_CHANNELS = {
   KANBAN_GET_PATH: 'kanban:getPath',
   KANBAN_SELECT_FILES: 'kanban:selectFiles',
   KANBAN_ATTACH_FILE: 'kanban:attachFile',
+  KANBAN_ATTACH_FROM_CLIPBOARD: 'kanban:attachFromClipboard',
   KANBAN_REMOVE_ATTACHMENT: 'kanban:removeAttachment',
 
   // Updates

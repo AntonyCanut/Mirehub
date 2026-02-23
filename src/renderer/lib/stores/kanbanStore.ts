@@ -43,6 +43,7 @@ interface KanbanActions {
   getTasksByStatus: (status: KanbanStatus) => KanbanTask[]
   sendToClaude: (task: KanbanTask) => Promise<void>
   attachFiles: (taskId: string) => Promise<void>
+  attachFromClipboard: (taskId: string, dataBase64: string, filename: string, mimeType: string) => Promise<void>
   removeAttachment: (taskId: string, attachmentId: string) => Promise<void>
 }
 
@@ -273,9 +274,21 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
     // Add attachments section if any
     if (task.attachments && task.attachments.length > 0) {
-      promptParts.push(``, `## Fichiers joints`, `Les fichiers suivants sont attaches a ce ticket. Lis-les pour du contexte.`)
-      for (const att of task.attachments) {
-        promptParts.push(`- **${att.filename}** (${att.mimeType}): \`${att.storedPath}\``)
+      const imageAtts = task.attachments.filter((a) => a.mimeType.startsWith('image/'))
+      const otherAtts = task.attachments.filter((a) => !a.mimeType.startsWith('image/'))
+
+      if (otherAtts.length > 0) {
+        promptParts.push(``, `## Fichiers joints`, `Les fichiers suivants sont attaches a ce ticket. Lis-les pour du contexte.`)
+        for (const att of otherAtts) {
+          promptParts.push(`- **${att.filename}** (${att.mimeType}): \`${att.storedPath}\``)
+        }
+      }
+
+      if (imageAtts.length > 0) {
+        promptParts.push(``, `## Images jointes`, `Les images suivantes sont jointes a ce ticket. Utilise le tool Read sur le chemin pour les visualiser.`)
+        for (const att of imageAtts) {
+          promptParts.push(`- **${att.filename}**: \`${att.storedPath}\``)
+        }
       }
     }
 
@@ -395,6 +408,18 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         }),
       }))
     }
+  },
+
+  attachFromClipboard: async (taskId: string, dataBase64: string, filename: string, mimeType: string) => {
+    const { currentWorkspaceId } = get()
+    if (!currentWorkspaceId) return
+    const attachment = await window.mirehub.kanban.attachFromClipboard(taskId, currentWorkspaceId, dataBase64, filename, mimeType)
+    set((state) => ({
+      tasks: state.tasks.map((t) => {
+        if (t.id !== taskId) return t
+        return { ...t, attachments: [...(t.attachments || []), attachment], updatedAt: Date.now() }
+      }),
+    }))
   },
 
   removeAttachment: async (taskId: string, attachmentId: string) => {
