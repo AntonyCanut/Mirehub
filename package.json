@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Mirehub - Environnement de developpement macOS avec Claude AI",
   "main": "dist/main/index.js",
-  "author": "akc",
+  "author": "Antony Kervazo Canut",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
