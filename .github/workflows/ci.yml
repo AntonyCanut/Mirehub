@@ -10,33 +10,53 @@ permissions:
   contents: write
 
 jobs:
-  quality:
+  lint:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
       - run: npm ci
+      - run: npm run lint
 
-      - name: Lint
-        run: npm run lint
+  typecheck:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
 
-      - name: Typecheck
-        run: npm run typecheck
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test
 
-      - name: Tests
-        run: npm run test
-
-      - name: Build
-        run: npm run build
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
 
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: quality
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: [lint, typecheck, test, build]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
