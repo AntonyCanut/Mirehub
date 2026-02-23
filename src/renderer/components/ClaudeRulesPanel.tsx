@@ -135,7 +135,7 @@ export function ClaudeRulesPanel() {
 
   const handlePermissionChange = useCallback(async (mode: string) => {
     if (!activeProject) return
-    const newSettings = { ...settings, _mirehubMode: mode }
+    const newSettings: Record<string, unknown> = { ...settings, _mirehubMode: mode }
     // Never write permissions as a string
     if (typeof newSettings.permissions === 'string') {
       newSettings.permissions = { allow: [], deny: [] }

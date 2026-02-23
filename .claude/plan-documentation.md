@@ -1,4 +1,4 @@
-# Plan de documentation - theOne/Workspaces
+# Plan de documentation - Mirehub
 
 ## Analyse de l'existant
 

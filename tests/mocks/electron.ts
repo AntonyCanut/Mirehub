@@ -18,10 +18,10 @@ export function createMockIpcMain() {
     // Test helpers
     _handlers: handlers,
     _listeners: listeners,
-    _invoke: async (channel: string, ...args: unknown[]) => {
+    _invoke: async <T = unknown>(channel: string, ...args: unknown[]): Promise<T> => {
       const handler = handlers.get(channel)
       if (!handler) throw new Error(`No handler for channel: ${channel}`)
-      return handler({}, ...args)
+      return handler({}, ...args) as T
     },
     _emit: (channel: string, ...args: unknown[]) => {
       const listener = listeners.get(channel)

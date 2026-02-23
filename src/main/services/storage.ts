@@ -21,8 +21,8 @@ export function _resetForTesting(): void {
 }
 
 export class StorageService {
-  private dataPath: string
-  private data: AppData
+  private dataPath!: string
+  private data!: AppData
 
   constructor() {
     // Enforce singleton: all handlers must share the same in-memory data
@@ -45,7 +45,7 @@ export class StorageService {
     }
     this.dataPath = path.join(DATA_DIR, 'data.json')
     this.data = this.load()
-    _instance = this
+    _instance = this // eslint-disable-line @typescript-eslint/no-this-alias
   }
 
   private load(): AppData {

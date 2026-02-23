@@ -1,4 +1,4 @@
-# theOne/Workspaces
+# Mirehub
 
 Environnement de developpement integre pour macOS, propulse par Electron et Claude AI. Workspaces combine un terminal multi-onglets, la gestion de projets, un tableau Kanban intelligent et des outils Git complets dans une interface native macOS.
 
@@ -12,7 +12,7 @@ Environnement de developpement integre pour macOS, propulse par Electron et Clau
 - **Gestion NPM** — Visualisation des paquets et verification de versions
 - **Editeur Monaco** — Visualisation et edition de fichiers avec coloration syntaxique
 - **Explorateur de fichiers** — Arborescence de repertoires navigable
-- **Persistance** — Recuperation de session et stockage JSON (`~/.theone/data.json`)
+- **Persistance** — Recuperation de session et stockage JSON (`~/.mirehub/data.json`)
 - **Auto-Clauder** — Deploiement automatique de la configuration `.claude`
 - **Interface macOS native** — Barre de titre personnalisee, vibrancy, polices systeme
 
@@ -82,9 +82,9 @@ src/
                         #   app, terminal, workspace, project, git, filesystem,
                         #   claude, kanban, updates, session, workspaceEnv
     services/
-      storage.ts        # Persistance JSON singleton (~/.theone/data.json)
+      storage.ts        # Persistance JSON singleton (~/.mirehub/data.json)
   preload/
-    index.ts            # API contextBridge (window.theone)
+    index.ts            # API contextBridge (window.mirehub)
   renderer/             # Processus renderer (React)
     App.tsx             # Composant racine
     main.tsx            # Point d'entree React

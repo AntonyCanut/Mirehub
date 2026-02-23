@@ -55,9 +55,10 @@ function getExtendedPath(): string {
 /**
  * Execute a shell command with extended PATH so CLI tools are found.
  */
-function execWithPath(cmd: string): ReturnType<typeof execAsync> {
+function execWithPath(cmd: string): Promise<{ stdout: string; stderr: string }> {
   return execAsync(cmd, {
     maxBuffer: 1024 * 1024 * 100,
+    encoding: 'utf-8',
     env: { ...process.env, PATH: getExtendedPath() },
   })
 }
@@ -392,7 +393,7 @@ export async function restoreBackup(
     const errStr = String(err)
     // Extract just the meaningful part from exec errors
     const stderrMatch = errStr.match(/stderr:\s*"(.+?)"/s)
-    const errMsg = stderrMatch ? stderrMatch[1] : errStr
+    const errMsg = stderrMatch?.[1] ?? errStr
     emitLog({ timestamp: Date.now(), type: 'error', message: errMsg, connectionName, operation: 'restore' })
     return { success: false, error: errMsg }
   }

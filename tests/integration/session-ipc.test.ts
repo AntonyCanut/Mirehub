@@ -4,8 +4,8 @@ import path from 'path'
 import os from 'os'
 import { createMockIpcMain } from '../mocks/electron'
 
-const TEST_DIR = path.join(os.tmpdir(), `.theone-session-ipc-test-${process.pid}-${Date.now()}`)
-const dataDir = path.join(TEST_DIR, '.theone')
+const TEST_DIR = path.join(os.tmpdir(), `.mirehub-session-ipc-test-${process.pid}-${Date.now()}`)
+const dataDir = path.join(TEST_DIR, '.mirehub')
 
 vi.mock('os', async () => {
   const actual = await vi.importActual<typeof import('os')>('os')

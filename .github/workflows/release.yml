@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  quality:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,15 +21,44 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
+      - name: Lint
+        run: npm run lint
 
-      - name: Build Electron app
-        run: npx electron-builder --mac --publish never
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm run test
+
+  build-and-release:
+    needs: quality
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build renderer + main
+        run: npm run build
+
+      - name: Build Electron app (arm64 + x64)
+        run: npx electron-builder --mac --arm64 --x64 --publish never
+        env:
+          CSC_LINK: ${{ secrets.MAC_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          draft: false
+          draft: true
           generate_release_notes: true
           files: |
             release/*.dmg

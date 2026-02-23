@@ -52,7 +52,7 @@ describe('useTerminalTabStore', () => {
     })
 
     it('active le dernier si on ferme le dernier tab actif', () => {
-      const id1 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
       const id2 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
       const id3 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
       useTerminalTabStore.getState().setActiveTab(id3)
@@ -81,7 +81,7 @@ describe('useTerminalTabStore', () => {
   describe('setActiveTab', () => {
     it('change le tab actif et reset hasActivity', () => {
       const id1 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
-      const id2 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
 
       // Simulate activity on tab 1
       useTerminalTabStore.getState().setTabActivity(id1, true)
@@ -388,7 +388,7 @@ describe('useTerminalTabStore', () => {
       const tabId = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
       const leftPaneId = useTerminalTabStore.getState().tabs[0]!.activePaneId
 
-      const rightPaneId = useTerminalTabStore.getState().splitPane(tabId, leftPaneId, 'horizontal')
+      useTerminalTabStore.getState().splitPane(tabId, leftPaneId, 'horizontal')
 
       // Active pane is the right one (last split target)
       useTerminalTabStore.getState().focusDirection(tabId, 'left')

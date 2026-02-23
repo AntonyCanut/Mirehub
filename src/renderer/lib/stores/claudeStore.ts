@@ -129,9 +129,9 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
 
   initListeners: () => {
     // Listen for file-based activity events from hooks
-    const unsubActivity = window.mirehub.claude.onActivity((data: { path: string; status: string }) => {
-      // Map the project path to a workspace
-      const { useWorkspaceStore } = require('./workspaceStore')
+    const unsubActivity = window.mirehub.claude.onActivity(async (data: { path: string; status: string }) => {
+      // Map the project path to a workspace (lazy import to avoid circular dependency)
+      const { useWorkspaceStore } = await import('./workspaceStore')
       const { projects } = useWorkspaceStore.getState()
 
       // Check if path matches a project path
@@ -183,7 +183,7 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
       }
     })
 
-    const unsub = window.mirehub.claude.onSessionEnd((data: { id: string; status: string }) => {
+    const unsub = window.mirehub.claude.onSessionEnd(async (data: { id: string; status: string }) => {
       // Find the session before updating to get projectId
       const session = get().sessions.find((s) => s.id === data.id)
 
@@ -211,7 +211,7 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
       // Flash the workspace orange
       if (session) {
         // Lazy import to avoid circular dependency
-        const { useWorkspaceStore } = require('./workspaceStore')
+        const { useWorkspaceStore } = await import('./workspaceStore')
         const { projects } = useWorkspaceStore.getState()
         const project = projects.find((p: { id: string }) => p.id === session.projectId)
         if (project) {

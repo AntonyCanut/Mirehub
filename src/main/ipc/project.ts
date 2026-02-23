@@ -987,7 +987,11 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
         const localSettingsPath = path.join(basePath, '.claude', 'settings.local.json')
         const prefix = basePath === projectPath ? '' : `[env] `
 
-        for (const [label, filePath] of [[`${prefix}settings.json`, settingsPath], [`${prefix}settings.local.json`, localSettingsPath]]) {
+        const filesToCheck: [string, string][] = [
+          [`${prefix}settings.json`, settingsPath],
+          [`${prefix}settings.local.json`, localSettingsPath],
+        ]
+        for (const [label, filePath] of filesToCheck) {
           if (!fs.existsSync(filePath)) continue
           try {
             const content = fs.readFileSync(filePath, 'utf-8')

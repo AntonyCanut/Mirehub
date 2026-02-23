@@ -26,8 +26,8 @@ export function ClaudeDefaultsLibrary({ onDeploySuccess }: Props) {
         window.mirehub.claudeDefaults.profiles(),
         window.mirehub.claudeDefaults.skills(),
       ])
-      setProfiles(p)
-      setSkills(s)
+      setProfiles(p as DefaultProfile[])
+      setSkills(s as DefaultSkill[])
     } catch {
       setProfiles([])
       setSkills([])

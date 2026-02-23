@@ -65,7 +65,7 @@ export function DatabaseExplorer() {
       appendBackupLog(entry)
       setLogPanelOpen(true)
     })
-    return unsubscribe
+    return () => { unsubscribe() }
   }, [appendBackupLog])
 
   // Connection management

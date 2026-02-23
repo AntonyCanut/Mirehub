@@ -2,11 +2,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import type { Workspace, Project, AppSettings, KanbanTask, AutoClauderTemplate } from '../../src/shared/types'
+import type { Workspace, Project, KanbanTask, AutoClauderTemplate } from '../../src/shared/types'
 import { DEFAULT_SETTINGS } from '../../src/shared/constants/defaults'
 
 // We need to mock the DATA_DIR before importing StorageService
-const TEST_DIR = path.join(os.tmpdir(), `.theone-test-${process.pid}-${Date.now()}`)
+const TEST_DIR = path.join(os.tmpdir(), `.mirehub-test-${process.pid}-${Date.now()}`)
 
 vi.mock('os', async () => {
   const actual = await vi.importActual<typeof import('os')>('os')
@@ -25,7 +25,7 @@ const { StorageService, _resetForTesting } = await import('../../src/main/servic
 
 describe('StorageService', () => {
   let service: InstanceType<typeof StorageService>
-  const dataDir = path.join(TEST_DIR, '.theone')
+  const dataDir = path.join(TEST_DIR, '.mirehub')
   const dataPath = path.join(dataDir, 'data.json')
 
   beforeEach(() => {

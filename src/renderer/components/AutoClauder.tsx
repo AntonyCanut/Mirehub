@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 
 const DEFAULT_CLAUDE_MD = `# Project Configuration

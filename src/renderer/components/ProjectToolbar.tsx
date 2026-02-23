@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useTerminalTabStore, type PaneNode } from '../lib/stores/terminalTabStore'
 import type { ProjectInfo } from '../../shared/types'

@@ -1,4 +1,3 @@
-import React from 'react'
 import type { SessionData } from '../../shared/types'
 import { useI18n } from '../lib/i18n'
 

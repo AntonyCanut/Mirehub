@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useViewStore } from '../lib/stores/viewStore'
 import { useI18n } from '../lib/i18n'

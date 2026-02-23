@@ -8,7 +8,7 @@ import { createMockIpcMain } from '../mocks/electron'
 const TEST_DIR = vi.hoisted(() => {
   const osMod = require('os')
   const pathMod = require('path')
-  return pathMod.join(osMod.tmpdir(), `.theone-db-ipc-test-${process.pid}-${Date.now()}`)
+  return pathMod.join(osMod.tmpdir(), `.mirehub-db-ipc-test-${process.pid}-${Date.now()}`)
 })
 const dataDir = path.join(TEST_DIR, '.mirehub', 'databases')
 

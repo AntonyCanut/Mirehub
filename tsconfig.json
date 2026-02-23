@@ -15,6 +15,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["src/shared/*"],
@@ -22,5 +23,5 @@
       "@renderer/*": ["src/renderer/*"]
     }
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "tests"]
 }

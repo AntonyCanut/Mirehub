@@ -4,7 +4,7 @@ import path from 'path'
 import os from 'os'
 import { createMockIpcMain } from '../mocks/electron'
 
-const TEST_DIR = path.join(os.tmpdir(), `.theone-wsenv-ipc-test-${process.pid}-${Date.now()}`)
+const TEST_DIR = path.join(os.tmpdir(), `.mirehub-wsenv-ipc-test-${process.pid}-${Date.now()}`)
 const projectDir1 = path.join(TEST_DIR, 'projects', 'project-alpha')
 const projectDir2 = path.join(TEST_DIR, 'projects', 'project-beta')
 
@@ -27,8 +27,8 @@ describe('WorkspaceEnv IPC Handlers', () => {
     vi.resetModules()
 
     // Clean up
-    if (fs.existsSync(path.join(TEST_DIR, '.workspaces'))) {
-      fs.rmSync(path.join(TEST_DIR, '.workspaces'), { recursive: true, force: true })
+    if (fs.existsSync(path.join(TEST_DIR, '.mirehub', 'envs'))) {
+      fs.rmSync(path.join(TEST_DIR, '.mirehub', 'envs'), { recursive: true, force: true })
     }
 
     // Recreate clean project directories (remove and remake to clear stale Claude files)
@@ -48,8 +48,8 @@ describe('WorkspaceEnv IPC Handlers', () => {
   })
 
   afterEach(() => {
-    if (fs.existsSync(path.join(TEST_DIR, '.workspaces'))) {
-      fs.rmSync(path.join(TEST_DIR, '.workspaces'), { recursive: true, force: true })
+    if (fs.existsSync(path.join(TEST_DIR, '.mirehub'))) {
+      fs.rmSync(path.join(TEST_DIR, '.mirehub'), { recursive: true, force: true })
     }
   })
 
@@ -75,12 +75,13 @@ describe('WorkspaceEnv IPC Handlers', () => {
       expect(result.success).toBe(true)
       expect(result.envPath).toBeDefined()
 
-      // Verifier que les symlinks existent
+      // Verifier que les symlinks existent (filter out .claude created by installActivityHooks)
       const envDir = result.envPath
       const entries = fs.readdirSync(envDir)
-      expect(entries).toHaveLength(2)
-      expect(entries).toContain('project-alpha')
-      expect(entries).toContain('project-beta')
+      const symlinks = entries.filter((e: string) => fs.lstatSync(path.join(envDir, e)).isSymbolicLink())
+      expect(symlinks).toHaveLength(2)
+      expect(symlinks).toContain('project-alpha')
+      expect(symlinks).toContain('project-beta')
 
       // Verifier que ce sont des symlinks
       const stat = fs.lstatSync(path.join(envDir, 'project-alpha'))
@@ -95,7 +96,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
 
       expect(result.success).toBe(true)
       expect(result.envPath).toContain('Mon Projet')
-      expect(result.envPath).toContain('.workspaces')
+      expect(result.envPath).toContain(path.join('.mirehub', 'envs'))
     })
 
     it('sanitize les caracteres speciaux dans le nom', async () => {
@@ -108,7 +109,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
       // Les caracteres speciaux doivent etre remplaces par _
       const dirName = path.basename(result.envPath)
       expect(dirName).toBe('test_invalid_name_')
-      expect(result.envPath).toContain('.workspaces')
+      expect(result.envPath).toContain(path.join('.mirehub', 'envs'))
     })
 
     it('gere les noms de dossiers dupliques', async () => {
@@ -126,10 +127,11 @@ describe('WorkspaceEnv IPC Handlers', () => {
       expect(result.success).toBe(true)
 
       const entries = fs.readdirSync(result.envPath)
-      expect(entries).toHaveLength(2)
+      const symlinks = entries.filter((e: string) => fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())
+      expect(symlinks).toHaveLength(2)
       // Le deuxieme devrait avoir un suffixe
-      expect(entries).toContain('myproject')
-      expect(entries).toContain('myproject-2')
+      expect(symlinks).toContain('myproject')
+      expect(symlinks).toContain('myproject-2')
     })
 
     it('nettoie les symlinks existants avant de recreer', async () => {
@@ -147,8 +149,9 @@ describe('WorkspaceEnv IPC Handlers', () => {
 
       expect(result.success).toBe(true)
       const entries = fs.readdirSync(result.envPath)
-      expect(entries).toHaveLength(1)
-      expect(entries).toContain('project-beta')
+      const symlinks = entries.filter((e: string) => fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())
+      expect(symlinks).toHaveLength(1)
+      expect(symlinks).toContain('project-beta')
     })
 
     it('gere un workspace avec un seul projet', async () => {
@@ -159,8 +162,9 @@ describe('WorkspaceEnv IPC Handlers', () => {
 
       expect(result.success).toBe(true)
       const entries = fs.readdirSync(result.envPath)
-      expect(entries).toHaveLength(1)
-      expect(entries).toContain('project-alpha')
+      const symlinks = entries.filter((e: string) => fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())
+      expect(symlinks).toHaveLength(1)
+      expect(symlinks).toContain('project-alpha')
 
       // Verifier que le symlink pointe vers le bon dossier
       const target = fs.readlinkSync(path.join(result.envPath, 'project-alpha'))
@@ -198,7 +202,9 @@ describe('WorkspaceEnv IPC Handlers', () => {
 
       expect(result.success).toBe(true)
       const entries = fs.readdirSync(result.envPath)
-      expect(entries).toHaveLength(0)
+      // installActivityHooks creates .claude/ even with empty projects
+      const symlinks = entries.filter((e: string) => fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())
+      expect(symlinks).toHaveLength(0)
     })
 
     it('copie les regles Claude du premier projet vers la racine env', async () => {
@@ -253,14 +259,16 @@ describe('WorkspaceEnv IPC Handlers', () => {
 
       expect(result.success).toBe(true)
       expect(fs.existsSync(path.join(result.envPath, 'CLAUDE.md'))).toBe(false)
-      expect(fs.existsSync(path.join(result.envPath, '.claude'))).toBe(false)
+      // .claude/ exists (created by installActivityHooks) but should NOT contain copied settings.json
+      expect(fs.existsSync(path.join(result.envPath, '.claude'))).toBe(true)
+      expect(fs.existsSync(path.join(result.envPath, '.claude', 'settings.json'))).toBe(false)
     })
 
     it('copie uniquement CLAUDE.md si le projet n a pas de dossier .claude', async () => {
       // Seulement CLAUDE.md, pas de dossier .claude
       fs.writeFileSync(path.join(projectDir1, 'CLAUDE.md'), '# Simple Rules')
 
-      const result = await mockIpcMain._invoke('workspace:envSetup', {
+      const result = await mockIpcMain._invoke<{ success: boolean; envPath: string }>('workspace:envSetup', {
         workspaceName: 'ws-md-only',
         projectPaths: [projectDir1],
       })
@@ -268,7 +276,10 @@ describe('WorkspaceEnv IPC Handlers', () => {
       expect(result.success).toBe(true)
       expect(fs.existsSync(path.join(result.envPath, 'CLAUDE.md'))).toBe(true)
       expect(fs.readFileSync(path.join(result.envPath, 'CLAUDE.md'), 'utf-8')).toBe('# Simple Rules')
-      expect(fs.existsSync(path.join(result.envPath, '.claude'))).toBe(false)
+      // .claude/ exists (created by installActivityHooks) but applyCludeRulesToEnv did not copy a .claude dir
+      // The .claude dir contains only hook settings, not project-copied settings
+      expect(fs.existsSync(path.join(result.envPath, '.claude'))).toBe(true)
+      expect(fs.existsSync(path.join(result.envPath, '.claude', 'settings.local.json'))).toBe(true)
     })
 
     it('remplace les regles Claude lors d un re-setup', async () => {
@@ -284,7 +295,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
       fs.writeFileSync(path.join(projectDir1, 'CLAUDE.md'), '# New Rules')
 
       // Deuxieme setup - les regles doivent etre mises a jour
-      const result = await mockIpcMain._invoke('workspace:envSetup', {
+      const result = await mockIpcMain._invoke<{ success: boolean; envPath: string }>('workspace:envSetup', {
         workspaceName: 'ws-re-setup',
         projectPaths: [projectDir1],
       })
@@ -299,7 +310,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
       fs.mkdirSync(path.join(projectDir2, '.claude'), { recursive: true })
       fs.writeFileSync(path.join(projectDir2, 'CLAUDE.md'), '# Beta Only')
 
-      const result = await mockIpcMain._invoke('workspace:envSetup', {
+      const result = await mockIpcMain._invoke<{ success: boolean; envPath: string }>('workspace:envSetup', {
         workspaceName: 'ws-second',
         projectPaths: [projectDir1, projectDir2],
       })
@@ -337,7 +348,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
   describe('workspace:envDelete', () => {
     it('supprime le dossier env d un workspace', async () => {
       // Setup first
-      const setupResult = await mockIpcMain._invoke('workspace:envSetup', {
+      const setupResult = await mockIpcMain._invoke<{ success: boolean; envPath: string }>('workspace:envSetup', {
         workspaceName: 'ws-to-delete',
         projectPaths: [projectDir1],
       })
@@ -345,7 +356,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
       expect(fs.existsSync(setupResult.envPath)).toBe(true)
 
       // Delete
-      const result = await mockIpcMain._invoke('workspace:envDelete', {
+      const result = await mockIpcMain._invoke<{ success: boolean }>('workspace:envDelete', {
         workspaceName: 'ws-to-delete',
       })
 
@@ -354,7 +365,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
     })
 
     it('ne plante pas si le dossier n existe pas', async () => {
-      const result = await mockIpcMain._invoke('workspace:envDelete', {
+      const result = await mockIpcMain._invoke<{ success: boolean }>('workspace:envDelete', {
         workspaceName: 'ws-inexistant',
       })
 

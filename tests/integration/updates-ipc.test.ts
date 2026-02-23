@@ -23,7 +23,13 @@ const mockWebContentsSend = vi.fn()
 vi.mock('electron', () => ({
   BrowserWindow: {
     getAllWindows: () => [
-      { webContents: { send: mockWebContentsSend } },
+      {
+        isDestroyed: () => false,
+        webContents: {
+          send: mockWebContentsSend,
+          isDestroyed: () => false,
+        },
+      },
     ],
   },
 }))
@@ -87,7 +93,7 @@ describe('Update IPC Handlers', () => {
       expect(nodeInfo.scope).toBe('global')
     })
 
-    it('ignore les outils introuvables', async () => {
+    it('retourne les outils introuvables avec installed a false', async () => {
       mockExecFile.mockImplementation((command: string, args: string[]) => {
         if (command === 'node' && args[0] === '--version') {
           return Promise.resolve({ stdout: 'v20.0.0\n' })
@@ -98,17 +104,29 @@ describe('Update IPC Handlers', () => {
 
       const results = await mockIpcMain._invoke('update:check')
 
-      // Only node should be returned
-      expect(results).toHaveLength(1)
-      expect(results[0].tool).toBe('node')
+      // All tools are returned, but only node is installed
+      const installed = results.filter((r: { installed: boolean }) => r.installed)
+      expect(installed).toHaveLength(1)
+      expect(installed[0].tool).toBe('node')
+
+      const notInstalled = results.filter((r: { installed: boolean }) => !r.installed)
+      expect(notInstalled.length).toBeGreaterThan(0)
+      notInstalled.forEach((r: { currentVersion: string }) => {
+        expect(r.currentVersion).toBe('')
+      })
     })
 
-    it('retourne une liste vide si aucun outil n est disponible', async () => {
+    it('retourne tous les outils comme non installes si aucun n est disponible', async () => {
       mockExecFile.mockRejectedValue(new Error('command not found'))
 
       const results = await mockIpcMain._invoke('update:check')
 
-      expect(results).toEqual([])
+      // All tools returned but none installed
+      expect(results.length).toBeGreaterThan(0)
+      results.forEach((r: { installed: boolean; currentVersion: string }) => {
+        expect(r.installed).toBe(false)
+        expect(r.currentVersion).toBe('')
+      })
     })
   })
 

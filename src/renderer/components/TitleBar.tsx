@@ -1,4 +1,3 @@
-import React from 'react'
 import { NotificationCenter } from './NotificationCenter'
 import { useI18n } from '../lib/i18n'
 

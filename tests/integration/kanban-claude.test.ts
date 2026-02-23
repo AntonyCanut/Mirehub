@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-// Mock the window.theone API
+// Mock the window.mirehub API
 const mockKanbanUpdate = vi.fn()
 const mockKanbanList = vi.fn()
 const mockKanbanCreate = vi.fn()
@@ -15,7 +15,7 @@ const mockTerminalWrite = vi.fn()
 const mockWorkspaceEnvSetup = vi.fn()
 
 vi.stubGlobal('window', {
-  theone: {
+  mirehub: {
     terminal: {
       write: mockTerminalWrite,
     },
@@ -69,7 +69,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
     vi.useRealTimers()
     mockCreateTab.mockReturnValue('tab-new-1')
     mockWorkspaceEnvSetup.mockResolvedValue({ success: true, envPath: '/tmp/workspace-env' })
-    mockKanbanGetPath.mockResolvedValue('/Users/test/.theone/kanban/ws-1.json')
+    mockKanbanGetPath.mockResolvedValue('/Users/test/.mirehub/kanban/ws-1.json')
 
     useKanbanStore.setState({
       tasks: [],
@@ -411,7 +411,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       expect(writtenPrompt).toContain('question')
     })
 
-    it('set les variables d\'env THEONE_KANBAN dans la commande', async () => {
+    it('set les variables d\'env MIREHUB_KANBAN dans la commande', async () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
@@ -428,9 +428,9 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       await useKanbanStore.getState().sendToClaude(task)
 
       const initialCommand = mockCreateTab.mock.calls[0]![3] as string
-      expect(initialCommand).toContain('THEONE_KANBAN_TASK_ID="task-1"')
-      expect(initialCommand).toContain('THEONE_KANBAN_FILE=')
-      expect(initialCommand).toContain('.theone/kanban/ws-1.json')
+      expect(initialCommand).toContain('MIREHUB_KANBAN_TASK_ID="task-1"')
+      expect(initialCommand).toContain('MIREHUB_KANBAN_FILE=')
+      expect(initialCommand).toContain('.mirehub/kanban/ws-1.json')
     })
 
     it('reste sur la vue courante (pas de navigation vers terminal)', async () => {

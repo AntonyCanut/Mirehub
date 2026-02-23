@@ -4,7 +4,7 @@ import path from 'path'
 import os from 'os'
 import { createMockIpcMain } from '../mocks/electron'
 
-const TEST_DIR = path.join(os.tmpdir(), `.theone-fs-ipc-test-${process.pid}-${Date.now()}`)
+const TEST_DIR = path.join(os.tmpdir(), `.mirehub-fs-ipc-test-${process.pid}-${Date.now()}`)
 const testFilesDir = path.join(TEST_DIR, 'test-files')
 
 describe('Filesystem IPC Handlers', () => {

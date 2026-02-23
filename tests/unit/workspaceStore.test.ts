@@ -1,7 +1,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import type { Workspace, Project } from '../../src/shared/types'
 
-// Mock window.theone API
+// Mock terminalTabStore (used by setActiveWorkspace)
+vi.mock('../../src/renderer/lib/stores/terminalTabStore', () => ({
+  useTerminalTabStore: {
+    getState: () => ({
+      tabs: [],
+      createSplitTab: vi.fn(),
+      activateFirstInWorkspace: vi.fn(),
+    }),
+  },
+}))
+
+// Mock window.mirehub API
 const mockWorkspaceApi = {
   list: vi.fn(),
   create: vi.fn(),
@@ -18,13 +29,13 @@ const mockProjectApi = {
 }
 
 // Set up global window mock before importing the store
-const mockTheone = {
+const mockMirehub = {
   workspace: mockWorkspaceApi,
   project: mockProjectApi,
   workspaceEnv: { setup: vi.fn(), getPath: vi.fn(), delete: vi.fn() },
 }
 
-vi.stubGlobal('window', { theone: mockTheone })
+vi.stubGlobal('window', { mirehub: mockMirehub })
 
 const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
 
@@ -80,6 +91,7 @@ describe('useWorkspaceStore', () => {
     it('charge les workspaces et marque initialized', async () => {
       const ws = makeWorkspace()
       mockWorkspaceApi.list.mockResolvedValue([ws])
+      mockProjectApi.list.mockResolvedValue([])
 
       await useWorkspaceStore.getState().init()
 
@@ -170,7 +182,7 @@ describe('useWorkspaceStore', () => {
       useWorkspaceStore.setState({ workspaces: [ws] })
       mockProjectApi.selectDir.mockResolvedValue('/tmp/test')
       mockProjectApi.add.mockResolvedValue(project)
-      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       const result = await useWorkspaceStore.getState().addProject('ws-1')
 
@@ -185,12 +197,12 @@ describe('useWorkspaceStore', () => {
       useWorkspaceStore.setState({ workspaces: [ws] })
       mockProjectApi.selectDir.mockResolvedValue('/tmp/test')
       mockProjectApi.add.mockResolvedValue(project)
-      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       await useWorkspaceStore.getState().addProject('ws-1')
 
       // Env should be set up with workspace name, not ID
-      expect(mockTheone.workspaceEnv.setup).toHaveBeenCalledWith('Test Workspace', ['/tmp/test'])
+      expect(mockMirehub.workspaceEnv.setup).toHaveBeenCalledWith('Test Workspace', ['/tmp/test'])
     })
 
     it('retourne null si l utilisateur annule la selection', async () => {
@@ -209,7 +221,7 @@ describe('useWorkspaceStore', () => {
       const project = makeProject()
       useWorkspaceStore.setState({ workspaces: [ws], projects: [project] })
       mockProjectApi.remove.mockResolvedValue(undefined)
-      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       await useWorkspaceStore.getState().removeProject('p-1')
 
@@ -221,7 +233,7 @@ describe('useWorkspaceStore', () => {
       const project = makeProject()
       useWorkspaceStore.setState({ projects: [project], activeProjectId: 'p-1', workspaces: [makeWorkspace({ projectIds: ['p-1'] })] })
       mockProjectApi.remove.mockResolvedValue(undefined)
-      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       await useWorkspaceStore.getState().removeProject('p-1')
 
@@ -234,11 +246,11 @@ describe('useWorkspaceStore', () => {
       const ws = makeWorkspace({ id: 'ws-1', name: 'Mon Workspace' })
       const project = makeProject({ workspaceId: 'ws-1' })
       useWorkspaceStore.setState({ workspaces: [ws], projects: [project] })
-      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/home/user/.workspaces/Mon Workspace' })
+      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/home/user/.workspaces/Mon Workspace' })
 
       const result = await useWorkspaceStore.getState().setupWorkspaceEnv('ws-1')
 
-      expect(mockTheone.workspaceEnv.setup).toHaveBeenCalledWith('Mon Workspace', ['/tmp/test'])
+      expect(mockMirehub.workspaceEnv.setup).toHaveBeenCalledWith('Mon Workspace', ['/tmp/test'])
       expect(result).toBe('/home/user/.workspaces/Mon Workspace')
     })
 
@@ -259,12 +271,12 @@ describe('useWorkspaceStore', () => {
       const ws = makeWorkspace()
       const project = makeProject()
       useWorkspaceStore.setState({ workspaces: [ws], projects: [project] })
-      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       const result = await useWorkspaceStore.getState().setupWorkspaceEnv('ws-1')
 
       expect(result).toBe('/tmp/env')
-      expect(mockTheone.workspaceEnv.setup).toHaveBeenCalledOnce()
+      expect(mockMirehub.workspaceEnv.setup).toHaveBeenCalledOnce()
     })
   })
 

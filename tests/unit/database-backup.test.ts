@@ -103,7 +103,7 @@ describe('Database Backup Service', () => {
 
       // Verify exec was called with pg_dump
       expect(mockExecAsync).toHaveBeenCalledTimes(1)
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('pg_dump')
       expect(callArgs[0]).toContain('-h')
       expect(callArgs[0]).toContain('-p 5432')
@@ -135,7 +135,7 @@ describe('Database Backup Service', () => {
       const result = await backupDatabase('conn-mysql', 'MySQL DB', config)
 
       expect(result.success).toBe(true)
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('mysqldump')
       expect(callArgs[0]).toContain('-h')
       expect(callArgs[0]).toContain('-P 3306')
@@ -149,12 +149,12 @@ describe('Database Backup Service', () => {
         database: 'mongodb_test',
       }
 
-      mockExecAsync.mockResolvedValueOnce({ stdout: Buffer.from('binary archive data'), stderr: '' })
+      mockExecAsync.mockResolvedValueOnce({ stdout: 'binary archive data', stderr: '' })
 
       const result = await backupDatabase('conn-mongo', 'Mongo DB', config)
 
       expect(result.success).toBe(true)
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('mongodump')
       expect(callArgs[0]).toContain('--uri=')
       expect(callArgs[0]).toContain('--archive')
@@ -169,7 +169,7 @@ describe('Database Backup Service', () => {
       const result = await backupDatabase('conn-sqlite', 'SQLite DB', config)
 
       expect(result.success).toBe(true)
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('sqlite3')
       expect(callArgs[0]).toContain('/tmp/test.db')
       expect(callArgs[0]).toContain('.dump')
@@ -213,7 +213,7 @@ describe('Database Backup Service', () => {
 
       await backupDatabase('conn-opts', 'Opts DB', config, { dataOnly: true })
 
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('--data-only')
     })
 
@@ -226,7 +226,7 @@ describe('Database Backup Service', () => {
 
       await backupDatabase('conn-opts', 'Opts DB', config, { schemaOnly: true })
 
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('--schema-only')
     })
 
@@ -239,7 +239,7 @@ describe('Database Backup Service', () => {
 
       await backupDatabase('conn-opts', 'Opts DB', config, { tables: ['users', 'orders'] })
 
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('-t')
       expect(callArgs[0]).toContain('users')
       expect(callArgs[0]).toContain('orders')
@@ -255,7 +255,7 @@ describe('Database Backup Service', () => {
       await backupDatabase('conn-path', 'Path DB', config)
 
       // Verify exec was called with extended PATH in env
-      const callOpts = mockExecAsync.mock.calls[0][1]
+      const callOpts = mockExecAsync.mock.calls[0]![1]
       expect(callOpts.env.PATH).toContain('/opt/homebrew/bin')
       expect(callOpts.env.PATH).toContain('/opt/homebrew/opt/postgresql@16/bin')
       expect(callOpts.env.PATH).toContain('/usr/local/bin')
@@ -283,7 +283,7 @@ describe('Database Backup Service', () => {
 
       // Reset uuid mock to get different ID
       const uuid = await import('uuid')
-      vi.spyOn(uuid, 'v4').mockReturnValueOnce('test-uuid-5678')
+      vi.spyOn(uuid, 'v4').mockReturnValue('test-uuid-5678')
 
       // Second backup
       await backupDatabase('conn-list', 'List DB', config)
@@ -291,7 +291,7 @@ describe('Database Backup Service', () => {
       const entries = listBackups('conn-list')
       expect(entries.length).toBeGreaterThanOrEqual(2)
       // Should be sorted newest first
-      expect(entries[0].timestamp).toBeGreaterThanOrEqual(entries[1].timestamp)
+      expect(entries[0]!.timestamp).toBeGreaterThanOrEqual(entries[1]!.timestamp)
     })
 
     it('filtre les entries dont le fichier n existe plus', async () => {
@@ -308,7 +308,7 @@ describe('Database Backup Service', () => {
       expect(entries).toHaveLength(1)
 
       // Delete the actual file
-      fs.unlinkSync(entries[0].filePath)
+      fs.unlinkSync(entries[0]!.filePath)
 
       // Now listing should return empty (file doesn't exist)
       entries = listBackups('conn-filter')
@@ -331,11 +331,11 @@ describe('Database Backup Service', () => {
       const entries = listBackups('conn-del')
       expect(entries).toHaveLength(1)
 
-      const result = deleteBackup('conn-del', entries[0].id)
+      const result = deleteBackup('conn-del', entries[0]!.id)
       expect(result.success).toBe(true)
 
       // File should be deleted
-      expect(fs.existsSync(entries[0].filePath)).toBe(false)
+      expect(fs.existsSync(entries[0]!.filePath)).toBe(false)
 
       // Manifest should be empty
       const remainingEntries = listBackups('conn-del')
@@ -374,10 +374,10 @@ describe('Database Backup Service', () => {
         database: 'target_db',
       }
 
-      const result = await restoreBackup(entries[0], targetConfig)
+      const result = await restoreBackup(entries[0]!, targetConfig)
       expect(result.success).toBe(true)
 
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('psql')
       expect(callArgs[0]).toContain('-h')
       expect(callArgs[0]).toContain('-p 5432')
@@ -401,10 +401,10 @@ describe('Database Backup Service', () => {
         database: 'target_mysql',
       }
 
-      const result = await restoreBackup(entries[0], targetConfig)
+      const result = await restoreBackup(entries[0]!, targetConfig)
       expect(result.success).toBe(true)
 
-      const callArgs = mockExecAsync.mock.calls[0]
+      const callArgs = mockExecAsync.mock.calls[0]!
       expect(callArgs[0]).toContain('mysql')
       expect(callArgs[0]).toContain('target_mysql')
     })
@@ -480,7 +480,7 @@ describe('Database Backup Service', () => {
         database: 'target_db',
       }
 
-      const result = await restoreBackup(entries[0], targetConfig)
+      const result = await restoreBackup(entries[0]!, targetConfig)
       expect(result.success).toBe(false)
       expect(result.error).toContain('password authentication failed')
     })

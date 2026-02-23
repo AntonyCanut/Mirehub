@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Terminal } from './Terminal'
 import { useClaudeStore } from '../lib/stores/claudeStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'

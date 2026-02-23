@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useUpdateStore } from '../lib/stores/updateStore'
 import { useI18n } from '../lib/i18n'
 
