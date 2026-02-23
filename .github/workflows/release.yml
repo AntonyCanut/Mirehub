@@ -82,7 +82,15 @@ jobs:
         run: npm run build
 
       - name: Build Electron app and publish (arm64 + x64)
-        run: npx electron-builder --mac --arm64 --x64 --publish always
+        run: |
+          # When MAC_CERTIFICATE secret is not configured, CSC_LINK is set to ""
+          # which electron-builder resolves to the CWD (path.resolve("") = CWD)
+          # causing "not a file" error. Unset it and disable auto-discovery.
+          if [ -z "$CSC_LINK" ]; then
+            unset CSC_LINK
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+          fi
+          npx electron-builder --mac --arm64 --x64 --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CERTIFICATE }}
