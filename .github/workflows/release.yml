@@ -47,7 +47,13 @@ jobs:
         run: |
           LATEST=$(git tag -l 'v*' --sort=-v:refname | head -n1)
           if [ -z "$LATEST" ]; then
-            NEXT="v0.1.0"
+            # No tags yet — read current version from package.json and bump patch
+            CURRENT=$(node -p "require('./package.json').version")
+            MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+            MINOR=$(echo "$CURRENT" | cut -d. -f2)
+            PATCH=$(echo "$CURRENT" | cut -d. -f3)
+            PATCH=$((PATCH + 1))
+            NEXT="v${MAJOR}.${MINOR}.${PATCH}"
           else
             MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
             MINOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f2)
@@ -61,7 +67,7 @@ jobs:
           echo "Next version: $NEXT"
 
       - name: Set version in package.json
-        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
       - name: Create and push tag
         run: |
@@ -75,34 +81,12 @@ jobs:
       - name: Build renderer + main
         run: npm run build
 
-      - name: Build Electron app (arm64 + x64)
-        run: npx electron-builder --mac --arm64 --x64 --publish never
+      - name: Build Electron app and publish (arm64 + x64)
+        run: npx electron-builder --mac --arm64 --x64 --publish always
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CERTIFICATE }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-
-      - name: Package .app bundles
-        run: |
-          cd release
-          if [ -d "mac-arm64" ]; then
-            cd mac-arm64 && zip -r -y ../Mirehub-arm64.app.zip *.app && cd ..
-          fi
-          if [ -d "mac-x64" ]; then
-            cd mac-x64 && zip -r -y ../Mirehub-x64.app.zip *.app && cd ..
-          fi
-          if [ -d "mac" ]; then
-            cd mac && zip -r -y ../Mirehub-x64.app.zip *.app && cd ..
-          fi
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Mirehub ${{ steps.version.outputs.tag }}
-          generate_release_notes: true
-          files: |
-            release/*.dmg
-            release/*.app.zip

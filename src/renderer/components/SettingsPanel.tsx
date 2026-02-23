@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { AppSettings } from '../../shared/types'
 import { useI18n } from '../lib/i18n'
+import { useAppUpdateStore } from '../lib/stores/appUpdateStore'
 
 const FONT_FAMILIES = [
   'Menlo',
@@ -32,6 +33,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 export function SettingsPanel() {
   const { t, locale, setLocale } = useI18n()
+  const { status: updateStatus, checkForUpdate } = useAppUpdateStore()
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [appVersion, setAppVersion] = useState<{ version: string; name: string } | null>(null)
@@ -237,6 +239,16 @@ export function SettingsPanel() {
           <div className="settings-row">
             <label className="settings-label">{t('settings.developer')}</label>
             <span className="settings-value">Antony KERVAZO CANUT</span>
+          </div>
+          <div className="settings-row">
+            <label className="settings-label">{t('appUpdate.checkNow')}</label>
+            <button
+              className="settings-btn"
+              onClick={checkForUpdate}
+              disabled={updateStatus === 'checking'}
+            >
+              {updateStatus === 'checking' ? t('common.loading') : t('appUpdate.checkNow')}
+            </button>
           </div>
         </div>
       </div>

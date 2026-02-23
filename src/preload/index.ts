@@ -399,6 +399,21 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.APP_VERSION),
   },
 
+  // App Update (electron-updater)
+  appUpdate: {
+    check: (): Promise<{ success: boolean; version?: string; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.APP_UPDATE_CHECK),
+    download: (): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.APP_UPDATE_DOWNLOAD),
+    install: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.APP_UPDATE_INSTALL),
+    onStatus: (callback: (data: { status: string; version?: string; releaseNotes?: string; percent?: number; message?: string }) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, payload: { status: string; version?: string; releaseNotes?: string; percent?: number; message?: string }) => callback(payload)
+      ipcRenderer.on(IPC_CHANNELS.APP_UPDATE_STATUS, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.APP_UPDATE_STATUS, listener)
+    },
+  },
+
   // Notifications
   notify: (title: string, body: string) =>
     ipcRenderer.send(IPC_CHANNELS.APP_NOTIFICATION, { title, body }),

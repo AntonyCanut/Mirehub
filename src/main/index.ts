@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron'
 import path from 'path'
+import { execSync } from 'child_process'
 import { registerTerminalHandlers } from './ipc/terminal'
 import { registerWorkspaceHandlers } from './ipc/workspace'
 import { registerProjectHandlers } from './ipc/project'
@@ -14,9 +15,38 @@ import { registerWorkspaceEnvHandlers } from './ipc/workspaceEnv'
 import { registerClaudeDefaultsHandlers } from './ipc/claudeDefaults'
 import { registerApiHandlers } from './ipc/api'
 import { registerDatabaseHandlers } from './ipc/database'
+import { registerAppUpdateHandlers } from './ipc/appUpdate'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
 import { databaseService } from './services/database'
+
+// Fix PATH for packaged .app on macOS — Electron .app bundles inherit a
+// minimal PATH (/usr/bin:/bin:/usr/sbin:/sbin) which prevents finding
+// user-installed tools (node, npm, claude, brew, cargo, etc.).
+// Resolve the real PATH by asking the user's login shell.
+if (process.platform === 'darwin') {
+  try {
+    const shell = process.env.SHELL || '/bin/zsh'
+    const shellPath = execSync(`${shell} -ilc 'printf "%s" "$PATH"'`, {
+      encoding: 'utf-8',
+      timeout: 5000,
+    })
+    if (shellPath) {
+      process.env.PATH = shellPath
+    }
+  } catch {
+    // Fallback: extend with common macOS binary locations
+    const extra = [
+      '/opt/homebrew/bin',
+      '/opt/homebrew/sbin',
+      '/usr/local/bin',
+      '/usr/local/sbin',
+      `${process.env.HOME}/.cargo/bin`,
+      `${process.env.HOME}/.nvm/versions/node`,
+    ].join(':')
+    process.env.PATH = `${extra}:${process.env.PATH ?? ''}`
+  }
+}
 
 // Set the app name for macOS menu bar (overrides default "Electron" in dev mode)
 app.name = 'Mirehub'
@@ -83,6 +113,7 @@ app.whenReady().then(() => {
   registerClaudeDefaultsHandlers(ipcMain)
   registerApiHandlers(ipcMain)
   registerDatabaseHandlers(ipcMain)
+  registerAppUpdateHandlers(ipcMain)
 
   // Ensure activity hook script exists and start watching
   ensureActivityHookScript()

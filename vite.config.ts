@@ -19,7 +19,7 @@ export default defineConfig({
             outDir: path.resolve(__dirname, 'dist/main'),
             emptyOutDir: true,
             rollupOptions: {
-              external: ['electron', 'node-pty', 'pg', 'pg-native', 'mysql2', 'mssql', 'mongodb', 'better-sqlite3'],
+              external: ['electron', 'electron-updater', 'node-pty', 'pg', 'pg-native', 'mysql2', 'mssql', 'mongodb', 'better-sqlite3'],
               output: {
                 // Prevent code-splitting for dynamic driver imports — avoids
                 // chunk hash mismatches between dev and production builds.

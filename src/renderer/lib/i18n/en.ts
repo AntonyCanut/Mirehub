@@ -647,6 +647,18 @@ export const en = {
   'command.showDatabase': 'Show Database',
   'project.addDbConnection': 'Add DB connection',
 
+  // App Update
+  'appUpdate.title': 'Update available',
+  'appUpdate.newVersion': 'Version {version} is available.',
+  'appUpdate.download': 'Download',
+  'appUpdate.installAndRestart': 'Install and restart',
+  'appUpdate.later': 'Later',
+  'appUpdate.checkNow': 'Check now',
+  'appUpdate.downloading': 'Downloading...',
+  'appUpdate.ready': 'Update ready to install.',
+  'appUpdate.error': 'Error checking for updates.',
+  'appUpdate.notAvailable': 'No update available.',
+
   // Title bar
   'titlebar.title': 'Mirehub',
 } as const

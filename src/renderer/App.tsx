@@ -19,9 +19,11 @@ import { ProjectStats } from './components/ProjectStats'
 import { PromptTemplates } from './components/PromptTemplates'
 import { ApiTesterPanel } from './components/ApiTesterPanel'
 import { DatabaseExplorer } from './components/DatabaseExplorer'
+import { AppUpdateModal } from './components/AppUpdateModal'
 import { useWorkspaceStore } from './lib/stores/workspaceStore'
 import { useTerminalTabStore } from './lib/stores/terminalTabStore'
 import { useViewStore } from './lib/stores/viewStore'
+import { useAppUpdateStore } from './lib/stores/appUpdateStore'
 import { useI18n } from './lib/i18n'
 import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 
@@ -126,6 +128,12 @@ export function App() {
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
+
+  // Initialize app update listener
+  const initUpdateListener = useAppUpdateStore((s) => s.initListener)
+  useEffect(() => {
+    return initUpdateListener()
+  }, [initUpdateListener])
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -445,6 +453,7 @@ export function App() {
         open={commandPaletteOpen || quickSwitchOpen}
         onClose={() => { setCommandPaletteOpen(false); setQuickSwitchOpen(false) }}
       />
+      <AppUpdateModal />
     </div>
     </ErrorBoundary>
   )

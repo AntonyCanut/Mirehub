@@ -647,6 +647,18 @@ export const fr = {
   'command.showDatabase': 'Afficher Base de donnees',
   'project.addDbConnection': 'Ajouter une connexion BDD',
 
+  // App Update
+  'appUpdate.title': 'Mise a jour disponible',
+  'appUpdate.newVersion': 'La version {version} est disponible.',
+  'appUpdate.download': 'Telecharger',
+  'appUpdate.installAndRestart': 'Installer et redemarrer',
+  'appUpdate.later': 'Plus tard',
+  'appUpdate.checkNow': 'Verifier maintenant',
+  'appUpdate.downloading': 'Telechargement en cours...',
+  'appUpdate.ready': 'Mise a jour prete a installer.',
+  'appUpdate.error': 'Erreur lors de la verification des mises a jour.',
+  'appUpdate.notAvailable': 'Aucune mise a jour disponible.',
+
   // Title bar
   'titlebar.title': 'Mirehub',
 } as const
