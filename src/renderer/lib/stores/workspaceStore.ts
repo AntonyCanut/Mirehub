@@ -16,6 +16,7 @@ interface WorkspaceActions {
   loadWorkspaces: () => Promise<void>
   createWorkspace: (name: string, color?: string) => Promise<Workspace | null>
   createWorkspaceFromFolder: () => Promise<Workspace | null>
+  createWorkspaceFromNew: (projectName: string) => Promise<Workspace | null>
   deleteWorkspace: (id: string) => Promise<void>
   updateWorkspace: (id: string, data: Partial<Workspace>) => Promise<void>
   addProject: (workspaceId: string) => Promise<Project | null>
@@ -23,6 +24,7 @@ interface WorkspaceActions {
   moveProject: (projectId: string, targetWorkspaceId: string) => Promise<void>
   rescanClaude: (projectId: string) => Promise<void>
   rescanAllClaude: () => Promise<void>
+  refreshWorkspace: (workspaceId: string) => Promise<void>
   setupWorkspaceEnv: (workspaceId: string) => Promise<string | null>
   setActiveWorkspace: (id: string | null) => void
   setActiveProject: (id: string | null) => void
@@ -34,17 +36,12 @@ type WorkspaceStore = WorkspaceState & WorkspaceActions
 
 /**
  * Get the working directory for a workspace.
- * If multiple projects: use the virtual env (symlinks).
- * If single project: use its path directly.
+ * Always creates a virtual env directory (~/.workspaces/{name}) with symlinks.
  */
-async function getWorkspaceCwd(workspaceId: string, projects: Project[]): Promise<string> {
-  const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
-  if (workspaceProjects.length <= 1) {
-    return workspaceProjects[0]?.path ?? '~'
-  }
-  // Multiple projects: setup and use virtual env
+async function getWorkspaceCwd(workspaceName: string, workspaceProjects: Project[]): Promise<string> {
+  if (workspaceProjects.length === 0) return '~'
   const paths = workspaceProjects.map((p) => p.path)
-  const result = await window.theone.workspaceEnv.setup(workspaceId, paths)
+  const result = await window.mirehub.workspaceEnv.setup(workspaceName, paths)
   if (result?.success && result.envPath) {
     return result.envPath
   }
@@ -63,19 +60,24 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   init: async () => {
     if (get().initialized) return
     await get().loadWorkspaces()
+    // Select first workspace by default if none is active
+    const { workspaces, activeWorkspaceId } = get()
+    if (!activeWorkspaceId && workspaces.length > 0) {
+      get().setActiveWorkspace(workspaces[0]!.id)
+    }
     set({ initialized: true })
     // Scan all projects for .claude folders after init
     get().rescanAllClaude()
   },
 
   loadWorkspaces: async () => {
-    const workspaces: Workspace[] = await window.theone.workspace.list()
-    const projects: Project[] = await window.theone.project.list()
+    const workspaces: Workspace[] = await window.mirehub.workspace.list()
+    const projects: Project[] = await window.mirehub.project.list()
     set({ workspaces, projects })
   },
 
   createWorkspace: async (name: string, color?: string) => {
-    const workspace = await window.theone.workspace.create({
+    const workspace = await window.mirehub.workspace.create({
       name,
       color: color ?? '#89b4fa',
     })
@@ -89,11 +91,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
   createWorkspaceFromFolder: async () => {
     try {
-      const dirPath = await window.theone.project.selectDir()
+      const dirPath = await window.mirehub.project.selectDir()
       if (!dirPath) return null
 
       const folderName = dirPath.split('/').pop() || dirPath
-      const workspace = await window.theone.workspace.create({
+      const workspace = await window.mirehub.workspace.create({
         name: folderName,
         color: '#89b4fa',
       })
@@ -105,20 +107,20 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
       // Init .workspaces directory for local project data
       try {
-        await window.theone.workspaceDir.init(dirPath)
+        await window.mirehub.workspaceDir.init(dirPath)
       } catch {
         // Non-blocking
       }
 
       // Automatically add the selected folder as a project
-      const project: Project = await window.theone.project.add({
+      const project: Project = await window.mirehub.project.add({
         workspaceId: workspace.id,
         path: dirPath,
       })
 
       if (project) {
         try {
-          const scanResult = await window.theone.project.scanClaude(dirPath)
+          const scanResult = await window.mirehub.project.scanClaude(dirPath)
           if (scanResult?.hasClaude) {
             project.hasClaude = true
           }
@@ -135,12 +137,13 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
           ),
         }))
 
+        // Setup workspace env and use env path for the terminal
+        const envPath = await get().setupWorkspaceEnv(workspace.id)
+        const cwd = envPath || dirPath
+
         // Create a single split tab: Claude (left) + Terminal (right)
         const termStore = useTerminalTabStore.getState()
-        termStore.createSplitTab(workspace.id, dirPath, 'Claude + Terminal', 'claude', null)
-
-        // Setup workspace env
-        await get().setupWorkspaceEnv(workspace.id)
+        termStore.createSplitTab(workspace.id, cwd, 'Claude + Terminal', 'claude', null)
       } else {
         set({ activeWorkspaceId: workspace.id })
       }
@@ -152,8 +155,64 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     }
   },
 
+  createWorkspaceFromNew: async (projectName: string) => {
+    try {
+      // Pick parent directory
+      const parentDir = await window.mirehub.project.selectDir()
+      if (!parentDir) return null
+
+      const projectPath = parentDir + '/' + projectName
+      const exists = await window.mirehub.fs.exists(projectPath)
+      if (exists) return null
+
+      // Create directory
+      await window.mirehub.fs.mkdir(projectPath)
+
+      // Create workspace
+      const workspace = await window.mirehub.workspace.create({
+        name: projectName,
+        color: '#89b4fa',
+      })
+      if (!workspace) return null
+
+      set((state) => ({
+        workspaces: [...state.workspaces, workspace],
+      }))
+
+      // Add project
+      const project: Project = await window.mirehub.project.add({
+        workspaceId: workspace.id,
+        path: projectPath,
+      })
+
+      if (project) {
+        set((state) => ({
+          projects: [...state.projects, project],
+          activeProjectId: project.id,
+          activeWorkspaceId: workspace.id,
+          workspaces: state.workspaces.map((w) =>
+            w.id === workspace.id ? { ...w, projectIds: [...w.projectIds, project.id] } : w,
+          ),
+        }))
+
+        const envPath = await get().setupWorkspaceEnv(workspace.id)
+        const cwd = envPath || projectPath
+
+        const termStore = useTerminalTabStore.getState()
+        termStore.createSplitTab(workspace.id, cwd, 'Claude + Terminal', 'claude', null)
+      } else {
+        set({ activeWorkspaceId: workspace.id })
+      }
+
+      return workspace
+    } catch (err) {
+      console.error('Failed to create workspace from new project:', err)
+      return null
+    }
+  },
+
   deleteWorkspace: async (id: string) => {
-    await window.theone.workspace.delete(id)
+    await window.mirehub.workspace.delete(id)
     set((state) => ({
       workspaces: state.workspaces.filter((w) => w.id !== id),
       projects: state.projects.filter((p) => p.workspaceId !== id),
@@ -162,17 +221,17 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   },
 
   updateWorkspace: async (id: string, data: Partial<Workspace>) => {
-    await window.theone.workspace.update({ id, ...data })
+    await window.mirehub.workspace.update({ id, ...data })
     set((state) => ({
       workspaces: state.workspaces.map((w) => (w.id === id ? { ...w, ...data } : w)),
     }))
   },
 
   addProject: async (workspaceId: string) => {
-    const dirPath = await window.theone.project.selectDir()
+    const dirPath = await window.mirehub.project.selectDir()
     if (!dirPath) return null
 
-    const project: Project = await window.theone.project.add({
+    const project: Project = await window.mirehub.project.add({
       workspaceId,
       path: dirPath,
     })
@@ -180,7 +239,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     if (project) {
       // Scan for .claude folder after adding the project
       try {
-        const scanResult = await window.theone.project.scanClaude(dirPath)
+        const scanResult = await window.mirehub.project.scanClaude(dirPath)
         if (scanResult?.hasClaude) {
           project.hasClaude = true
         }
@@ -196,12 +255,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         pendingClaudeImport: !project.hasClaude ? project.id : state.pendingClaudeImport,
       }))
 
-      // Rebuild workspace env if there are now multiple projects
-      const { projects } = get()
-      const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
-      if (workspaceProjects.length > 1) {
-        await get().setupWorkspaceEnv(workspaceId)
-      }
+      // Rebuild workspace env
+      await get().setupWorkspaceEnv(workspaceId)
     }
 
     return project
@@ -209,7 +264,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
   removeProject: async (id: string) => {
     const project = get().projects.find((p) => p.id === id)
-    await window.theone.project.remove(id)
+    await window.mirehub.project.remove(id)
     set((state) => ({
       projects: state.projects.filter((p) => p.id !== id),
       workspaces: state.workspaces.map((w) =>
@@ -233,8 +288,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     const sourceWorkspaceId = project.workspaceId
 
     // Remove from source workspace, add to target workspace
-    await window.theone.project.remove(projectId)
-    const newProject = await window.theone.project.add({
+    await window.mirehub.project.remove(projectId)
+    const newProject = await window.mirehub.project.add({
       workspaceId: targetWorkspaceId,
       path: project.path,
     })
@@ -267,7 +322,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     const project = get().projects.find((p) => p.id === projectId)
     if (!project) return
     try {
-      const result = await window.theone.project.scanClaude(project.path)
+      const result = await window.mirehub.project.scanClaude(project.path)
       const hasClaude = result?.hasClaude ?? false
       if (hasClaude !== project.hasClaude) {
         set((state) => ({
@@ -288,7 +343,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     await Promise.allSettled(
       projects.map(async (p) => {
         try {
-          const result = await window.theone.project.scanClaude(p.path)
+          const result = await window.mirehub.project.scanClaude(p.path)
           const hasClaude = result?.hasClaude ?? false
           if (hasClaude !== p.hasClaude) {
             updates.push({ id: p.id, hasClaude })
@@ -308,12 +363,45 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     }
   },
 
+  refreshWorkspace: async (workspaceId: string) => {
+    const wsProjects = get().projects.filter((p) => p.workspaceId === workspaceId)
+    if (wsProjects.length === 0) return
+
+    const updates: Array<{ id: string; hasClaude: boolean; hasGit: boolean }> = []
+    await Promise.allSettled(
+      wsProjects.map(async (p) => {
+        try {
+          const result = await window.mirehub.project.scanClaude(p.path)
+          const hasClaude = result?.hasClaude ?? false
+          const hasGit = await window.mirehub.fs.exists(p.path + '/.git')
+          if (hasClaude !== p.hasClaude || hasGit !== (p.hasGit ?? false)) {
+            updates.push({ id: p.id, hasClaude, hasGit })
+          }
+        } catch { /* ignore */ }
+      }),
+    )
+
+    if (updates.length > 0) {
+      set((state) => ({
+        projects: state.projects.map((p) => {
+          const u = updates.find((upd) => upd.id === p.id)
+          return u ? { ...p, hasClaude: u.hasClaude, hasGit: u.hasGit } : p
+        }),
+      }))
+    }
+
+    // Also re-setup the workspace env to sync symlinks
+    await get().setupWorkspaceEnv(workspaceId)
+  },
+
   setupWorkspaceEnv: async (workspaceId: string) => {
-    const { projects } = get()
+    const { projects, workspaces } = get()
+    const workspace = workspaces.find((w) => w.id === workspaceId)
+    if (!workspace) return null
     const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
-    if (workspaceProjects.length <= 1) return null
+    if (workspaceProjects.length === 0) return null
     const paths = workspaceProjects.map((p) => p.path)
-    const result = await window.theone.workspaceEnv.setup(workspaceId, paths)
+    const result = await window.mirehub.workspaceEnv.setup(workspace.name, paths)
     return result?.envPath ?? null
   },
 
@@ -322,9 +410,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
     if (id) {
       // Auto-select the first project in this workspace
-      const { projects } = get()
+      const { projects, workspaces } = get()
+      const workspace = workspaces.find((w) => w.id === id)
       const workspaceProjects = projects.filter((p) => p.workspaceId === id)
-      if (workspaceProjects.length > 0) {
+      if (workspace && workspaceProjects.length > 0) {
         const firstProject = workspaceProjects[0]!
         set({ activeProjectId: firstProject.id })
 
@@ -332,8 +421,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         const workspaceTabs = termStore.tabs.filter((t) => t.workspaceId === id)
         if (workspaceTabs.length === 0) {
           // Auto-create split tab (Claude + Terminal) if none exist for this workspace
-          // Use workspace env for multi-project workspaces
-          getWorkspaceCwd(id, projects)
+          getWorkspaceCwd(workspace.name, workspaceProjects)
             .then((cwd) => {
               termStore.createSplitTab(id, cwd, 'Claude + Terminal', 'claude', null)
             })
@@ -349,7 +437,16 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       }
     }
   },
-  setActiveProject: (id: string | null) => set({ activeProjectId: id }),
+  setActiveProject: (id: string | null) => {
+    if (id) {
+      const { projects, activeWorkspaceId } = get()
+      const project = projects.find((p) => p.id === id)
+      if (project && project.workspaceId !== activeWorkspaceId) {
+        get().setActiveWorkspace(project.workspaceId)
+      }
+    }
+    set({ activeProjectId: id })
+  },
 
   clearPendingClaudeImport: () => set({ pendingClaudeImport: null }),
 

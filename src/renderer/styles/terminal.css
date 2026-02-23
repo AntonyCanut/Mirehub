@@ -1,6 +1,16 @@
-.terminal-container {
+/* Terminal wrapper (holds search bar + terminal + scroll button) */
+.terminal-wrapper {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.terminal-container {
+  width: 100%;
+  flex: 1;
   overflow: hidden;
 }
 
@@ -29,4 +39,86 @@
 
 .terminal-container .xterm-viewport::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Search bar */
+.terminal-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.terminal-search-input {
+  flex: 1;
+  height: 24px;
+  padding: 0 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  min-width: 0;
+}
+
+.terminal-search-input:focus {
+  border-color: var(--accent);
+}
+
+.terminal-search-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.terminal-search-btn:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.terminal-search-close:hover {
+  background: rgba(243, 139, 168, 0.2);
+  color: var(--danger);
+}
+
+/* Scroll-to-bottom floating button */
+.terminal-scroll-to-bottom {
+  position: absolute;
+  bottom: 12px;
+  right: 20px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+}
+
+.terminal-scroll-to-bottom:hover {
+  background: var(--accent);
+  color: var(--bg-tertiary);
+  border-color: var(--accent);
 }

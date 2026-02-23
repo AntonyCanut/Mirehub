@@ -1,8 +1,47 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
-.vite/
-*.log
-.DS_Store
+out/
+release/
 *.dmg
 *.app
-out/
+*.zip
+
+# Vite
+.vite/
+
+# Coverage
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS code signing
+*.provisionprofile
+embedded.provisionprofile

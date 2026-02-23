@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { AppSettings } from '../../shared/types'
+import { useI18n } from '../lib/i18n'
 
 const FONT_FAMILIES = [
   'Menlo',
@@ -18,6 +19,7 @@ const SHELLS = [
 
 const DEFAULT_SETTINGS: AppSettings = {
   theme: 'dark',
+  locale: 'fr',
   defaultShell: '/bin/zsh',
   fontSize: 13,
   fontFamily: 'Menlo',
@@ -29,51 +31,95 @@ const DEFAULT_SETTINGS: AppSettings = {
 }
 
 export function SettingsPanel() {
+  const { t, locale, setLocale } = useI18n()
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
+  const [appVersion, setAppVersion] = useState<{ version: string; name: string } | null>(null)
 
   useEffect(() => {
     setLoading(true)
-    window.theone.settings.get().then((s: AppSettings) => {
+    window.mirehub.settings.get().then((s: AppSettings) => {
       setSettings({ ...DEFAULT_SETTINGS, ...s })
+      if (s.locale) {
+        setLocale(s.locale)
+      }
       setLoading(false)
     })
-  }, [])
+    window.mirehub.app.version().then(setAppVersion)
+  }, [setLocale])
 
   const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
-    window.theone.settings.set({ [key]: value })
+    window.mirehub.settings.set({ [key]: value })
+
+    // Apply theme immediately when changed
+    if (key === 'theme') {
+      const theme = value as string
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
+      } else {
+        document.documentElement.setAttribute('data-theme', theme)
+      }
+    }
   }, [])
 
+  const handleLocaleChange = useCallback((newLocale: 'fr' | 'en') => {
+    setLocale(newLocale)
+    setSettings((prev) => ({ ...prev, locale: newLocale }))
+  }, [setLocale])
+
   if (loading) {
-    return <div className="file-viewer-empty">Chargement...</div>
+    return <div className="file-viewer-empty">{t('common.loading')}</div>
   }
 
   return (
     <div className="settings-panel">
       <div className="settings-header">
-        <h3>Preferences</h3>
+        <h3>{t('settings.title')}</h3>
       </div>
       <div className="settings-body">
+        {/* General */}
+        <div className="settings-group">
+          <h4 className="settings-group-title">{t('settings.general')}</h4>
+          <div className="settings-row">
+            <label className="settings-label">{t('settings.language')}</label>
+            <div className="settings-radio-group">
+              <button
+                className={`settings-radio-btn${locale === 'fr' ? ' settings-radio-btn--active' : ''}`}
+                onClick={() => handleLocaleChange('fr')}
+              >
+                {t('settings.french')}
+              </button>
+              <button
+                className={`settings-radio-btn${locale === 'en' ? ' settings-radio-btn--active' : ''}`}
+                onClick={() => handleLocaleChange('en')}
+              >
+                {t('settings.english')}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Apparence */}
         <div className="settings-group">
-          <h4 className="settings-group-title">Apparence</h4>
+          <h4 className="settings-group-title">{t('settings.appearance')}</h4>
           <div className="settings-row">
-            <label className="settings-label">Theme</label>
+            <label className="settings-label">{t('settings.theme')}</label>
             <div className="settings-radio-group">
-              {(['dark', 'light', 'system'] as const).map((t) => (
+              {(['dark', 'light', 'terracotta', 'system'] as const).map((th) => (
                 <button
-                  key={t}
-                  className={`settings-radio-btn${settings.theme === t ? ' settings-radio-btn--active' : ''}`}
-                  onClick={() => updateSetting('theme', t)}
+                  key={th}
+                  className={`settings-radio-btn${settings.theme === th ? ' settings-radio-btn--active' : ''}`}
+                  onClick={() => updateSetting('theme', th)}
                 >
-                  {t === 'dark' ? 'Sombre' : t === 'light' ? 'Clair' : 'Systeme'}
+                  {t(`settings.theme${th.charAt(0).toUpperCase() + th.slice(1)}`)}
                 </button>
               ))}
             </div>
           </div>
           <div className="settings-row">
-            <label className="settings-label">Taille de police</label>
+            <label className="settings-label">{t('settings.fontSize')}</label>
             <div className="settings-input-row">
               <input
                 type="range"
@@ -87,7 +133,7 @@ export function SettingsPanel() {
             </div>
           </div>
           <div className="settings-row">
-            <label className="settings-label">Famille de police</label>
+            <label className="settings-label">{t('settings.fontFamily')}</label>
             <select
               className="settings-select"
               value={settings.fontFamily}
@@ -102,9 +148,9 @@ export function SettingsPanel() {
 
         {/* Terminal */}
         <div className="settings-group">
-          <h4 className="settings-group-title">Terminal</h4>
+          <h4 className="settings-group-title">{t('settings.terminal')}</h4>
           <div className="settings-row">
-            <label className="settings-label">Shell par defaut</label>
+            <label className="settings-label">{t('settings.defaultShell')}</label>
             <select
               className="settings-select"
               value={settings.defaultShell}
@@ -116,7 +162,7 @@ export function SettingsPanel() {
             </select>
           </div>
           <div className="settings-row">
-            <label className="settings-label">Lignes de scrollback</label>
+            <label className="settings-label">{t('settings.scrollbackLines')}</label>
             <div className="settings-input-row">
               <input
                 type="number"
@@ -133,9 +179,9 @@ export function SettingsPanel() {
 
         {/* Claude */}
         <div className="settings-group">
-          <h4 className="settings-group-title">Claude</h4>
+          <h4 className="settings-group-title">{t('settings.claude')}</h4>
           <div className="settings-row">
-            <label className="settings-label">Couleur de detection</label>
+            <label className="settings-label">{t('settings.detectionColor')}</label>
             <input
               type="color"
               value={settings.claudeDetectionColor}
@@ -144,7 +190,7 @@ export function SettingsPanel() {
             />
           </div>
           <div className="settings-row">
-            <label className="settings-label">Auto-Clauder actif</label>
+            <label className="settings-label">{t('settings.autoClaude')}</label>
             <button
               className={`settings-toggle${settings.autoClauderEnabled ? ' settings-toggle--active' : ''}`}
               onClick={() => updateSetting('autoClauderEnabled', !settings.autoClauderEnabled)}
@@ -156,9 +202,9 @@ export function SettingsPanel() {
 
         {/* Notifications */}
         <div className="settings-group">
-          <h4 className="settings-group-title">Notifications</h4>
+          <h4 className="settings-group-title">{t('settings.notifications')}</h4>
           <div className="settings-row">
-            <label className="settings-label">Son de notification</label>
+            <label className="settings-label">{t('settings.sound')}</label>
             <button
               className={`settings-toggle${settings.notificationSound ? ' settings-toggle--active' : ''}`}
               onClick={() => updateSetting('notificationSound', !settings.notificationSound)}
@@ -167,13 +213,30 @@ export function SettingsPanel() {
             </button>
           </div>
           <div className="settings-row">
-            <label className="settings-label">Verifier les MAJ au lancement</label>
+            <label className="settings-label">{t('settings.checkUpdates')}</label>
             <button
               className={`settings-toggle${settings.checkUpdatesOnLaunch ? ' settings-toggle--active' : ''}`}
               onClick={() => updateSetting('checkUpdatesOnLaunch', !settings.checkUpdatesOnLaunch)}
             >
               <span className="settings-toggle-knob" />
             </button>
+          </div>
+        </div>
+
+        {/* About */}
+        <div className="settings-group">
+          <h4 className="settings-group-title">{t('settings.about')}</h4>
+          <div className="settings-row">
+            <label className="settings-label">{t('settings.appName')}</label>
+            <span className="settings-value">{appVersion?.name ?? 'Workspaces'}</span>
+          </div>
+          <div className="settings-row">
+            <label className="settings-label">{t('settings.version')}</label>
+            <span className="settings-value">{appVersion?.version ?? '—'}</span>
+          </div>
+          <div className="settings-row">
+            <label className="settings-label">{t('settings.developer')}</label>
+            <span className="settings-value">Antony KERVAZO CANUT</span>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import os from 'os'
 import { Workspace, Project, AppSettings, KanbanTask, AutoClauderTemplate, SessionData } from '../../shared/types'
 import { DEFAULT_SETTINGS } from '../../shared/constants/defaults'
 
-const DATA_DIR = path.join(os.homedir(), '.theone')
+const DATA_DIR = path.join(os.homedir(), '.mirehub')
 
 interface AppData {
   workspaces: Workspace[]
@@ -27,6 +27,19 @@ export class StorageService {
   constructor() {
     // Enforce singleton: all handlers must share the same in-memory data
     if (_instance) return _instance
+    // Auto-migrate from old data directories
+    const OLD_DIRS = [
+      path.join(os.homedir(), '.tasks'),
+      path.join(os.homedir(), '.theone'),
+    ]
+    if (!fs.existsSync(DATA_DIR)) {
+      for (const oldDir of OLD_DIRS) {
+        if (fs.existsSync(oldDir)) {
+          fs.renameSync(oldDir, DATA_DIR)
+          break
+        }
+      }
+    }
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true })
     }
@@ -110,9 +123,9 @@ export class StorageService {
   }
 
   // Kanban
-  getKanbanTasks(projectId?: string): KanbanTask[] {
-    if (projectId) {
-      return this.data.kanbanTasks.filter((t) => t.projectId === projectId)
+  getKanbanTasks(workspaceId?: string): KanbanTask[] {
+    if (workspaceId) {
+      return this.data.kanbanTasks.filter((t) => t.workspaceId === workspaceId)
     }
     return this.data.kanbanTasks
   }

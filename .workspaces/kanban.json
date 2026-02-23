@@ -4,9 +4,23 @@
     "projectId": "95ba1469-34b6-4e91-9cb1-2bc1c6db1156",
     "title": "Documentation",
     "description": "Il faudrait documenter tout le projet",
-    "status": "TODO",
+    "status": "DONE",
     "priority": "medium",
     "createdAt": 1771593289274,
-    "updatedAt": 1771593289274
+    "updatedAt": 1771609095439,
+    "agentId": "b0cf03ad-41c5-4f79-b143-413f7fde09da",
+    "result": "Documentation complete du projet : correction ARCHITECTURE.md (remplacement section SQLite par JSON StorageService, correction sandbox false, correction outils de test fictifs, mise a jour phases d'implementation), ajout docs/STORES.md (6 stores Zustand documentes avec etat/actions/interactions), ajout docs/KEYBOARD-SHORTCUTS.md (tous les raccourcis clavier), ajout docs/SECURITY.md (guide securite Electron dedie), mise a jour README.md et CONTRIBUTING.md avec references croisees vers les 8 documents. Total: 8 fichiers de documentation (ARCHITECTURE, IPC-API, COMPONENTS, STORES, KEYBOARD-SHORTCUTS, SECURITY, TESTING, CONTRIBUTING)."
+  },
+  {
+    "id": "f9050ccf-9948-43e4-8b60-dd54df5ec44c",
+    "projectId": "95ba1469-34b6-4e91-9cb1-2bc1c6db1156",
+    "title": "test",
+    "description": "ne fais rien",
+    "status": "DONE",
+    "priority": "medium",
+    "createdAt": 1771603700372,
+    "updatedAt": 1740067200000,
+    "agentId": "65284c6f-09f6-4e12-845c-94c47f324a12",
+    "result": "Rien fait, comme demandé par la description du ticket."
   }
 ]

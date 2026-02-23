@@ -2,6 +2,7 @@ import type { AppSettings } from '../types'
 
 export const DEFAULT_SETTINGS: AppSettings = {
   theme: 'dark',
+  locale: 'fr',
   defaultShell: process.env.SHELL || '/bin/zsh',
   fontSize: 14,
   fontFamily: 'Menlo, Monaco, "Courier New", monospace',

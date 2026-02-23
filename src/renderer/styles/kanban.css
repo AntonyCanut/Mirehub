@@ -56,7 +56,7 @@
 
 .kanban-add-btn:hover { opacity: 0.85; }
 
-/* Create Form */
+/* Create Form (legacy inline - kept for reference) */
 .kanban-create-form {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -66,6 +66,92 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* Create Modal */
+.kanban-create-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 600px;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.kanban-create-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.kanban-create-modal-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.kanban-create-modal-close {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kanban-create-modal-close:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.kanban-create-modal-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.kanban-create-modal-textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.kanban-create-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.kanban-create-modal-cancel {
+  height: 32px;
+  padding: 0 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kanban-create-modal-cancel:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
 }
 
 .kanban-input {
@@ -216,15 +302,22 @@
 
 .kanban-card:active { cursor: grabbing; opacity: 0.7; }
 
-/* Working card - pulsing border */
+/* Working card - prominent orange halo */
 .kanban-card--working {
   border-color: #fab387;
-  animation: kanban-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(250, 179, 135, 0.4), 0 0 20px rgba(250, 179, 135, 0.15);
+  animation: kanban-halo 2s ease-in-out infinite;
 }
 
-@keyframes kanban-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(250, 179, 135, 0.4); }
-  50% { box-shadow: 0 0 0 4px rgba(250, 179, 135, 0.1); }
+@keyframes kanban-halo {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(250, 179, 135, 0.4), 0 0 20px rgba(250, 179, 135, 0.15);
+    border-color: #fab387;
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(250, 179, 135, 0.6), 0 0 30px rgba(250, 179, 135, 0.25);
+    border-color: #f9c57a;
+  }
 }
 
 .kanban-card-header {
@@ -537,6 +630,20 @@
   font-size: 11px;
 }
 
+.kanban-detail-output {
+  padding: 8px 10px;
+  background: rgba(250, 179, 135, 0.06);
+  border: 1px solid rgba(250, 179, 135, 0.2);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  font-family: 'Menlo', monospace;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 .kanban-detail-timestamps {
   padding: 12px 16px;
   display: flex;
@@ -566,4 +673,447 @@
 .kanban-detail-delete-btn:hover {
   background: rgba(243, 139, 168, 0.1);
   border-color: var(--danger);
+}
+
+/* Send to Claude button */
+.kanban-detail-claude-btn {
+  width: 100%;
+  height: 34px;
+  background: linear-gradient(135deg, #cba6f7, #89b4fa);
+  color: #1e1e2e;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.3px;
+}
+
+.kanban-detail-claude-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 12px rgba(203, 166, 247, 0.3);
+}
+
+/* Scope tag */
+.kanban-card-scope-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.kanban-card-scope-tag--workspace {
+  background: rgba(137, 180, 250, 0.2);
+  color: #89b4fa;
+}
+
+.kanban-card-scope-tag--project {
+  background: rgba(250, 179, 135, 0.2);
+  color: #fab387;
+}
+
+/* ========= Search Input ========= */
+.kanban-search-input {
+  height: 28px;
+  width: 180px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.kanban-search-input:focus { border-color: var(--accent); }
+.kanban-search-input::placeholder { color: var(--text-muted); }
+
+/* ========= Filter Bar ========= */
+.kanban-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.kanban-filter-select {
+  height: 26px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-family: inherit;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.kanban-filter-labels {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.kanban-filter-clear {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kanban-filter-clear:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+/* ========= Label Chips ========= */
+.kanban-label-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  opacity: 0.5;
+}
+
+.kanban-label-chip--active {
+  opacity: 1;
+  border-color: currentColor;
+}
+
+.kanban-label-chip--small {
+  height: 16px;
+  padding: 0 6px;
+  font-size: 9px;
+  cursor: default;
+  opacity: 1;
+}
+
+.kanban-label-chip--bug { color: #f38ba8; background: rgba(243, 139, 168, 0.15); }
+.kanban-label-chip--feature { color: #89b4fa; background: rgba(137, 180, 250, 0.15); }
+.kanban-label-chip--refactor { color: #cba6f7; background: rgba(203, 166, 247, 0.15); }
+.kanban-label-chip--docs { color: #a6e3a1; background: rgba(166, 227, 161, 0.15); }
+.kanban-label-chip--urgent { color: #fab387; background: rgba(250, 179, 135, 0.15); }
+.kanban-label-chip--test { color: #94e2d5; background: rgba(148, 226, 213, 0.15); }
+
+/* Card labels row */
+.kanban-card-labels {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+/* Detail panel labels */
+.kanban-detail-labels {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ========= Create Form Labels Row ========= */
+.kanban-create-labels {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kanban-create-labels-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ========= Due Date ========= */
+.kanban-date-input {
+  width: 130px;
+  flex: none;
+}
+
+.kanban-card-due-badge {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.kanban-card-due-badge--overdue {
+  color: #f38ba8;
+  background: rgba(243, 139, 168, 0.15);
+}
+
+/* Overdue card */
+.kanban-card--overdue {
+  border-color: #f38ba8 !important;
+  box-shadow: 0 0 0 1px rgba(243, 139, 168, 0.3);
+}
+
+/* Detail panel date input */
+.kanban-detail-date-input {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.kanban-detail-date-input:focus { border-color: var(--accent); }
+
+.kanban-detail-overdue-warning {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #f38ba8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========= Archive Section ========= */
+.kanban-archive {
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.kanban-archive-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.kanban-archive-toggle:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.kanban-archive-arrow {
+  font-size: 8px;
+  transition: transform 0.15s ease;
+}
+
+.kanban-archive-arrow--open {
+  transform: rotate(90deg);
+}
+
+.kanban-archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.kanban-archive-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.kanban-archive-item-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.kanban-archive-restore-btn {
+  height: 22px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  background: transparent;
+  color: #a6e3a1;
+  border: 1px solid rgba(166, 227, 161, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.kanban-archive-restore-btn:hover {
+  background: rgba(166, 227, 161, 0.1);
+  border-color: #a6e3a1;
+}
+
+/* ========= Attachments ========= */
+
+/* Attach button (dashed border) */
+.kanban-attach-btn {
+  height: 28px;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kanban-attach-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+  background: var(--bg-surface);
+}
+
+/* Attachment chips in create form */
+.kanban-create-attachments {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.kanban-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #89b4fa;
+  background: rgba(137, 180, 250, 0.12);
+  border: 1px solid rgba(137, 180, 250, 0.25);
+  border-radius: 10px;
+}
+
+.kanban-attachment-chip-remove {
+  width: 14px;
+  height: 14px;
+  background: transparent;
+  border: none;
+  color: #89b4fa;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.kanban-attachment-chip-remove:hover {
+  background: rgba(243, 139, 168, 0.2);
+  color: #f38ba8;
+}
+
+/* Detail panel attachments */
+.kanban-detail-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.kanban-attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.kanban-attachment-item-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.kanban-attachment-item-name {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kanban-attachment-item-size {
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.kanban-attachment-item-remove {
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.kanban-attachment-item-remove:hover {
+  color: #f38ba8;
+  background: rgba(243, 139, 168, 0.1);
+}
+
+.kanban-detail-empty-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Card attachment badge */
+.kanban-card-attachment-badge {
+  font-size: 9px;
+  font-weight: 600;
+  color: #89b4fa;
+  background: rgba(137, 180, 250, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
 }

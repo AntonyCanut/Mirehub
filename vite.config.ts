@@ -17,8 +17,14 @@ export default defineConfig({
         vite: {
           build: {
             outDir: path.resolve(__dirname, 'dist/main'),
+            emptyOutDir: true,
             rollupOptions: {
-              external: ['electron', 'node-pty'],
+              external: ['electron', 'node-pty', 'pg', 'pg-native', 'mysql2', 'mssql', 'mongodb', 'better-sqlite3'],
+              output: {
+                // Prevent code-splitting for dynamic driver imports — avoids
+                // chunk hash mismatches between dev and production builds.
+                inlineDynamicImports: true,
+              },
             },
           },
         },

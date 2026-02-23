@@ -11,7 +11,15 @@ import { registerFilesystemHandlers } from './ipc/filesystem'
 import { registerGitHandlers } from './ipc/git'
 import { registerSessionHandlers } from './ipc/session'
 import { registerWorkspaceEnvHandlers } from './ipc/workspaceEnv'
+import { registerClaudeDefaultsHandlers } from './ipc/claudeDefaults'
+import { registerApiHandlers } from './ipc/api'
+import { registerDatabaseHandlers } from './ipc/database'
 import { cleanupTerminals } from './ipc/terminal'
+import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
+import { databaseService } from './services/database'
+
+// Set the app name for macOS menu bar (overrides default "Electron" in dev mode)
+app.name = 'Mirehub'
 
 // vite-plugin-electron sets VITE_DEV_SERVER_URL in dev mode
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -72,6 +80,13 @@ app.whenReady().then(() => {
   registerGitHandlers(ipcMain)
   registerSessionHandlers(ipcMain)
   registerWorkspaceEnvHandlers(ipcMain)
+  registerClaudeDefaultsHandlers(ipcMain)
+  registerApiHandlers(ipcMain)
+  registerDatabaseHandlers(ipcMain)
+
+  // Ensure activity hook script exists and start watching
+  ensureActivityHookScript()
+  startActivityWatcher()
 
   // DevTools shortcut: Cmd+Alt+I
   globalShortcut.register('CommandOrControl+Alt+I', () => {
@@ -94,6 +109,7 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   cleanupTerminals()
   cleanupClaudeSessions()
+  databaseService.disconnectAll()
 })
 
 // Security: prevent new window creation

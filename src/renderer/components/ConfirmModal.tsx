@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react'
+import { useI18n } from '../lib/i18n'
 
 interface ConfirmModalProps {
   title: string
@@ -13,12 +14,15 @@ interface ConfirmModalProps {
 export function ConfirmModal({
   title,
   message,
-  confirmLabel = 'Confirmer',
-  cancelLabel = 'Annuler',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   danger = false,
 }: ConfirmModalProps) {
+  const { t } = useI18n()
+  const resolvedConfirmLabel = confirmLabel ?? t('common.confirm')
+  const resolvedCancelLabel = cancelLabel ?? t('common.cancel')
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -41,13 +45,13 @@ export function ConfirmModal({
         <div className="modal-body">{message}</div>
         <div className="modal-footer">
           <button className="modal-btn modal-btn--secondary" onClick={onCancel}>
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             className={`modal-btn ${danger ? 'modal-btn--danger' : 'modal-btn--primary'}`}
             onClick={onConfirm}
           >
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>

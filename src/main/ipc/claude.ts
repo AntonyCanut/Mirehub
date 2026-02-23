@@ -20,12 +20,15 @@ function notifySessionEnd(session: ClaudeSession, status: 'completed' | 'failed'
   })
   notification.show()
 
-  const windows = BrowserWindow.getAllWindows()
-  for (const win of windows) {
-    win.webContents.send(IPC_CHANNELS.CLAUDE_SESSION_END, {
-      id: session.id,
-      status,
-    })
+  for (const win of BrowserWindow.getAllWindows()) {
+    try {
+      if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+        win.webContents.send(IPC_CHANNELS.CLAUDE_SESSION_END, {
+          id: session.id,
+          status,
+        })
+      }
+    } catch { /* render frame disposed */ }
   }
 }
 
@@ -46,22 +49,28 @@ function startClaudeProcess(managed: ManagedClaudeSession, projectPath: string):
 
   // Forward stdout to renderer via terminal
   proc.stdout?.on('data', (data: Buffer) => {
-    const windows = BrowserWindow.getAllWindows()
-    for (const win of windows) {
-      win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, {
-        id: managed.session.terminalId,
-        data: data.toString(),
-      })
+    for (const win of BrowserWindow.getAllWindows()) {
+      try {
+        if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+          win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, {
+            id: managed.session.terminalId,
+            data: data.toString(),
+          })
+        }
+      } catch { /* render frame disposed */ }
     }
   })
 
   proc.stderr?.on('data', (data: Buffer) => {
-    const windows = BrowserWindow.getAllWindows()
-    for (const win of windows) {
-      win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, {
-        id: managed.session.terminalId,
-        data: data.toString(),
-      })
+    for (const win of BrowserWindow.getAllWindows()) {
+      try {
+        if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+          win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, {
+            id: managed.session.terminalId,
+            data: data.toString(),
+          })
+        }
+      } catch { /* render frame disposed */ }
     }
   })
 

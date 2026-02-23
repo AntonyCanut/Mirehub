@@ -70,22 +70,21 @@ const BUILT_IN_TEMPLATES: Template[] = [
 ]
 
 export function AutoClauder() {
-  const { projects, activeProjectId } = useWorkspaceStore()
+  const { projects } = useWorkspaceStore()
   const [selectedTemplate, setSelectedTemplate] = useState('default')
   const [showPreview, setShowPreview] = useState(false)
   const [applying, setApplying] = useState(false)
 
-  const activeProject = projects.find((p) => p.id === activeProjectId)
   const nonClaudeProjects = projects.filter((p) => !p.hasClaude)
 
   const template = BUILT_IN_TEMPLATES.find((t) => t.id === selectedTemplate) || BUILT_IN_TEMPLATES[0]
 
   const handleApply = useCallback(
-    async (projectId: string) => {
+    async (_projectId: string) => {
       if (!template) return
       setApplying(true)
       try {
-        await window.theone.settings.set({
+        await window.mirehub.settings.set({
           autoClauderEnabled: true,
           defaultAutoClauderTemplateId: template.id,
         })

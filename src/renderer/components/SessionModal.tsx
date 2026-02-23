@@ -1,5 +1,6 @@
 import React from 'react'
 import type { SessionData } from '../../shared/types'
+import { useI18n } from '../lib/i18n'
 
 interface SessionModalProps {
   session: SessionData
@@ -9,15 +10,16 @@ interface SessionModalProps {
 }
 
 export function SessionModal({ session, onResume, onClear, onDismiss }: SessionModalProps) {
+  const { t } = useI18n()
   const savedDate = new Date(session.savedAt)
-  const timeAgo = formatTimeAgo(savedDate)
+  const timeAgo = formatTimeAgo(savedDate, t)
   const tabCount = session.tabs.length
 
   return (
     <div className="session-modal-overlay" onClick={onDismiss}>
       <div className="session-modal" onClick={(e) => e.stopPropagation()}>
         <div className="session-modal-header">
-          <h3>Session precedente</h3>
+          <h3>{t('session.previousSession')}</h3>
           <button className="session-modal-close" onClick={onDismiss}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -26,11 +28,11 @@ export function SessionModal({ session, onResume, onClear, onDismiss }: SessionM
         </div>
         <div className="session-modal-body">
           <p className="session-modal-info">
-            Une session a ete sauvegardee {timeAgo}.
+            {t('session.savedAgo', { timeAgo })}
           </p>
           <div className="session-modal-details">
             <div className="session-modal-detail">
-              <span className="session-modal-detail-label">Onglets</span>
+              <span className="session-modal-detail-label">{t('session.tabs')}</span>
               <span className="session-modal-detail-value">{tabCount}</span>
             </div>
             {session.tabs.map((tab, i) => (
@@ -48,13 +50,13 @@ export function SessionModal({ session, onResume, onClear, onDismiss }: SessionM
         </div>
         <div className="session-modal-actions">
           <button className="session-modal-btn session-modal-btn--resume" onClick={onResume}>
-            Reprendre
+            {t('session.resume')}
           </button>
           <button className="session-modal-btn session-modal-btn--clear" onClick={onClear}>
-            Effacer
+            {t('session.clear')}
           </button>
           <button className="session-modal-btn session-modal-btn--dismiss" onClick={onDismiss}>
-            Plus tard
+            {t('session.later')}
           </button>
         </div>
       </div>
@@ -62,16 +64,16 @@ export function SessionModal({ session, onResume, onClear, onDismiss }: SessionM
   )
 }
 
-function formatTimeAgo(date: Date): string {
+function formatTimeAgo(date: Date, t: (key: string, params?: Record<string, string | number>) => string): string {
   const now = Date.now()
   const diff = now - date.getTime()
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
 
-  if (minutes < 1) return "a l'instant"
-  if (minutes < 60) return `il y a ${minutes} min`
-  if (hours < 24) return `il y a ${hours}h`
-  if (days === 1) return 'hier'
-  return `il y a ${days} jours`
+  if (minutes < 1) return t('time.justNow')
+  if (minutes < 60) return t('time.minutesAgo', { minutes })
+  if (hours < 24) return t('time.hoursAgo', { hours })
+  if (days === 1) return t('time.yesterday')
+  return t('time.daysAgo', { days })
 }

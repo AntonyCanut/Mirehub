@@ -1,36 +1,115 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useKanbanStore } from '../lib/stores/kanbanStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
-import type { KanbanStatus, KanbanTask } from '../../shared/types/index'
+import { useI18n } from '../lib/i18n'
+import { ContextMenu } from './ContextMenu'
+import type { ContextMenuItem } from './ContextMenu'
+import type { KanbanStatus, KanbanTask, PromptTemplate } from '../../shared/types/index'
 import '../styles/kanban.css'
 
-const COLUMNS: { status: KanbanStatus; label: string; color: string }[] = [
-  { status: 'TODO', label: 'A faire', color: '#89b4fa' },
-  { status: 'WORKING', label: 'En cours', color: '#fab387' },
-  { status: 'PENDING', label: 'En attente', color: '#f9e2af' },
-  { status: 'DONE', label: 'Termine', color: '#a6e3a1' },
-  { status: 'FAILED', label: 'Echoue', color: '#f38ba8' },
+const COLUMNS: { status: KanbanStatus; labelKey: string; color: string }[] = [
+  { status: 'TODO', labelKey: 'kanban.todo', color: '#89b4fa' },
+  { status: 'WORKING', labelKey: 'kanban.working', color: '#fab387' },
+  { status: 'PENDING', labelKey: 'kanban.pending', color: '#f9e2af' },
+  { status: 'DONE', labelKey: 'kanban.done', color: '#a6e3a1' },
+  { status: 'FAILED', labelKey: 'kanban.failed', color: '#f38ba8' },
 ]
+
+// Columns displayed in the main board (DONE is handled via archive)
+const ACTIVE_COLUMNS = COLUMNS.filter((c) => c.status !== 'DONE')
 
 const PRIORITIES = ['low', 'medium', 'high', 'critical'] as const
 
+const LABEL_DEFS: Record<string, string> = {
+  bug: '#f38ba8',
+  feature: '#89b4fa',
+  refactor: '#cba6f7',
+  docs: '#a6e3a1',
+  urgent: '#fab387',
+  test: '#94e2d5',
+}
+
+const ALL_LABELS = Object.keys(LABEL_DEFS)
+
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
+
 export function KanbanBoard() {
-  const { activeProjectId, projects } = useWorkspaceStore()
-  const { tasks, loadTasks, createTask, updateTaskStatus, updateTask, deleteTask, draggedTaskId, setDragged } =
-    useKanbanStore()
+  const { t } = useI18n()
+  const { activeWorkspaceId, projects } = useWorkspaceStore()
+  const {
+    tasks,
+    loadTasks,
+    syncTasksFromFile,
+    createTask,
+    updateTaskStatus,
+    updateTask,
+    deleteTask,
+    duplicateTask,
+    draggedTaskId,
+    setDragged,
+    sendToClaude,
+    attachFiles,
+    removeAttachment,
+  } = useKanbanStore()
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [newPriority, setNewPriority] = useState<(typeof PRIORITIES)[number]>('medium')
+  const [newTargetProjectId, setNewTargetProjectId] = useState('')
+  const [newLabels, setNewLabels] = useState<string[]>([])
+  const [newDueDate, setNewDueDate] = useState('')
+  const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
+  const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([])
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null)
 
-  const activeProject = projects.find((p) => p.id === activeProjectId)
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; task: KanbanTask } | null>(null)
+
+  // Filter & search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterPriority, setFilterPriority] = useState<string>('all')
+  const [filterLabels, setFilterLabels] = useState<string[]>([])
+  const [filterScope, setFilterScope] = useState<string>('all')
+
+  // Archive state
+  const [archiveExpanded, setArchiveExpanded] = useState(false)
+
+  const workspaceProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
 
   useEffect(() => {
-    if (activeProjectId && activeProject) {
-      loadTasks(activeProjectId, activeProject.path)
+    if (activeWorkspaceId) {
+      loadTasks(activeWorkspaceId)
     }
-  }, [activeProjectId, activeProject?.path, loadTasks])
+  }, [activeWorkspaceId, loadTasks])
+
+  // Periodic sync: re-read kanban.json while WORKING tasks exist (catches hook/Claude changes)
+  const hasWorkingTasks = tasks.some((t) => t.status === 'WORKING')
+  useEffect(() => {
+    if (!hasWorkingTasks) return
+    const interval = setInterval(() => syncTasksFromFile(), 5000)
+    return () => clearInterval(interval)
+  }, [hasWorkingTasks, syncTasksFromFile])
+
+  // Load prompt templates when create form opens
+  useEffect(() => {
+    if (showCreateForm) {
+      window.mirehub.prompts.list().then(setPromptTemplates).catch(() => {})
+    }
+  }, [showCreateForm])
+
+  // Listen for prefill events from PromptTemplates
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { title: string; description: string }
+      if (detail) {
+        setNewTitle(detail.title)
+        setNewDesc(detail.description)
+        setShowCreateForm(true)
+      }
+    }
+    window.addEventListener('kanban:prefill', handler)
+    return () => window.removeEventListener('kanban:prefill', handler)
+  }, [])
 
   // Sync selectedTask with store
   useEffect(() => {
@@ -41,14 +120,98 @@ export function KanbanBoard() {
     }
   }, [tasks, selectedTask?.id])
 
+  // Filtered tasks
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((t) => {
+      // Search filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase()
+        if (!t.title.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) {
+          return false
+        }
+      }
+      // Priority filter
+      if (filterPriority !== 'all' && t.priority !== filterPriority) return false
+      // Label filter
+      if (filterLabels.length > 0) {
+        if (!t.labels || !filterLabels.some((l) => t.labels!.includes(l))) return false
+      }
+      // Scope filter
+      if (filterScope === 'workspace' && t.targetProjectId) return false
+      if (filterScope !== 'all' && filterScope !== 'workspace' && t.targetProjectId !== filterScope) return false
+      return true
+    })
+  }, [tasks, searchQuery, filterPriority, filterLabels, filterScope])
+
+  // Split DONE tasks into active vs archived
+  const now = Date.now()
+  const doneTasks = useMemo(() => filteredTasks.filter((t) => t.status === 'DONE'), [filteredTasks])
+  const recentDoneTasks = useMemo(
+    () => doneTasks.filter((t) => now - t.updatedAt < TWENTY_FOUR_HOURS),
+    [doneTasks, now],
+  )
+  const archivedTasks = useMemo(
+    () => doneTasks.filter((t) => now - t.updatedAt >= TWENTY_FOUR_HOURS),
+    [doneTasks, now],
+  )
+
+  // Sort tasks within a column: overdue first, then by due date, then by creation
+  const sortTasks = useCallback((taskList: KanbanTask[]): KanbanTask[] => {
+    return [...taskList].sort((a, b) => {
+      const aOverdue = a.dueDate && a.dueDate < Date.now() ? 1 : 0
+      const bOverdue = b.dueDate && b.dueDate < Date.now() ? 1 : 0
+      if (aOverdue !== bOverdue) return bOverdue - aOverdue // overdue first
+      if (a.dueDate && b.dueDate) return a.dueDate - b.dueDate
+      if (a.dueDate) return -1
+      if (b.dueDate) return 1
+      return a.createdAt - b.createdAt
+    })
+  }, [])
+
+  const handleSelectPendingFiles = useCallback(async () => {
+    const files = await window.mirehub.kanban.selectFiles()
+    if (files && files.length > 0) {
+      setPendingAttachments((prev) => [...prev, ...files])
+    }
+  }, [])
+
   const handleCreate = useCallback(async () => {
-    if (!activeProjectId || !activeProject || !newTitle.trim()) return
-    await createTask(activeProjectId, activeProject.path, newTitle.trim(), newDesc.trim(), newPriority)
+    if (!activeWorkspaceId || !newTitle.trim()) return
+    await createTask(
+      activeWorkspaceId,
+      newTitle.trim(),
+      newDesc.trim(),
+      newPriority,
+      newTargetProjectId || undefined,
+    )
+    // Update labels and due date on the newly created task
+    const createdTasks = useKanbanStore.getState().tasks
+    const newest = createdTasks[createdTasks.length - 1]
+    if (newest && (newLabels.length > 0 || newDueDate)) {
+      const extra: Partial<KanbanTask> = {}
+      if (newLabels.length > 0) extra.labels = newLabels
+      if (newDueDate) extra.dueDate = new Date(newDueDate).getTime()
+      await updateTask(newest.id, extra)
+    }
+    // Attach pending files
+    if (newest && pendingAttachments.length > 0) {
+      for (const filePath of pendingAttachments) {
+        try {
+          await window.mirehub.kanban.attachFile(newest.id, activeWorkspaceId, filePath)
+        } catch { /* best-effort */ }
+      }
+      // Reload tasks to get updated attachments
+      await loadTasks(activeWorkspaceId)
+    }
     setNewTitle('')
     setNewDesc('')
     setNewPriority('medium')
+    setNewTargetProjectId('')
+    setNewLabels([])
+    setNewDueDate('')
+    setPendingAttachments([])
     setShowCreateForm(false)
-  }, [activeProjectId, newTitle, newDesc, newPriority, createTask])
+  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newDueDate, pendingAttachments, createTask, updateTask, loadTasks])
 
   const handleDragStart = useCallback(
     (taskId: string) => {
@@ -71,67 +234,251 @@ export function KanbanBoard() {
     [draggedTaskId, updateTaskStatus, setDragged],
   )
 
-  if (!activeProjectId) {
+  const handleSendToClaude = useCallback((task: KanbanTask) => {
+    sendToClaude(task)
+  }, [sendToClaude])
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, task: KanbanTask) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setContextMenu({ x: e.clientX, y: e.clientY, task })
+  }, [])
+
+  const getContextMenuItems = useCallback((task: KanbanTask): ContextMenuItem[] => {
+    const statusItems: ContextMenuItem[] = COLUMNS.filter((c) => c.status !== task.status).map((col) => ({
+      label: t(col.labelKey),
+      action: () => updateTaskStatus(task.id, col.status),
+    }))
+
+    return [
+      { label: t('kanban.duplicateTask'), action: () => duplicateTask(task), separator: false },
+      { label: '', action: () => {}, separator: true },
+      ...statusItems,
+      { label: '', action: () => {}, separator: true },
+      { label: t('kanban.sendToClaude'), action: () => handleSendToClaude(task) },
+    ]
+  }, [t, updateTaskStatus, duplicateTask, handleSendToClaude])
+
+  const handleRestoreFromArchive = useCallback((task: KanbanTask) => {
+    updateTaskStatus(task.id, 'TODO')
+  }, [updateTaskStatus])
+
+  const toggleFilterLabel = useCallback((label: string) => {
+    setFilterLabels((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+    )
+  }, [])
+
+  const hasActiveFilters = filterPriority !== 'all' || filterLabels.length > 0 || filterScope !== 'all' || searchQuery !== ''
+
+  if (!activeWorkspaceId) {
     return (
       <div className="kanban-empty">
-        Selectionnez un projet pour voir le Kanban.
+        {t('kanban.selectWorkspace')}
       </div>
     )
   }
 
-  const getTasksByStatus = (status: KanbanStatus): KanbanTask[] =>
-    tasks.filter((t) => t.status === status)
+  const getTasksByStatus = (status: KanbanStatus): KanbanTask[] => {
+    if (status === 'DONE') return sortTasks(recentDoneTasks)
+    return sortTasks(filteredTasks.filter((t) => t.status === status))
+  }
 
   return (
     <div className="kanban">
       <div className="kanban-header">
-        <h2>Kanban</h2>
+        <h2>{t('kanban.title')}</h2>
         <div className="kanban-header-actions">
-          <span className="kanban-task-count">{tasks.length} taches</span>
+          {/* Search */}
+          <input
+            className="kanban-search-input"
+            type="text"
+            placeholder={t('common.search')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <span className="kanban-task-count">{t('kanban.taskCount', { count: String(filteredTasks.length) })}</span>
           <button className="kanban-add-btn" onClick={() => setShowCreateForm(!showCreateForm)}>
-            + Nouvelle tache
+            {t('kanban.newTask')}
           </button>
         </div>
       </div>
 
-      {showCreateForm && (
-        <div className="kanban-create-form">
-          <input
-            className="kanban-input"
-            placeholder="Titre de la tache..."
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            autoFocus
-          />
-          <textarea
-            className="kanban-textarea"
-            placeholder="Description..."
-            value={newDesc}
-            onChange={(e) => setNewDesc(e.target.value)}
-            rows={2}
-          />
-          <div className="kanban-create-row">
-            <select
-              className="kanban-select"
-              value={newPriority}
-              onChange={(e) => setNewPriority(e.target.value as typeof newPriority)}
+      {/* Filter bar */}
+      <div className="kanban-filter-bar">
+        <select
+          className="kanban-filter-select"
+          value={filterPriority}
+          onChange={(e) => setFilterPriority(e.target.value)}
+        >
+          <option value="all">{t('kanban.allPriorities')}</option>
+          <option value="low">{t('kanban.low')}</option>
+          <option value="medium">{t('kanban.medium')}</option>
+          <option value="high">{t('kanban.high')}</option>
+          <option value="critical">{t('kanban.critical')}</option>
+        </select>
+
+        <div className="kanban-filter-labels">
+          {ALL_LABELS.map((label) => (
+            <button
+              key={label}
+              className={`kanban-label-chip kanban-label-chip--${label}${filterLabels.includes(label) ? ' kanban-label-chip--active' : ''}`}
+              onClick={() => toggleFilterLabel(label)}
             >
-              <option value="low">Basse</option>
-              <option value="medium">Moyenne</option>
-              <option value="high">Haute</option>
-              <option value="critical">Critique</option>
-            </select>
-            <button className="kanban-submit-btn" onClick={handleCreate}>
-              Creer
+              {label}
             </button>
+          ))}
+        </div>
+
+        <select
+          className="kanban-filter-select"
+          value={filterScope}
+          onChange={(e) => setFilterScope(e.target.value)}
+        >
+          <option value="all">{t('kanban.allScopes')}</option>
+          <option value="workspace">{t('kanban.workspaceOnly')}</option>
+          {workspaceProjects.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+
+        {hasActiveFilters && (
+          <button
+            className="kanban-filter-clear"
+            onClick={() => {
+              setFilterPriority('all')
+              setFilterLabels([])
+              setFilterScope('all')
+              setSearchQuery('')
+            }}
+          >
+            {t('kanban.clearFilters')}
+          </button>
+        )}
+      </div>
+
+      {showCreateForm && (
+        <div className="modal-overlay" onClick={() => setShowCreateForm(false)}>
+          <div className="kanban-create-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="kanban-create-modal-header">
+              <h3>{t('kanban.newTaskTitle')}</h3>
+              <button className="kanban-create-modal-close" onClick={() => setShowCreateForm(false)}>&times;</button>
+            </div>
+            <div className="kanban-create-modal-body">
+              <input
+                className="kanban-input"
+                placeholder={t('kanban.taskTitlePlaceholder')}
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                autoFocus
+              />
+              <textarea
+                className="kanban-textarea kanban-create-modal-textarea"
+                placeholder={t('kanban.descriptionPlaceholder')}
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                rows={6}
+              />
+              <div className="kanban-create-row">
+                <select
+                  className="kanban-select"
+                  value={newPriority}
+                  onChange={(e) => setNewPriority(e.target.value as typeof newPriority)}
+                >
+                  <option value="low">{t('kanban.low')}</option>
+                  <option value="medium">{t('kanban.medium')}</option>
+                  <option value="high">{t('kanban.high')}</option>
+                  <option value="critical">{t('kanban.critical')}</option>
+                </select>
+                <select
+                  className="kanban-select"
+                  value={newTargetProjectId}
+                  onChange={(e) => setNewTargetProjectId(e.target.value)}
+                >
+                  <option value="">{t('kanban.entireWorkspace')}</option>
+                  {workspaceProjects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <input
+                  className="kanban-input kanban-date-input"
+                  type="date"
+                  value={newDueDate}
+                  onChange={(e) => setNewDueDate(e.target.value)}
+                  title={t('kanban.dueDate')}
+                />
+              </div>
+              {promptTemplates.length > 0 && (
+                <select
+                  className="kanban-select"
+                  value=""
+                  onChange={(e) => {
+                    const tpl = promptTemplates.find((t) => t.id === e.target.value)
+                    if (tpl) setNewDesc(tpl.content)
+                  }}
+                  title={t('kanban.useTemplate')}
+                >
+                  <option value="">{t('kanban.applyTemplate')}</option>
+                  {promptTemplates.map((tpl) => (
+                    <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
+                  ))}
+                </select>
+              )}
+              <div className="kanban-create-labels">
+                <span className="kanban-create-labels-title">{t('kanban.labels')} :</span>
+                {ALL_LABELS.map((label) => (
+                  <button
+                    key={label}
+                    className={`kanban-label-chip kanban-label-chip--${label}${newLabels.includes(label) ? ' kanban-label-chip--active' : ''}`}
+                    onClick={() =>
+                      setNewLabels((prev) =>
+                        prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+                      )
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button
+                className="kanban-attach-btn"
+                onClick={handleSelectPendingFiles}
+                title={t('kanban.attachFiles')}
+              >
+                + {t('kanban.attachFiles')}{pendingAttachments.length > 0 ? ` (${pendingAttachments.length})` : ''}
+              </button>
+              {pendingAttachments.length > 0 && (
+                <div className="kanban-create-attachments">
+                  {pendingAttachments.map((fp, i) => (
+                    <span key={`${fp}-${i}`} className="kanban-attachment-chip">
+                      {fp.split('/').pop()}
+                      <button
+                        className="kanban-attachment-chip-remove"
+                        onClick={() => setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))}
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="kanban-create-modal-actions">
+              <button className="kanban-create-modal-cancel" onClick={() => setShowCreateForm(false)}>
+                {t('common.cancel')}
+              </button>
+              <button className="kanban-submit-btn" onClick={handleCreate}>
+                {t('common.create')}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       <div className="kanban-main">
         <div className="kanban-columns">
-          {COLUMNS.map((col) => (
+          {ACTIVE_COLUMNS.map((col) => (
             <div
               key={col.status}
               className="kanban-column"
@@ -140,7 +487,7 @@ export function KanbanBoard() {
             >
               <div className="kanban-column-header" style={{ borderColor: col.color }}>
                 <span className="kanban-column-dot" style={{ backgroundColor: col.color }} />
-                <span className="kanban-column-title">{col.label}</span>
+                <span className="kanban-column-title">{t(col.labelKey)}</span>
                 <span className="kanban-column-count">{getTasksByStatus(col.status).length}</span>
               </div>
               <div className="kanban-column-body">
@@ -152,11 +499,69 @@ export function KanbanBoard() {
                     onDragStart={() => handleDragStart(task.id)}
                     onClick={() => setSelectedTask(task)}
                     onDelete={() => deleteTask(task.id)}
+                    onContextMenu={(e) => handleContextMenu(e, task)}
+                    projects={workspaceProjects}
                   />
                 ))}
               </div>
             </div>
           ))}
+
+          {/* DONE column: recent done + archive */}
+          <div
+            className="kanban-column"
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop('DONE')}
+          >
+            <div className="kanban-column-header" style={{ borderColor: '#a6e3a1' }}>
+              <span className="kanban-column-dot" style={{ backgroundColor: '#a6e3a1' }} />
+              <span className="kanban-column-title">{t('kanban.done')}</span>
+              <span className="kanban-column-count">{doneTasks.length}</span>
+            </div>
+            <div className="kanban-column-body">
+              {recentDoneTasks.map((task) => (
+                <KanbanCard
+                  key={task.id}
+                  task={task}
+                  isSelected={selectedTask?.id === task.id}
+                  onDragStart={() => handleDragStart(task.id)}
+                  onClick={() => setSelectedTask(task)}
+                  onDelete={() => deleteTask(task.id)}
+                  onContextMenu={(e) => handleContextMenu(e, task)}
+                  projects={workspaceProjects}
+                />
+              ))}
+
+              {/* Archive section */}
+              {archivedTasks.length > 0 && (
+                <div className="kanban-archive">
+                  <button
+                    className="kanban-archive-toggle"
+                    onClick={() => setArchiveExpanded(!archiveExpanded)}
+                  >
+                    <span className={`kanban-archive-arrow${archiveExpanded ? ' kanban-archive-arrow--open' : ''}`}>&#9654;</span>
+                    {t('kanban.archives', { count: String(archivedTasks.length) })}
+                  </button>
+                  {archiveExpanded && (
+                    <div className="kanban-archive-list">
+                      {archivedTasks.map((task) => (
+                        <div key={task.id} className="kanban-archive-item">
+                          <span className="kanban-archive-item-title">{task.title}</span>
+                          <button
+                            className="kanban-archive-restore-btn"
+                            onClick={() => handleRestoreFromArchive(task)}
+                            title={t('kanban.restoreToTodo')}
+                          >
+                            {t('common.restore')}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Detail panel */}
@@ -167,9 +572,23 @@ export function KanbanBoard() {
             onUpdate={(data) => updateTask(selectedTask.id, data)}
             onDelete={() => { deleteTask(selectedTask.id); setSelectedTask(null) }}
             onStatusChange={(status) => updateTaskStatus(selectedTask.id, status)}
+            onSendToClaude={() => handleSendToClaude(selectedTask)}
+            onAttachFiles={() => attachFiles(selectedTask.id)}
+            onRemoveAttachment={(attachmentId) => removeAttachment(selectedTask.id, attachmentId)}
+            projects={workspaceProjects}
           />
         )}
       </div>
+
+      {/* Context menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={getContextMenuItems(contextMenu.task)}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   )
 }
@@ -182,13 +601,18 @@ function KanbanCard({
   onDragStart,
   onClick,
   onDelete,
+  onContextMenu,
+  projects,
 }: {
   task: KanbanTask
   isSelected: boolean
   onDragStart: () => void
   onClick: () => void
   onDelete: () => void
+  onContextMenu: (e: React.MouseEvent) => void
+  projects: Array<{ id: string; name: string }>
 }) {
+  const { t } = useI18n()
   const priorityColors: Record<string, string> = {
     low: '#6c7086',
     medium: '#89b4fa',
@@ -197,13 +621,16 @@ function KanbanCard({
   }
 
   const isWorking = task.status === 'WORKING'
+  const isOverdue = task.dueDate != null && task.dueDate < Date.now() && task.status !== 'DONE'
+  const targetProject = task.targetProjectId ? projects.find((p) => p.id === task.targetProjectId) : null
 
   return (
     <div
-      className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}`}
+      className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${isOverdue ? ' kanban-card--overdue' : ''}`}
       draggable
       onDragStart={onDragStart}
       onClick={onClick}
+      onContextMenu={onContextMenu}
     >
       <div className="kanban-card-header">
         <span
@@ -214,7 +641,7 @@ function KanbanCard({
         <button
           className="kanban-card-delete"
           onClick={(e) => { e.stopPropagation(); onDelete() }}
-          title="Supprimer"
+          title={t('common.delete')}
         >
           &times;
         </button>
@@ -222,19 +649,45 @@ function KanbanCard({
       {task.description && (
         <p className="kanban-card-desc">{task.description}</p>
       )}
+      {/* Labels */}
+      {task.labels && task.labels.length > 0 && (
+        <div className="kanban-card-labels">
+          {task.labels.map((label) => (
+            <span
+              key={label}
+              className={`kanban-label-chip kanban-label-chip--${label} kanban-label-chip--small`}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="kanban-card-footer">
-        {isWorking && task.agentId && (
+        {isWorking && (
           <span className="kanban-card-ai-badge">
             <span className="kanban-card-ai-dot" />
-            IA en cours
+            {t('kanban.aiInProgress')}
           </span>
         )}
         {task.result && (
-          <span className="kanban-card-result-badge">Resultat disponible</span>
+          <span className="kanban-card-result-badge">{t('kanban.resultAvailable')}</span>
         )}
         {task.question && (
-          <span className="kanban-card-question-badge">Question en attente</span>
+          <span className="kanban-card-question-badge">{t('kanban.questionPending')}</span>
         )}
+        {task.dueDate != null && (
+          <span className={`kanban-card-due-badge${isOverdue ? ' kanban-card-due-badge--overdue' : ''}`}>
+            {new Date(task.dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+          </span>
+        )}
+        {task.attachments && task.attachments.length > 0 && (
+          <span className="kanban-card-attachment-badge">
+            {t('kanban.filesCount', { count: String(task.attachments.length) })}
+          </span>
+        )}
+        <span className={`kanban-card-scope-tag kanban-card-scope-tag--${targetProject ? 'project' : 'workspace'}`}>
+          {targetProject ? targetProject.name : 'Workspace'}
+        </span>
       </div>
     </div>
   )
@@ -248,13 +701,22 @@ function TaskDetailPanel({
   onUpdate,
   onDelete,
   onStatusChange,
+  onSendToClaude,
+  onAttachFiles,
+  onRemoveAttachment,
+  projects,
 }: {
   task: KanbanTask
   onClose: () => void
   onUpdate: (data: Partial<KanbanTask>) => void
   onDelete: () => void
   onStatusChange: (status: KanbanStatus) => void
+  onSendToClaude: () => void
+  onAttachFiles: () => void
+  onRemoveAttachment: (attachmentId: string) => void
+  projects: Array<{ id: string; name: string }>
 }) {
+  const { t } = useI18n()
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleValue, setTitleValue] = useState(task.title)
   const [editingDesc, setEditingDesc] = useState(false)
@@ -303,13 +765,30 @@ function TaskDetailPanel({
   }
 
   const priorityLabels: Record<string, string> = {
-    low: 'Basse',
-    medium: 'Moyenne',
-    high: 'Haute',
-    critical: 'Critique',
+    low: t('kanban.low'),
+    medium: t('kanban.medium'),
+    high: t('kanban.high'),
+    critical: t('kanban.critical'),
   }
 
   const statusColumn = COLUMNS.find((c) => c.status === task.status)
+  const taskLabels = task.labels || []
+
+  const toggleLabel = useCallback((label: string) => {
+    const updated = taskLabels.includes(label)
+      ? taskLabels.filter((l) => l !== label)
+      : [...taskLabels, label]
+    onUpdate({ labels: updated })
+  }, [taskLabels, onUpdate])
+
+  const handleDueDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    onUpdate({ dueDate: value ? new Date(value).getTime() : undefined })
+  }, [onUpdate])
+
+  const dueDateValue = task.dueDate
+    ? new Date(task.dueDate).toISOString().split('T')[0]
+    : ''
 
   return (
     <div className="kanban-detail">
@@ -339,10 +818,10 @@ function TaskDetailPanel({
         )}
       </div>
 
-      {/* Status & Priority */}
+      {/* Status & Priority & Scope */}
       <div className="kanban-detail-meta">
         <div className="kanban-detail-meta-item">
-          <span className="kanban-detail-meta-label">Statut</span>
+          <span className="kanban-detail-meta-label">{t('kanban.status')}</span>
           <select
             className="kanban-detail-select"
             value={task.status}
@@ -350,12 +829,12 @@ function TaskDetailPanel({
             style={{ borderColor: statusColumn?.color }}
           >
             {COLUMNS.map((col) => (
-              <option key={col.status} value={col.status}>{col.label}</option>
+              <option key={col.status} value={col.status}>{t(col.labelKey)}</option>
             ))}
           </select>
         </div>
         <div className="kanban-detail-meta-item">
-          <span className="kanban-detail-meta-label">Priorite</span>
+          <span className="kanban-detail-meta-label">{t('kanban.priority')}</span>
           <select
             className="kanban-detail-select"
             value={task.priority}
@@ -367,11 +846,86 @@ function TaskDetailPanel({
             ))}
           </select>
         </div>
+        <div className="kanban-detail-meta-item">
+          <span className="kanban-detail-meta-label">{t('kanban.scope')}</span>
+          <select
+            className="kanban-detail-select"
+            value={task.targetProjectId || ''}
+            onChange={(e) => onUpdate({ targetProjectId: e.target.value || undefined })}
+          >
+            <option value="">{t('kanban.entireWorkspace')}</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Due date */}
+      <div className="kanban-detail-section">
+        <span className="kanban-detail-section-title">{t('kanban.dueDate')}</span>
+        <input
+          className="kanban-detail-date-input"
+          type="date"
+          value={dueDateValue}
+          onChange={handleDueDateChange}
+        />
+        {task.dueDate != null && task.dueDate < Date.now() && task.status !== 'DONE' && (
+          <span className="kanban-detail-overdue-warning">{t('kanban.overdue')}</span>
+        )}
+      </div>
+
+      {/* Labels */}
+      <div className="kanban-detail-section">
+        <span className="kanban-detail-section-title">{t('kanban.labels')}</span>
+        <div className="kanban-detail-labels">
+          {ALL_LABELS.map((label) => (
+            <button
+              key={label}
+              className={`kanban-label-chip kanban-label-chip--${label}${taskLabels.includes(label) ? ' kanban-label-chip--active' : ''}`}
+              onClick={() => toggleLabel(label)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Attachments */}
+      <div className="kanban-detail-section">
+        <span className="kanban-detail-section-title">{t('kanban.attachedFiles')}</span>
+        <div className="kanban-detail-attachments">
+          {task.attachments && task.attachments.length > 0 ? (
+            task.attachments.map((att) => (
+              <div key={att.id} className="kanban-attachment-item">
+                <span className="kanban-attachment-item-icon">
+                  {att.mimeType.startsWith('image/') ? '🖼' : '📄'}
+                </span>
+                <span className="kanban-attachment-item-name" title={att.storedPath}>{att.filename}</span>
+                <span className="kanban-attachment-item-size">
+                  {att.size < 1024 ? `${att.size} o` : att.size < 1048576 ? `${(att.size / 1024).toFixed(1)} Ko` : `${(att.size / 1048576).toFixed(1)} Mo`}
+                </span>
+                <button
+                  className="kanban-attachment-item-remove"
+                  onClick={() => onRemoveAttachment(att.id)}
+                  title={t('common.delete')}
+                >
+                  &times;
+                </button>
+              </div>
+            ))
+          ) : (
+            <span className="kanban-detail-empty-hint">{t('kanban.noAttachments')}</span>
+          )}
+        </div>
+        <button className="kanban-attach-btn" onClick={onAttachFiles}>
+          {t('kanban.addFile')}
+        </button>
       </div>
 
       {/* Description */}
       <div className="kanban-detail-section">
-        <span className="kanban-detail-section-title">Description</span>
+        <span className="kanban-detail-section-title">{t('kanban.description')}</span>
         {editingDesc ? (
           <textarea
             ref={descRef}
@@ -386,7 +940,7 @@ function TaskDetailPanel({
             className="kanban-detail-desc"
             onDoubleClick={() => setEditingDesc(true)}
           >
-            {task.description || 'Aucune description. Double-cliquez pour ajouter.'}
+            {task.description || t('kanban.noDescription')}
           </div>
         )}
       </div>
@@ -394,10 +948,10 @@ function TaskDetailPanel({
       {/* AI Agent info */}
       {task.agentId && (
         <div className="kanban-detail-section">
-          <span className="kanban-detail-section-title">Agent IA</span>
+          <span className="kanban-detail-section-title">{t('kanban.aiAgent')}</span>
           <div className="kanban-detail-agent">
             <span className={`kanban-detail-agent-status${task.status === 'WORKING' ? ' kanban-detail-agent-status--active' : ''}`}>
-              {task.status === 'WORKING' ? 'En cours de traitement' : 'Termine'}
+              {task.status === 'WORKING' ? t('kanban.processing') : t('kanban.done')}
             </span>
             <span className="kanban-detail-agent-id">{task.agentId}</span>
           </div>
@@ -407,7 +961,7 @@ function TaskDetailPanel({
       {/* Question */}
       {task.question && (
         <div className="kanban-detail-section">
-          <span className="kanban-detail-section-title">Question de l'IA</span>
+          <span className="kanban-detail-section-title">{t('kanban.aiQuestion')}</span>
           <div className="kanban-detail-question">{task.question}</div>
         </div>
       )}
@@ -415,7 +969,7 @@ function TaskDetailPanel({
       {/* Result */}
       {task.result && (
         <div className="kanban-detail-section">
-          <span className="kanban-detail-section-title">Resultat</span>
+          <span className="kanban-detail-section-title">{t('kanban.result')}</span>
           <div className="kanban-detail-result">{task.result}</div>
         </div>
       )}
@@ -423,21 +977,30 @@ function TaskDetailPanel({
       {/* Error */}
       {task.error && (
         <div className="kanban-detail-section">
-          <span className="kanban-detail-section-title">Erreur</span>
+          <span className="kanban-detail-section-title">{t('kanban.error')}</span>
           <div className="kanban-detail-error">{task.error}</div>
         </div>
       )}
 
       {/* Timestamps */}
       <div className="kanban-detail-timestamps">
-        <span>Cree : {new Date(task.createdAt).toLocaleString('fr-FR')}</span>
-        <span>Modifie : {new Date(task.updatedAt).toLocaleString('fr-FR')}</span>
+        <span>{t('kanban.created')} {new Date(task.createdAt).toLocaleString('fr-FR')}</span>
+        <span>{t('kanban.modified')} {new Date(task.updatedAt).toLocaleString('fr-FR')}</span>
       </div>
+
+      {/* Send to Claude */}
+      {task.status !== 'WORKING' && (
+        <div className="kanban-detail-section">
+          <button className="kanban-detail-claude-btn" onClick={onSendToClaude}>
+            {t('kanban.sendToClaude')}
+          </button>
+        </div>
+      )}
 
       {/* Delete */}
       <div className="kanban-detail-actions">
         <button className="kanban-detail-delete-btn" onClick={onDelete}>
-          Supprimer cette tache
+          {t('kanban.deleteTask')}
         </button>
       </div>
     </div>

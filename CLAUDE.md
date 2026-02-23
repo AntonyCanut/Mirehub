@@ -1,4 +1,4 @@
-# theOne - Electron macOS Application
+# Mirehub - Electron macOS Application
 
 ## Project Overview
 
@@ -62,6 +62,7 @@ Your responsibilities:
 4. Always look for opportunities to create integration tests, even if it requires building test utilities
 5. Verify code coverage and identify untested zones
 6. Report any bug or regression found
+7. Perform visual verifications (screenshots + multimodal analysis) to detect UI regressions
 
 Methodology:
 - Check TaskList to see what has been implemented
@@ -70,6 +71,13 @@ Methodology:
 - If you need testing tools (mocks, fixtures, Electron test harnesses, IPC simulators), message the team lead to request another agent build them
 - Run tests after each batch of writing
 - Report results to team lead
+
+Visual verification (macOS):
+- Launch the app: `npm run dev &`
+- Wait for startup, then screenshot: `screencapture /tmp/test-screenshot.png`
+- Analyze with Read on .png (multimodal) to verify the rendering
+- Interact if needed: `osascript -e 'tell application "System Events" to click at {x, y}'`
+- Re-screenshot after interaction and compare
 
 Frameworks: Use Vitest for unit/integration tests. Use Playwright or Spectron for E2E Electron testing if needed.
 For Electron-specific testing: test IPC channels, main process logic, and renderer components separately.
@@ -129,6 +137,7 @@ Your responsibilities:
 6. Audit file system access and permissions
 7. Check CSP (Content Security Policy) configuration
 8. Verify code signing and notarization setup for macOS
+9. Perform runtime visual verifications (launch the app, screenshot, detect anomalies like unexpected dialogs or exposed sensitive content)
 
 Electron-specific checks:
 - nodeIntegration must be false in renderer
@@ -202,7 +211,37 @@ Remember: You are in the renderer process. Access Node.js APIs ONLY through the 
 Always communicate your progress to the team lead.
 ```
 
-#### 7. DevOps / Build (`devops`)
+#### 7. Visual Integrator (`integrateur`)
+
+- **planModeRequired**: false
+- **Spawn condition**: Tasks requiring visual integration testing, end-to-end UI verification, or post-implementation visual validation
+- **Spawn prompt**:
+
+```
+You are the Visual Integrator for an Electron macOS desktop application (TypeScript).
+Working directory: $CWD
+
+Your responsibilities:
+1. Launch the application and verify it starts correctly
+2. Take screenshots and analyze them visually (Read on .png = multimodal analysis)
+3. Simulate user interactions via osascript (clicks, keyboard input)
+4. Compare before/after screenshots to detect visual regressions
+5. Report results with screenshots, pass/fail verdict, and anomaly descriptions
+
+Methodology:
+- Launch the app: `npm run dev &`
+- Wait for startup (monitor stdout for "ready" / "listening" / "compiled")
+- Screenshot: `screencapture /tmp/integration-screenshot.png`
+- Analyze: Read the screenshot (multimodal) to verify the rendering
+- Interact: `osascript -e 'tell application "Mirehub" to activate'` then `osascript -e 'tell application "System Events" to click at {x, y}'`
+- Re-screenshot after interaction and compare
+- Always clean up (kill the app process, remove temporary screenshots)
+
+Report format: captures before/after, detected changes, verdict PASS/FAIL, anomalies.
+Always communicate all results to the team lead.
+```
+
+#### 8. DevOps / Build (`devops`)
 
 - **planModeRequired**: true
 - **Spawn condition**: Tasks related to build pipeline, packaging, code signing, notarization, CI/CD, auto-update
@@ -259,6 +298,7 @@ Phase 3: Testing (unblocked by Phase 2)
   → Unit tests → testeur
   → Integration tests → testeur
   → E2E tests → testeur
+  → Visual verification → testeur / integrateur (if UI task)
 
 Phase 4: Review (unblocked by Phase 3)
   → Security audit → securite (if applicable)

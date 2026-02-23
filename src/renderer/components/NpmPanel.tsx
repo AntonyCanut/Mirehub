@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
+import { useI18n } from '../lib/i18n'
 import type { NpmPackageInfo } from '../../shared/types'
 
 type FilterMode = 'all' | 'dependency' | 'devDependency' | 'deprecated' | 'updates'
 
 export function NpmPanel() {
+  const { t } = useI18n()
   const { activeProjectId, projects } = useWorkspaceStore()
   const [packages, setPackages] = useState<NpmPackageInfo[]>([])
   const [loading, setLoading] = useState(false)
@@ -21,7 +23,7 @@ export function NpmPanel() {
     setLoading(true)
     setError(null)
     try {
-      const result = await window.theone.project.checkPackages(activeProject.path)
+      const result = await window.mirehub.project.checkPackages(activeProject.path)
       setPackages(result.packages)
     } catch (err) {
       setError(String(err))
@@ -45,15 +47,15 @@ export function NpmPanel() {
     if (!activeProject) return
     setUpdatingPackages((prev) => new Set(prev).add(packageName))
     try {
-      const result = await window.theone.project.updatePackage(activeProject.path, packageName)
+      const result = await window.mirehub.project.updatePackage(activeProject.path, packageName)
       if (result.success) {
-        setFeedback({ message: `${packageName} mis \u00e0 jour`, success: true })
+        setFeedback({ message: t('npm.updated', { name: packageName }), success: true })
       } else {
-        setFeedback({ message: `\u00c9chec ${packageName}: ${result.error}`, success: false })
+        setFeedback({ message: t('npm.failedUpdate', { name: packageName, error: result.error ?? '' }), success: false })
       }
       await loadPackages()
     } catch (err) {
-      setFeedback({ message: `Erreur: ${String(err)}`, success: false })
+      setFeedback({ message: t('npm.error', { error: String(err) }), success: false })
     } finally {
       setUpdatingPackages((prev) => {
         const next = new Set(prev)
@@ -67,15 +69,15 @@ export function NpmPanel() {
     if (!activeProject) return
     setUpdateAllLoading(true)
     try {
-      const result = await window.theone.project.updatePackage(activeProject.path)
+      const result = await window.mirehub.project.updatePackage(activeProject.path)
       if (result.success) {
-        setFeedback({ message: 'Tous les packages mis \u00e0 jour', success: true })
+        setFeedback({ message: t('npm.allUpdated'), success: true })
       } else {
-        setFeedback({ message: `\u00c9chec: ${result.error}`, success: false })
+        setFeedback({ message: t('npm.failedUpdate', { name: 'all', error: result.error ?? '' }), success: false })
       }
       await loadPackages()
     } catch (err) {
-      setFeedback({ message: `Erreur: ${String(err)}`, success: false })
+      setFeedback({ message: t('npm.error', { error: String(err) }), success: false })
     } finally {
       setUpdateAllLoading(false)
     }
@@ -84,7 +86,7 @@ export function NpmPanel() {
   if (!activeProject) {
     return (
       <div className="npm-panel-empty">
-        Selectionnez un projet pour voir ses packages NPM
+        {t('npm.selectProject')}
       </div>
     )
   }
@@ -112,23 +114,23 @@ export function NpmPanel() {
   return (
     <div className="npm-panel">
       <div className="npm-panel-header">
-        <h3>Packages NPM</h3>
-        <span className="npm-panel-count">{packages.length} packages</span>
+        <h3>{t('npm.title')}</h3>
+        <span className="npm-panel-count">{t('npm.packageCount', { count: String(packages.length) })}</span>
         {updatesCount > 0 && (
           <button
             className="npm-update-all-btn"
             onClick={handleUpdateAll}
             disabled={updateAllLoading}
-            title="Tout mettre \u00e0 jour"
+            title={t('npm.updateAll')}
           >
-            {updateAllLoading ? '...' : `Tout mettre \u00e0 jour (${updatesCount})`}
+            {updateAllLoading ? '...' : t('npm.updateAllCount', { count: String(updatesCount) })}
           </button>
         )}
         <button
           className="npm-panel-refresh"
           onClick={loadPackages}
           disabled={loading}
-          title="Rafraichir"
+          title={t('common.refresh')}
         >
           &#x21bb;
         </button>
@@ -148,26 +150,26 @@ export function NpmPanel() {
           className={`npm-filter-btn${filter === 'all' ? ' npm-filter-btn--active' : ''}`}
           onClick={() => setFilter('all')}
         >
-          Tous ({packages.length})
+          {t('npm.allCount', { count: String(packages.length) })}
         </button>
         <button
           className={`npm-filter-btn${filter === 'dependency' ? ' npm-filter-btn--active' : ''}`}
           onClick={() => setFilter('dependency')}
         >
-          deps ({depsCount})
+          {t('npm.depsCount', { count: String(depsCount) })}
         </button>
         <button
           className={`npm-filter-btn${filter === 'devDependency' ? ' npm-filter-btn--active' : ''}`}
           onClick={() => setFilter('devDependency')}
         >
-          devDeps ({devDepsCount})
+          {t('npm.devDepsCount', { count: String(devDepsCount) })}
         </button>
         {updatesCount > 0 && (
           <button
             className={`npm-filter-btn npm-filter-btn--updates${filter === 'updates' ? ' npm-filter-btn--active' : ''}`}
             onClick={() => setFilter('updates')}
           >
-            Mises a jour ({updatesCount})
+            {t('npm.updatesCount', { count: String(updatesCount) })}
           </button>
         )}
         {deprecatedCount > 0 && (
@@ -175,7 +177,7 @@ export function NpmPanel() {
             className={`npm-filter-btn npm-filter-btn--deprecated${filter === 'deprecated' ? ' npm-filter-btn--active' : ''}`}
             onClick={() => setFilter('deprecated')}
           >
-            Obsoletes ({deprecatedCount})
+            {t('npm.deprecatedCount', { count: String(deprecatedCount) })}
           </button>
         )}
       </div>
@@ -183,9 +185,9 @@ export function NpmPanel() {
       {error && <div className="npm-panel-error">{error}</div>}
 
       <div className="npm-panel-list">
-        {loading && <div className="npm-panel-loading">Analyse des packages en cours...</div>}
+        {loading && <div className="npm-panel-loading">{t('npm.analyzing')}</div>}
         {!loading && filtered.length === 0 && (
-          <div className="npm-panel-empty-list">Aucun package dans cette categorie</div>
+          <div className="npm-panel-empty-list">{t('npm.noPackages')}</div>
         )}
         {!loading &&
           filtered.map((pkg) => (
@@ -196,7 +198,7 @@ export function NpmPanel() {
               <div className="npm-package-info">
                 <span className="npm-package-name">{pkg.name}</span>
                 <span className="npm-package-type">
-                  {pkg.type === 'devDependency' ? 'dev' : 'dep'}
+                  {pkg.type === 'devDependency' ? t('npm.dev') : t('npm.dep')}
                 </span>
               </div>
               <div className="npm-package-versions">
@@ -213,7 +215,7 @@ export function NpmPanel() {
                   className="npm-package-update-btn"
                   onClick={() => handleUpdatePackage(pkg.name)}
                   disabled={updatingPackages.has(pkg.name) || updateAllLoading}
-                  title={`Mettre \u00e0 jour ${pkg.name}`}
+                  title={t('npm.updatePackage', { name: pkg.name })}
                 >
                   {updatingPackages.has(pkg.name) ? '...' : '\u2191'}
                 </button>

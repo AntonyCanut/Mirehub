@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useI18n } from '../lib/i18n'
 
 interface ClaudeInfoPanelProps {
   projectPath: string
@@ -53,6 +54,7 @@ function extractDeniedTools(settings: Record<string, unknown> | null | undefined
 }
 
 export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) {
+  const { t } = useI18n()
   const [data, setData] = useState<ScanResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'claudemd'>('overview')
@@ -61,7 +63,7 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
     let cancelled = false
     async function load() {
       try {
-        const result: ScanResult = await window.theone.project.scanClaude(projectPath)
+        const result: ScanResult = await window.mirehub.project.scanClaude(projectPath)
         if (!cancelled) {
           setData(result)
           setLoading(false)
@@ -99,9 +101,9 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
             />
             <circle cx="8" cy="8" r="2" fill="var(--claude-color)" />
           </svg>
-          Configuration Claude
+          {t('claudeInfo.title')}
         </span>
-        <button className="claude-info-close btn-icon" onClick={onClose} title="Fermer">
+        <button className="claude-info-close btn-icon" onClick={onClose} title={t('common.close')}>
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
             <path d="M2 2L8 8M8 2L2 8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
           </svg>
@@ -110,12 +112,12 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
 
       {loading ? (
         <div className="claude-info-body">
-          <span className="claude-info-loading">Chargement...</span>
+          <span className="claude-info-loading">{t('common.loading')}</span>
         </div>
       ) : !data?.hasClaude ? (
         <div className="claude-info-body">
           <span className="claude-info-empty">
-            Dossier .claude detecte, mais aucune configuration trouvee.
+            {t('claudeInfo.detected')}
           </span>
         </div>
       ) : (
@@ -125,7 +127,7 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
               className={`claude-info-tab${activeTab === 'overview' ? ' claude-info-tab--active' : ''}`}
               onClick={() => setActiveTab('overview')}
             >
-              Vue rapide
+              {t('claudeInfo.quickView')}
             </button>
             {hasClaudeMd && (
               <button
@@ -149,7 +151,7 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
                 {/* Permission mode indicator */}
                 {permInfo && (
                   <div className="claude-info-section">
-                    <span className="claude-info-label">Mode permissions</span>
+                    <span className="claude-info-label">{t('claudeInfo.permissionMode')}</span>
                     <span className={`claude-info-perm ${permInfo.className}`}>
                       {permInfo.label}
                     </span>
@@ -159,7 +161,7 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
                 {/* Allowed tools */}
                 {allowedTools.length > 0 && (
                   <div className="claude-info-section">
-                    <span className="claude-info-label">Outils autorises</span>
+                    <span className="claude-info-label">{t('claudeInfo.allowedTools')}</span>
                     <div className="claude-info-tool-list">
                       {allowedTools.map((tool) => (
                         <span key={tool} className="claude-info-tool claude-info-tool--allow">
@@ -173,7 +175,7 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
                 {/* Denied tools */}
                 {deniedTools.length > 0 && (
                   <div className="claude-info-section">
-                    <span className="claude-info-label">Outils bloques</span>
+                    <span className="claude-info-label">{t('claudeInfo.blockedTools')}</span>
                     <div className="claude-info-tool-list">
                       {deniedTools.map((tool) => (
                         <span key={tool} className="claude-info-tool claude-info-tool--deny">
@@ -187,7 +189,7 @@ export function ClaudeInfoPanel({ projectPath, onClose }: ClaudeInfoPanelProps) 
                 {/* No settings info */}
                 {!hasSettings && !hasClaudeMd && (
                   <span className="claude-info-empty">
-                    Dossier .claude present mais vide.
+                    {t('claudeInfo.emptyFolder')}
                   </span>
                 )}
               </div>

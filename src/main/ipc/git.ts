@@ -1,6 +1,6 @@
 import { IpcMain } from 'electron'
 import { execSync } from 'child_process'
-import { IPC_CHANNELS, GitLogEntry, GitStatus } from '../../shared/types'
+import { IPC_CHANNELS, GitLogEntry, GitStatus, GitTag, GitBlameLine, GitRemote } from '../../shared/types'
 
 function exec(cmd: string, cwd: string): string {
   return execSync(cmd, {
@@ -250,6 +250,299 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     async (_event, { cwd, branch }: { cwd: string; branch: string }) => {
       try {
         exec(`git merge "${branch}"`, cwd)
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(IPC_CHANNELS.GIT_FETCH, async (_event, { cwd }: { cwd: string }) => {
+    try {
+      exec('git fetch --all --prune', cwd)
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: String(err) }
+    }
+  })
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_STAGE,
+    async (_event, { cwd, files }: { cwd: string; files: string[] }) => {
+      try {
+        for (const file of files) {
+          exec(`git add "${file}"`, cwd)
+        }
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_UNSTAGE,
+    async (_event, { cwd, files }: { cwd: string; files: string[] }) => {
+      try {
+        if (!hasCommits(cwd)) {
+          for (const file of files) {
+            exec(`git rm --cached "${file}"`, cwd)
+          }
+        } else {
+          for (const file of files) {
+            exec(`git reset HEAD -- "${file}"`, cwd)
+          }
+        }
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_DISCARD,
+    async (_event, { cwd, files }: { cwd: string; files: string[] }) => {
+      try {
+        for (const file of files) {
+          exec(`git checkout -- "${file}"`, cwd)
+        }
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_SHOW,
+    async (_event, { cwd, hash }: { cwd: string; hash: string }) => {
+      try {
+        if (!hasCommits(cwd)) return { files: [], diff: '' }
+        // Get list of changed files with status
+        const filesOutput = exec(`git diff-tree --no-commit-id --name-status -r "${hash}"`, cwd)
+        const files = filesOutput
+          .split('\n')
+          .filter(Boolean)
+          .map((line) => {
+            const [status, ...nameParts] = line.split('\t')
+            return { status: status || '?', file: nameParts.join('\t') || '' }
+          })
+        // Get full diff
+        const diff = exec(`git show --format="" --patch "${hash}"`, cwd)
+        return { files, diff }
+      } catch {
+        return { files: [], diff: '' }
+      }
+    },
+  )
+
+  ipcMain.handle(IPC_CHANNELS.GIT_STASH_LIST, async (_event, { cwd }: { cwd: string }) => {
+    try {
+      const output = exec('git stash list --format="%gd|%gs|%ci"', cwd)
+      if (!output) return []
+      return output.split('\n').filter(Boolean).map((line) => {
+        const [ref, message, date] = line.split('|')
+        return { ref: ref || '', message: message || '', date: date || '' }
+      })
+    } catch {
+      return []
+    }
+  })
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_RENAME_BRANCH,
+    async (_event, { cwd, oldName, newName }: { cwd: string; oldName: string; newName: string }) => {
+      try {
+        exec(`git branch -m "${oldName}" "${newName}"`, cwd)
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  // --- Tag management ---
+
+  ipcMain.handle(IPC_CHANNELS.GIT_TAGS, async (_event, { cwd }: { cwd: string }) => {
+    try {
+      if (!hasCommits(cwd)) return []
+      const SEP = '\x1f'
+      const output = exec(
+        `git tag -l --sort=-creatordate --format="%(refname:short)${SEP}%(objectname:short)${SEP}%(contents:subject)${SEP}%(creatordate:iso)${SEP}%(objecttype)"`,
+        cwd,
+      )
+      if (!output) return []
+      const tags: GitTag[] = output.split('\n').filter(Boolean).map((line) => {
+        const parts = line.split(SEP)
+        return {
+          name: parts[0] || '',
+          hash: parts[1] || '',
+          message: parts[2] || '',
+          date: parts[3] || '',
+          isAnnotated: parts[4] === 'tag',
+        }
+      })
+      return tags
+    } catch {
+      return []
+    }
+  })
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_CREATE_TAG,
+    async (
+      _event,
+      { cwd, name, message }: { cwd: string; name: string; message?: string },
+    ) => {
+      try {
+        if (message) {
+          exec(`git tag -a "${name}" -m "${message.replace(/"/g, '\\"')}"`, cwd)
+        } else {
+          exec(`git tag "${name}"`, cwd)
+        }
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_DELETE_TAG,
+    async (_event, { cwd, name }: { cwd: string; name: string }) => {
+      try {
+        exec(`git tag -d "${name}"`, cwd)
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  // --- Cherry-pick ---
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_CHERRY_PICK,
+    async (_event, { cwd, hash }: { cwd: string; hash: string }) => {
+      try {
+        exec(`git cherry-pick "${hash}"`, cwd)
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  // --- Branch comparison ---
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_DIFF_BRANCHES,
+    async (
+      _event,
+      { cwd, branch1, branch2 }: { cwd: string; branch1: string; branch2: string },
+    ) => {
+      try {
+        const output = exec(`git diff "${branch1}"..."${branch2}" --stat`, cwd)
+        return output
+      } catch (err) {
+        return String(err)
+      }
+    },
+  )
+
+  // --- Blame ---
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_BLAME,
+    async (_event, { cwd, file }: { cwd: string; file: string }) => {
+      try {
+        if (!hasCommits(cwd)) return []
+        const output = exec(`git blame --porcelain "${file}"`, cwd)
+        const lines: GitBlameLine[] = []
+        const blocks = output.split('\n')
+        let currentHash = ''
+        let currentAuthor = ''
+        let currentDate = ''
+        let currentLineNumber = 0
+
+        for (const line of blocks) {
+          // Commit header line: <hash> <orig-line> <final-line> [<num-lines>]
+          const headerMatch = line.match(/^([0-9a-f]{40})\s+\d+\s+(\d+)/)
+          if (headerMatch) {
+            currentHash = headerMatch[1]!
+            currentLineNumber = parseInt(headerMatch[2]!, 10)
+            continue
+          }
+          if (line.startsWith('author ')) {
+            currentAuthor = line.slice(7)
+            continue
+          }
+          if (line.startsWith('author-time ')) {
+            const timestamp = parseInt(line.slice(12), 10)
+            currentDate = new Date(timestamp * 1000).toISOString()
+            continue
+          }
+          // Content line starts with a tab
+          if (line.startsWith('\t')) {
+            lines.push({
+              hash: currentHash.slice(0, 8),
+              author: currentAuthor,
+              date: currentDate,
+              lineNumber: currentLineNumber,
+              content: line.slice(1),
+            })
+          }
+        }
+        return lines
+      } catch {
+        return []
+      }
+    },
+  )
+
+  // --- Remote management ---
+
+  ipcMain.handle(IPC_CHANNELS.GIT_REMOTES, async (_event, { cwd }: { cwd: string }) => {
+    try {
+      const output = exec('git remote -v', cwd)
+      if (!output) return []
+      const remoteMap = new Map<string, GitRemote>()
+      for (const line of output.split('\n')) {
+        if (!line) continue
+        const match = line.match(/^(\S+)\s+(\S+)\s+\((fetch|push)\)$/)
+        if (!match) continue
+        const [, name, url, type] = match
+        if (!remoteMap.has(name!)) {
+          remoteMap.set(name!, { name: name!, fetchUrl: '', pushUrl: '' })
+        }
+        const remote = remoteMap.get(name!)!
+        if (type === 'fetch') remote.fetchUrl = url!
+        else remote.pushUrl = url!
+      }
+      return Array.from(remoteMap.values())
+    } catch {
+      return []
+    }
+  })
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_ADD_REMOTE,
+    async (_event, { cwd, name, url }: { cwd: string; name: string; url: string }) => {
+      try {
+        exec(`git remote add "${name}" "${url}"`, cwd)
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_REMOVE_REMOTE,
+    async (_event, { cwd, name }: { cwd: string; name: string }) => {
+      try {
+        exec(`git remote remove "${name}"`, cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }

@@ -1,4 +1,4 @@
-.PHONY: dev build clean install lint format test typecheck build-app
+.PHONY: dev build clean install lint format test typecheck build-app app dmg open-dmg
 
 # Développement
 dev: node_modules
@@ -12,12 +12,21 @@ node_modules: package.json
 	npm install
 	@touch node_modules
 
-# Build
+# Build Vite (main + preload + renderer)
 build: node_modules
 	npm run build
 
-build-app: node_modules
-	npm run build:app
+# Package macOS app (.app + .dmg + .zip) dans release/
+app: build
+	npx electron-builder --mac --publish never
+
+dmg: app
+
+build-app: app
+
+# Ouvrir le DMG généré
+open-dmg:
+	@open release/Workspaces-*.dmg 2>/dev/null || echo "Pas de DMG trouvé. Lancez 'make dmg' d'abord."
 
 # Qualité
 lint: node_modules
@@ -30,7 +39,8 @@ format: node_modules
 	npm run format
 
 typecheck: node_modules
-	npm run typecheck
+	npx tsc -p tsconfig.main.json --noEmit
+	npx tsc -p tsconfig.renderer.json --noEmit
 
 # Tests
 test: node_modules
@@ -44,4 +54,4 @@ test-coverage: node_modules
 
 # Nettoyage
 clean:
-	rm -rf dist node_modules .vite
+	rm -rf dist release .vite

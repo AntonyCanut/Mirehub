@@ -1,4 +1,4 @@
-import { IpcMain, Notification } from 'electron'
+import { IpcMain, Notification, app } from 'electron'
 import { IPC_CHANNELS, AppSettings } from '../../shared/types'
 import { StorageService } from '../services/storage'
 
@@ -28,4 +28,8 @@ export function registerAppHandlers(ipcMain: IpcMain): void {
       notification.show()
     },
   )
+
+  ipcMain.handle(IPC_CHANNELS.APP_VERSION, () => {
+    return { version: app.getVersion(), name: app.getName() }
+  })
 }

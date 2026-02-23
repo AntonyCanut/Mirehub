@@ -407,7 +407,7 @@ describe('useTerminalTabStore', () => {
 
 describe('utility functions', () => {
   it('countLeaves compte les feuilles', () => {
-    const leaf: PaneLeaf = { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null }
+    const leaf: PaneLeaf = { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null, externalSessionId: null }
     expect(countLeaves(leaf)).toBe(1)
 
     const split: PaneSplit = {
@@ -415,8 +415,8 @@ describe('utility functions', () => {
       id: 's1',
       direction: 'horizontal',
       children: [
-        { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null },
-        { type: 'leaf', id: 'p2', sessionId: null, initialCommand: null },
+        { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null, externalSessionId: null },
+        { type: 'leaf', id: 'p2', sessionId: null, initialCommand: null, externalSessionId: null },
       ],
       ratio: 0.5,
     }
@@ -429,8 +429,8 @@ describe('utility functions', () => {
       id: 's1',
       direction: 'horizontal',
       children: [
-        { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null },
-        { type: 'leaf', id: 'p2', sessionId: null, initialCommand: null },
+        { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null, externalSessionId: null },
+        { type: 'leaf', id: 'p2', sessionId: null, initialCommand: null, externalSessionId: null },
       ],
       ratio: 0.5,
     }

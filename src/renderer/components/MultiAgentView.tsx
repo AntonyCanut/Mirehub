@@ -172,7 +172,7 @@ export function MultiAgentView() {
               )}
             </div>
             <div className="multiagent-pane-terminal">
-              <Terminal cwd={activeProject.path} />
+              <Terminal cwd={activeProject.path} isVisible={true} fontSize={14} />
             </div>
           </div>
         ))}

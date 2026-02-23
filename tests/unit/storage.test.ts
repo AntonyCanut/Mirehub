@@ -214,7 +214,7 @@ describe('StorageService', () => {
   describe('kanban tasks', () => {
     const task: KanbanTask = {
       id: 'k-1',
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'Tache test',
       description: 'Description',
       status: 'TODO',
@@ -228,12 +228,12 @@ describe('StorageService', () => {
       expect(service.getKanbanTasks()).toHaveLength(1)
     })
 
-    it('filtre les taches par projectId', () => {
+    it('filtre les taches par workspaceId', () => {
       service.addKanbanTask(task)
-      service.addKanbanTask({ ...task, id: 'k-2', projectId: 'p-2' })
+      service.addKanbanTask({ ...task, id: 'k-2', workspaceId: 'ws-2' })
 
-      expect(service.getKanbanTasks('p-1')).toHaveLength(1)
-      expect(service.getKanbanTasks('p-2')).toHaveLength(1)
+      expect(service.getKanbanTasks('ws-1')).toHaveLength(1)
+      expect(service.getKanbanTasks('ws-2')).toHaveLength(1)
     })
 
     it('met a jour une tache kanban', () => {

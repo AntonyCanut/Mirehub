@@ -15,26 +15,47 @@ interface ManagedTerminal {
 const terminals = new Map<string, ManagedTerminal>()
 
 /**
- * Ensure a custom ZDOTDIR with a .zshrc that initialises compinit
- * BEFORE sourcing the user's real ~/.zshrc. This prevents the
- * "command not found: compdef" error that occurs when completion
- * scripts call compdef before compinit has been loaded.
+ * Ensure a custom ZDOTDIR with a .zshenv and .zshrc that properly
+ * initialise the shell environment. This handles two issues:
+ *
+ * 1. When launched from Finder, process.env.PATH is minimal
+ *    (/usr/bin:/bin:/usr/sbin:/sbin). We source /etc/zprofile and
+ *    ~/.zprofile in .zshenv so path_helper and user PATH additions
+ *    are available (claude, eza, brew tools, etc.).
+ *
+ * 2. compinit must be loaded BEFORE the user's .zshrc to prevent
+ *    "command not found: compdef" errors.
  */
 function ensureZshWrapper(): string {
-  const shellDir = path.join(os.homedir(), '.theone', 'shell')
-  const wrapperPath = path.join(shellDir, '.zshrc')
+  const shellDir = path.join(os.homedir(), '.mirehub', 'shell')
   if (!fs.existsSync(shellDir)) {
     fs.mkdirSync(shellDir, { recursive: true })
   }
-  const wrapperContent = [
+
+  // .zshenv runs first (before .zshrc) — set up PATH here
+  const zshenvContent = [
+    '# Source system and user profile for PATH setup (critical when launched from Finder)',
+    '[ -f /etc/zprofile ] && source /etc/zprofile',
+    '[ -f "$HOME/.zprofile" ] && source "$HOME/.zprofile"',
+  ].join('\n')
+
+  const zshenvPath = path.join(shellDir, '.zshenv')
+  if (!fs.existsSync(zshenvPath) || fs.readFileSync(zshenvPath, 'utf-8') !== zshenvContent) {
+    fs.writeFileSync(zshenvPath, zshenvContent, 'utf-8')
+  }
+
+  // .zshrc — compinit + user config
+  const zshrcContent = [
     'autoload -Uz compinit && compinit -C',
     'ZDOTDIR="$HOME"',
     '[ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc"',
   ].join('\n')
-  // Only write if missing or changed
-  if (!fs.existsSync(wrapperPath) || fs.readFileSync(wrapperPath, 'utf-8') !== wrapperContent) {
-    fs.writeFileSync(wrapperPath, wrapperContent, 'utf-8')
+
+  const zshrcPath = path.join(shellDir, '.zshrc')
+  if (!fs.existsSync(zshrcPath) || fs.readFileSync(zshrcPath, 'utf-8') !== zshrcContent) {
+    fs.writeFileSync(zshrcPath, zshrcContent, 'utf-8')
   }
+
   return shellDir
 }
 
@@ -58,6 +79,11 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
         COLORTERM: 'truecolor',
       } as Record<string, string>
 
+      // Remove Claude Code session markers so terminals can launch claude without
+      // "nested session" errors (the app may itself be launched from a Claude session)
+      delete shellEnv.CLAUDECODE
+      delete shellEnv.CLAUDE_CODE_ENTRYPOINT
+
       if (isZsh) {
         shellEnv.ZDOTDIR = ensureZshWrapper()
       }
@@ -73,19 +99,25 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
       const managed: ManagedTerminal = { id, pty, cwd }
       terminals.set(id, managed)
 
-      // Forward output to renderer
+      // Forward output to renderer (try-catch guards against render frame disposal during reload)
       pty.onData((data: string) => {
-        const windows = BrowserWindow.getAllWindows()
-        for (const win of windows) {
-          win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, { id, data })
+        for (const win of BrowserWindow.getAllWindows()) {
+          try {
+            if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+              win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, { id, data })
+            }
+          } catch { /* render frame disposed — ignore */ }
         }
       })
 
       pty.onExit(({ exitCode, signal }) => {
         terminals.delete(id)
-        const windows = BrowserWindow.getAllWindows()
-        for (const win of windows) {
-          win.webContents.send(IPC_CHANNELS.TERMINAL_CLOSE, { id, exitCode, signal })
+        for (const win of BrowserWindow.getAllWindows()) {
+          try {
+            if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+              win.webContents.send(IPC_CHANNELS.TERMINAL_CLOSE, { id, exitCode, signal })
+            }
+          } catch { /* render frame disposed — ignore */ }
         }
       })
 

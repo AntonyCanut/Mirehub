@@ -40,6 +40,12 @@ describe('Workspace IPC Handlers', () => {
     }
     fs.mkdirSync(dataDir, { recursive: true })
 
+    // Clean workspace env directory
+    const wsDir = path.join(TEST_DIR, '.workspaces')
+    if (fs.existsSync(wsDir)) {
+      fs.rmSync(wsDir, { recursive: true, force: true })
+    }
+
     // Re-import after module reset to get fresh StorageService instance
     const { registerWorkspaceHandlers } = await import('../../src/main/ipc/workspace')
 
@@ -53,12 +59,14 @@ describe('Workspace IPC Handlers', () => {
     }
   })
 
-  it('enregistre les 4 handlers workspace', () => {
-    expect(mockIpcMain.handle).toHaveBeenCalledTimes(4)
+  it('enregistre les 6 handlers workspace', () => {
+    expect(mockIpcMain.handle).toHaveBeenCalledTimes(6)
     expect(mockIpcMain._handlers.has('workspace:list')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:create')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:update')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:delete')).toBe(true)
+    expect(mockIpcMain._handlers.has('workspace:export')).toBe(true)
+    expect(mockIpcMain._handlers.has('workspace:import')).toBe(true)
   })
 
   it('liste les workspaces (vide au depart)', async () => {
@@ -121,6 +129,39 @@ describe('Workspace IPC Handlers', () => {
 
     const list = await mockIpcMain._invoke('workspace:list')
     expect(list).toHaveLength(0)
+  })
+
+  it('supprime le dossier env sur disque lors de la suppression du workspace', async () => {
+    const ws = await mockIpcMain._invoke('workspace:create', { name: 'Env Cleanup' })
+
+    // Create a fake env directory to simulate workspace env
+    const envDir = path.join(TEST_DIR, '.workspaces', 'Env Cleanup')
+    fs.mkdirSync(envDir, { recursive: true })
+    fs.writeFileSync(path.join(envDir, 'marker.txt'), 'test')
+    expect(fs.existsSync(envDir)).toBe(true)
+
+    // Delete workspace should also clean up env
+    await mockIpcMain._invoke('workspace:delete', { id: ws.id })
+
+    expect(fs.existsSync(envDir)).toBe(false)
+  })
+
+  it('renomme le dossier env lors du renommage du workspace', async () => {
+    const ws = await mockIpcMain._invoke('workspace:create', { name: 'Old Name' })
+
+    // Create a fake env directory
+    const oldEnvDir = path.join(TEST_DIR, '.workspaces', 'Old Name')
+    fs.mkdirSync(oldEnvDir, { recursive: true })
+    fs.writeFileSync(path.join(oldEnvDir, 'marker.txt'), 'test')
+
+    // Rename workspace
+    await mockIpcMain._invoke('workspace:update', { id: ws.id, name: 'New Name' })
+
+    // Old dir should be gone, new dir should exist
+    expect(fs.existsSync(oldEnvDir)).toBe(false)
+    const newEnvDir = path.join(TEST_DIR, '.workspaces', 'New Name')
+    expect(fs.existsSync(newEnvDir)).toBe(true)
+    expect(fs.readFileSync(path.join(newEnvDir, 'marker.txt'), 'utf-8')).toBe('test')
   })
 
   it('persiste les donnees sur disque', async () => {

@@ -1,9 +1,29 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import type { Workspace, Project } from '../../shared/types/index'
+import type { Workspace, Project, DbEnvironmentTag } from '../../shared/types/index'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
+import { useClaudeStore } from '../lib/stores/claudeStore'
+import { useViewStore } from '../lib/stores/viewStore'
+import { useDatabaseStore } from '../lib/stores/databaseStore'
+import { useI18n } from '../lib/i18n'
 import { ProjectItem } from './ProjectItem'
 import { ContextMenu, ContextMenuItem } from './ContextMenu'
-import { useViewStore } from '../lib/stores/viewStore'
+
+const ENV_TAG_COLORS: Record<DbEnvironmentTag, string> = {
+  local: '#a6e3a1',
+  dev: '#89b4fa',
+  int: '#fab387',
+  qua: '#cba6f7',
+  prd: '#f38ba8',
+  custom: 'var(--text-muted)',
+}
+
+const ENGINE_ICONS: Record<string, string> = {
+  postgresql: 'PG',
+  mysql: 'MY',
+  mssql: 'MS',
+  mongodb: 'MG',
+  sqlite: 'SQ',
+}
 
 interface WorkspaceItemProps {
   workspace: Workspace
@@ -22,18 +42,36 @@ const WORKSPACE_COLORS = [
   '#f5c2e7', // pink
 ]
 
-const WORKSPACE_ICONS = [
-  { icon: '\u25CF', label: 'Cercle' },       // filled circle
-  { icon: '\u2605', label: 'Etoile' },       // star
-  { icon: '\u2665', label: 'Coeur' },        // heart
-  { icon: '\u26A1', label: 'Eclair' },       // lightning
-  { icon: '\u2699', label: 'Engrenage' },    // gear
-  { icon: '\u2702', label: 'Ciseaux' },      // scissors
-  { icon: '\u270E', label: 'Crayon' },       // pencil
-  { icon: '\u2764', label: 'Code' },         // code bracket
+const WORKSPACE_ICON_KEYS = [
+  { icon: '\u25CF', key: 'icon.circle' },       // filled circle
+  { icon: '\u2605', key: 'icon.star' },          // star
+  { icon: '\u2665', key: 'icon.heart' },         // heart
+  { icon: '\u26A1', key: 'icon.lightning' },     // lightning
+  { icon: '\u2699', key: 'icon.gear' },          // gear
+  { icon: '\u2702', key: 'icon.scissors' },      // scissors
+  { icon: '\u270E', key: 'icon.pencil' },        // pencil
+  { icon: '\u2764', key: 'icon.code' },          // code bracket
 ]
 
 export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemProps) {
+  const { t } = useI18n()
+
+  // Load DB connections for this workspace (every workspace loads its own)
+  const {
+    connectionsByWorkspace,
+    connectionStatuses,
+    loadConnections,
+    setActiveConnection,
+    connectDb,
+    disconnectDb,
+    deleteConnection: deleteDbConnection,
+  } = useDatabaseStore()
+  const wsConnections = connectionsByWorkspace[workspace.id] ?? []
+
+  useEffect(() => {
+    loadConnections(workspace.id)
+  }, [workspace.id, loadConnections])
+
   const [expanded, setExpanded] = useState(true)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const [isRenaming, setIsRenaming] = useState(false)
@@ -41,7 +79,13 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [showAddMenu, setShowAddMenu] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createProjectName, setCreateProjectName] = useState('')
+  const [createError, setCreateError] = useState<string | null>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
+  const createInputRef = useRef<HTMLInputElement>(null)
+  const addMenuRef = useRef<HTMLDivElement>(null)
 
   const {
     setActiveWorkspace,
@@ -50,7 +94,12 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     updateWorkspace,
     addProject,
     moveProject,
+    refreshWorkspace,
   } = useWorkspaceStore()
+
+  const flashingWorkspaceId = useClaudeStore((s) => s.flashingWorkspaceId)
+  const isFlashing = workspace.id === flashingWorkspaceId
+  const workspaceClaudeStatus = useClaudeStore((s) => s.workspaceClaudeStatus[workspace.id])
 
   const handleToggle = useCallback(() => {
     setExpanded((prev) => !prev)
@@ -58,7 +107,6 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
 
   const handleClick = useCallback(() => {
     setActiveWorkspace(workspace.id)
-    useViewStore.getState().setViewMode('terminal')
   }, [workspace.id, setActiveWorkspace])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
@@ -99,6 +147,80 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     addProject(workspace.id)
   }, [workspace.id, addProject])
 
+  const handleCreateProject = useCallback(async () => {
+    const name = createProjectName.trim()
+    if (!name) return
+    setCreateError(null)
+
+    // Pick parent directory
+    const parentDir = await window.mirehub.project.selectDir()
+    if (!parentDir) return
+
+    const projectPath = parentDir + '/' + name
+    // Check if directory already exists
+    const exists = await window.mirehub.fs.exists(projectPath)
+    if (exists) {
+      setCreateError(t('workspace.folderExists'))
+      return
+    }
+
+    // Create directory
+    await window.mirehub.fs.mkdir(projectPath)
+
+    // Add as project
+    const project = await window.mirehub.project.add({
+      workspaceId: workspace.id,
+      path: projectPath,
+    })
+
+    if (project) {
+      const { projects: allProjects, workspaces } = useWorkspaceStore.getState()
+      useWorkspaceStore.setState({
+        projects: [...allProjects, project],
+        activeProjectId: project.id,
+        workspaces: workspaces.map((w) =>
+          w.id === workspace.id ? { ...w, projectIds: [...w.projectIds, project.id] } : w,
+        ),
+      })
+      await useWorkspaceStore.getState().setupWorkspaceEnv(workspace.id)
+    }
+
+    setShowCreateModal(false)
+    setCreateProjectName('')
+  }, [createProjectName, workspace.id])
+
+  // Close add menu on click outside
+  useEffect(() => {
+    if (!showAddMenu) return
+    const handler = (e: MouseEvent) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
+        setShowAddMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showAddMenu])
+
+  // Focus create input when modal opens
+  useEffect(() => {
+    if (showCreateModal && createInputRef.current) {
+      createInputRef.current.focus()
+    }
+  }, [showCreateModal])
+
+  const handleExportWorkspace = useCallback(async () => {
+    await window.mirehub.workspace.export(workspace.id)
+  }, [workspace.id])
+
+  const handleImportWorkspace = useCallback(async () => {
+    const result = await window.mirehub.workspace.import()
+    if (result.success) {
+      // Reload workspaces to pick up the imported one
+      const { loadWorkspaces } = useWorkspaceStore.getState()
+      await loadWorkspaces()
+    }
+  }, [])
+
   const handleColorChange = useCallback(
     (color: string) => {
       updateWorkspace(workspace.id, { color })
@@ -117,7 +239,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
 
   // Drag & drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes('application/theone-project')) {
+    if (e.dataTransfer.types.includes('application/mirehub-project')) {
       e.preventDefault()
       e.dataTransfer.dropEffect = 'move'
       setIsDragOver(true)
@@ -132,7 +254,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     (e: React.DragEvent) => {
       e.preventDefault()
       setIsDragOver(false)
-      const projectId = e.dataTransfer.getData('application/theone-project')
+      const projectId = e.dataTransfer.getData('application/mirehub-project')
       if (projectId) {
         moveProject(projectId, workspace.id)
       }
@@ -147,19 +269,38 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     }
   }, [isRenaming])
 
+  const { setViewMode, setPendingDbProjectPath } = useViewStore()
+
+  // DB context menu state
+  const [dbContextMenu, setDbContextMenu] = useState<{ x: number; y: number; connId: string } | null>(null)
+
+  const handleAddDbConnection = useCallback(() => {
+    // Activate this workspace first so the modal targets the right workspace
+    setActiveWorkspace(workspace.id)
+    setPendingDbProjectPath(workspace.id)
+    setViewMode('database')
+  }, [workspace.id, setActiveWorkspace, setPendingDbProjectPath, setViewMode])
+
   const contextMenuItems: ContextMenuItem[] = [
-    { label: 'Renommer', action: handleStartRename },
-    { label: 'Changer la couleur', action: () => { setShowColorPicker(true); setShowIconPicker(false) } },
-    { label: 'Changer l\'icone', action: () => { setShowIconPicker(true); setShowColorPicker(false) } },
+    { label: t('workspace.rename'), action: handleStartRename },
+    { label: t('workspace.changeColor'), action: () => { setShowColorPicker(true); setShowIconPicker(false) } },
+    { label: t('workspace.changeIcon'), action: () => { setShowIconPicker(true); setShowColorPicker(false) } },
     { separator: true, label: '', action: () => {} },
-    { label: 'Ajouter un projet', action: handleAddProject },
+    { label: t('workspace.addExistingProject'), action: handleAddProject },
+    { label: t('workspace.createNewProject'), action: () => { setCreateProjectName(''); setCreateError(null); setShowCreateModal(true) } },
+    { label: t('workspace.addDbConnection'), action: handleAddDbConnection },
     { separator: true, label: '', action: () => {} },
-    { label: 'Supprimer', action: () => deleteWorkspace(workspace.id), danger: true },
+    { label: t('workspace.refresh'), action: () => refreshWorkspace(workspace.id) },
+    { separator: true, label: '', action: () => {} },
+    { label: t('workspace.export'), action: handleExportWorkspace },
+    { label: t('workspace.import'), action: handleImportWorkspace },
+    { separator: true, label: '', action: () => {} },
+    { label: t('workspace.delete'), action: () => deleteWorkspace(workspace.id), danger: true },
   ]
 
   return (
     <div
-      className={`workspace-item${isActive ? ' workspace-item--active' : ''}${isDragOver ? ' workspace-item--dragover' : ''}`}
+      className={`workspace-item${isActive ? ' workspace-item--active' : ''}${isDragOver ? ' workspace-item--dragover' : ''}${isFlashing ? ' workspace-item--flashing' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -202,16 +343,51 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
           <span className="workspace-item-name">{workspace.name}</span>
         )}
 
-        <button
-          className="workspace-item-add btn-icon"
-          onClick={(e) => {
-            e.stopPropagation()
-            handleAddProject()
-          }}
-          title="Ajouter un projet"
-        >
-          +
-        </button>
+        {workspaceClaudeStatus === 'working' && (
+          <span className="workspace-ia-tag workspace-ia-tag--working">{t('workspace.aiWorking')}</span>
+        )}
+        {workspaceClaudeStatus === 'finished' && (
+          <span className="workspace-ia-tag workspace-ia-tag--finished">{t('workspace.aiFinish')}</span>
+        )}
+
+        <div className="workspace-item-add-wrapper" ref={addMenuRef}>
+          <button
+            className="workspace-item-add btn-icon"
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowAddMenu((prev) => !prev)
+            }}
+            title={t('workspace.addCreateProject')}
+          >
+            +
+          </button>
+          {showAddMenu && (
+            <div className="workspace-add-menu">
+              <button
+                className="workspace-add-menu-item"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowAddMenu(false)
+                  handleAddProject()
+                }}
+              >
+                {t('workspace.addExistingProject')}
+              </button>
+              <button
+                className="workspace-add-menu-item"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowAddMenu(false)
+                  setCreateProjectName('')
+                  setCreateError(null)
+                  setShowCreateModal(true)
+                }}
+              >
+                {t('workspace.createNewProject')}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {showColorPicker && (
@@ -232,16 +408,16 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
           <button
             className={`workspace-icon-swatch${!workspace.icon ? ' workspace-icon-swatch--active' : ''}`}
             onClick={() => handleIconChange('')}
-            title="Aucune icone"
+            title={t('workspace.noIcon')}
           >
             <span className="workspace-item-color" style={{ backgroundColor: workspace.color, width: 10, height: 10 }} />
           </button>
-          {WORKSPACE_ICONS.map(({ icon, label }) => (
+          {WORKSPACE_ICON_KEYS.map(({ icon, key }) => (
             <button
               key={icon}
               className={`workspace-icon-swatch${workspace.icon === icon ? ' workspace-icon-swatch--active' : ''}`}
               onClick={() => handleIconChange(icon)}
-              title={label}
+              title={t(key)}
             >
               {icon}
             </button>
@@ -252,22 +428,143 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
       <div
         className={`workspace-item-projects${expanded ? ' workspace-item-projects--expanded' : ''}`}
       >
-        {projects.length === 0 ? (
+        {projects.length === 0 && wsConnections.length === 0 ? (
           <div className="workspace-item-empty">
             <button className="workspace-item-empty-btn" onClick={handleAddProject}>
-              + Ajouter un projet
+              {t('workspace.addExisting')}
+            </button>
+            <button className="workspace-item-empty-btn" onClick={() => { setCreateProjectName(''); setCreateError(null); setShowCreateModal(true) }}>
+              {t('workspace.createNewShort')}
             </button>
           </div>
         ) : (
-          projects.map((project) => (
-            <ProjectItem
-              key={project.id}
-              project={project}
-              isActive={activeProjectId === project.id}
-            />
-          ))
+          <>
+            {projects.map((project) => (
+              <ProjectItem
+                key={project.id}
+                project={project}
+                isActive={activeProjectId === project.id}
+              />
+            ))}
+            {wsConnections.map((conn) => {
+              const status = connectionStatuses[conn.id] ?? 'disconnected'
+              const tagColor = conn.environmentTag === 'custom'
+                ? 'var(--text-muted)'
+                : ENV_TAG_COLORS[conn.environmentTag]
+              const tagLabel = conn.environmentTag === 'custom'
+                ? (conn.customTagName ?? 'custom')
+                : conn.environmentTag
+
+              return (
+                <div
+                  key={conn.id}
+                  className="workspace-db-item"
+                  onClick={() => {
+                    setActiveWorkspace(workspace.id)
+                    setActiveConnection(conn.id)
+                    useViewStore.getState().setViewMode('database')
+                  }}
+                  onContextMenu={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setDbContextMenu({ x: e.clientX, y: e.clientY, connId: conn.id })
+                  }}
+                  title={`${conn.engine} — ${conn.name} (${tagLabel})`}
+                >
+                  <span className={`db-status-dot db-status-dot--sidebar db-status-dot--${status}`} />
+                  <span className="workspace-db-engine">{ENGINE_ICONS[conn.engine] ?? conn.engine.slice(0, 2).toUpperCase()}</span>
+                  <span className="workspace-db-name">{conn.name}</span>
+                  <span
+                    className="workspace-db-tag"
+                    style={{ background: tagColor, color: '#1e1e2e' }}
+                  >
+                    {tagLabel}
+                  </span>
+                </div>
+              )
+            })}
+          </>
         )}
       </div>
+
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">{t('workspace.createProjectTitle')}</div>
+            <div className="modal-body">
+              <p style={{ marginBottom: 10, color: 'var(--text-muted)', fontSize: 12 }}>
+                {t('workspace.chooseNameSelectParent')}
+              </p>
+              <input
+                ref={createInputRef}
+                className="workspace-create-project-input"
+                type="text"
+                placeholder={t('sidebar.projectNamePlaceholder')}
+                value={createProjectName}
+                onChange={(e) => { setCreateProjectName(e.target.value); setCreateError(null) }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && createProjectName.trim()) handleCreateProject(); if (e.key === 'Escape') setShowCreateModal(false) }}
+              />
+              {createError && <div className="workspace-create-project-error">{createError}</div>}
+            </div>
+            <div className="modal-footer">
+              <button className="modal-btn modal-btn--secondary" onClick={() => setShowCreateModal(false)}>
+                {t('common.cancel')}
+              </button>
+              <button
+                className="modal-btn modal-btn--primary"
+                onClick={handleCreateProject}
+                disabled={!createProjectName.trim()}
+              >
+                {t('sidebar.chooseLocationAndCreate')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {dbContextMenu && (() => {
+        const conn = wsConnections.find((c) => c.id === dbContextMenu.connId)
+        if (!conn) return null
+        const status = connectionStatuses[conn.id] ?? 'disconnected'
+        const isConnected = status === 'connected'
+
+        const dbMenuItems: ContextMenuItem[] = [
+          ...(isConnected
+            ? [{ label: t('db.disconnect'), action: () => disconnectDb(conn.id) }]
+            : [{ label: t('db.connect'), action: () => connectDb(conn.id) }]
+          ),
+          { separator: true, label: '', action: () => {} },
+          {
+            label: t('db.editConnection'),
+            action: () => {
+              setActiveWorkspace(workspace.id)
+              setActiveConnection(conn.id)
+              setPendingDbProjectPath(null)
+              useViewStore.getState().setViewMode('database')
+              // Signal edit via a small delay so the explorer is mounted
+              setTimeout(() => {
+                useDatabaseStore.getState().setActiveConnection(conn.id)
+                // The DatabaseExplorer's sidebar has an edit button; for now, navigate there
+              }, 50)
+            },
+          },
+          { separator: true, label: '', action: () => {} },
+          {
+            label: t('db.deleteConnection'),
+            action: () => deleteDbConnection(conn.id),
+            danger: true,
+          },
+        ]
+
+        return (
+          <ContextMenu
+            x={dbContextMenu.x}
+            y={dbContextMenu.y}
+            items={dbMenuItems}
+            onClose={() => setDbContextMenu(null)}
+          />
+        )
+      })()}
 
       {contextMenu && (
         <ContextMenu

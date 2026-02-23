@@ -18,6 +18,7 @@ interface UpdateState {
 interface UpdateActions {
   checkUpdates: () => Promise<void>
   installUpdate: (tool: string, scope: string, projectId?: string) => Promise<void>
+  uninstallUpdate: (tool: string) => Promise<void>
   clearUpdates: () => void
   clearInstallStatus: () => void
 }
@@ -34,7 +35,7 @@ export const useUpdateStore = create<UpdateStore>((set, get) => ({
   checkUpdates: async () => {
     set({ isChecking: true })
     try {
-      const updates: UpdateInfo[] = await window.theone.updates.check()
+      const updates: UpdateInfo[] = await window.mirehub.updates.check()
       set({ updates, lastChecked: Date.now() })
     } catch {
       // Silently fail — update check is not critical
@@ -46,9 +47,22 @@ export const useUpdateStore = create<UpdateStore>((set, get) => ({
   installUpdate: async (tool: string, scope: string, projectId?: string) => {
     set({ installingTool: tool, installStatus: null })
     try {
-      await window.theone.updates.install(tool, scope, projectId)
+      await window.mirehub.updates.install(tool, scope, projectId)
       set({ installStatus: { tool, success: true } })
       // Re-check after install
+      await get().checkUpdates()
+    } catch (err) {
+      set({ installStatus: { tool, success: false, error: String(err) } })
+    } finally {
+      set({ installingTool: null })
+    }
+  },
+
+  uninstallUpdate: async (tool: string) => {
+    set({ installingTool: tool, installStatus: null })
+    try {
+      await window.mirehub.updates.uninstall(tool)
+      set({ installStatus: { tool, success: true } })
       await get().checkUpdates()
     } catch (err) {
       set({ installStatus: { tool, success: false, error: String(err) } })

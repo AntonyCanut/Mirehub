@@ -26,69 +26,88 @@ function findNonClaudeSession(tree: PaneNode): string | null {
   return findNonClaudeSession(tree.children[0]) || findNonClaudeSession(tree.children[1])
 }
 
-export function ProjectToolbar() {
-  const { activeProjectId, projects } = useWorkspaceStore()
-  const { tabs, activeTabId } = useTerminalTabStore()
-  const [info, setInfo] = useState<ProjectInfo | null>(null)
+interface ProjectMakeInfo {
+  projectId: string
+  projectName: string
+  projectPath: string
+  gitBranch: string | null
+  targets: string[]
+}
 
-  const activeProject = projects.find((p) => p.id === activeProjectId)
+export function ProjectToolbar() {
+  const { activeWorkspaceId, projects } = useWorkspaceStore()
+  const { tabs, activeTabId } = useTerminalTabStore()
+  const [projectInfos, setProjectInfos] = useState<ProjectMakeInfo[]>([])
+
+  const workspaceProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
 
   useEffect(() => {
-    if (!activeProject) {
-      setInfo(null)
+    if (workspaceProjects.length === 0) {
+      setProjectInfos([])
       return
     }
-    window.theone.project.scanInfo(activeProject.path).then(setInfo).catch(() => setInfo(null))
-  }, [activeProject?.path])
+    Promise.all(
+      workspaceProjects.map(async (proj) => {
+        try {
+          const info: ProjectInfo = await window.mirehub.project.scanInfo(proj.path)
+          const targets = info.hasMakefile
+            ? info.makeTargets.filter((t) => !t.startsWith('_') && t !== '.PHONY')
+            : []
+          return {
+            projectId: proj.id,
+            projectName: proj.name,
+            projectPath: proj.path,
+            gitBranch: info.gitBranch,
+            targets,
+          } as ProjectMakeInfo
+        } catch {
+          return null
+        }
+      }),
+    ).then((results) => {
+      setProjectInfos(results.filter((r): r is ProjectMakeInfo => r !== null && r.targets.length > 0))
+    })
+  }, [workspaceProjects.map((p) => p.path).join(',')])
 
   const runMakeTarget = useCallback(
-    (target: string) => {
+    (projectPath: string, target: string) => {
       if (!activeTabId) return
       const tab = tabs.find((t) => t.id === activeTabId)
       if (!tab) return
 
       const sessionId = findTerminalSession(tab.paneTree, tab.activePaneId)
       if (sessionId) {
-        window.theone.terminal.write(sessionId, `make ${target}\n`)
+        const escapedPath = projectPath.replace(/'/g, "'\\''")
+        window.mirehub.terminal.write(sessionId, `cd '${escapedPath}' && make ${target}\n`)
       }
     },
     [activeTabId, tabs],
   )
 
-  if (!activeProject || !info) return null
-
-  const priorityTargets = ['dev', 'build', 'test', 'clean', 'install', 'lint', 'run', 'start']
-  const shownTargets = info.hasMakefile
-    ? priorityTargets.filter((t) => info.makeTargets.includes(t))
-    : []
-
-  if (shownTargets.length === 0 && !info.hasGit) return null
+  if (projectInfos.length === 0) return null
 
   return (
     <div className="project-toolbar">
-      {info.hasGit && (
-        <span className="project-toolbar-git">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M15.698 7.287L8.712.302a1.03 1.03 0 0 0-1.457 0l-1.45 1.45 1.84 1.84a1.223 1.223 0 0 1 1.548 1.56l1.773 1.774a1.224 1.224 0 1 1-.733.68L8.535 5.908v4.27a1.224 1.224 0 1 1-1.008-.036V5.822a1.224 1.224 0 0 1-.664-1.605L5.04 2.394.302 7.13a1.03 1.03 0 0 0 0 1.457l6.986 6.986a1.03 1.03 0 0 0 1.457 0l6.953-6.953a1.03 1.03 0 0 0 0-1.457" />
-          </svg>
-          <span>{info.gitBranch || 'git'}</span>
-        </span>
-      )}
-      {shownTargets.length > 0 && (
-        <div className="project-toolbar-make">
-          {shownTargets.map((target) => (
-            <button
-              key={target}
-              className="project-toolbar-btn"
-              onClick={() => runMakeTarget(target)}
-              title={`make ${target}`}
-            >
-              make {target}
-            </button>
-          ))}
+      {projectInfos.map((pi) => (
+        <div key={pi.projectId} className="project-toolbar-group">
+          <span className="project-toolbar-group-label">
+            {pi.projectName}
+            {pi.gitBranch && <span className="project-toolbar-branch"> ({pi.gitBranch})</span>}
+          </span>
+          <div className="project-toolbar-make">
+            {pi.targets.map((target) => (
+              <button
+                key={target}
+                className="project-toolbar-btn"
+                onClick={() => runMakeTarget(pi.projectPath, target)}
+                title={`make ${target} (${pi.projectName})`}
+              >
+                {target}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-      <span className="project-toolbar-name">{activeProject.name}</span>
+      ))}
     </div>
   )
 }

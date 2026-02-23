@@ -34,6 +34,16 @@ const TOOLS_TO_CHECK: ToolCheck[] = [
     checkCommand: 'git',
     checkArgs: ['--version'],
   },
+  {
+    name: 'rtk',
+    checkCommand: 'rtk',
+    checkArgs: ['--version'],
+  },
+  {
+    name: 'peon-ping',
+    checkCommand: 'peon-ping',
+    checkArgs: ['--version'],
+  },
 ]
 
 async function getVersion(command: string, args: string[]): Promise<string | null> {
@@ -94,7 +104,19 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
 
   for (const tool of TOOLS_TO_CHECK) {
     const currentVersion = await getVersion(tool.checkCommand, tool.checkArgs)
-    if (!currentVersion) continue
+
+    if (!currentVersion) {
+      // Tool not installed
+      results.push({
+        tool: tool.name,
+        currentVersion: '',
+        latestVersion: '',
+        updateAvailable: false,
+        installed: false,
+        scope: 'global',
+      })
+      continue
+    }
 
     let latestVersion: string | null = null
 
@@ -105,6 +127,11 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
       latestVersion = await getLatestNpmVersion('npm')
     } else if (tool.name === 'claude') {
       latestVersion = await getLatestNpmVersion('@anthropic-ai/claude-code')
+    } else if (tool.name === 'rtk') {
+      // rtk is a cargo crate — no easy remote version check, skip
+      latestVersion = null
+    } else if (tool.name === 'peon-ping') {
+      latestVersion = await getLatestNpmVersion('peon-ping')
     }
 
     results.push({
@@ -112,6 +139,7 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
       currentVersion: extractVersion(currentVersion),
       latestVersion: latestVersion ? extractVersion(latestVersion) : extractVersion(currentVersion),
       updateAvailable: latestVersion !== null && compareVersions(currentVersion, latestVersion),
+      installed: true,
       scope: 'global',
     })
   }
@@ -134,7 +162,11 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
 
       const sendStatus = (status: string, progress?: number) => {
         for (const win of windows) {
-          win.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { tool, scope, status, progress })
+          try {
+            if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+              win.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { tool, scope, status, progress })
+            }
+          } catch { /* render frame disposed */ }
         }
       }
 
@@ -157,6 +189,14 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
             command = 'npm'
             args = ['install', '-g', '@anthropic-ai/claude-code@latest']
             break
+          case 'rtk':
+            command = 'cargo'
+            args = ['install', 'rtk-token-killer']
+            break
+          case 'peon-ping':
+            command = 'npm'
+            args = ['install', '-g', 'peon-ping']
+            break
           default:
             throw new Error(`Unknown tool: ${tool}`)
         }
@@ -164,6 +204,52 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
         sendStatus('installing', 50)
         await execFileAsync(command, args, { timeout: 120000 })
         sendStatus('completed', 100)
+
+        return { success: true }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        sendStatus('failed')
+        return { success: false, error: message }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.UPDATE_UNINSTALL,
+    async (_event, { tool }: { tool: string }) => {
+      const windows = BrowserWindow.getAllWindows()
+
+      const sendStatus = (status: string) => {
+        for (const win of windows) {
+          try {
+            if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+              win.webContents.send(IPC_CHANNELS.UPDATE_STATUS, { tool, scope: 'global', status })
+            }
+          } catch { /* render frame disposed */ }
+        }
+      }
+
+      sendStatus('uninstalling')
+
+      try {
+        let command: string
+        let args: string[]
+
+        switch (tool) {
+          case 'rtk':
+            command = 'cargo'
+            args = ['uninstall', 'rtk-token-killer']
+            break
+          case 'peon-ping':
+            command = 'npm'
+            args = ['uninstall', '-g', 'peon-ping']
+            break
+          default:
+            throw new Error(`Cannot uninstall core tool: ${tool}`)
+        }
+
+        await execFileAsync(command, args, { timeout: 120000 })
+        sendStatus('completed')
 
         return { success: true }
       } catch (error) {

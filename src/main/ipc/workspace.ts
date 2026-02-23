@@ -1,7 +1,10 @@
-import { IpcMain } from 'electron'
+import { IpcMain, dialog } from 'electron'
 import { v4 as uuid } from 'uuid'
-import { IPC_CHANNELS, Workspace } from '../../shared/types'
+import fs from 'fs'
+import path from 'path'
+import { IPC_CHANNELS, Workspace, WorkspaceExportData } from '../../shared/types'
 import { StorageService } from '../services/storage'
+import { deleteWorkspaceEnv, renameWorkspaceEnv } from './workspaceEnv'
 
 const storage = new StorageService()
 
@@ -31,13 +34,107 @@ export function registerWorkspaceHandlers(ipcMain: IpcMain): void {
     async (_event, data: { id: string } & Partial<Workspace>) => {
       const workspace = storage.getWorkspace(data.id)
       if (!workspace) throw new Error(`Workspace ${data.id} not found`)
+      const oldName = workspace.name
       const updated = { ...workspace, ...data, updatedAt: Date.now() }
       storage.updateWorkspace(updated)
+
+      // If name changed, rename the env directory on disk
+      if (data.name && data.name !== oldName) {
+        renameWorkspaceEnv(oldName, data.name)
+      }
+
       return updated
     },
   )
 
   ipcMain.handle(IPC_CHANNELS.WORKSPACE_DELETE, async (_event, { id }: { id: string }) => {
+    const workspace = storage.getWorkspace(id)
     storage.deleteWorkspace(id)
+
+    // Clean up workspace env directory on disk
+    if (workspace) {
+      deleteWorkspaceEnv(workspace.name)
+    }
+  })
+
+  // Workspace export
+  ipcMain.handle(
+    IPC_CHANNELS.WORKSPACE_EXPORT,
+    async (_event, { workspaceId }: { workspaceId: string }) => {
+      const workspace = storage.getWorkspace(workspaceId)
+      if (!workspace) return { success: false, error: 'Workspace not found' }
+
+      const projects = storage.getProjects(workspaceId)
+      const exportData: WorkspaceExportData = {
+        name: workspace.name,
+        color: workspace.color,
+        icon: workspace.icon,
+        projectPaths: projects.map((p) => p.path),
+        exportedAt: Date.now(),
+      }
+
+      const result = await dialog.showSaveDialog({
+        title: 'Exporter le workspace',
+        defaultPath: `${workspace.name}.json`,
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+      })
+
+      if (result.canceled || !result.filePath) return { success: false, error: 'cancelled' }
+
+      fs.writeFileSync(result.filePath, JSON.stringify(exportData, null, 2), 'utf-8')
+      return { success: true }
+    },
+  )
+
+  // Workspace import
+  ipcMain.handle(IPC_CHANNELS.WORKSPACE_IMPORT, async () => {
+    const result = await dialog.showOpenDialog({
+      title: 'Importer un workspace',
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+      properties: ['openFile'],
+    })
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, error: 'cancelled' }
+    }
+
+    try {
+      const raw = fs.readFileSync(result.filePaths[0]!, 'utf-8')
+      const data: WorkspaceExportData = JSON.parse(raw)
+
+      // Create workspace
+      const workspace: Workspace = {
+        id: uuid(),
+        name: data.name,
+        color: data.color,
+        icon: data.icon,
+        projectIds: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      }
+      storage.addWorkspace(workspace)
+
+      // Add projects that exist on disk
+      for (const projectPath of data.projectPaths) {
+        if (fs.existsSync(projectPath)) {
+          const project = {
+            id: uuid(),
+            name: path.basename(projectPath),
+            path: projectPath,
+            hasClaude: fs.existsSync(path.join(projectPath, '.claude')),
+            hasGit: fs.existsSync(path.join(projectPath, '.git')),
+            workspaceId: workspace.id,
+            createdAt: Date.now(),
+          }
+          storage.addProject(project)
+          workspace.projectIds.push(project.id)
+        }
+      }
+
+      storage.updateWorkspace(workspace)
+      return { success: true, workspace }
+    } catch {
+      return { success: false, error: 'Invalid workspace file' }
+    }
   })
 }

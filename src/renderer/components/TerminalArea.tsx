@@ -1,10 +1,12 @@
 import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
+import { useI18n } from '../lib/i18n'
 import { SplitContainer } from './SplitContainer'
 import { ProjectToolbar } from './ProjectToolbar'
 
 export function TerminalArea() {
+  const { t } = useI18n()
   const {
     tabs: allTabs,
     activeTabId,
@@ -22,7 +24,7 @@ export function TerminalArea() {
     focusDirection,
   } = useTerminalTabStore()
 
-  const { activeWorkspaceId, activeProjectId, projects } = useWorkspaceStore()
+  const { activeWorkspaceId, activeProjectId, projects, workspaces } = useWorkspaceStore()
 
   // Filter tabs for the active workspace
   const tabs = useMemo(
@@ -31,13 +33,39 @@ export function TerminalArea() {
   )
 
   const activeProject = projects.find((p) => p.id === activeProjectId)
-  const projectCwd = activeProject?.path || ''
+  const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId)
+
+  // Resolve workspace env path for new terminal cwd
+  const [envCwd, setEnvCwd] = useState('')
+  useEffect(() => {
+    if (!activeWorkspace || !activeWorkspaceId) {
+      setEnvCwd(activeProject?.path || '')
+      return
+    }
+    const wsProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
+    if (wsProjects.length === 0) {
+      setEnvCwd(activeProject?.path || '')
+      return
+    }
+    window.mirehub.workspaceEnv.setup(activeWorkspace.name, wsProjects.map((p) => p.path))
+      .then((result: { success: boolean; envPath?: string }) => {
+        if (result?.success && result.envPath) {
+          setEnvCwd(result.envPath)
+        } else {
+          setEnvCwd(activeProject?.path || '')
+        }
+      })
+      .catch(() => setEnvCwd(activeProject?.path || ''))
+  }, [activeWorkspaceId, activeWorkspace?.name, activeProject?.path, projects.length])
 
   const [editingTabId, setEditingTabId] = useState<string | null>(null)
   const [editingLabel, setEditingLabel] = useState('')
   const editInputRef = useRef<HTMLInputElement>(null)
   const dragIndexRef = useRef<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+
+  // Terminal font size (shared across all terminals)
+  const [terminalFontSize, setTerminalFontSize] = useState(14)
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -47,8 +75,8 @@ export function TerminalArea() {
       // Cmd+T: new tab
       if (isMeta && !e.shiftKey && e.key === 't') {
         e.preventDefault()
-        if (activeWorkspaceId && projectCwd) {
-          createTab(activeWorkspaceId, projectCwd)
+        if (activeWorkspaceId && envCwd) {
+          createTab(activeWorkspaceId, envCwd)
         }
         return
       }
@@ -137,6 +165,27 @@ export function TerminalArea() {
         }
         return
       }
+
+      // Cmd+Plus: increase terminal font size
+      if (isMeta && (e.key === '=' || e.key === '+')) {
+        e.preventDefault()
+        setTerminalFontSize((prev) => Math.min(prev + 1, 32))
+        return
+      }
+
+      // Cmd+Minus: decrease terminal font size
+      if (isMeta && e.key === '-') {
+        e.preventDefault()
+        setTerminalFontSize((prev) => Math.max(prev - 1, 8))
+        return
+      }
+
+      // Cmd+0: reset terminal font size
+      if (isMeta && e.key === '0') {
+        e.preventDefault()
+        setTerminalFontSize(14)
+        return
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -144,7 +193,7 @@ export function TerminalArea() {
   }, [
     activeTabId,
     activeWorkspaceId,
-    projectCwd,
+    envCwd,
     createTab,
     closePane,
     activateNext,
@@ -237,19 +286,19 @@ export function TerminalArea() {
   )
 
   const handleNewTab = useCallback(() => {
-    if (activeWorkspaceId && projectCwd) {
-      createTab(activeWorkspaceId, projectCwd)
+    if (activeWorkspaceId && envCwd) {
+      createTab(activeWorkspaceId, envCwd)
     }
-  }, [activeWorkspaceId, projectCwd, createTab])
+  }, [activeWorkspaceId, envCwd, createTab])
 
   if (!activeWorkspaceId) {
     return (
       <main className="terminal-area">
         <div className="terminal-content">
           <div className="terminal-empty">
-            <p>Aucun workspace sélectionné</p>
+            <p>{t('terminal.noWorkspace')}</p>
             <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              Sélectionnez ou créez un workspace pour ouvrir un terminal.
+              {t('terminal.selectOrCreate')}
             </p>
           </div>
         </div>
@@ -265,7 +314,7 @@ export function TerminalArea() {
             key={tab.id}
             className={`tab ${tab.id === activeTabId ? 'active' : ''} ${
               dragOverIndex === index ? 'tab-drag-over' : ''
-            }`}
+            }${tab.color === '#fab387' ? ' tab--streaming' : ''}`}
             onClick={() => setActiveTab(tab.id)}
             onDoubleClick={() => handleDoubleClick(tab.id, tab.label)}
             draggable={editingTabId !== tab.id}
@@ -295,14 +344,14 @@ export function TerminalArea() {
             )}
             <button
               className="tab-close"
-              title="Fermer"
+              title={t('common.close')}
               onClick={(e) => handleTabClose(e, tab.id)}
             >
               x
             </button>
           </div>
         ))}
-        <button className="btn-icon tab-add" title="Nouveau terminal (Cmd+T)" onClick={handleNewTab}>
+        <button className="btn-icon tab-add" title={t('terminal.newTerminal')} onClick={handleNewTab}>
           +
         </button>
       </div>
@@ -319,14 +368,14 @@ export function TerminalArea() {
                   : 'none',
             }}
           >
-            <SplitContainer tabId={tab.id} />
+            <SplitContainer tabId={tab.id} fontSize={terminalFontSize} />
           </div>
         ))}
         {tabs.length === 0 && (
           <div className="terminal-empty">
-            <p>Aucun terminal ouvert</p>
+            <p>{t('terminal.noTerminalOpen')}</p>
             <button className="terminal-empty-btn" onClick={handleNewTab}>
-              Nouveau terminal (Cmd+T)
+              {t('terminal.newTerminal')}
             </button>
           </div>
         )}

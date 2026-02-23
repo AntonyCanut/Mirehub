@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { DiffEditor } from '@monaco-editor/react'
 import { useViewStore } from '../lib/stores/viewStore'
+import { useI18n } from '../lib/i18n'
 
 export function FileDiffViewer() {
+  const { t } = useI18n()
   const { diffFiles, clearSelection, setViewMode } = useViewStore()
   const [originalContent, setOriginalContent] = useState<string>('')
   const [modifiedContent, setModifiedContent] = useState<string>('')
@@ -14,16 +16,16 @@ export function FileDiffViewer() {
     setLoading(true)
     setError(null)
     Promise.all([
-      window.theone.fs.readFile(diffFiles[0]),
-      window.theone.fs.readFile(diffFiles[1]),
+      window.mirehub.fs.readFile(diffFiles[0]),
+      window.mirehub.fs.readFile(diffFiles[1]),
     ])
       .then(([left, right]) => {
         if (left.error) {
-          setError(`Erreur lecture ${diffFiles[0]}: ${left.error}`)
+          setError(t('diff.readError', { file: diffFiles[0], error: left.error }))
           return
         }
         if (right.error) {
-          setError(`Erreur lecture ${diffFiles[1]}: ${right.error}`)
+          setError(t('diff.readError', { file: diffFiles[1], error: right.error }))
           return
         }
         setOriginalContent(left.content ?? '')
@@ -51,7 +53,7 @@ export function FileDiffViewer() {
   }
 
   if (!diffFiles) {
-    return <div className="file-viewer-empty">Aucun fichier a comparer</div>
+    return <div className="file-viewer-empty">{t('diff.noFiles')}</div>
   }
 
   const leftName = diffFiles[0].split('/').pop() ?? diffFiles[0]
@@ -62,18 +64,18 @@ export function FileDiffViewer() {
     <div className="file-diff-viewer">
       <div className="file-diff-header">
         <span className="file-diff-name">{leftName}</span>
-        <span className="file-diff-vs">vs</span>
+        <span className="file-diff-vs">{t('common.vs')}</span>
         <span className="file-diff-name">{rightName}</span>
         <button
           className="file-viewer-close btn-icon"
           onClick={handleClose}
-          title="Fermer"
+          title={t('common.close')}
         >
           &times;
         </button>
       </div>
       <div className="file-diff-editor">
-        {loading && <div className="file-viewer-loading">Chargement...</div>}
+        {loading && <div className="file-viewer-loading">{t('common.loading')}</div>}
         {error && <div className="file-viewer-error">{error}</div>}
         {!loading && !error && (
           <DiffEditor

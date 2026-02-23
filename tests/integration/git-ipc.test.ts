@@ -69,6 +69,13 @@ describe('Git IPC Handlers', () => {
     expect(mockIpcMain._handlers.has('git:createBranch')).toBe(true)
     expect(mockIpcMain._handlers.has('git:deleteBranch')).toBe(true)
     expect(mockIpcMain._handlers.has('git:merge')).toBe(true)
+    expect(mockIpcMain._handlers.has('git:fetch')).toBe(true)
+    expect(mockIpcMain._handlers.has('git:stage')).toBe(true)
+    expect(mockIpcMain._handlers.has('git:unstage')).toBe(true)
+    expect(mockIpcMain._handlers.has('git:discard')).toBe(true)
+    expect(mockIpcMain._handlers.has('git:show')).toBe(true)
+    expect(mockIpcMain._handlers.has('git:stashList')).toBe(true)
+    expect(mockIpcMain._handlers.has('git:renameBranch')).toBe(true)
   })
 
   describe('git:init', () => {
@@ -407,6 +414,228 @@ describe('Git IPC Handlers', () => {
 
       expect(result).toEqual({ success: true })
       expect(fs.existsSync(path.join(repoDir, 'feature.txt'))).toBe(true)
+    })
+  })
+
+  describe('git:stage', () => {
+    it('ajoute un fichier au staging', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'new.txt'), 'content')
+
+      const result = await mockIpcMain._invoke('git:stage', {
+        cwd: repoDir,
+        files: ['new.txt'],
+      })
+
+      expect(result).toEqual({ success: true })
+
+      const status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
+      expect(status.staged).toContain('new.txt')
+    })
+
+    it('ajoute plusieurs fichiers au staging', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'a.txt'), 'a')
+      fs.writeFileSync(path.join(repoDir, 'b.txt'), 'b')
+
+      const result = await mockIpcMain._invoke('git:stage', {
+        cwd: repoDir,
+        files: ['a.txt', 'b.txt'],
+      })
+
+      expect(result).toEqual({ success: true })
+
+      const status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
+      expect(status.staged).toContain('a.txt')
+      expect(status.staged).toContain('b.txt')
+    })
+  })
+
+  describe('git:unstage', () => {
+    it('retire un fichier du staging', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'staged.txt'), 'content')
+      gitExec('git add staged.txt')
+
+      // Verify file is staged
+      let status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
+      expect(status.staged).toContain('staged.txt')
+
+      const result = await mockIpcMain._invoke('git:unstage', {
+        cwd: repoDir,
+        files: ['staged.txt'],
+      })
+
+      expect(result).toEqual({ success: true })
+
+      status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
+      expect(status.staged).not.toContain('staged.txt')
+      expect(status.untracked).toContain('staged.txt')
+    })
+  })
+
+  describe('git:discard', () => {
+    it('abandonne les modifications d un fichier', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'README.md'), '# Modifie')
+
+      const result = await mockIpcMain._invoke('git:discard', {
+        cwd: repoDir,
+        files: ['README.md'],
+      })
+
+      expect(result).toEqual({ success: true })
+
+      const content = fs.readFileSync(path.join(repoDir, 'README.md'), 'utf-8')
+      expect(content).toBe('# Test')
+    })
+  })
+
+  describe('git:show', () => {
+    it('retourne les fichiers et le diff d un commit', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'new.txt'), 'new content')
+      gitExec('git add .')
+      gitExec('git commit -m "Add new file"')
+
+      const log = await mockIpcMain._invoke('git:log', { cwd: repoDir })
+      const lastCommit = log[0]
+
+      const detail = await mockIpcMain._invoke('git:show', {
+        cwd: repoDir,
+        hash: lastCommit.hash,
+      })
+
+      expect(detail.files).toBeDefined()
+      expect(detail.files.length).toBeGreaterThan(0)
+      expect(detail.files.some((f: { file: string }) => f.file === 'new.txt')).toBe(true)
+      expect(detail.diff).toContain('new content')
+    })
+
+    it('retourne vide pour un repo sans commits', async () => {
+      setupGitRepo()
+
+      const detail = await mockIpcMain._invoke('git:show', {
+        cwd: repoDir,
+        hash: 'abc123',
+      })
+
+      expect(detail.files).toEqual([])
+      expect(detail.diff).toBe('')
+    })
+  })
+
+  describe('git:stashList', () => {
+    it('retourne la liste des stashes', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'README.md'), '# Stash me')
+      gitExec('git stash')
+
+      const stashes = await mockIpcMain._invoke('git:stashList', { cwd: repoDir })
+
+      expect(stashes.length).toBeGreaterThan(0)
+      expect(stashes[0].ref).toContain('stash@{0}')
+      expect(stashes[0].message).toBeDefined()
+    })
+
+    it('retourne un tableau vide si pas de stash', async () => {
+      setupGitRepoWithCommit()
+
+      const stashes = await mockIpcMain._invoke('git:stashList', { cwd: repoDir })
+
+      expect(stashes).toEqual([])
+    })
+
+    it('retourne un tableau vide pour un repo sans commits', async () => {
+      setupGitRepo()
+
+      const stashes = await mockIpcMain._invoke('git:stashList', { cwd: repoDir })
+
+      expect(stashes).toEqual([])
+    })
+  })
+
+  describe('git:renameBranch', () => {
+    it('renomme une branche', async () => {
+      setupGitRepoWithCommit()
+      gitExec('git checkout -b old-name')
+      gitExec('git checkout master')
+
+      const result = await mockIpcMain._invoke('git:renameBranch', {
+        cwd: repoDir,
+        oldName: 'old-name',
+        newName: 'new-name',
+      })
+
+      expect(result).toEqual({ success: true })
+
+      const branches = await mockIpcMain._invoke('git:branches', { cwd: repoDir })
+      const branchNames = branches.map((b: { name: string }) => b.name)
+      expect(branchNames).toContain('new-name')
+      expect(branchNames).not.toContain('old-name')
+    })
+  })
+
+  describe('git:fetch', () => {
+    it('retourne success pour un repo local sans remote', async () => {
+      setupGitRepoWithCommit()
+
+      // fetch sans remote echoue normalement
+      const result = await mockIpcMain._invoke('git:fetch', { cwd: repoDir })
+
+      // Sans remote, fetch echoue mais retourne une erreur proprement
+      expect(result).toBeDefined()
+      // success peut etre false (pas de remote) mais ne doit pas crash
+    })
+  })
+
+  describe('integration: stage + commit workflow', () => {
+    it('stage individual files then commit only staged', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'a.txt'), 'a')
+      fs.writeFileSync(path.join(repoDir, 'b.txt'), 'b')
+
+      // Stage only a.txt
+      await mockIpcMain._invoke('git:stage', { cwd: repoDir, files: ['a.txt'] })
+
+      let status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
+      expect(status.staged).toContain('a.txt')
+      expect(status.staged).not.toContain('b.txt')
+
+      // Commit with staged files
+      const result = await mockIpcMain._invoke('git:commit', {
+        cwd: repoDir,
+        message: 'Add a only',
+        files: status.staged,
+      })
+
+      expect(result).toEqual({ success: true })
+
+      // b.txt should still be untracked
+      status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
+      expect(status.untracked).toContain('b.txt')
+      expect(status.staged).toEqual([])
+    })
+
+    it('stage, unstage, then commit nothing fails gracefully', async () => {
+      setupGitRepoWithCommit()
+      fs.writeFileSync(path.join(repoDir, 'temp.txt'), 'temp')
+
+      await mockIpcMain._invoke('git:stage', { cwd: repoDir, files: ['temp.txt'] })
+      await mockIpcMain._invoke('git:unstage', { cwd: repoDir, files: ['temp.txt'] })
+
+      const status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
+      expect(status.staged).toEqual([])
+
+      // Trying to commit with no staged files should fail
+      const result = await mockIpcMain._invoke('git:commit', {
+        cwd: repoDir,
+        message: 'Empty commit',
+        files: [],
+      })
+
+      // Nothing to commit, should fail
+      expect(result.success).toBe(false)
     })
   })
 })

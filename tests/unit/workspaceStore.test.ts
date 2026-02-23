@@ -21,7 +21,7 @@ const mockProjectApi = {
 const mockTheone = {
   workspace: mockWorkspaceApi,
   project: mockProjectApi,
-  workspaceEnv: { setup: vi.fn(), getPath: vi.fn() },
+  workspaceEnv: { setup: vi.fn(), getPath: vi.fn(), delete: vi.fn() },
 }
 
 vi.stubGlobal('window', { theone: mockTheone })
@@ -170,12 +170,27 @@ describe('useWorkspaceStore', () => {
       useWorkspaceStore.setState({ workspaces: [ws] })
       mockProjectApi.selectDir.mockResolvedValue('/tmp/test')
       mockProjectApi.add.mockResolvedValue(project)
+      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       const result = await useWorkspaceStore.getState().addProject('ws-1')
 
       expect(result).toEqual(project)
       expect(useWorkspaceStore.getState().projects).toHaveLength(1)
       expect(useWorkspaceStore.getState().workspaces[0]!.projectIds).toContain('p-1')
+    })
+
+    it('setup workspace env apres ajout de projet', async () => {
+      const ws = makeWorkspace()
+      const project = makeProject()
+      useWorkspaceStore.setState({ workspaces: [ws] })
+      mockProjectApi.selectDir.mockResolvedValue('/tmp/test')
+      mockProjectApi.add.mockResolvedValue(project)
+      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+
+      await useWorkspaceStore.getState().addProject('ws-1')
+
+      // Env should be set up with workspace name, not ID
+      expect(mockTheone.workspaceEnv.setup).toHaveBeenCalledWith('Test Workspace', ['/tmp/test'])
     })
 
     it('retourne null si l utilisateur annule la selection', async () => {
@@ -194,6 +209,7 @@ describe('useWorkspaceStore', () => {
       const project = makeProject()
       useWorkspaceStore.setState({ workspaces: [ws], projects: [project] })
       mockProjectApi.remove.mockResolvedValue(undefined)
+      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       await useWorkspaceStore.getState().removeProject('p-1')
 
@@ -205,10 +221,50 @@ describe('useWorkspaceStore', () => {
       const project = makeProject()
       useWorkspaceStore.setState({ projects: [project], activeProjectId: 'p-1', workspaces: [makeWorkspace({ projectIds: ['p-1'] })] })
       mockProjectApi.remove.mockResolvedValue(undefined)
+      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
 
       await useWorkspaceStore.getState().removeProject('p-1')
 
       expect(useWorkspaceStore.getState().activeProjectId).toBeNull()
+    })
+  })
+
+  describe('setupWorkspaceEnv', () => {
+    it('setup env avec le nom du workspace (pas l id)', async () => {
+      const ws = makeWorkspace({ id: 'ws-1', name: 'Mon Workspace' })
+      const project = makeProject({ workspaceId: 'ws-1' })
+      useWorkspaceStore.setState({ workspaces: [ws], projects: [project] })
+      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/home/user/.workspaces/Mon Workspace' })
+
+      const result = await useWorkspaceStore.getState().setupWorkspaceEnv('ws-1')
+
+      expect(mockTheone.workspaceEnv.setup).toHaveBeenCalledWith('Mon Workspace', ['/tmp/test'])
+      expect(result).toBe('/home/user/.workspaces/Mon Workspace')
+    })
+
+    it('retourne null si le workspace n existe pas', async () => {
+      const result = await useWorkspaceStore.getState().setupWorkspaceEnv('ws-inexistant')
+      expect(result).toBeNull()
+    })
+
+    it('retourne null si le workspace n a pas de projets', async () => {
+      const ws = makeWorkspace()
+      useWorkspaceStore.setState({ workspaces: [ws], projects: [] })
+
+      const result = await useWorkspaceStore.getState().setupWorkspaceEnv('ws-1')
+      expect(result).toBeNull()
+    })
+
+    it('setup env meme avec un seul projet', async () => {
+      const ws = makeWorkspace()
+      const project = makeProject()
+      useWorkspaceStore.setState({ workspaces: [ws], projects: [project] })
+      mockTheone.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+
+      const result = await useWorkspaceStore.getState().setupWorkspaceEnv('ws-1')
+
+      expect(result).toBe('/tmp/env')
+      expect(mockTheone.workspaceEnv.setup).toHaveBeenCalledOnce()
     })
   })
 

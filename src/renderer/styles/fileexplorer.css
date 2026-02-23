@@ -24,10 +24,33 @@
   gap: 2px;
 }
 
+.file-explorer-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .file-explorer-title {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.file-explorer-sort {
+  font-size: 11px;
+  padding: 1px 4px;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.file-explorer-sort:focus {
+  border-color: var(--accent);
 }
 
 .file-explorer-path {
@@ -123,6 +146,18 @@
   height: 24px;
   display: flex;
   align-items: center;
+}
+
+.file-tree-size {
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: 'Menlo', monospace;
+}
+
+.file-tree-row--creating {
+  background: var(--bg-surface);
 }
 
 .file-tree-children {

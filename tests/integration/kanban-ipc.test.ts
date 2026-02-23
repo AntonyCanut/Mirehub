@@ -6,7 +6,6 @@ import { createMockIpcMain } from '../mocks/electron'
 
 const TEST_DIR = path.join(os.tmpdir(), `.theone-kanban-ipc-test-${process.pid}-${Date.now()}`)
 const dataDir = path.join(TEST_DIR, '.theone')
-const workspacesDir = path.join(TEST_DIR, '.workspaces')
 
 vi.mock('os', async () => {
   const actual = await vi.importActual<typeof import('os')>('os')
@@ -37,10 +36,6 @@ describe('Kanban IPC Handlers', () => {
     }
     fs.mkdirSync(dataDir, { recursive: true })
 
-    if (fs.existsSync(workspacesDir)) {
-      fs.rmSync(workspacesDir, { recursive: true, force: true })
-    }
-
     const { registerKanbanHandlers } = await import('../../src/main/ipc/kanban')
 
     mockIpcMain = createMockIpcMain()
@@ -61,14 +56,13 @@ describe('Kanban IPC Handlers', () => {
   })
 
   it('liste les taches (vide au depart)', async () => {
-    const result = await mockIpcMain._invoke('kanban:list', { projectPath: TEST_DIR })
+    const result = await mockIpcMain._invoke('kanban:list', { workspaceId: 'ws-1' })
     expect(result).toEqual([])
   })
 
   it('cree une tache avec statut par defaut TODO', async () => {
     const task = await mockIpcMain._invoke('kanban:create', {
-      projectPath: TEST_DIR,
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'Ma tache',
       description: 'Description de la tache',
       priority: 'medium',
@@ -76,7 +70,7 @@ describe('Kanban IPC Handlers', () => {
 
     expect(task).toMatchObject({
       id: 'kanban-uuid-1',
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'Ma tache',
       description: 'Description de la tache',
       status: 'TODO',
@@ -88,8 +82,7 @@ describe('Kanban IPC Handlers', () => {
 
   it('cree une tache avec un statut specifique', async () => {
     const task = await mockIpcMain._invoke('kanban:create', {
-      projectPath: TEST_DIR,
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'En cours',
       description: 'Deja commencee',
       priority: 'high',
@@ -99,45 +92,37 @@ describe('Kanban IPC Handlers', () => {
     expect(task.status).toBe('WORKING')
   })
 
-  it('filtre les taches par projectPath', async () => {
-    const dir1 = path.join(TEST_DIR, 'proj1')
-    const dir2 = path.join(TEST_DIR, 'proj2')
-    fs.mkdirSync(dir1, { recursive: true })
-    fs.mkdirSync(dir2, { recursive: true })
-
+  it('filtre les taches par workspaceId', async () => {
     await mockIpcMain._invoke('kanban:create', {
-      projectPath: dir1,
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'Tache 1',
       description: '',
       priority: 'low',
     })
     await mockIpcMain._invoke('kanban:create', {
-      projectPath: dir2,
-      projectId: 'p-2',
+      workspaceId: 'ws-2',
       title: 'Tache 2',
       description: '',
       priority: 'low',
     })
 
-    const p1Tasks = await mockIpcMain._invoke('kanban:list', { projectPath: dir1 })
-    const p2Tasks = await mockIpcMain._invoke('kanban:list', { projectPath: dir2 })
+    const ws1Tasks = await mockIpcMain._invoke('kanban:list', { workspaceId: 'ws-1' })
+    const ws2Tasks = await mockIpcMain._invoke('kanban:list', { workspaceId: 'ws-2' })
 
-    expect(p1Tasks).toHaveLength(1)
-    expect(p2Tasks).toHaveLength(1)
+    expect(ws1Tasks).toHaveLength(1)
+    expect(ws2Tasks).toHaveLength(1)
   })
 
   it('met a jour une tache existante', async () => {
     const task = await mockIpcMain._invoke('kanban:create', {
-      projectPath: TEST_DIR,
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'Original',
       description: 'Desc',
       priority: 'medium',
     })
 
     const updated = await mockIpcMain._invoke('kanban:update', {
-      projectPath: TEST_DIR,
+      workspaceId: 'ws-1',
       id: task.id,
       status: 'DONE',
       title: 'Terminee',
@@ -150,35 +135,33 @@ describe('Kanban IPC Handlers', () => {
 
   it('echoue si on met a jour une tache inexistante', async () => {
     await expect(
-      mockIpcMain._invoke('kanban:update', { projectPath: TEST_DIR, id: 'inexistant', status: 'DONE' }),
+      mockIpcMain._invoke('kanban:update', { workspaceId: 'ws-1', id: 'inexistant', status: 'DONE' }),
     ).rejects.toThrow('Kanban task inexistant not found')
   })
 
   it('supprime une tache', async () => {
     const task = await mockIpcMain._invoke('kanban:create', {
-      projectPath: TEST_DIR,
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'A supprimer',
       description: '',
       priority: 'low',
     })
 
-    await mockIpcMain._invoke('kanban:delete', { id: task.id, projectPath: TEST_DIR })
+    await mockIpcMain._invoke('kanban:delete', { id: task.id, workspaceId: 'ws-1' })
 
-    const list = await mockIpcMain._invoke('kanban:list', { projectPath: TEST_DIR })
+    const list = await mockIpcMain._invoke('kanban:list', { workspaceId: 'ws-1' })
     expect(list).toHaveLength(0)
   })
 
   it('persiste les taches sur disque', async () => {
     await mockIpcMain._invoke('kanban:create', {
-      projectPath: TEST_DIR,
-      projectId: 'p-1',
+      workspaceId: 'ws-1',
       title: 'Persistante',
       description: '',
       priority: 'critical',
     })
 
-    const kanbanPath = path.join(workspacesDir, 'kanban.json')
+    const kanbanPath = path.join(TEST_DIR, '.theone', 'kanban', 'ws-1.json')
     const raw = JSON.parse(fs.readFileSync(kanbanPath, 'utf-8'))
     expect(raw).toHaveLength(1)
     expect(raw[0].title).toBe('Persistante')

@@ -12,11 +12,17 @@ function findPaneInitialCommand(node: PaneNode, paneId: string): string | null {
   return findPaneInitialCommand(node.children[0], paneId) ?? findPaneInitialCommand(node.children[1], paneId)
 }
 
-interface SplitContainerProps {
-  tabId: string
+function findPaneExternalSessionId(node: PaneNode, paneId: string): string | null {
+  if (node.type === 'leaf') return node.id === paneId ? node.externalSessionId : null
+  return findPaneExternalSessionId(node.children[0], paneId) ?? findPaneExternalSessionId(node.children[1], paneId)
 }
 
-export function SplitContainer({ tabId }: SplitContainerProps) {
+interface SplitContainerProps {
+  tabId: string
+  fontSize: number
+}
+
+export function SplitContainer({ tabId, fontSize }: SplitContainerProps) {
   const tab = useTerminalTabStore((s) => s.tabs.find((t) => t.id === tabId))
   const activeTabId = useTerminalTabStore((s) => s.activeTabId)
   const setActivePane = useTerminalTabStore((s) => s.setActivePane)
@@ -55,7 +61,9 @@ export function SplitContainer({ tabId }: SplitContainerProps) {
           isTabVisible={isTabVisible}
           cwd={cwd}
           initialCommand={findPaneInitialCommand(tab.paneTree, rect.id)}
+          externalSessionId={findPaneExternalSessionId(tab.paneTree, rect.id)}
           rect={rect}
+          fontSize={fontSize}
           setActivePane={setActivePane}
           setTabActivity={setTabActivity}
           closePane={closePane}
@@ -86,7 +94,9 @@ interface FlatPaneViewProps {
   isTabVisible: boolean
   cwd: string
   initialCommand: string | null
+  externalSessionId: string | null
   rect: { x: number; y: number; w: number; h: number }
+  fontSize: number
   setActivePane: (tabId: string, paneId: string) => void
   setTabActivity: (tabId: string, hasActivity: boolean) => void
   closePane: (tabId: string, paneId: string) => void
@@ -101,7 +111,9 @@ function FlatPaneView({
   isTabVisible,
   cwd,
   initialCommand,
+  externalSessionId,
   rect,
+  fontSize,
   setActivePane,
   setTabActivity,
   closePane,
@@ -144,7 +156,7 @@ function FlatPaneView({
       }}
       onMouseDown={handleFocus}
     >
-      <Terminal cwd={cwd} initialCommand={initialCommand} isVisible={isTabVisible} onActivity={handleActivity} onClose={handleClose} onSessionCreated={handleSessionCreated} />
+      <Terminal cwd={cwd} initialCommand={initialCommand} externalSessionId={externalSessionId} isVisible={isTabVisible} fontSize={fontSize} onActivity={handleActivity} onClose={handleClose} onSessionCreated={handleSessionCreated} />
     </div>
   )
 }

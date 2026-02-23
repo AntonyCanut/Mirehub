@@ -22,11 +22,12 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
   const [renameValue, setRenameValue] = useState(entry.name)
   const renameInputRef = useRef<HTMLInputElement>(null)
   const selectedFiles = useViewStore((s) => s.selectedFiles)
+  const highlightedFilePath = useViewStore((s) => s.highlightedFilePath)
 
   const loadChildren = useCallback(async () => {
     setLoading(true)
     try {
-      const entries = await window.theone.fs.readDir(entry.path)
+      const entries = await window.mirehub.fs.readDir(entry.path)
       setChildren(entries)
     } catch {
       setChildren([])
@@ -65,7 +66,7 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
     const trimmed = renameValue.trim()
     if (trimmed && trimmed !== entry.name) {
       const dir = entry.path.substring(0, entry.path.lastIndexOf('/'))
-      await window.theone.fs.rename(entry.path, dir + '/' + trimmed)
+      await window.mirehub.fs.rename(entry.path, dir + '/' + trimmed)
       onRefresh()
     }
     setIsRenaming(false)
@@ -97,26 +98,26 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
     let destName = `${baseName} copie${ext}`
     let destPath = `${dir}/${destName}`
     let counter = 2
-    while (await window.theone.fs.exists(destPath)) {
+    while (await window.mirehub.fs.exists(destPath)) {
       destName = `${baseName} copie ${counter}${ext}`
       destPath = `${dir}/${destName}`
       counter++
     }
-    await window.theone.fs.copy(entry.path, destPath)
+    await window.mirehub.fs.copy(entry.path, destPath)
     onRefresh()
   }, [entry.path, entry.name, onRefresh])
 
   const handleDelete = useCallback(async () => {
     const confirmed = window.confirm(`Supprimer "${entry.name}" ?`)
     if (confirmed) {
-      await window.theone.fs.delete(entry.path)
+      await window.mirehub.fs.delete(entry.path)
       onRefresh()
     }
   }, [entry.path, entry.name, onRefresh])
 
   const handleNewFile = useCallback(async () => {
     const filePath = entry.path + '/nouveau_fichier'
-    await window.theone.fs.writeFile(filePath, '')
+    await window.mirehub.fs.writeFile(filePath, '')
     if (!expanded) {
       await loadChildren()
       setExpanded(true)
@@ -127,7 +128,7 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
 
   const handleNewFolder = useCallback(async () => {
     const dirPath = entry.path + '/nouveau_dossier'
-    await window.theone.fs.mkdir(dirPath)
+    await window.mirehub.fs.mkdir(dirPath)
     if (!expanded) {
       await loadChildren()
       setExpanded(true)
@@ -142,13 +143,13 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
     const name = clipboardPath.split('/').pop() ?? 'paste'
     let destPath = `${entry.path}/${name}`
     let counter = 2
-    while (await window.theone.fs.exists(destPath)) {
+    while (await window.mirehub.fs.exists(destPath)) {
       const ext = name.includes('.') ? '.' + name.split('.').pop() : ''
       const base = ext ? name.slice(0, -ext.length) : name
       destPath = `${entry.path}/${base} (${counter})${ext}`
       counter++
     }
-    await window.theone.fs.copy(clipboardPath, destPath)
+    await window.mirehub.fs.copy(clipboardPath, destPath)
     useViewStore.getState().clearClipboard()
     if (expanded) {
       await loadChildren()
@@ -209,11 +210,12 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
   }
 
   const isSelected = !entry.isDirectory && selectedFiles.includes(entry.path)
+  const isHighlighted = entry.path === highlightedFilePath
 
   return (
     <div className="sidebar-ft-node">
       <div
-        className={`sidebar-ft-row${entry.isDirectory ? ' sidebar-ft-row--dir' : ''}${isSelected ? ' sidebar-ft-row--selected' : ''}`}
+        className={`sidebar-ft-row${entry.isDirectory ? ' sidebar-ft-row--dir' : ''}${isSelected ? ' sidebar-ft-row--selected' : ''}${isHighlighted ? ' sidebar-ft-row--highlighted' : ''}`}
         style={{ paddingLeft: `${depth * 14 + 8}px` }}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
@@ -281,7 +283,7 @@ export function SidebarFileTree({ projectPath }: SidebarFileTreeProps) {
       return
     }
     setLoading(true)
-    window.theone.fs
+    window.mirehub.fs
       .readDir(projectPath)
       .then(setEntries)
       .catch(() => setEntries([]))

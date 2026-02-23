@@ -1,9 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react'
 import { useTerminalTabStore, type TerminalTabData } from '../lib/stores/terminalTabStore'
+import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { ContextMenu, type ContextMenuItem } from './ContextMenu'
 
 export function TabBar() {
-  const { tabs, activeTabId, createTab, closeTab, setActiveTab, renameTab, reorderTabs, closeOtherTabs } =
+  const { tabs, activeTabId, createTab, closeTab, setActiveTab, renameTab, reorderTabs, closeOtherTabs, closeTabsToRight, duplicateTab } =
     useTerminalTabStore()
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
@@ -47,13 +48,21 @@ export function TabBar() {
           },
         },
         {
+          label: 'Dupliquer',
+          action: () => duplicateTab(contextMenu.tabId),
+        },
+        { label: '', action: () => {}, separator: true },
+        {
           label: 'Fermer',
           action: () => closeTab(contextMenu.tabId),
         },
         {
           label: 'Fermer les autres',
           action: () => closeOtherTabs(contextMenu.tabId),
-          separator: true,
+        },
+        {
+          label: 'Fermer a droite',
+          action: () => closeTabsToRight(contextMenu.tabId),
         },
       ]
     : []
@@ -103,11 +112,12 @@ export function TabBar() {
         const isRenaming = tab.id === renamingId
         const isDragging = index === dragIndex
         const isDropTarget = index === dropTarget
+        const isStreaming = tab.color === '#fab387' // Orange = active kanban AI session
 
         return (
           <div
             key={tab.id}
-            className={`tab${isActive ? ' active' : ''}${isDragging ? ' tab--dragging' : ''}${isDropTarget ? ' tab--drop-target' : ''}`}
+            className={`tab${isActive ? ' active' : ''}${isDragging ? ' tab--dragging' : ''}${isDropTarget ? ' tab--drop-target' : ''}${isStreaming ? ' tab--streaming' : ''}`}
             onClick={() => !isRenaming && setActiveTab(tab.id)}
             onDoubleClick={() => handleDoubleClick(tab)}
             onContextMenu={(e) => handleContextMenu(e, tab.id)}
@@ -117,6 +127,7 @@ export function TabBar() {
             onDrop={(e) => handleDrop(e, index)}
             onDragEnd={handleDragEnd}
           >
+            {tab.color && <span className="tab-color-dot" style={{ background: tab.color }} />}
             {tab.hasActivity && !isActive && <span className="tab-activity-dot" />}
             {isRenaming ? (
               <input
@@ -150,7 +161,22 @@ export function TabBar() {
           </div>
         )
       })}
-      <button className="btn-icon tab-add" title="Nouveau terminal (⌘T)" onClick={createTab}>
+      <button className="btn-icon tab-add" title="Nouveau terminal (⌘T)" onClick={async () => {
+        const { activeWorkspaceId, activeProjectId, projects, workspaces } = useWorkspaceStore.getState()
+        const project = projects.find((p) => p.id === activeProjectId)
+        const workspace = workspaces.find((w) => w.id === activeWorkspaceId)
+        let cwd = project?.path || ''
+        if (workspace && activeWorkspaceId) {
+          const wsProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
+          if (wsProjects.length > 0) {
+            try {
+              const result = await window.mirehub.workspaceEnv.setup(workspace.name, wsProjects.map((p) => p.path))
+              if (result?.success && result.envPath) cwd = result.envPath
+            } catch { /* fallback to project path */ }
+          }
+        }
+        createTab(activeWorkspaceId || '', cwd)
+      }}>
         +
       </button>
 

@@ -1,10 +1,12 @@
 import { create } from 'zustand'
 
-export type ViewMode = 'terminal' | 'git' | 'kanban' | 'file' | 'npm' | 'diff' | 'claude' | 'settings'
+export type ViewMode = 'terminal' | 'git' | 'kanban' | 'file' | 'npm' | 'diff' | 'claude' | 'settings' | 'todos' | 'shortcuts' | 'stats' | 'search' | 'prompts' | 'api' | 'database'
 
 interface ViewState {
   viewMode: ViewMode
   selectedFilePath: string | null
+  highlightedFilePath: string | null
+  pendingLineNumber: number | null
   isEditorDirty: boolean
   availableMagicTabs: string[]
   // Multi-select for diff
@@ -13,8 +15,15 @@ interface ViewState {
   // Clipboard for file operations
   clipboardPath: string | null
   clipboardOperation: 'copy' | null
+  // Database explorer
+  pendingDbProjectPath: string | null
+  // Recent files and bookmarks
+  recentFiles: string[]
+  bookmarks: string[]
+  setPendingDbProjectPath: (path: string | null) => void
   setViewMode: (mode: ViewMode) => void
-  openFile: (filePath: string) => void
+  openFile: (filePath: string, lineNumber?: number) => void
+  setHighlightedFilePath: (path: string | null) => void
   setEditorDirty: (dirty: boolean) => void
   setAvailableMagicTabs: (tabs: string[]) => void
   toggleFileSelection: (filePath: string) => void
@@ -22,19 +31,58 @@ interface ViewState {
   clearSelection: () => void
   setClipboard: (path: string, operation: 'copy') => void
   clearClipboard: () => void
+  toggleBookmark: (filePath: string) => void
+}
+
+// Load persisted data from localStorage
+function loadPersistedList(key: string): string[] {
+  try {
+    if (typeof localStorage === 'undefined') return []
+    const stored = localStorage.getItem(key)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function persistList(key: string, list: string[]): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, JSON.stringify(list))
+    }
+  } catch { /* ignore in non-browser environments */ }
 }
 
 export const useViewStore = create<ViewState>((set, get) => ({
   viewMode: 'terminal',
   selectedFilePath: null,
+  highlightedFilePath: null,
+  pendingLineNumber: null,
   isEditorDirty: false,
   availableMagicTabs: [],
   selectedFiles: [],
   diffFiles: null,
   clipboardPath: null,
   clipboardOperation: null,
+  pendingDbProjectPath: null,
+  recentFiles: loadPersistedList('mirehub:recentFiles'),
+  bookmarks: loadPersistedList('mirehub:bookmarks'),
+  setPendingDbProjectPath: (path) => set({ pendingDbProjectPath: path }),
   setViewMode: (mode) => set({ viewMode: mode }),
-  openFile: (filePath) => set({ viewMode: 'file', selectedFilePath: filePath, isEditorDirty: false }),
+  openFile: (filePath, lineNumber?) => {
+    const { recentFiles } = get()
+    const updated = [filePath, ...recentFiles.filter((f) => f !== filePath)].slice(0, 20)
+    persistList('mirehub:recentFiles', updated)
+    set({
+      viewMode: 'file',
+      selectedFilePath: filePath,
+      highlightedFilePath: filePath,
+      isEditorDirty: false,
+      pendingLineNumber: lineNumber ?? null,
+      recentFiles: updated,
+    })
+  },
+  setHighlightedFilePath: (path) => set({ highlightedFilePath: path }),
   setEditorDirty: (dirty) => set({ isEditorDirty: dirty }),
   setAvailableMagicTabs: (tabs) => set({ availableMagicTabs: tabs }),
   toggleFileSelection: (filePath) => {
@@ -62,4 +110,12 @@ export const useViewStore = create<ViewState>((set, get) => ({
   clearSelection: () => set({ selectedFiles: [], diffFiles: null }),
   setClipboard: (path, operation) => set({ clipboardPath: path, clipboardOperation: operation }),
   clearClipboard: () => set({ clipboardPath: null, clipboardOperation: null }),
+  toggleBookmark: (filePath) => {
+    const { bookmarks } = get()
+    const updated = bookmarks.includes(filePath)
+      ? bookmarks.filter((f) => f !== filePath)
+      : [...bookmarks, filePath]
+    persistList('mirehub:bookmarks', updated)
+    set({ bookmarks: updated })
+  },
 }))

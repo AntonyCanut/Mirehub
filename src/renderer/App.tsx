@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Sidebar } from './components/Sidebar'
 import { TerminalArea } from './components/TerminalArea'
@@ -11,16 +11,31 @@ import { FileDiffViewer } from './components/FileDiffViewer'
 import { ClaudeRulesPanel } from './components/ClaudeRulesPanel'
 import { SettingsPanel } from './components/SettingsPanel'
 import { SessionModal } from './components/SessionModal'
+import { CommandPalette } from './components/CommandPalette'
+import { GlobalSearch } from './components/GlobalSearch'
+import { TodoScanner } from './components/TodoScanner'
+import { ShortcutsPanel } from './components/ShortcutsPanel'
+import { ProjectStats } from './components/ProjectStats'
+import { PromptTemplates } from './components/PromptTemplates'
+import { ApiTesterPanel } from './components/ApiTesterPanel'
+import { DatabaseExplorer } from './components/DatabaseExplorer'
 import { useWorkspaceStore } from './lib/stores/workspaceStore'
 import { useTerminalTabStore } from './lib/stores/terminalTabStore'
 import { useViewStore } from './lib/stores/viewStore'
-import type { SessionData, SessionTab } from '../shared/types'
+import { useI18n } from './lib/i18n'
+import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 
 export function App() {
   const { viewMode, setViewMode, availableMagicTabs, setAvailableMagicTabs } = useViewStore()
-  const { activeProjectId, projects } = useWorkspaceStore()
+  const { activeProjectId, projects, activeWorkspaceId, workspaces } = useWorkspaceStore()
+  const { t } = useI18n()
   const [pendingSession, setPendingSession] = useState<SessionData | null>(null)
   const [sessionChecked, setSessionChecked] = useState(false)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [quickSwitchOpen, setQuickSwitchOpen] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(260)
+  const [isResizing, setIsResizing] = useState(false)
+  const resizingRef = useRef(false)
 
   // Detect available magic tabs based on active project
   const activeProject = projects.find((p) => p.id === activeProjectId)
@@ -30,7 +45,7 @@ export function App() {
       return
     }
     // Check for package.json to enable NPM tab
-    window.theone.fs.readFile(activeProject.path + '/package.json').then((result) => {
+    window.mirehub.fs.readFile(activeProject.path + '/package.json').then((result) => {
       if (result.content !== null) {
         setAvailableMagicTabs(['npm'])
       } else {
@@ -41,12 +56,40 @@ export function App() {
 
   // Check for saved session on startup
   useEffect(() => {
-    window.theone.session.load().then((session) => {
+    window.mirehub.session.load().then((session) => {
       if (session && session.tabs.length > 0) {
         setPendingSession(session)
       }
       setSessionChecked(true)
     })
+  }, [])
+
+  // Apply theme on startup and when settings change
+  useEffect(() => {
+    const applyTheme = (theme: string) => {
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
+      } else {
+        document.documentElement.setAttribute('data-theme', theme)
+      }
+    }
+
+    window.mirehub.settings.get().then((s: AppSettings) => {
+      applyTheme(s?.theme || 'dark')
+    })
+
+    // Listen for system theme changes when using 'system' mode
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleSystemThemeChange = () => {
+      window.mirehub.settings.get().then((s: AppSettings) => {
+        if (s?.theme === 'system') {
+          applyTheme('system')
+        }
+      })
+    }
+    mediaQuery.addEventListener('change', handleSystemThemeChange)
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange)
   }, [])
 
   // Save session on before unload
@@ -76,13 +119,47 @@ export function App() {
           savedAt: Date.now(),
         }
         // Use sendBeacon-style sync save via IPC
-        window.theone.session.save(session)
+        window.mirehub.session.save(session)
       }
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+K: Command Palette
+      if (e.metaKey && e.key === 'k') {
+        e.preventDefault()
+        setCommandPaletteOpen((v) => !v)
+        setQuickSwitchOpen(false)
+      }
+      // Cmd+P: Quick Project Switch
+      if (e.metaKey && e.key === 'p') {
+        e.preventDefault()
+        setQuickSwitchOpen((v) => !v)
+        setCommandPaletteOpen(false)
+      }
+      // Cmd+Shift+F: Global Search
+      if (e.metaKey && e.shiftKey && e.key === 'f') {
+        e.preventDefault()
+        setViewMode('search')
+        setCommandPaletteOpen(false)
+        setQuickSwitchOpen(false)
+      }
+      // Cmd+,: Preferences
+      if (e.metaKey && e.key === ',') {
+        e.preventDefault()
+        setViewMode('settings')
+        setCommandPaletteOpen(false)
+        setQuickSwitchOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [setViewMode])
 
   const handleResume = useCallback(() => {
     if (!pendingSession) return
@@ -107,12 +184,12 @@ export function App() {
       setActiveProject(pendingSession.activeProjectId)
     }
 
-    window.theone.session.clear()
+    window.mirehub.session.clear()
     setPendingSession(null)
   }, [pendingSession])
 
   const handleClear = useCallback(() => {
-    window.theone.session.clear()
+    window.mirehub.session.clear()
     setPendingSession(null)
   }, [])
 
@@ -121,42 +198,86 @@ export function App() {
     setPendingSession(null)
   }, [])
 
+  // Sidebar resize handlers
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    resizingRef.current = true
+    setIsResizing(true)
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!resizingRef.current) return
+      const newWidth = Math.min(500, Math.max(180, startWidth + (moveEvent.clientX - startX)))
+      setSidebarWidth(newWidth)
+    }
+
+    const handleMouseUp = () => {
+      resizingRef.current = false
+      setIsResizing(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }, [sidebarWidth])
+
   return (
     <ErrorBoundary>
     <div className="app">
       <TitleBar />
       <div className="app-body">
-        <div className="sidebar-wrapper">
+        <div className="sidebar-wrapper" style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
           <ErrorBoundary>
             <Sidebar />
           </ErrorBoundary>
         </div>
+        <div
+          className={`sidebar-resize-handle${isResizing ? ' sidebar-resize-handle--active' : ''}`}
+          onMouseDown={handleResizeStart}
+        />
         <div className="main-content">
           <div className="view-switcher">
+            {(() => {
+              const ws = workspaces.find((w) => w.id === activeWorkspaceId)
+              return ws ? (
+                <span
+                  className="workspace-badge"
+                  style={ws.color ? { borderColor: ws.color, color: ws.color } : undefined}
+                >
+                  {ws.name}
+                </span>
+              ) : null
+            })()}
             <button
               className={`view-btn${viewMode === 'terminal' ? ' view-btn--active' : ''}`}
               onClick={() => setViewMode('terminal')}
             >
-              Terminal
+              {t('view.terminal')}
             </button>
             <button
               className={`view-btn${viewMode === 'git' ? ' view-btn--active' : ''}`}
               onClick={() => setViewMode('git')}
             >
-              Git
+              {t('view.git')}
             </button>
             <button
               className={`view-btn${viewMode === 'kanban' ? ' view-btn--active' : ''}`}
               onClick={() => setViewMode('kanban')}
             >
-              Kanban
+              {t('view.kanban')}
             </button>
             {availableMagicTabs.includes('npm') && (
               <button
                 className={`view-btn${viewMode === 'npm' ? ' view-btn--active' : ''}`}
                 onClick={() => setViewMode('npm')}
               >
-                NPM
+                {t('view.npm')}
               </button>
             )}
             {activeProject?.hasClaude && (
@@ -164,24 +285,74 @@ export function App() {
                 className={`view-btn${viewMode === 'claude' ? ' view-btn--active' : ''}`}
                 onClick={() => setViewMode('claude')}
               >
-                Claude
+                {t('view.claude')}
               </button>
             )}
+            <button
+              className={`view-btn${viewMode === 'todos' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('todos')}
+            >
+              {t('view.todos')}
+            </button>
+            <button
+              className={`view-btn${viewMode === 'stats' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('stats')}
+            >
+              {t('view.stats')}
+            </button>
+            <button
+              className={`view-btn${viewMode === 'prompts' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('prompts')}
+            >
+              {t('view.prompts')}
+            </button>
+            <button
+              className={`view-btn${viewMode === 'api' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('api')}
+            >
+              {t('view.api')}
+            </button>
+            <button
+              className={`view-btn${viewMode === 'database' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('database')}
+            >
+              {t('view.database')}
+            </button>
             {viewMode === 'file' && (
               <button className="view-btn view-btn--active">
-                Fichier
+                {t('view.file')}
               </button>
             )}
             {viewMode === 'diff' && (
               <button className="view-btn view-btn--active">
-                Diff
+                {t('view.diff')}
               </button>
             )}
+            <button
+              className={`view-btn${viewMode === 'search' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('search')}
+              title={t('view.searchTooltip')}
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.2" />
+                <path d="M10.5 10.5L14 14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              </svg>
+            </button>
             <div style={{ flex: 1 }} />
+            <button
+              className={`view-btn${viewMode === 'shortcuts' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('shortcuts')}
+              title={t('view.shortcutsTooltip')}
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="4" width="14" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+                <path d="M4 7h1M7.5 7h1M11 7h1M5 10h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              </svg>
+            </button>
             <button
               className={`view-btn view-btn--settings${viewMode === 'settings' ? ' view-btn--active' : ''}`}
               onClick={() => setViewMode('settings')}
-              title="Preferences"
+              title={t('view.settingsTooltip')}
             >
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path d="M8 10a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" strokeWidth="1.2" />
@@ -224,6 +395,41 @@ export function App() {
                 <SettingsPanel />
               </div>
             )}
+            {viewMode === 'search' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <GlobalSearch />
+              </div>
+            )}
+            {viewMode === 'todos' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <TodoScanner />
+              </div>
+            )}
+            {viewMode === 'shortcuts' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <ShortcutsPanel />
+              </div>
+            )}
+            {viewMode === 'stats' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <ProjectStats />
+              </div>
+            )}
+            {viewMode === 'prompts' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <PromptTemplates />
+              </div>
+            )}
+            {viewMode === 'api' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <ApiTesterPanel />
+              </div>
+            )}
+            {viewMode === 'database' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <DatabaseExplorer />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -235,6 +441,10 @@ export function App() {
           onDismiss={handleDismiss}
         />
       )}
+      <CommandPalette
+        open={commandPaletteOpen || quickSwitchOpen}
+        onClose={() => { setCommandPaletteOpen(false); setQuickSwitchOpen(false) }}
+      />
     </div>
     </ErrorBoundary>
   )

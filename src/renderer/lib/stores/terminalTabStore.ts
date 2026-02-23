@@ -7,6 +7,7 @@ export interface PaneLeaf {
   id: string
   sessionId: string | null
   initialCommand: string | null
+  externalSessionId: string | null
 }
 
 export interface PaneSplit {
@@ -44,6 +45,7 @@ interface TerminalTabState {
 interface TerminalTabActions {
   createTab: (workspaceId: string, cwd: string, label?: string, initialCommand?: string) => string
   createSplitTab: (workspaceId: string, cwd: string, label: string, leftCommand: string | null, rightCommand: string | null) => string
+  createViewOnlyTab: (workspaceId: string, cwd: string, label: string, externalSessionId: string) => string
   closeTab: (id: string) => void
   setActiveTab: (id: string) => void
   renameTab: (id: string, label: string) => void
@@ -55,6 +57,8 @@ interface TerminalTabActions {
   activateByIndex: (index: number, workspaceId?: string) => void
   activateFirstInWorkspace: (workspaceId: string) => void
   closeOtherTabs: (id: string) => void
+  closeTabsToRight: (id: string) => void
+  duplicateTab: (tabId: string) => string | null
 
   // Pane actions
   splitPane: (tabId: string, paneId: string, direction: 'horizontal' | 'vertical') => string | null
@@ -74,8 +78,8 @@ function generateId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-function createLeafPane(initialCommand?: string): PaneLeaf {
-  return { type: 'leaf', id: generateId('pane'), sessionId: null, initialCommand: initialCommand ?? null }
+function createLeafPane(initialCommand?: string, externalSessionId?: string): PaneLeaf {
+  return { type: 'leaf', id: generateId('pane'), sessionId: null, initialCommand: initialCommand ?? null, externalSessionId: externalSessionId ?? null }
 }
 
 // Count leaf panes in a tree
@@ -169,6 +173,26 @@ function computePaneRects(
   }
 }
 
+function isClaudeCommand(cmd: string | null | undefined): boolean {
+  if (!cmd) return false
+  return cmd === 'claude' || cmd.includes('claude ')
+}
+
+function countClaudePanes(node: PaneNode): number {
+  if (node.type === 'leaf') return isClaudeCommand(node.initialCommand) ? 1 : 0
+  return countClaudePanes(node.children[0]) + countClaudePanes(node.children[1])
+}
+
+// Lazy getter to avoid circular imports; returns null in test environments
+function getClaudeStore() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('./claudeStore').useClaudeStore
+  } catch {
+    return null
+  }
+}
+
 export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
   tabs: [],
   activeTabId: null,
@@ -193,6 +217,9 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
       tabs: [...state.tabs, tab],
       activeTabId: id,
     }))
+    if (isClaudeCommand(initialCommand)) {
+      getClaudeStore()?.getState().incrementWorkspaceClaude(workspaceId)
+    }
     return id
   },
 
@@ -223,13 +250,48 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
       tabs: [...state.tabs, tab],
       activeTabId: id,
     }))
+    const claudeCount = (isClaudeCommand(leftCommand) ? 1 : 0) + (isClaudeCommand(rightCommand) ? 1 : 0)
+    if (claudeCount > 0) {
+      const store = getClaudeStore()?.getState()
+      if (store) for (let i = 0; i < claudeCount; i++) store.incrementWorkspaceClaude(workspaceId)
+    }
+    return id
+  },
+
+  createViewOnlyTab: (workspaceId: string, cwd: string, label: string, externalSessionId: string) => {
+    const pane = createLeafPane(undefined, externalSessionId)
+    const id = generateId('tab')
+    const tab: TerminalTabData = {
+      id,
+      label,
+      color: '#fab387',
+      hasActivity: false,
+      paneTree: pane,
+      activePaneId: pane.id,
+      zoomedPaneId: null,
+      workspaceId,
+      cwd,
+      initialCommand: null,
+    }
+    set((state) => ({
+      tabs: [...state.tabs, tab],
+      activeTabId: id,
+    }))
     return id
   },
 
   closeTab: (id: string) => {
     const { tabs, activeTabId } = get()
-    const index = tabs.findIndex((t) => t.id === id)
-    if (index === -1) return
+    const tab = tabs.find((t) => t.id === id)
+    if (!tab) return
+    const index = tabs.indexOf(tab)
+
+    // Track Claude pane removals
+    const claudePaneCount = countClaudePanes(tab.paneTree)
+    if (claudePaneCount > 0) {
+      const store = getClaudeStore()?.getState()
+      if (store) for (let i = 0; i < claudePaneCount; i++) store.decrementWorkspaceClaude(tab.workspaceId)
+    }
 
     const newTabs = tabs.filter((t) => t.id !== id)
 
@@ -326,6 +388,44 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     }))
   },
 
+  closeTabsToRight: (id: string) => {
+    const { tabs } = get()
+    const index = tabs.findIndex((t) => t.id === id)
+    if (index === -1) return
+    const kept = tabs.slice(0, index + 1)
+    const newActiveId = kept.find((t) => t.id === get().activeTabId)
+      ? get().activeTabId
+      : id
+    set({ tabs: kept, activeTabId: newActiveId })
+  },
+
+  duplicateTab: (tabId: string) => {
+    const { tabs } = get()
+    const source = tabs.find((t) => t.id === tabId)
+    if (!source) return null
+    const pane = createLeafPane()
+    const newId = generateId('tab')
+    const tab: TerminalTabData = {
+      id: newId,
+      label: `Copy of ${source.label}`,
+      color: null,
+      hasActivity: false,
+      paneTree: pane,
+      activePaneId: pane.id,
+      zoomedPaneId: null,
+      workspaceId: source.workspaceId,
+      cwd: source.cwd,
+      initialCommand: null,
+    }
+    const sourceIndex = tabs.findIndex((t) => t.id === tabId)
+    set((state) => {
+      const newTabs = [...state.tabs]
+      newTabs.splice(sourceIndex + 1, 0, tab)
+      return { tabs: newTabs, activeTabId: newId }
+    })
+    return newId
+  },
+
   // --- Pane actions ---
 
   splitPane: (tabId: string, paneId: string, direction: 'horizontal' | 'vertical') => {
@@ -365,10 +465,16 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     const tab = tabs.find((t) => t.id === tabId)
     if (!tab) return
 
-    // If only one pane, close the tab
+    // If only one pane, close the tab (closeTab already handles Claude tracking)
     if (countLeaves(tab.paneTree) <= 1) {
       get().closeTab(tabId)
       return
+    }
+
+    // Track Claude pane removal before modifying tree
+    const closedPane = findPane(tab.paneTree, paneId)
+    if (closedPane && isClaudeCommand(closedPane.initialCommand)) {
+      getClaudeStore()?.getState().decrementWorkspaceClaude(tab.workspaceId)
     }
 
     const newTree = removeLeaf(tab.paneTree, paneId)

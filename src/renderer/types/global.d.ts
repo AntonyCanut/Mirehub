@@ -1,7 +1,7 @@
-import type { TheOneAPI } from '../../preload/index'
+import type { MirehubAPI } from '../../preload/index'
 
 declare global {
   interface Window {
-    theone: TheOneAPI
+    mirehub: MirehubAPI
   }
 }

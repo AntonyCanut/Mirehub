@@ -1,21 +1,20 @@
 {
   "env": {
+    "CLAUDE_CODE_ENABLE_TASKS": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash",
       "Read",
-      "Edit",
       "Write",
-      "Grep",
+      "Edit",
       "Glob",
+      "Grep",
       "WebFetch",
       "WebSearch",
       "Task",
-      "NotebookEdit",
-      "Skill"
+      "NotebookEdit"
     ]
   }
 }
