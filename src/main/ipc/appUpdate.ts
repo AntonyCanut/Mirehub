@@ -1,4 +1,4 @@
-import { IpcMain, BrowserWindow } from 'electron'
+import { IpcMain, BrowserWindow, app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHANNELS } from '../../shared/types'
 import { StorageService } from '../services/storage'
@@ -82,11 +82,27 @@ export function registerAppUpdateHandlers(ipcMain: IpcMain): void {
   })
 
   ipcMain.handle(IPC_CHANNELS.APP_UPDATE_INSTALL, () => {
-    // Defer quitAndInstall so the IPC response is sent before the app quits.
-    // Without this, the synchronous quit blocks the IPC channel and nothing happens.
-    setImmediate(() => {
-      autoUpdater.quitAndInstall(false, true)
-    })
+    // Use setTimeout instead of setImmediate so the IPC response is fully
+    // transmitted to the renderer before the quit sequence starts.
+    // setImmediate was unreliable in Electron's hybrid event loop on macOS.
+    setTimeout(() => {
+      try {
+        autoUpdater.quitAndInstall(false, true)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('[appUpdate] quitAndInstall failed:', err)
+      }
+
+      // Safety net: if quitAndInstall did not terminate the process
+      // (e.g. install() returned false), force a relaunch + quit so
+      // autoInstallOnAppQuit can apply the update on exit.
+      setTimeout(() => {
+        // eslint-disable-next-line no-console
+        console.warn('[appUpdate] quitAndInstall did not exit — forcing relaunch')
+        app.relaunch()
+        app.quit()
+      }, 3000)
+    }, 500)
   })
 
   // Auto-check on startup (5s delay)
