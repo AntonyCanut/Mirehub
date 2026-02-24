@@ -351,3 +351,58 @@ tests/
 - No `any` unless documented justification
 - ESLint + Prettier for formatting
 - Conventional Commits for git messages (in French)
+
+<!-- MIREHUB_WORKFLOW -->
+
+## Workflow Orchestration
+
+### 1. Mode Plan
+- Entrer en mode plan pour TOUTE tache non triviale (3+ etapes ou decisions architecturales)
+- Si quelque chose deraille, STOP et re-planifier immediatement - ne pas insister
+- Utiliser le mode plan pour les etapes de verification, pas seulement la construction
+- Ecrire des specifications detaillees en amont pour reduire l'ambiguite
+
+### 2. Strategie Sous-Agents
+- Utiliser les sous-agents liberalement pour garder la fenetre de contexte principale propre
+- Deleguer la recherche, l'exploration et l'analyse parallele aux sous-agents
+- Pour les problemes complexes, utiliser plus de calcul via les sous-agents
+- Une tache par sous-agent pour une execution concentree
+
+### 3. Boucle d'Auto-Amelioration
+- Apres TOUTE correction de l'utilisateur : mettre a jour tasks/lessons.md avec le pattern
+- Ecrire des regles pour soi-meme qui empechent la meme erreur
+- Iterer sans relache sur ces lecons jusqu'a ce que le taux d'erreur baisse
+- Revoir les lecons au debut de chaque session pour le projet concerne
+
+### 4. Verification Avant Terminaison
+- Ne jamais marquer une tache comme terminee sans prouver qu'elle fonctionne
+- Comparer le comportement entre main et vos changements quand c'est pertinent
+- Se demander : "Est-ce qu'un ingenieur senior approuverait ceci ?"
+- Lancer les tests, verifier les logs, demontrer la correction
+
+### 5. Exiger l'Elegance (Equilibre)
+- Pour les changements non triviaux : pause et se demander "y a-t-il une facon plus elegante ?"
+- Si un correctif semble hacky : "Sachant tout ce que je sais, implementer la solution elegante"
+- Passer cette etape pour les correctifs simples et evidents - ne pas sur-concevoir
+- Remettre en question son propre travail avant de le presenter
+
+### 6. Correction Autonome de Bugs
+- Quand un rapport de bug arrive : le corriger directement. Ne pas demander d'accompagnement
+- Pointer les logs, erreurs, tests echoues - puis les resoudre
+- Zero changement de contexte requis de la part de l'utilisateur
+- Aller corriger les tests CI en echec sans qu'on vous le dise
+
+## Task Management
+
+1. **Plan First**: Write plan to tasks/todo.md with checkable items
+2. **Verify Plan**: Check in before starting implementation
+3. **Track Progress**: Mark items complete as you go
+4. **Explain Changes**: High-level summary at each step
+5. **Document Results**: Add review section to tasks/todo.md
+6. **Capture Lessons**: Update tasks/lessons.md after corrections
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary.

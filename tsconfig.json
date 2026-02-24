@@ -23,5 +23,5 @@
       "@renderer/*": ["src/renderer/*"]
     }
   },
-  "exclude": ["node_modules", "dist", "tests"]
+  "exclude": ["node_modules", "dist", "tests", "megalinter-reports"]
 }

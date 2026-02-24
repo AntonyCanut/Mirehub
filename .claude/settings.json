@@ -17,5 +17,15 @@
       "NotebookEdit"
     ]
   },
-  "_mirehubMode": "bypassPermissions"
+  "_mirehubMode": "bypassPermissions",
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/tmp"
+      ]
+    }
+  }
 }

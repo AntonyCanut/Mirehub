@@ -19,6 +19,137 @@ import {
 } from '../../shared/types'
 
 // ---------------------------------------------------------------------------
+// Tool-specific JSON output types (used by parsers)
+// ---------------------------------------------------------------------------
+
+interface SemgrepResult {
+  path?: string
+  start?: { line?: number; col?: number }
+  end?: { line?: number; col?: number }
+  check_id?: string
+  extra?: {
+    severity?: string
+    message?: string
+    lines?: string
+    metadata?: {
+      source?: string
+      cwe?: string | string[]
+    }
+  }
+}
+
+interface BanditResult {
+  filename?: string
+  line_number?: number
+  col_offset?: number
+  issue_severity?: string
+  issue_text?: string
+  test_id?: string
+  issue_cwe?: { id?: number }
+}
+
+interface BearerWarning {
+  filename?: string
+  file?: string
+  line_number?: number
+  line?: number
+  severity?: string
+  description?: string
+  title?: string
+  rule_id?: string
+  id?: string
+  documentation_url?: string
+  cwe_ids?: number[]
+}
+
+interface TrivyVulnerability {
+  Severity?: string
+  VulnerabilityID?: string
+  Title?: string
+  Description?: string
+  PkgName?: string
+  InstalledVersion?: string
+  PrimaryURL?: string
+  CweIDs?: string[]
+}
+
+interface TrivyResultEntry {
+  Target?: string
+  Vulnerabilities?: TrivyVulnerability[]
+}
+
+interface OsvVulnerability {
+  id?: string
+  summary?: string
+  database_specific?: { severity?: string }
+  references?: { url?: string }[]
+}
+
+interface OsvPackage {
+  package?: { name?: string; version?: string }
+  vulnerabilities?: OsvVulnerability[]
+}
+
+interface OsvResultEntry {
+  source?: { path?: string }
+  packages?: OsvPackage[]
+}
+
+interface EslintMessage {
+  line?: number
+  column?: number
+  endLine?: number
+  endColumn?: number
+  severity?: number
+  message?: string
+  ruleId?: string
+}
+
+interface EslintFileResult {
+  filePath?: string
+  messages?: EslintMessage[]
+}
+
+interface CheckovCheck {
+  file_path?: string
+  file_line_range?: number[]
+  severity?: string
+  check_id?: string
+  name?: string
+  check_result?: { result?: string }
+  guideline?: string
+}
+
+interface PylintResult {
+  path?: string
+  module?: string
+  line?: number
+  column?: number
+  endLine?: number
+  endColumn?: number
+  type?: string
+  message?: string
+  symbol?: string
+  'message-id'?: string
+}
+
+interface MegaLinterError {
+  line?: number
+  column?: number
+  message?: string
+}
+
+interface MegaLinterFileResult {
+  file?: string
+  errors?: MegaLinterError[]
+}
+
+interface MegaLinterLinter {
+  linter_name?: string
+  files_lint_results?: MegaLinterFileResult[]
+}
+
+// ---------------------------------------------------------------------------
 // Tool catalog
 // ---------------------------------------------------------------------------
 
@@ -124,8 +255,8 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     ],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
-      const results: unknown[] = data.results || []
-      return results.map((r: any) => ({
+      const results = (data.results || []) as SemgrepResult[]
+      return results.map((r) => ({
         id: uuid(),
         tool: 'semgrep',
         file: relativize(r.path || '', projectPath),
@@ -159,8 +290,8 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     ],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
-      const results: unknown[] = data.results || []
-      return results.map((r: any) => ({
+      const results = (data.results || []) as BanditResult[]
+      return results.map((r) => ({
         id: uuid(),
         tool: 'bandit',
         file: relativize(r.filename || '', projectPath),
@@ -191,7 +322,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       const findings: AnalysisFinding[] = []
       // Bearer may use different output shapes; handle common ones
       const warnings: unknown[] = data.warnings || data.findings || []
-      for (const w of warnings as any[]) {
+      for (const w of warnings as BearerWarning[]) {
         findings.push({
           id: uuid(),
           tool: 'bearer',
@@ -224,10 +355,10 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
       const results: unknown[] = data.Results || []
-      for (const res of results as any[]) {
+      for (const res of results as TrivyResultEntry[]) {
         const target = res.Target || ''
         const vulns: unknown[] = res.Vulnerabilities || []
-        for (const v of vulns as any[]) {
+        for (const v of vulns as TrivyVulnerability[]) {
           findings.push({
             id: uuid(),
             tool: 'trivy',
@@ -261,12 +392,12 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
       const results: unknown[] = data.results || []
-      for (const res of results as any[]) {
+      for (const res of results as OsvResultEntry[]) {
         const source = res.source?.path || ''
         const packages: unknown[] = res.packages || []
-        for (const pkg of packages as any[]) {
+        for (const pkg of packages as OsvPackage[]) {
           const vulns: unknown[] = pkg.vulnerabilities || []
-          for (const v of vulns as any[]) {
+          for (const v of vulns as OsvVulnerability[]) {
             findings.push({
               id: uuid(),
               tool: 'osv-scanner',
@@ -299,9 +430,9 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
-      for (const file of data as any[]) {
+      for (const file of data as EslintFileResult[]) {
         const filePath = relativize(file.filePath || '', projectPath)
-        for (const msg of (file.messages || []) as any[]) {
+        for (const msg of (file.messages || []) as EslintMessage[]) {
           findings.push({
             id: uuid(),
             tool: 'eslint',
@@ -375,7 +506,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       const checks = Array.isArray(data) ? data : [data]
       for (const group of checks) {
         const failed: unknown[] = group.results?.failed_checks || []
-        for (const check of failed as any[]) {
+        for (const check of failed as CheckovCheck[]) {
           findings.push({
             id: uuid(),
             tool: 'checkov',
@@ -407,7 +538,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     ],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
-      return (data as any[]).map((r: any) => ({
+      return (data as PylintResult[]).map((r: PylintResult) => ({
         id: uuid(),
         tool: 'pylint',
         file: relativize(r.path || r.module || '', projectPath),
@@ -522,11 +653,11 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       try {
         const data = JSON.parse(stdout)
         const linters: unknown[] = data.linters || []
-        for (const linter of linters as any[]) {
+        for (const linter of linters as MegaLinterLinter[]) {
           const files: unknown[] = linter.files_lint_results || []
-          for (const file of files as any[]) {
+          for (const file of files as MegaLinterFileResult[]) {
             const errors: unknown[] = file.errors || []
-            for (const err of errors as any[]) {
+            for (const err of errors as MegaLinterError[]) {
               findings.push({
                 id: uuid(),
                 tool: 'megalinter',

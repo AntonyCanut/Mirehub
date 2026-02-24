@@ -471,14 +471,14 @@ const api = {
     onProgress: (callback: (data: AnalysisProgress) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, payload: AnalysisProgress) => callback(payload)
       ipcRenderer.on(IPC_CHANNELS.ANALYSIS_PROGRESS, listener)
-      return () => ipcRenderer.removeListener(IPC_CHANNELS.ANALYSIS_PROGRESS, listener)
+      return () => { ipcRenderer.removeListener(IPC_CHANNELS.ANALYSIS_PROGRESS, listener) }
     },
     installTool: (toolId: string): Promise<{ success: boolean; installed: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.ANALYSIS_INSTALL_TOOL, { toolId }),
     onInstallProgress: (callback: (data: { toolId: string; output: string; status: 'running' | 'done' | 'error' }) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, data: { toolId: string; output: string; status: 'running' | 'done' | 'error' }) => callback(data)
       ipcRenderer.on(IPC_CHANNELS.ANALYSIS_INSTALL_PROGRESS, handler)
-      return () => ipcRenderer.removeListener(IPC_CHANNELS.ANALYSIS_INSTALL_PROGRESS, handler)
+      return () => { ipcRenderer.removeListener(IPC_CHANNELS.ANALYSIS_INSTALL_PROGRESS, handler) }
     },
   },
 

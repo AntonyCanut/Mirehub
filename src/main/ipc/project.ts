@@ -389,12 +389,17 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
 
       const extCounts: Record<string, { count: number; lines: number }> = {}
       const allFiles: { path: string; size: number; lines: number; modifiedAt: number }[] = []
+      const dirStats: Record<string, { fileCount: number; totalSize: number }> = {}
       let totalFiles = 0
       let totalLines = 0
       let totalSize = 0
       let totalDirs = 0
+      let maxDepth = 0
+      let binaryFiles = 0
+      let emptyFiles = 0
 
-      function scanDir(dirPath: string): void {
+      function scanDir(dirPath: string, depth = 0): void {
+        if (depth > maxDepth) maxDepth = depth
         let entries: fs.Dirent[]
         try {
           entries = fs.readdirSync(dirPath, { withFileTypes: true })
@@ -411,7 +416,7 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
 
           if (entry.isDirectory()) {
             totalDirs++
-            scanDir(fullPath)
+            scanDir(fullPath, depth + 1)
           } else if (entry.isFile()) {
             totalFiles++
             const ext = path.extname(entry.name).toLowerCase() || '(no ext)'
@@ -422,7 +427,14 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
               const content = fs.readFileSync(fullPath, 'utf-8')
               const lineCount = content.split('\n').length
 
+              if (stat.size === 0) emptyFiles++
               totalLines += lineCount
+
+              // Track per-directory stats
+              const dirKey = path.relative(projectPath, dirPath) || '.'
+              if (!dirStats[dirKey]) dirStats[dirKey] = { fileCount: 0, totalSize: 0 }
+              dirStats[dirKey]!.fileCount++
+              dirStats[dirKey]!.totalSize += stat.size
 
               if (!extCounts[ext]) {
                 extCounts[ext] = { count: 0, lines: 0 }
@@ -438,6 +450,7 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
               })
             } catch {
               // Skip binary/unreadable files for line count
+              binaryFiles++
               try {
                 const stat = fs.statSync(fullPath)
                 totalSize += stat.size
@@ -474,15 +487,24 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
         .slice(0, 15)
         .map((f) => ({ path: f.path, modifiedAt: f.modifiedAt }))
 
+      const biggestDirs = Object.entries(dirStats)
+        .map(([dirPath, data]) => ({ path: dirPath, fileCount: data.fileCount, totalSize: data.totalSize }))
+        .sort((a, b) => b.totalSize - a.totalSize)
+        .slice(0, 15)
+
       const stats: ProjectStatsData = {
         totalFiles,
         totalLines,
         totalSize,
         totalDirs,
         avgFileSize: totalFiles > 0 ? Math.round(totalSize / totalFiles) : 0,
+        maxDepth,
+        binaryFiles,
+        emptyFiles,
         fileTypeBreakdown,
         largestFiles,
         recentFiles,
+        biggestDirs,
       }
 
       return stats
