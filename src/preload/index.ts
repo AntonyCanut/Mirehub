@@ -152,6 +152,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.GIT_ADD_REMOTE, { cwd, name, url }),
     removeRemote: (cwd: string, name: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.GIT_REMOVE_REMOTE, { cwd, name }),
+    resetSoft: (cwd: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_RESET_SOFT, { cwd }),
   },
 
   // Claude
@@ -455,6 +457,13 @@ const api = {
   // Notifications
   notify: (title: string, body: string) =>
     ipcRenderer.send(IPC_CHANNELS.APP_NOTIFICATION, { title, body }),
+
+  // Menu actions (from main process)
+  onMenuAction: (callback: (action: string) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, action: string) => callback(action)
+    ipcRenderer.on(IPC_CHANNELS.MENU_ACTION, listener)
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.MENU_ACTION, listener) }
+  },
 }
 
 contextBridge.exposeInMainWorld('mirehub', api)

@@ -283,6 +283,7 @@ export function GitPanel() {
   const [newBranchName, setNewBranchName] = useState('')
   const [showNewBranch, setShowNewBranch] = useState(false)
   const [branchCtx, setBranchCtx] = useState<{ x: number; y: number; branch: string } | null>(null)
+  const [commitCtx, setCommitCtx] = useState<{ x: number; y: number; entry: GitLogEntry } | null>(null)
   const [renamingBranch, setRenamingBranch] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const renameInputRef = useRef<HTMLInputElement>(null)
@@ -516,6 +517,21 @@ export function GitPanel() {
     refresh()
   }, [activeProject, refresh])
 
+  const handleUndo = useCallback(async () => {
+    if (!activeProject) return
+    const confirmed = window.confirm(t('git.undoCommit'))
+    if (!confirmed) return
+    const result = await window.mirehub.git.resetSoft(activeProject.path)
+    if (!result.success) {
+      window.alert(result.error)
+    }
+    refresh()
+  }, [activeProject, refresh, t])
+
+  const handleSwitchToTerminal = useCallback(() => {
+    useViewStore.getState().setViewMode('terminal')
+  }, [])
+
   // --- Tag operations ---
 
   const handleCreateTag = useCallback(async () => {
@@ -631,6 +647,47 @@ export function GitPanel() {
     return items
   }
 
+  // Commit context menu items
+  const getCommitContextItems = (entry: GitLogEntry): ContextMenuItem[] => {
+    const items: ContextMenuItem[] = [
+      {
+        label: t('git.viewDetails'),
+        action: () => handleSelectCommit(entry),
+      },
+      {
+        label: t('git.copyHash'),
+        action: () => navigator.clipboard.writeText(entry.hash),
+      },
+      { separator: true, label: '', action: () => {} },
+      {
+        label: t('git.cherryPickLabel'),
+        action: () => handleCherryPick(entry.hash),
+      },
+      {
+        label: t('git.createBranchFrom'),
+        action: async () => {
+          const name = window.prompt(t('git.newBranch').replace('+ ', ''))
+          if (name && activeProject) {
+            await window.mirehub.git.checkout(activeProject.path, entry.hash)
+            await window.mirehub.git.createBranch(activeProject.path, name.trim())
+            refresh()
+          }
+        },
+      },
+      {
+        label: t('git.createTagFrom'),
+        action: async () => {
+          const name = window.prompt(t('git.newTag').replace('+ ', ''))
+          if (name && activeProject) {
+            await window.mirehub.git.createTag(activeProject.path, name.trim())
+            refresh()
+          }
+        },
+      },
+    ]
+    return items
+  }
+
   // --- Guard: no project ---
 
   if (!activeProject) {
@@ -674,20 +731,99 @@ export function GitPanel() {
             </span>
           )}
         </div>
-        <div className="git-actions">
-          <button className="git-action-btn" onClick={handleFetch} title="Fetch">Fetch</button>
-          <button className="git-action-btn" onClick={handlePull} title="Pull">Pull</button>
-          <button className="git-action-btn" onClick={handlePush} title="Push">Push</button>
-          <button className="git-action-btn" onClick={handleStash} title="Stash">Stash</button>
-          <button className="git-action-btn" onClick={handleStashPop} title="Pop stash">Pop</button>
-          <button
-            className={`git-action-btn${showBranchCompare ? ' git-action-btn--active' : ''}`}
-            onClick={() => { setShowBranchCompare(!showBranchCompare); setBlameFile(null); setBlameData([]) }}
-            title="Comparer des branches"
-          >
-            Compare
+
+        <div className="git-toolbar">
+          {/* Undo */}
+          <button className="git-toolbar-btn" onClick={handleUndo} title={t('git.undoCommit')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6.69 3L3 13" />
+            </svg>
+            <span>{t('git.undo')}</span>
           </button>
-          <button className="git-action-btn" onClick={refresh} title="Rafraichir">&#8635;</button>
+
+          <div className="git-toolbar-sep" />
+
+          {/* Pull */}
+          <button className="git-toolbar-btn" onClick={handlePull} title="Pull">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14" /><path d="M19 12l-7 7-7-7" />
+            </svg>
+            <span>Pull</span>
+          </button>
+
+          {/* Push */}
+          <button className="git-toolbar-btn" onClick={handlePush} title="Push">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5" /><path d="M5 12l7-7 7 7" />
+            </svg>
+            <span>Push</span>
+          </button>
+
+          {/* Fetch */}
+          <button className="git-toolbar-btn" onClick={handleFetch} title="Fetch">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M3 22v-6h6" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+            </svg>
+            <span>Fetch</span>
+          </button>
+
+          <div className="git-toolbar-sep" />
+
+          {/* Branch */}
+          <button className="git-toolbar-btn" onClick={() => setShowNewBranch(true)} title={t('git.newBranch')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="6" y1="3" x2="6" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" />
+            </svg>
+            <span>{t('git.branch')}</span>
+          </button>
+
+          {/* Stash */}
+          <button className="git-toolbar-btn" onClick={handleStash} title="Stash">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" /><path d="M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3" /><path d="M4 12h16" />
+            </svg>
+            <span>Stash</span>
+          </button>
+
+          {/* Pop */}
+          <button className="git-toolbar-btn" onClick={handleStashPop} title="Pop stash">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" /><path d="M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3" /><path d="M12 8v8" /><path d="M8 12l4-4 4 4" />
+            </svg>
+            <span>Pop</span>
+          </button>
+
+          <div className="git-toolbar-sep" />
+
+          {/* Compare */}
+          <button
+            className={`git-toolbar-btn${showBranchCompare ? ' git-toolbar-btn--active' : ''}`}
+            onClick={() => { setShowBranchCompare(!showBranchCompare); setBlameFile(null); setBlameData([]) }}
+            title={t('common.compare')}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            <span>{t('common.compare')}</span>
+          </button>
+
+          {/* Terminal */}
+          <button className="git-toolbar-btn" onClick={handleSwitchToTerminal} title={t('git.terminal')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" />
+            </svg>
+            <span>{t('git.terminal')}</span>
+          </button>
+
+          <div className="git-toolbar-sep" />
+
+          {/* Refresh */}
+          <button className="git-toolbar-btn" onClick={refresh} title={t('common.refresh')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+            </svg>
+            <span />
+          </button>
         </div>
       </div>
 
@@ -1030,6 +1166,10 @@ export function GitPanel() {
                     key={info.entry.hash}
                     className={`git-graph-row${selectedCommit?.hash === info.entry.hash ? ' git-graph-row--selected' : ''}`}
                     onClick={() => handleSelectCommit(info.entry)}
+                    onContextMenu={(e) => {
+                      e.preventDefault()
+                      setCommitCtx({ x: e.clientX, y: e.clientY, entry: info.entry })
+                    }}
                   >
                     <div className="git-graph-cell">
                       <GraphRow info={info} />
@@ -1172,6 +1312,16 @@ export function GitPanel() {
           y={branchCtx.y}
           items={getBranchContextItems(branchCtx.branch)}
           onClose={() => setBranchCtx(null)}
+        />
+      )}
+
+      {/* Commit context menu */}
+      {commitCtx && (
+        <ContextMenu
+          x={commitCtx.x}
+          y={commitCtx.y}
+          items={getCommitContextItems(commitCtx.entry)}
+          onClose={() => setCommitCtx(null)}
         />
       )}
     </div>

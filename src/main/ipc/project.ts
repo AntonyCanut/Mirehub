@@ -5,6 +5,7 @@ import path from 'path'
 import os from 'os'
 import { execSync, execFile } from 'child_process'
 import { promisify } from 'util'
+import ignore from 'ignore'
 
 const execFileAsync = promisify(execFile)
 import { IPC_CHANNELS, Project, NpmPackageInfo, TodoEntry, ProjectStatsData, PromptTemplate, Locale } from '../../shared/types/index'
@@ -374,11 +375,24 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.PROJECT_STATS,
     async (_event, { path: projectPath }: { path: string }) => {
-      const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', '.cache'])
+      // Load .gitignore patterns
+      const ig = ignore()
+      ig.add(['.git'])
+      const gitignorePath = path.join(projectPath, '.gitignore')
+      try {
+        const gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8')
+        ig.add(gitignoreContent)
+      } catch {
+        // No .gitignore — fall back to basic exclusions
+        ig.add(['node_modules', 'dist', 'build', '.next', '.cache'])
+      }
+
       const extCounts: Record<string, { count: number; lines: number }> = {}
-      const allFiles: { path: string; size: number; lines: number }[] = []
+      const allFiles: { path: string; size: number; lines: number; modifiedAt: number }[] = []
       let totalFiles = 0
       let totalLines = 0
+      let totalSize = 0
+      let totalDirs = 0
 
       function scanDir(dirPath: string): void {
         let entries: fs.Dirent[]
@@ -389,11 +403,14 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
         }
 
         for (const entry of entries) {
-          if (SKIP_DIRS.has(entry.name)) continue
-
           const fullPath = path.join(dirPath, entry.name)
+          const relativePath = path.relative(projectPath, fullPath)
+
+          // Use ignore to check if path should be excluded
+          if (ig.ignores(relativePath + (entry.isDirectory() ? '/' : ''))) continue
 
           if (entry.isDirectory()) {
+            totalDirs++
             scanDir(fullPath)
           } else if (entry.isFile()) {
             totalFiles++
@@ -401,6 +418,7 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
 
             try {
               const stat = fs.statSync(fullPath)
+              totalSize += stat.size
               const content = fs.readFileSync(fullPath, 'utf-8')
               const lineCount = content.split('\n').length
 
@@ -413,12 +431,25 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
               extCounts[ext]!.lines += lineCount
 
               allFiles.push({
-                path: path.relative(projectPath, fullPath),
+                path: relativePath,
                 size: stat.size,
                 lines: lineCount,
+                modifiedAt: stat.mtimeMs,
               })
             } catch {
               // Skip binary/unreadable files for line count
+              try {
+                const stat = fs.statSync(fullPath)
+                totalSize += stat.size
+                allFiles.push({
+                  path: relativePath,
+                  size: stat.size,
+                  lines: 0,
+                  modifiedAt: stat.mtimeMs,
+                })
+              } catch {
+                // Skip completely unreadable files
+              }
               if (!extCounts[ext]) {
                 extCounts[ext] = { count: 0, lines: 0 }
               }
@@ -438,11 +469,20 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
         .sort((a, b) => b.size - a.size)
         .slice(0, 20)
 
+      const recentFiles = [...allFiles]
+        .sort((a, b) => b.modifiedAt - a.modifiedAt)
+        .slice(0, 15)
+        .map((f) => ({ path: f.path, modifiedAt: f.modifiedAt }))
+
       const stats: ProjectStatsData = {
         totalFiles,
         totalLines,
+        totalSize,
+        totalDirs,
+        avgFileSize: totalFiles > 0 ? Math.round(totalSize / totalFiles) : 0,
         fileTypeBreakdown,
         largestFiles,
+        recentFiles,
       }
 
       return stats

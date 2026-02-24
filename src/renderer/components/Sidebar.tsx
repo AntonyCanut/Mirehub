@@ -42,6 +42,29 @@ export function Sidebar() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [navigateWorkspace, createWorkspaceFromFolder])
 
+  // Listen for menu actions from macOS app menu
+  useEffect(() => {
+    const handleMenuAction = (e: Event) => {
+      const action = (e as CustomEvent).detail
+      if (action === 'workspace:new') {
+        setShowCreateMenu(true)
+      } else if (action === 'workspace:newFromFolder') {
+        createWorkspaceFromFolder()
+      } else if (action === 'workspace:import') {
+        window.mirehub.workspace.import().then((result) => {
+          if (result.success) init()
+        })
+      } else if (action === 'workspace:export') {
+        const ws = useWorkspaceStore.getState()
+        if (ws.activeWorkspaceId) {
+          window.mirehub.workspace.export(ws.activeWorkspaceId)
+        }
+      }
+    }
+    window.addEventListener('mirehub:menu-action', handleMenuAction)
+    return () => window.removeEventListener('mirehub:menu-action', handleMenuAction)
+  }, [createWorkspaceFromFolder, init])
+
   // Close create menu on click outside
   useEffect(() => {
     if (!showCreateMenu) return

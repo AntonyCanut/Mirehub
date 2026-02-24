@@ -549,4 +549,17 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       }
     },
   )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_RESET_SOFT,
+    async (_event, { cwd }: { cwd: string }) => {
+      try {
+        if (!hasCommits(cwd)) return { success: false, error: 'No commits to undo' }
+        exec('git reset --soft HEAD~1', cwd)
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
 }

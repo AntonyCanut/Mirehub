@@ -142,6 +142,32 @@ export function App() {
     return initClaudeListeners()
   }, [initClaudeListeners])
 
+  // Listen for menu actions from main process
+  useEffect(() => {
+    const unsubscribe = window.mirehub.onMenuAction((action: string) => {
+      if (action.startsWith('view:')) {
+        const view = action.replace('view:', '')
+        setViewMode(view as typeof viewMode)
+      } else if (action === 'commandPalette') {
+        setCommandPaletteOpen((v) => !v)
+        setQuickSwitchOpen(false)
+      } else if (action === 'quickSwitch') {
+        setQuickSwitchOpen((v) => !v)
+        setCommandPaletteOpen(false)
+      } else if (action === 'workspace:new') {
+        // Dispatch a custom event for the sidebar to handle
+        window.dispatchEvent(new CustomEvent('mirehub:menu-action', { detail: action }))
+      } else if (action === 'workspace:newFromFolder') {
+        window.dispatchEvent(new CustomEvent('mirehub:menu-action', { detail: action }))
+      } else if (action === 'workspace:import') {
+        window.dispatchEvent(new CustomEvent('mirehub:menu-action', { detail: action }))
+      } else if (action === 'workspace:export') {
+        window.dispatchEvent(new CustomEvent('mirehub:menu-action', { detail: action }))
+      }
+    })
+    return unsubscribe
+  }, [setViewMode])
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

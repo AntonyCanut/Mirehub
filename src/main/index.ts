@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron'
+import { app, BrowserWindow, ipcMain, globalShortcut, Menu, shell } from 'electron'
 import path from 'path'
 import { execSync } from 'child_process'
 import { registerTerminalHandlers } from './ipc/terminal'
@@ -21,6 +21,8 @@ import { registerSshHandlers } from './ipc/ssh'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
 import { databaseService } from './services/database'
+import { StorageService } from './services/storage'
+import { IPC_CHANNELS } from '../shared/types'
 
 // Fix PATH for packaged .app on macOS — Electron .app bundles inherit a
 // minimal PATH (/usr/bin:/bin:/usr/sbin:/sbin) which prevents finding
@@ -97,8 +99,174 @@ function createMainWindow(): BrowserWindow {
   return win
 }
 
+function sendMenuAction(action: string): void {
+  mainWindow?.webContents.send(IPC_CHANNELS.MENU_ACTION, action)
+}
+
+function buildApplicationMenu(): void {
+  const storage = new StorageService()
+  const locale = storage.getSettings().locale || 'fr'
+  const isFr = locale === 'fr'
+
+  const template: Electron.MenuItemConstructorOptions[] = [
+    // App menu
+    {
+      label: 'Mirehub',
+      submenu: [
+        { role: 'about', label: isFr ? 'A propos de Mirehub' : 'About Mirehub' },
+        { type: 'separator' },
+        {
+          label: isFr ? 'Preferences...' : 'Preferences...',
+          accelerator: 'CmdOrCtrl+,',
+          click: () => sendMenuAction('view:settings'),
+        },
+        { type: 'separator' },
+        { role: 'hide', label: isFr ? 'Masquer Mirehub' : 'Hide Mirehub' },
+        { role: 'hideOthers', label: isFr ? 'Masquer les autres' : 'Hide Others' },
+        { role: 'unhide', label: isFr ? 'Tout afficher' : 'Show All' },
+        { type: 'separator' },
+        { role: 'quit', label: isFr ? 'Quitter Mirehub' : 'Quit Mirehub' },
+      ],
+    },
+    // File menu
+    {
+      label: isFr ? 'Fichier' : 'File',
+      submenu: [
+        {
+          label: isFr ? 'Nouveau workspace' : 'New Workspace',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => sendMenuAction('workspace:new'),
+        },
+        {
+          label: isFr ? 'Workspace depuis un dossier...' : 'Workspace from Folder...',
+          accelerator: 'CmdOrCtrl+Shift+N',
+          click: () => sendMenuAction('workspace:newFromFolder'),
+        },
+        { type: 'separator' },
+        {
+          label: isFr ? 'Importer un workspace...' : 'Import Workspace...',
+          click: () => sendMenuAction('workspace:import'),
+        },
+        {
+          label: isFr ? 'Exporter le workspace...' : 'Export Workspace...',
+          click: () => sendMenuAction('workspace:export'),
+        },
+        { type: 'separator' },
+        { role: 'close', label: isFr ? 'Fermer la fenetre' : 'Close Window' },
+      ],
+    },
+    // Edit menu
+    {
+      label: isFr ? 'Edition' : 'Edit',
+      submenu: [
+        { role: 'undo', label: isFr ? 'Annuler' : 'Undo' },
+        { role: 'redo', label: isFr ? 'Retablir' : 'Redo' },
+        { type: 'separator' },
+        { role: 'cut', label: isFr ? 'Couper' : 'Cut' },
+        { role: 'copy', label: isFr ? 'Copier' : 'Copy' },
+        { role: 'paste', label: isFr ? 'Coller' : 'Paste' },
+        { role: 'selectAll', label: isFr ? 'Tout selectionner' : 'Select All' },
+      ],
+    },
+    // View menu
+    {
+      label: isFr ? 'Affichage' : 'View',
+      submenu: [
+        {
+          label: 'Terminal',
+          accelerator: 'CmdOrCtrl+1',
+          click: () => sendMenuAction('view:terminal'),
+        },
+        {
+          label: 'Git',
+          accelerator: 'CmdOrCtrl+2',
+          click: () => sendMenuAction('view:git'),
+        },
+        {
+          label: 'Kanban',
+          accelerator: 'CmdOrCtrl+3',
+          click: () => sendMenuAction('view:kanban'),
+        },
+        {
+          label: 'Claude',
+          accelerator: 'CmdOrCtrl+4',
+          click: () => sendMenuAction('view:claude'),
+        },
+        {
+          label: isFr ? 'Base de donnees' : 'Database',
+          accelerator: 'CmdOrCtrl+5',
+          click: () => sendMenuAction('view:database'),
+        },
+        { type: 'separator' },
+        {
+          label: isFr ? 'Palette de commandes' : 'Command Palette',
+          accelerator: 'CmdOrCtrl+K',
+          click: () => sendMenuAction('commandPalette'),
+        },
+        {
+          label: isFr ? 'Changement rapide' : 'Quick Switch',
+          accelerator: 'CmdOrCtrl+P',
+          click: () => sendMenuAction('quickSwitch'),
+        },
+        {
+          label: isFr ? 'Recherche globale' : 'Global Search',
+          accelerator: 'CmdOrCtrl+Shift+F',
+          click: () => sendMenuAction('view:search'),
+        },
+        { type: 'separator' },
+        {
+          label: isFr ? 'Outils de developpement' : 'Toggle Developer Tools',
+          accelerator: 'CmdOrCtrl+Alt+I',
+          click: () => mainWindow?.webContents.toggleDevTools(),
+        },
+        { role: 'reload', label: isFr ? 'Recharger' : 'Reload' },
+        { role: 'forceReload', label: isFr ? 'Forcer le rechargement' : 'Force Reload' },
+        { type: 'separator' },
+        { role: 'resetZoom', label: isFr ? 'Taille reelle' : 'Actual Size' },
+        { role: 'zoomIn', label: isFr ? 'Zoom avant' : 'Zoom In' },
+        { role: 'zoomOut', label: isFr ? 'Zoom arriere' : 'Zoom Out' },
+        { type: 'separator' },
+        { role: 'togglefullscreen', label: isFr ? 'Plein ecran' : 'Toggle Full Screen' },
+      ],
+    },
+    // Window menu
+    {
+      label: isFr ? 'Fenetre' : 'Window',
+      role: 'window',
+      submenu: [
+        { role: 'minimize', label: isFr ? 'Reduire' : 'Minimize' },
+        { role: 'zoom', label: 'Zoom' },
+        { type: 'separator' },
+        { role: 'front', label: isFr ? 'Tout ramener au premier plan' : 'Bring All to Front' },
+      ],
+    },
+    // Help menu
+    {
+      label: isFr ? 'Aide' : 'Help',
+      role: 'help',
+      submenu: [
+        {
+          label: isFr ? 'Raccourcis clavier' : 'Keyboard Shortcuts',
+          click: () => sendMenuAction('view:shortcuts'),
+        },
+        { type: 'separator' },
+        {
+          label: isFr ? 'Site web Mirehub' : 'Mirehub Website',
+          click: () => shell.openExternal('https://github.com/AntonyCanut/Mirehub'),
+        },
+      ],
+    },
+  ]
+
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+}
+
 app.whenReady().then(() => {
   mainWindow = createMainWindow()
+
+  // Build macOS application menu
+  buildApplicationMenu()
 
   // Register IPC handlers
   registerTerminalHandlers(ipcMain)

@@ -211,8 +211,16 @@ export interface TodoEntry {
 export interface ProjectStatsData {
   totalFiles: number
   totalLines: number
+  totalSize: number
+  totalDirs: number
+  avgFileSize: number
+  maxDepth: number
+  binaryFiles: number
+  emptyFiles: number
   fileTypeBreakdown: { ext: string; count: number; lines: number }[]
   largestFiles: { path: string; size: number; lines: number }[]
+  recentFiles: { path: string; modifiedAt: number }[]
+  biggestDirs: { path: string; fileCount: number; totalSize: number }[]
 }
 
 export interface NpmPackageInfo {
@@ -487,6 +495,62 @@ export interface McpCatalogEntry {
   official: boolean
 }
 
+// Code Analysis types
+export type AnalysisSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info'
+export type AnalysisToolCategory = 'security' | 'quality' | 'dependencies' | 'infrastructure'
+
+export interface AnalysisToolDef {
+  id: string
+  name: string
+  command: string
+  category: AnalysisToolCategory
+  description: string
+  languages: string[]
+  installed: boolean
+  jsonFlag: string
+}
+
+export interface AnalysisFinding {
+  id: string
+  tool: string
+  file: string
+  line: number
+  column?: number
+  endLine?: number
+  endColumn?: number
+  severity: AnalysisSeverity
+  message: string
+  rule?: string
+  ruleUrl?: string
+  snippet?: string
+  cwe?: string
+}
+
+export interface AnalysisReport {
+  id: string
+  projectPath: string
+  toolId: string
+  toolName: string
+  timestamp: number
+  duration: number
+  findings: AnalysisFinding[]
+  summary: {
+    critical: number
+    high: number
+    medium: number
+    low: number
+    info: number
+    total: number
+  }
+  error?: string
+}
+
+export interface AnalysisRunOptions {
+  projectPath: string
+  toolId: string
+  extraArgs?: string[]
+}
+
 // SSH Key types
 export type SshKeyType = 'ed25519' | 'rsa'
 
@@ -608,6 +672,7 @@ export const IPC_CHANNELS = {
   GIT_REMOTES: 'git:remotes',
   GIT_ADD_REMOTE: 'git:addRemote',
   GIT_REMOVE_REMOTE: 'git:removeRemote',
+  GIT_RESET_SOFT: 'git:resetSoft',
 
   // Workspace storage (.workspaces dir)
   WORKSPACE_INIT_DIR: 'workspace:initDir',
@@ -711,6 +776,9 @@ export const IPC_CHANNELS = {
   APP_UPDATE_DOWNLOAD: 'appUpdate:download',
   APP_UPDATE_INSTALL: 'appUpdate:install',
   APP_UPDATE_STATUS: 'appUpdate:status',
+
+  // Menu
+  MENU_ACTION: 'menu:action',
 
   // SSH Keys
   SSH_LIST_KEYS: 'ssh:listKeys',

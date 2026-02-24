@@ -3186,7 +3186,7 @@ body {
   border-radius: 4px;
 }
 
-/* ===== Settings Panel ===== */
+/* ===== Settings Panel (split layout) ===== */
 .settings-panel {
   flex: 1;
   display: flex;
@@ -3195,6 +3195,165 @@ body {
   background: var(--bg-primary);
 }
 
+.settings-panel--split {
+  flex-direction: row;
+}
+
+/* -- Navigation sidebar -- */
+.settings-nav {
+  width: 180px;
+  min-width: 180px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.settings-nav-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  padding: 14px 16px 10px;
+}
+
+.settings-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  transition: all 0.12s ease;
+  text-align: left;
+}
+
+.settings-nav-item:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.settings-nav-item--active {
+  background: var(--accent);
+  color: var(--bg-tertiary);
+}
+
+.settings-nav-item--active:hover {
+  background: var(--accent);
+  color: var(--bg-tertiary);
+}
+
+.settings-nav-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.settings-nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* -- Content area -- */
+.settings-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.settings-content-header {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.settings-content-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.settings-content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.settings-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-card--about {
+  padding: 20px;
+}
+
+.settings-about-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.settings-about-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.settings-about-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-about-version {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* -- Legacy support (keep for compatibility) -- */
 .settings-header {
   padding: 12px 20px;
   background: var(--bg-secondary);
@@ -3243,10 +3402,23 @@ body {
   min-height: 32px;
 }
 
+.settings-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .settings-label {
   font-size: 13px;
   color: var(--text-secondary);
   flex-shrink: 0;
+}
+
+.settings-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 .settings-radio-group {

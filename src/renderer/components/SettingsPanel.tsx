@@ -32,12 +32,26 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoCloseCompletedTerminals: false,
 }
 
+type SettingsSection = 'general' | 'appearance' | 'terminal' | 'ssh' | 'claude' | 'kanban' | 'notifications' | 'about'
+
+const SECTIONS: { id: SettingsSection; icon: string }[] = [
+  { id: 'general', icon: '⚙' },
+  { id: 'appearance', icon: '🎨' },
+  { id: 'terminal', icon: '▸' },
+  { id: 'ssh', icon: '🔑' },
+  { id: 'claude', icon: '✦' },
+  { id: 'kanban', icon: '☰' },
+  { id: 'notifications', icon: '🔔' },
+  { id: 'about', icon: 'ℹ' },
+]
+
 export function SettingsPanel() {
   const { t, locale, setLocale } = useI18n()
   const { status: updateStatus, checkForUpdate } = useAppUpdateStore()
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [appVersion, setAppVersion] = useState<{ version: string; name: string } | null>(null)
+  const [activeSection, setActiveSection] = useState<SettingsSection>('general')
 
   // SSH state
   const [sshKeys, setSshKeys] = useState<SshKeyInfo[]>([])
@@ -88,7 +102,6 @@ export function SettingsPanel() {
     setSettings((prev) => ({ ...prev, [key]: value }))
     window.mirehub.settings.set({ [key]: value })
 
-    // Apply theme immediately when changed
     if (key === 'theme') {
       const theme = value as string
       if (theme === 'system') {
@@ -201,349 +214,449 @@ export function SettingsPanel() {
     return <div className="file-viewer-empty">{t('common.loading')}</div>
   }
 
+  const sectionLabel = (id: SettingsSection): string => {
+    const map: Record<SettingsSection, string> = {
+      general: t('settings.general'),
+      appearance: t('settings.appearance'),
+      terminal: t('settings.terminal'),
+      ssh: t('settings.ssh'),
+      claude: t('settings.claude'),
+      kanban: t('settings.kanban'),
+      notifications: t('settings.notifications'),
+      about: t('settings.about'),
+    }
+    return map[id]
+  }
+
   return (
-    <div className="settings-panel">
-      <div className="settings-header">
-        <h3>{t('settings.title')}</h3>
-      </div>
-      <div className="settings-body">
-        {/* General */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.general')}</h4>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.language')}</label>
-            <div className="settings-radio-group">
+    <div className="settings-panel settings-panel--split">
+      {/* Navigation sidebar */}
+      <nav className="settings-nav">
+        <h3 className="settings-nav-title">{t('settings.title')}</h3>
+        <ul className="settings-nav-list">
+          {SECTIONS.map((section) => (
+            <li key={section.id}>
               <button
-                className={`settings-radio-btn${locale === 'fr' ? ' settings-radio-btn--active' : ''}`}
-                onClick={() => handleLocaleChange('fr')}
+                className={`settings-nav-item${activeSection === section.id ? ' settings-nav-item--active' : ''}`}
+                onClick={() => setActiveSection(section.id)}
               >
-                {t('settings.french')}
+                <span className="settings-nav-icon">{section.icon}</span>
+                <span className="settings-nav-label">{sectionLabel(section.id)}</span>
               </button>
-              <button
-                className={`settings-radio-btn${locale === 'en' ? ' settings-radio-btn--active' : ''}`}
-                onClick={() => handleLocaleChange('en')}
-              >
-                {t('settings.english')}
-              </button>
-            </div>
-          </div>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* Content area */}
+      <div className="settings-content">
+        <div className="settings-content-header">
+          <h3>{sectionLabel(activeSection)}</h3>
         </div>
+        <div className="settings-content-body">
 
-        {/* Apparence */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.appearance')}</h4>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.theme')}</label>
-            <div className="settings-radio-group">
-              {(['dark', 'light', 'terracotta', 'system'] as const).map((th) => (
-                <button
-                  key={th}
-                  className={`settings-radio-btn${settings.theme === th ? ' settings-radio-btn--active' : ''}`}
-                  onClick={() => updateSetting('theme', th)}
-                >
-                  {t(`settings.theme${th.charAt(0).toUpperCase() + th.slice(1)}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.fontSize')}</label>
-            <div className="settings-input-row">
-              <input
-                type="range"
-                min={8}
-                max={24}
-                value={settings.fontSize}
-                onChange={(e) => updateSetting('fontSize', Number(e.target.value))}
-                className="settings-slider"
-              />
-              <span className="settings-value">{settings.fontSize}px</span>
-            </div>
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.fontFamily')}</label>
-            <select
-              className="settings-select"
-              value={settings.fontFamily}
-              onChange={(e) => updateSetting('fontFamily', e.target.value)}
-            >
-              {FONT_FAMILIES.map((f) => (
-                <option key={f} value={f}>{f}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Terminal */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.terminal')}</h4>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.defaultShell')}</label>
-            <select
-              className="settings-select"
-              value={settings.defaultShell}
-              onChange={(e) => updateSetting('defaultShell', e.target.value)}
-            >
-              {SHELLS.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.scrollbackLines')}</label>
-            <div className="settings-input-row">
-              <input
-                type="number"
-                min={1000}
-                max={50000}
-                step={1000}
-                value={settings.scrollbackLines}
-                onChange={(e) => updateSetting('scrollbackLines', Number(e.target.value))}
-                className="settings-number-input"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Git / SSH */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.ssh')}</h4>
-
-          {/* Actions bar */}
-          <div className="ssh-actions">
-            <button className="ssh-action-btn" onClick={() => { setShowGenerateForm(!showGenerateForm); setShowImportForm(false) }}>
-              + {t('settings.sshGenerate')}
-            </button>
-            <button className="ssh-action-btn" onClick={() => { setShowImportForm(!showImportForm); setShowGenerateForm(false) }}>
-              {t('settings.sshImport')}
-            </button>
-            <button className="ssh-action-btn" onClick={handleSelectKeyFile}>
-              {t('settings.sshSelectFile')}
-            </button>
-            <button className="ssh-action-btn" onClick={handleOpenSshDir}>
-              {t('settings.sshOpenFolder')}
-            </button>
-          </div>
-
-          {/* Error */}
-          {sshError && (
-            <div className="ssh-error">{sshError}</div>
-          )}
-
-          {/* Generate form */}
-          {showGenerateForm && (
-            <div className="ssh-form">
-              <div className="ssh-form-row">
-                <label className="settings-label">{t('settings.sshKeyName')}</label>
-                <input
-                  type="text"
-                  className="ssh-input"
-                  value={genName}
-                  onChange={(e) => setGenName(e.target.value)}
-                  placeholder="id_ed25519"
-                />
-              </div>
-              <div className="ssh-form-row">
-                <label className="settings-label">{t('settings.sshKeyType')}</label>
-                <div className="settings-radio-group">
-                  {(['ed25519', 'rsa'] as const).map((kt) => (
+          {/* General */}
+          {activeSection === 'general' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.language')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Langue de l\'interface' : 'Interface language'}</span>
+                  </div>
+                  <div className="settings-radio-group">
                     <button
-                      key={kt}
-                      className={`settings-radio-btn${genType === kt ? ' settings-radio-btn--active' : ''}`}
-                      onClick={() => {
-                        setGenType(kt)
-                        setGenName(kt === 'ed25519' ? 'id_ed25519' : 'id_rsa')
-                      }}
+                      className={`settings-radio-btn${locale === 'fr' ? ' settings-radio-btn--active' : ''}`}
+                      onClick={() => handleLocaleChange('fr')}
                     >
-                      {kt.toUpperCase()}
+                      {t('settings.french')}
                     </button>
-                  ))}
+                    <button
+                      className={`settings-radio-btn${locale === 'en' ? ' settings-radio-btn--active' : ''}`}
+                      onClick={() => handleLocaleChange('en')}
+                    >
+                      {t('settings.english')}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div className="ssh-form-row">
-                <label className="settings-label">{t('settings.sshKeyComment')}</label>
-                <input
-                  type="text"
-                  className="ssh-input"
-                  value={genComment}
-                  onChange={(e) => setGenComment(e.target.value)}
-                  placeholder="user@example.com"
-                />
-              </div>
-              <div className="ssh-form-actions">
-                <button className="ssh-btn ssh-btn--primary" onClick={handleGenerateKey} disabled={genLoading || !genName.trim()}>
-                  {genLoading ? t('settings.sshGenerating') : t('settings.sshGenerateBtn')}
-                </button>
-                <button className="ssh-btn" onClick={() => setShowGenerateForm(false)}>
-                  {t('common.cancel')}
-                </button>
-              </div>
             </div>
           )}
 
-          {/* Import form */}
-          {showImportForm && (
-            <div className="ssh-form">
-              <div className="ssh-form-row">
-                <label className="settings-label">{t('settings.sshKeyName')}</label>
-                <input
-                  type="text"
-                  className="ssh-input"
-                  value={importName}
-                  onChange={(e) => setImportName(e.target.value)}
-                  placeholder="my_key"
-                />
-              </div>
-              <div className="ssh-form-row">
-                <label className="settings-label">{t('settings.sshPastePrivateKey')}</label>
-                <textarea
-                  className="ssh-textarea"
-                  value={importPrivateKey}
-                  onChange={(e) => setImportPrivateKey(e.target.value)}
-                  placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
-                  rows={4}
-                />
-              </div>
-              <div className="ssh-form-row">
-                <label className="settings-label">{t('settings.sshPastePublicKey')}</label>
-                <textarea
-                  className="ssh-textarea"
-                  value={importPublicKey}
-                  onChange={(e) => setImportPublicKey(e.target.value)}
-                  placeholder="ssh-ed25519 AAAA..."
-                  rows={2}
-                />
-              </div>
-              <div className="ssh-form-actions">
-                <button className="ssh-btn ssh-btn--primary" onClick={handleImportKey} disabled={!importName.trim() || !importPrivateKey.trim()}>
-                  {t('settings.sshImportBtn')}
-                </button>
-                <button className="ssh-btn" onClick={() => setShowImportForm(false)}>
-                  {t('common.cancel')}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Key list */}
-          {sshLoading ? (
-            <div className="ssh-loading">{t('common.loading')}</div>
-          ) : sshKeys.length === 0 ? (
-            <div className="ssh-empty">{t('settings.sshNoKeys')}</div>
-          ) : (
-            <div className="ssh-key-list">
-              {sshKeys.map((key) => (
-                <div key={key.id} className="ssh-key-card">
-                  <div className="ssh-key-header">
-                    <span className="ssh-key-name">{key.name}</span>
-                    <span className="ssh-key-type">{key.type.toUpperCase()}</span>
-                    {key.isDefault && <span className="ssh-key-badge">{t('settings.sshDefault')}</span>}
+          {/* Appearance */}
+          {activeSection === 'appearance' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.theme')}</label>
                   </div>
-                  {key.comment && <div className="ssh-key-comment">{key.comment}</div>}
-                  {key.fingerprint && (
-                    <div className="ssh-key-fingerprint">{key.fingerprint}</div>
-                  )}
-                  <div className="ssh-key-actions">
-                    {key.publicKeyPath && (
-                      <button className="ssh-btn ssh-btn--small" onClick={() => handleCopyPublicKey(key)}>
-                        {copiedKeyId === key.id ? t('settings.sshCopied') : t('settings.sshCopyPublicKey')}
+                  <div className="settings-radio-group">
+                    {(['dark', 'light', 'terracotta', 'system'] as const).map((th) => (
+                      <button
+                        key={th}
+                        className={`settings-radio-btn${settings.theme === th ? ' settings-radio-btn--active' : ''}`}
+                        onClick={() => updateSetting('theme', th)}
+                      >
+                        {t(`settings.theme${th.charAt(0).toUpperCase() + th.slice(1)}`)}
                       </button>
-                    )}
-                    <button className="ssh-btn ssh-btn--small ssh-btn--danger" onClick={() => handleDeleteKey(key)}>
-                      {t('settings.sshDelete')}
-                    </button>
+                    ))}
                   </div>
                 </div>
-              ))}
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.fontSize')}</label>
+                  </div>
+                  <div className="settings-input-row">
+                    <input
+                      type="range"
+                      min={8}
+                      max={24}
+                      value={settings.fontSize}
+                      onChange={(e) => updateSetting('fontSize', Number(e.target.value))}
+                      className="settings-slider"
+                    />
+                    <span className="settings-value">{settings.fontSize}px</span>
+                  </div>
+                </div>
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.fontFamily')}</label>
+                  </div>
+                  <select
+                    className="settings-select"
+                    value={settings.fontFamily}
+                    onChange={(e) => updateSetting('fontFamily', e.target.value)}
+                  >
+                    {FONT_FAMILIES.map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Claude */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.claude')}</h4>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.detectionColor')}</label>
-            <input
-              type="color"
-              value={settings.claudeDetectionColor}
-              onChange={(e) => updateSetting('claudeDetectionColor', e.target.value)}
-              className="settings-color-input"
-            />
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.autoClaude')}</label>
-            <button
-              className={`settings-toggle${settings.autoClauderEnabled ? ' settings-toggle--active' : ''}`}
-              onClick={() => updateSetting('autoClauderEnabled', !settings.autoClauderEnabled)}
-            >
-              <span className="settings-toggle-knob" />
-            </button>
-          </div>
-        </div>
+          {/* Terminal */}
+          {activeSection === 'terminal' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.defaultShell')}</label>
+                  </div>
+                  <select
+                    className="settings-select"
+                    value={settings.defaultShell}
+                    onChange={(e) => updateSetting('defaultShell', e.target.value)}
+                  >
+                    {SHELLS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.scrollbackLines')}</label>
+                  </div>
+                  <div className="settings-input-row">
+                    <input
+                      type="number"
+                      min={1000}
+                      max={50000}
+                      step={1000}
+                      value={settings.scrollbackLines}
+                      onChange={(e) => updateSetting('scrollbackLines', Number(e.target.value))}
+                      className="settings-number-input"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-        {/* Kanban */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.kanban')}</h4>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.autoCloseCompletedTerminals')}</label>
-            <button
-              className={`settings-toggle${settings.autoCloseCompletedTerminals ? ' settings-toggle--active' : ''}`}
-              onClick={() => updateSetting('autoCloseCompletedTerminals', !settings.autoCloseCompletedTerminals)}
-            >
-              <span className="settings-toggle-knob" />
-            </button>
-          </div>
-        </div>
+          {/* SSH */}
+          {activeSection === 'ssh' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="ssh-actions">
+                  <button className="ssh-action-btn" onClick={() => { setShowGenerateForm(!showGenerateForm); setShowImportForm(false) }}>
+                    + {t('settings.sshGenerate')}
+                  </button>
+                  <button className="ssh-action-btn" onClick={() => { setShowImportForm(!showImportForm); setShowGenerateForm(false) }}>
+                    {t('settings.sshImport')}
+                  </button>
+                  <button className="ssh-action-btn" onClick={handleSelectKeyFile}>
+                    {t('settings.sshSelectFile')}
+                  </button>
+                  <button className="ssh-action-btn" onClick={handleOpenSshDir}>
+                    {t('settings.sshOpenFolder')}
+                  </button>
+                </div>
 
-        {/* Notifications */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.notifications')}</h4>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.sound')}</label>
-            <button
-              className={`settings-toggle${settings.notificationSound ? ' settings-toggle--active' : ''}`}
-              onClick={() => updateSetting('notificationSound', !settings.notificationSound)}
-            >
-              <span className="settings-toggle-knob" />
-            </button>
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.checkUpdates')}</label>
-            <button
-              className={`settings-toggle${settings.checkUpdatesOnLaunch ? ' settings-toggle--active' : ''}`}
-              onClick={() => updateSetting('checkUpdatesOnLaunch', !settings.checkUpdatesOnLaunch)}
-            >
-              <span className="settings-toggle-knob" />
-            </button>
-          </div>
-        </div>
+                {sshError && (
+                  <div className="ssh-error">{sshError}</div>
+                )}
 
-        {/* About */}
-        <div className="settings-group">
-          <h4 className="settings-group-title">{t('settings.about')}</h4>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.appName')}</label>
-            <span className="settings-value">{appVersion?.name ?? 'Workspaces'}</span>
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.version')}</label>
-            <span className="settings-value">{appVersion?.version ?? '—'}</span>
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('settings.developer')}</label>
-            <span className="settings-value">Antony KERVAZO CANUT</span>
-          </div>
-          <div className="settings-row">
-            <label className="settings-label">{t('appUpdate.checkNow')}</label>
-            <button
-              className="settings-btn"
-              onClick={checkForUpdate}
-              disabled={updateStatus === 'checking'}
-            >
-              {updateStatus === 'checking' ? t('common.loading') : t('appUpdate.checkNow')}
-            </button>
-          </div>
+                {showGenerateForm && (
+                  <div className="ssh-form">
+                    <div className="ssh-form-row">
+                      <label className="settings-label">{t('settings.sshKeyName')}</label>
+                      <input
+                        type="text"
+                        className="ssh-input"
+                        value={genName}
+                        onChange={(e) => setGenName(e.target.value)}
+                        placeholder="id_ed25519"
+                      />
+                    </div>
+                    <div className="ssh-form-row">
+                      <label className="settings-label">{t('settings.sshKeyType')}</label>
+                      <div className="settings-radio-group">
+                        {(['ed25519', 'rsa'] as const).map((kt) => (
+                          <button
+                            key={kt}
+                            className={`settings-radio-btn${genType === kt ? ' settings-radio-btn--active' : ''}`}
+                            onClick={() => {
+                              setGenType(kt)
+                              setGenName(kt === 'ed25519' ? 'id_ed25519' : 'id_rsa')
+                            }}
+                          >
+                            {kt.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="ssh-form-row">
+                      <label className="settings-label">{t('settings.sshKeyComment')}</label>
+                      <input
+                        type="text"
+                        className="ssh-input"
+                        value={genComment}
+                        onChange={(e) => setGenComment(e.target.value)}
+                        placeholder="user@example.com"
+                      />
+                    </div>
+                    <div className="ssh-form-actions">
+                      <button className="ssh-btn ssh-btn--primary" onClick={handleGenerateKey} disabled={genLoading || !genName.trim()}>
+                        {genLoading ? t('settings.sshGenerating') : t('settings.sshGenerateBtn')}
+                      </button>
+                      <button className="ssh-btn" onClick={() => setShowGenerateForm(false)}>
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {showImportForm && (
+                  <div className="ssh-form">
+                    <div className="ssh-form-row">
+                      <label className="settings-label">{t('settings.sshKeyName')}</label>
+                      <input
+                        type="text"
+                        className="ssh-input"
+                        value={importName}
+                        onChange={(e) => setImportName(e.target.value)}
+                        placeholder="my_key"
+                      />
+                    </div>
+                    <div className="ssh-form-row">
+                      <label className="settings-label">{t('settings.sshPastePrivateKey')}</label>
+                      <textarea
+                        className="ssh-textarea"
+                        value={importPrivateKey}
+                        onChange={(e) => setImportPrivateKey(e.target.value)}
+                        placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
+                        rows={4}
+                      />
+                    </div>
+                    <div className="ssh-form-row">
+                      <label className="settings-label">{t('settings.sshPastePublicKey')}</label>
+                      <textarea
+                        className="ssh-textarea"
+                        value={importPublicKey}
+                        onChange={(e) => setImportPublicKey(e.target.value)}
+                        placeholder="ssh-ed25519 AAAA..."
+                        rows={2}
+                      />
+                    </div>
+                    <div className="ssh-form-actions">
+                      <button className="ssh-btn ssh-btn--primary" onClick={handleImportKey} disabled={!importName.trim() || !importPrivateKey.trim()}>
+                        {t('settings.sshImportBtn')}
+                      </button>
+                      <button className="ssh-btn" onClick={() => setShowImportForm(false)}>
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Key list */}
+              <div className="settings-card">
+                {sshLoading ? (
+                  <div className="ssh-loading">{t('common.loading')}</div>
+                ) : sshKeys.length === 0 ? (
+                  <div className="ssh-empty">{t('settings.sshNoKeys')}</div>
+                ) : (
+                  <div className="ssh-key-list">
+                    {sshKeys.map((key) => (
+                      <div key={key.id} className="ssh-key-card">
+                        <div className="ssh-key-header">
+                          <span className="ssh-key-name">{key.name}</span>
+                          <span className="ssh-key-type">{key.type.toUpperCase()}</span>
+                          {key.isDefault && <span className="ssh-key-badge">{t('settings.sshDefault')}</span>}
+                        </div>
+                        {key.comment && <div className="ssh-key-comment">{key.comment}</div>}
+                        {key.fingerprint && (
+                          <div className="ssh-key-fingerprint">{key.fingerprint}</div>
+                        )}
+                        <div className="ssh-key-actions">
+                          {key.publicKeyPath && (
+                            <button className="ssh-btn ssh-btn--small" onClick={() => handleCopyPublicKey(key)}>
+                              {copiedKeyId === key.id ? t('settings.sshCopied') : t('settings.sshCopyPublicKey')}
+                            </button>
+                          )}
+                          <button className="ssh-btn ssh-btn--small ssh-btn--danger" onClick={() => handleDeleteKey(key)}>
+                            {t('settings.sshDelete')}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Claude */}
+          {activeSection === 'claude' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.detectionColor')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Couleur des indicateurs Claude dans les terminaux' : 'Color of Claude indicators in terminals'}</span>
+                  </div>
+                  <input
+                    type="color"
+                    value={settings.claudeDetectionColor}
+                    onChange={(e) => updateSetting('claudeDetectionColor', e.target.value)}
+                    className="settings-color-input"
+                  />
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.autoClaude')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Activer le lancement automatique des sessions Claude' : 'Enable automatic Claude session launching'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.autoClauderEnabled ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('autoClauderEnabled', !settings.autoClauderEnabled)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Kanban */}
+          {activeSection === 'kanban' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.autoCloseCompletedTerminals')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Ferme automatiquement les terminaux des tickets termines' : 'Automatically close terminals of completed tickets'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.autoCloseCompletedTerminals ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('autoCloseCompletedTerminals', !settings.autoCloseCompletedTerminals)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Notifications */}
+          {activeSection === 'notifications' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.sound')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Jouer un son lors des notifications' : 'Play a sound on notifications'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.notificationSound ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('notificationSound', !settings.notificationSound)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.checkUpdates')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Verifier les mises a jour au demarrage de l\'application' : 'Check for updates when the application starts'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.checkUpdatesOnLaunch ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('checkUpdatesOnLaunch', !settings.checkUpdatesOnLaunch)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* About */}
+          {activeSection === 'about' && (
+            <div className="settings-section">
+              <div className="settings-card settings-card--about">
+                <div className="settings-about-header">
+                  <span className="settings-about-icon">M</span>
+                  <div>
+                    <div className="settings-about-name">{appVersion?.name ?? 'Mirehub'}</div>
+                    <div className="settings-about-version">v{appVersion?.version ?? '—'}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.developer')}</label>
+                  </div>
+                  <span className="settings-value">Antony KERVAZO CANUT</span>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('appUpdate.checkNow')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Verifier si une nouvelle version est disponible' : 'Check if a new version is available'}</span>
+                  </div>
+                  <button
+                    className="settings-btn"
+                    onClick={checkForUpdate}
+                    disabled={updateStatus === 'checking'}
+                  >
+                    {updateStatus === 'checking' ? t('common.loading') : t('appUpdate.checkNow')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

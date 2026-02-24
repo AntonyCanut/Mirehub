@@ -37,6 +37,17 @@ function formatNumber(n: number): string {
   return n.toLocaleString()
 }
 
+function timeAgo(timestamp: number): string {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000)
+  if (seconds < 60) return '<1m'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h`
+  const days = Math.floor(hours / 24)
+  return `${days}d`
+}
+
 export function ProjectStats() {
   const { t } = useI18n()
   const { activeProjectId, projects } = useWorkspaceStore()
@@ -115,6 +126,18 @@ export function ProjectStats() {
               <span className="project-stats-card-label">{t('stats.totalLines')}</span>
             </div>
             <div className="project-stats-card">
+              <span className="project-stats-card-value">{formatSize(stats.totalSize)}</span>
+              <span className="project-stats-card-label">{t('stats.totalSize')}</span>
+            </div>
+            <div className="project-stats-card">
+              <span className="project-stats-card-value">{formatNumber(stats.totalDirs)}</span>
+              <span className="project-stats-card-label">{t('stats.totalDirs')}</span>
+            </div>
+            <div className="project-stats-card">
+              <span className="project-stats-card-value">{formatSize(stats.avgFileSize)}</span>
+              <span className="project-stats-card-label">{t('stats.avgFileSize')}</span>
+            </div>
+            <div className="project-stats-card">
               <span className="project-stats-card-value">{stats.fileTypeBreakdown.length}</span>
               <span className="project-stats-card-label">{t('stats.fileTypes')}</span>
             </div>
@@ -155,6 +178,22 @@ export function ProjectStats() {
                   <span className="project-stats-file-path">{file.path}</span>
                   <span className="project-stats-file-size">{formatSize(file.size)}</span>
                   <span className="project-stats-file-lines">{formatNumber(file.lines)} lines</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="project-stats-section">
+            <h4 className="project-stats-section-title">{t('stats.recentFiles')}</h4>
+            <div className="project-stats-files">
+              {stats.recentFiles.map((file) => (
+                <button
+                  key={file.path}
+                  className="project-stats-file-row"
+                  onClick={() => handleClickFile(file.path)}
+                >
+                  <span className="project-stats-file-path">{file.path}</span>
+                  <span className="project-stats-file-size">{timeAgo(file.modifiedAt)}</span>
                 </button>
               ))}
             </div>
