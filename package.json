@@ -4,7 +4,7 @@
   "description": "Mirehub - Environnement de developpement macOS avec Claude AI",
   "main": "dist/main/index.js",
   "author": "Antony Kervazo Canut",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

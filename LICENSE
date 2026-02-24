@@ -1,0 +1,88 @@
+Mirehub Proprietary Source-Available License
+Version 1.0, February 2026
+
+Copyright (c) 2026 Antony Kervazo Canut. All rights reserved.
+
+
+1. DEFINITIONS
+
+"Software" means the Mirehub application, including all source code, object code,
+documentation, and associated files in this repository.
+
+"Licensor" means Antony Kervazo Canut, the sole copyright holder.
+
+"You" means any individual or legal entity exercising rights under this License.
+
+"Commercial Use" means any use intended for or directed toward commercial advantage
+or monetary compensation. This includes, but is not limited to, selling the Software,
+offering paid services built on the Software, or incorporating the Software into a
+commercial product.
+
+"Competing Product" means any product or service that provides substantially similar
+functionality to the Software.
+
+
+2. GRANT OF RIGHTS
+
+Subject to the terms of this License, the Licensor grants You a non-exclusive,
+non-transferable, revocable license to:
+
+  a) View, study, and read the source code for educational and reference purposes.
+  b) Use the Software for personal, non-commercial purposes.
+  c) Fork and modify the Software for personal, non-commercial purposes.
+
+
+3. RESTRICTIONS
+
+You may NOT, without prior written authorization from the Licensor:
+
+  a) Use the Software or any derivative work for Commercial Use.
+  b) Create, distribute, or sell a Competing Product based on or incorporating
+     the Software in whole or in part.
+  c) Sublicense, sell, resell, lease, or rent the Software.
+  d) Remove or alter any copyright notices, license texts, or attribution
+     contained in the Software.
+  e) Redistribute the Software or derivative works in any form (source or binary)
+     for commercial purposes.
+
+
+4. COMMERCIAL LICENSING
+
+Commercial use of the Software requires a separate written license agreement with
+the Licensor. For commercial licensing inquiries, contact the Licensor directly.
+
+
+5. OWNERSHIP
+
+The Software is and remains the exclusive property of the Licensor. This License
+does not grant You any ownership rights, title, or interest in the Software beyond
+the limited rights expressly stated in Section 2.
+
+
+6. LICENSE CHANGES
+
+The Licensor reserves the right to modify, replace, or update the terms of this
+License at any time. Such changes apply to future versions of the Software. Your
+continued use of the Software after any change constitutes acceptance of the new
+terms.
+
+
+7. TERMINATION
+
+This License is effective until terminated. It terminates automatically if You
+breach any of its terms. Upon termination, You must cease all use and destroy all
+copies of the Software in your possession.
+
+
+8. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+
+9. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
