@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, McpServerConfig, McpHelpResult } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -299,6 +299,12 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_WRITE_SKILL, { projectPath, filename, content }),
     delete: (projectPath: string, filename: string): Promise<{ success: boolean }> =>
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_DELETE_SKILL, { projectPath, filename }),
+  },
+
+  // MCP servers
+  mcp: {
+    getHelp: (name: string, config: McpServerConfig): Promise<McpHelpResult> =>
+      ipcRenderer.invoke(IPC_CHANNELS.MCP_GET_HELP, { name, config }),
   },
 
   // Claude defaults library

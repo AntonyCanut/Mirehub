@@ -256,6 +256,10 @@ body {
   background: rgba(137, 180, 250, 0.05);
 }
 
+.notification-item--missing {
+  opacity: 0.7;
+}
+
 .notification-item-info {
   display: flex;
   flex-direction: column;
@@ -278,6 +282,11 @@ body {
 .notification-item-latest {
   color: var(--success);
   font-weight: 600;
+}
+
+.notification-item-version--missing {
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .notification-item-scope {
@@ -5206,6 +5215,231 @@ body {
 .pt-btn--danger-text:hover {
   color: var(--danger);
   background: rgba(243, 139, 168, 0.08);
+}
+
+/* ===== Claude MCP Servers ===== */
+.claude-rules-mcp {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.claude-mcp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.claude-mcp-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.claude-mcp-add-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.claude-mcp-add-btn:hover {
+  opacity: 0.9;
+}
+
+.claude-mcp-add-form {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.claude-mcp-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.claude-mcp-form-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.claude-mcp-form-input {
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: 'Menlo', monospace;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+}
+
+.claude-mcp-form-input:focus {
+  border-color: var(--accent);
+}
+
+.claude-mcp-form-textarea {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: 'Menlo', monospace;
+  line-height: 1.5;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.claude-mcp-form-textarea:focus {
+  border-color: var(--accent);
+}
+
+.claude-mcp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.claude-mcp-server-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.claude-mcp-server-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.claude-mcp-server-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+.claude-mcp-server-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.claude-mcp-server-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.claude-mcp-server-command {
+  font-size: 11px;
+  font-family: 'Menlo', monospace;
+  color: var(--text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.claude-mcp-server-env-chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.claude-mcp-env-chip {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-family: 'Menlo', monospace;
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.claude-mcp-server-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.claude-mcp-action-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.claude-mcp-action-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.claude-mcp-action-btn--danger:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.claude-mcp-help-panel {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+}
+
+.claude-mcp-help-output {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 11px;
+  font-family: 'Menlo', monospace;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.claude-mcp-help-error {
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.claude-mcp-help-loading {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.claude-mcp-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 24px 0;
+  font-size: 13px;
 }
 
 /* ===== API Tester Panel ===== */

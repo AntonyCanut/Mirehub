@@ -64,8 +64,6 @@ const LABEL_DEFS: Record<string, string> = {
 
 const ALL_LABELS = Object.keys(LABEL_DEFS)
 
-const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
-
 export function KanbanBoard() {
   const { t } = useI18n()
   const { activeWorkspaceId, projects } = useWorkspaceStore()
@@ -96,6 +94,15 @@ export function KanbanBoard() {
   const [pendingClipboardImages, setPendingClipboardImages] = useState<PendingClipboardImage[]>([])
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([])
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null)
+
+  // Edit modal state
+  const [editingTask, setEditingTask] = useState<KanbanTask | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDesc, setEditDesc] = useState('')
+  const [editPriority, setEditPriority] = useState<(typeof PRIORITIES)[number]>('medium')
+  const [editTargetProjectId, setEditTargetProjectId] = useState('')
+  const [editLabels, setEditLabels] = useState<string[]>([])
+  const [editDueDate, setEditDueDate] = useState('')
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; task: KanbanTask } | null>(null)
@@ -155,6 +162,14 @@ export function KanbanBoard() {
     }
   }, [tasks, selectedTask?.id])
 
+  // Sync editingTask with store
+  useEffect(() => {
+    if (editingTask) {
+      const updated = tasks.find((t) => t.id === editingTask.id)
+      if (!updated) setEditingTask(null)
+    }
+  }, [tasks, editingTask?.id])
+
   // Filtered tasks
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
@@ -178,16 +193,15 @@ export function KanbanBoard() {
     })
   }, [tasks, searchQuery, filterPriority, filterLabels, filterScope])
 
-  // Split DONE tasks into active vs archived
-  const now = Date.now()
+  // Split DONE tasks into active vs manually archived
   const doneTasks = useMemo(() => filteredTasks.filter((t) => t.status === 'DONE'), [filteredTasks])
-  const recentDoneTasks = useMemo(
-    () => doneTasks.filter((t) => now - t.updatedAt < TWENTY_FOUR_HOURS),
-    [doneTasks, now],
+  const activeDoneTasks = useMemo(
+    () => doneTasks.filter((t) => !t.archived),
+    [doneTasks],
   )
   const archivedTasks = useMemo(
-    () => doneTasks.filter((t) => now - t.updatedAt >= TWENTY_FOUR_HOURS),
-    [doneTasks, now],
+    () => doneTasks.filter((t) => t.archived),
+    [doneTasks],
   )
 
   // Sort tasks within a column: overdue first, then by due date, then by creation
@@ -323,14 +337,50 @@ export function KanbanBoard() {
   }, [t, updateTaskStatus, duplicateTask, handleSendToClaude])
 
   const handleRestoreFromArchive = useCallback((task: KanbanTask) => {
-    updateTaskStatus(task.id, 'TODO')
-  }, [updateTaskStatus])
+    updateTask(task.id, { archived: false })
+  }, [updateTask])
 
   const toggleFilterLabel = useCallback((label: string) => {
     setFilterLabels((prev) =>
       prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
     )
   }, [])
+
+  const handleArchiveTask = useCallback((task: KanbanTask) => {
+    updateTask(task.id, { archived: true })
+  }, [updateTask])
+
+  const handleOpenEditModal = useCallback((task: KanbanTask) => {
+    setEditingTask(task)
+    setEditTitle(task.title)
+    setEditDesc(task.description)
+    setEditPriority(task.priority)
+    setEditTargetProjectId(task.targetProjectId || '')
+    setEditLabels(task.labels || [])
+    setEditDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0]! : '')
+  }, [])
+
+  const handleCloseEditModal = useCallback(() => {
+    setEditingTask(null)
+  }, [])
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!editingTask || !editTitle.trim()) return
+    const updates: Partial<KanbanTask> = {}
+    if (editTitle.trim() !== editingTask.title) updates.title = editTitle.trim()
+    if (editDesc !== editingTask.description) updates.description = editDesc
+    if (editPriority !== editingTask.priority) updates.priority = editPriority
+    const newTargetProject = editTargetProjectId || undefined
+    if (newTargetProject !== editingTask.targetProjectId) updates.targetProjectId = newTargetProject
+    const currentLabels = editingTask.labels || []
+    if (JSON.stringify([...editLabels].sort()) !== JSON.stringify([...currentLabels].sort())) updates.labels = editLabels
+    const currentDueDate = editingTask.dueDate ? new Date(editingTask.dueDate).toISOString().split('T')[0]! : ''
+    if (editDueDate !== currentDueDate) updates.dueDate = editDueDate ? new Date(editDueDate).getTime() : undefined
+    if (Object.keys(updates).length > 0) {
+      await updateTask(editingTask.id, updates)
+    }
+    setEditingTask(null)
+  }, [editingTask, editTitle, editDesc, editPriority, editTargetProjectId, editLabels, editDueDate, updateTask])
 
   const hasActiveFilters = filterPriority !== 'all' || filterLabels.length > 0 || filterScope !== 'all' || searchQuery !== ''
 
@@ -343,7 +393,7 @@ export function KanbanBoard() {
   }
 
   const getTasksByStatus = (status: KanbanStatus): KanbanTask[] => {
-    if (status === 'DONE') return sortTasks(recentDoneTasks)
+    if (status === 'DONE') return sortTasks(activeDoneTasks)
     return sortTasks(filteredTasks.filter((t) => t.status === status))
   }
 
@@ -555,6 +605,87 @@ export function KanbanBoard() {
         </div>
       )}
 
+      {editingTask && (
+        <div className="modal-overlay" onClick={handleCloseEditModal}>
+          <div className="kanban-create-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="kanban-create-modal-header">
+              <h3>{t('kanban.editTask')}</h3>
+              <button className="kanban-create-modal-close" onClick={handleCloseEditModal}>&times;</button>
+            </div>
+            <div className="kanban-create-modal-body">
+              <input
+                className="kanban-input"
+                placeholder={t('kanban.taskTitlePlaceholder')}
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+                autoFocus
+              />
+              <textarea
+                className="kanban-textarea kanban-create-modal-textarea"
+                placeholder={t('kanban.descriptionPlaceholder')}
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+                rows={6}
+              />
+              <div className="kanban-create-row">
+                <select
+                  className="kanban-select"
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(e.target.value as typeof editPriority)}
+                >
+                  <option value="low">{t('kanban.low')}</option>
+                  <option value="medium">{t('kanban.medium')}</option>
+                  <option value="high">{t('kanban.high')}</option>
+                  <option value="critical">{t('kanban.critical')}</option>
+                </select>
+                <select
+                  className="kanban-select"
+                  value={editTargetProjectId}
+                  onChange={(e) => setEditTargetProjectId(e.target.value)}
+                >
+                  <option value="">{t('kanban.entireWorkspace')}</option>
+                  {workspaceProjects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <input
+                  className="kanban-input kanban-date-input"
+                  type="date"
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  title={t('kanban.dueDate')}
+                />
+              </div>
+              <div className="kanban-create-labels">
+                <span className="kanban-create-labels-title">{t('kanban.labels')} :</span>
+                {ALL_LABELS.map((label) => (
+                  <button
+                    key={label}
+                    className={`kanban-label-chip kanban-label-chip--${label}${editLabels.includes(label) ? ' kanban-label-chip--active' : ''}`}
+                    onClick={() =>
+                      setEditLabels((prev) =>
+                        prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+                      )
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="kanban-create-modal-actions">
+              <button className="kanban-create-modal-cancel" onClick={handleCloseEditModal}>
+                {t('common.cancel')}
+              </button>
+              <button className="kanban-submit-btn" onClick={handleSaveEdit}>
+                {t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="kanban-main">
         <div className="kanban-columns">
           {ACTIVE_COLUMNS.map((col) => (
@@ -579,7 +710,7 @@ export function KanbanBoard() {
                     onClick={() => setSelectedTask(task)}
                     onDelete={() => deleteTask(task.id)}
                     onContextMenu={(e) => handleContextMenu(e, task)}
-                    onUpdate={(data) => updateTask(task.id, data)}
+                    onDoubleClick={() => handleOpenEditModal(task)}
                     projects={workspaceProjects}
                   />
                 ))}
@@ -599,18 +730,26 @@ export function KanbanBoard() {
               <span className="kanban-column-count">{doneTasks.length}</span>
             </div>
             <div className="kanban-column-body">
-              {recentDoneTasks.map((task) => (
-                <KanbanCard
-                  key={task.id}
-                  task={task}
-                  isSelected={selectedTask?.id === task.id}
-                  onDragStart={() => handleDragStart(task.id)}
-                  onClick={() => setSelectedTask(task)}
-                  onDelete={() => deleteTask(task.id)}
-                  onContextMenu={(e) => handleContextMenu(e, task)}
-                  onUpdate={(data) => updateTask(task.id, data)}
-                  projects={workspaceProjects}
-                />
+              {activeDoneTasks.map((task) => (
+                <div key={task.id} className="kanban-done-card-wrapper">
+                  <KanbanCard
+                    task={task}
+                    isSelected={selectedTask?.id === task.id}
+                    onDragStart={() => handleDragStart(task.id)}
+                    onClick={() => setSelectedTask(task)}
+                    onDelete={() => deleteTask(task.id)}
+                    onContextMenu={(e) => handleContextMenu(e, task)}
+                    onDoubleClick={() => handleOpenEditModal(task)}
+                    projects={workspaceProjects}
+                  />
+                  <button
+                    className="kanban-archive-btn"
+                    onClick={() => handleArchiveTask(task)}
+                    title={t('kanban.archiveTask')}
+                  >
+                    {t('kanban.archiveTask')}
+                  </button>
+                </div>
               ))}
 
               {/* Archive section */}
@@ -684,7 +823,7 @@ function KanbanCard({
   onClick,
   onDelete,
   onContextMenu,
-  onUpdate,
+  onDoubleClick,
   projects,
 }: {
   task: KanbanTask
@@ -693,78 +832,28 @@ function KanbanCard({
   onClick: () => void
   onDelete: () => void
   onContextMenu: (e: React.MouseEvent) => void
-  onUpdate: (data: Partial<KanbanTask>) => void
+  onDoubleClick: () => void
   projects: Array<{ id: string; name: string }>
 }) {
   const { t } = useI18n()
-  const [editingTitle, setEditingTitle] = useState(false)
-  const [titleValue, setTitleValue] = useState(task.title)
-  const [editingDesc, setEditingDesc] = useState(false)
-  const [descValue, setDescValue] = useState(task.description)
-  const titleRef = useRef<HTMLInputElement>(null)
-  const descRef = useRef<HTMLTextAreaElement>(null)
   const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => { setTitleValue(task.title) }, [task.title])
-  useEffect(() => { setDescValue(task.description) }, [task.description])
-
-  useEffect(() => {
-    if (editingTitle && titleRef.current) {
-      titleRef.current.focus()
-      titleRef.current.select()
-    }
-  }, [editingTitle])
-
-  useEffect(() => {
-    if (editingDesc && descRef.current) {
-      descRef.current.focus()
-    }
-  }, [editingDesc])
-
-  const saveTitle = useCallback(() => {
-    const trimmed = titleValue.trim()
-    if (trimmed && trimmed !== task.title) {
-      onUpdate({ title: trimmed })
-    } else {
-      setTitleValue(task.title)
-    }
-    setEditingTitle(false)
-  }, [titleValue, task.title, onUpdate])
-
-  const saveDesc = useCallback(() => {
-    if (descValue !== task.description) {
-      onUpdate({ description: descValue })
-    }
-    setEditingDesc(false)
-  }, [descValue, task.description, onUpdate])
 
   // Delayed single-click: allows double-click to cancel opening the detail panel
   const handleCardClick = useCallback(() => {
-    if (editingTitle || editingDesc) return
     clickTimeoutRef.current = setTimeout(() => {
       clickTimeoutRef.current = null
       onClick()
     }, 250)
-  }, [editingTitle, editingDesc, onClick])
+  }, [onClick])
 
-  const cancelPendingClick = useCallback(() => {
+  const handleCardDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
     if (clickTimeoutRef.current) {
       clearTimeout(clickTimeoutRef.current)
       clickTimeoutRef.current = null
     }
-  }, [])
-
-  const handleTitleDoubleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    cancelPendingClick()
-    setEditingTitle(true)
-  }, [cancelPendingClick])
-
-  const handleDescDoubleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    cancelPendingClick()
-    setEditingDesc(true)
-  }, [cancelPendingClick])
+    onDoubleClick()
+  }, [onDoubleClick])
 
   const priorityColors: Record<string, string> = {
     low: '#6c7086',
@@ -780,9 +869,10 @@ function KanbanCard({
   return (
     <div
       className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${isOverdue ? ' kanban-card--overdue' : ''}`}
-      draggable={!editingTitle && !editingDesc}
+      draggable
       onDragStart={onDragStart}
       onClick={handleCardClick}
+      onDoubleClick={handleCardDoubleClick}
       onContextMenu={onContextMenu}
     >
       <div className="kanban-card-header">
@@ -790,22 +880,7 @@ function KanbanCard({
           className="kanban-card-priority"
           style={{ backgroundColor: priorityColors[task.priority] }}
         />
-        {editingTitle ? (
-          <input
-            ref={titleRef}
-            className="kanban-card-title-input"
-            value={titleValue}
-            onChange={(e) => setTitleValue(e.target.value)}
-            onBlur={saveTitle}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') saveTitle()
-              if (e.key === 'Escape') { setTitleValue(task.title); setEditingTitle(false) }
-            }}
-            onClick={(e) => e.stopPropagation()}
-          />
-        ) : (
-          <span className="kanban-card-title" onDoubleClick={handleTitleDoubleClick}>{task.title}</span>
-        )}
+        <span className="kanban-card-title">{task.title}</span>
         <button
           className="kanban-card-delete"
           onClick={(e) => { e.stopPropagation(); onDelete() }}
@@ -814,27 +889,9 @@ function KanbanCard({
           &times;
         </button>
       </div>
-      {editingDesc ? (
-        <textarea
-          ref={descRef}
-          className="kanban-card-desc-edit"
-          value={descValue}
-          onChange={(e) => setDescValue(e.target.value)}
-          onBlur={saveDesc}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') { setDescValue(task.description); setEditingDesc(false) }
-          }}
-          onClick={(e) => e.stopPropagation()}
-          rows={3}
-        />
-      ) : (
-        <p
-          className="kanban-card-desc"
-          onDoubleClick={handleDescDoubleClick}
-        >
-          {task.description || t('kanban.noDescription')}
-        </p>
-      )}
+      <p className="kanban-card-desc">
+        {task.description || t('kanban.noDescription')}
+      </p>
       {/* Labels */}
       {task.labels && task.labels.length > 0 && (
         <div className="kanban-card-labels">

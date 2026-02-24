@@ -82,6 +82,7 @@ export interface KanbanTask {
   labels?: string[]
   attachments?: KanbanAttachment[]
   dueDate?: number
+  archived?: boolean
   createdAt: number
   updatedAt: number
 }
@@ -456,6 +457,19 @@ export interface DbFile {
   connections: DbConnection[]
 }
 
+// MCP Server types
+export interface McpServerConfig {
+  command: string
+  args?: string[]
+  env?: Record<string, string>
+}
+
+export interface McpHelpResult {
+  success: boolean
+  output: string
+  error?: string
+}
+
 // IPC Channel types
 export const IPC_CHANNELS = {
   // Terminal
@@ -617,6 +631,9 @@ export const IPC_CHANNELS = {
   CLAUDE_CHECK_HOOKS: 'claude:checkHooks',
   CLAUDE_VALIDATE_SETTINGS: 'claude:validateSettings',
   CLAUDE_FIX_SETTINGS: 'claude:fixSettings',
+
+  // MCP
+  MCP_GET_HELP: 'mcp:getHelp',
 
   // API Tester
   API_EXECUTE: 'api:execute',

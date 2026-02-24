@@ -16,6 +16,7 @@ import { registerClaudeDefaultsHandlers } from './ipc/claudeDefaults'
 import { registerApiHandlers } from './ipc/api'
 import { registerDatabaseHandlers } from './ipc/database'
 import { registerAppUpdateHandlers } from './ipc/appUpdate'
+import { registerMcpHandlers } from './ipc/mcp'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
 import { databaseService } from './services/database'
@@ -114,6 +115,7 @@ app.whenReady().then(() => {
   registerApiHandlers(ipcMain)
   registerDatabaseHandlers(ipcMain)
   registerAppUpdateHandlers(ipcMain)
+  registerMcpHandlers(ipcMain)
 
   // Ensure activity hook script exists and start watching
   ensureActivityHookScript()

@@ -16,5 +16,6 @@
       "Task",
       "NotebookEdit"
     ]
-  }
+  },
+  "_mirehubMode": "bypassPermissions"
 }

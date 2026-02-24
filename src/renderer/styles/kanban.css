@@ -923,6 +923,38 @@
   letter-spacing: 0.5px;
 }
 
+/* ========= Archive Button on DONE Cards ========= */
+.kanban-done-card-wrapper {
+  position: relative;
+}
+
+.kanban-archive-btn {
+  display: block;
+  width: 100%;
+  padding: 4px 0;
+  margin-top: -2px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 0 0 6px 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  opacity: 0;
+}
+
+.kanban-done-card-wrapper:hover .kanban-archive-btn {
+  opacity: 1;
+}
+
+.kanban-archive-btn:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
 /* ========= Archive Section ========= */
 .kanban-archive {
   margin-top: 8px;

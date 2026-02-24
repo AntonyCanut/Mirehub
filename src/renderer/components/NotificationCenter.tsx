@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useUpdateStore } from '../lib/stores/updateStore'
+import { useAppUpdateStore } from '../lib/stores/appUpdateStore'
 import { useI18n } from '../lib/i18n'
 
 export function NotificationCenter() {
@@ -7,14 +8,21 @@ export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false)
   const { updates, isChecking, lastChecked, installingTool, installStatus, checkUpdates, installUpdate, uninstallUpdate, clearInstallStatus } =
     useUpdateStore()
+  const { status: appUpdateStatus, version: appNewVersion, downloadPercent, checkForUpdate, downloadUpdate, installUpdate: installAppUpdate } =
+    useAppUpdateStore()
+
+  const [currentAppVersion, setCurrentAppVersion] = useState<string | null>(null)
 
   const availableUpdates = updates.filter((u) => u.updateAvailable)
   const notInstalled = updates.filter((u) => !u.installed)
-  const badgeCount = availableUpdates.length + notInstalled.length
+  const appUpdateAvailable = appUpdateStatus === 'available' || appUpdateStatus === 'downloading' || appUpdateStatus === 'downloaded'
+  const badgeCount = availableUpdates.length + notInstalled.length + (appUpdateAvailable ? 1 : 0)
 
   useEffect(() => {
-    // Check updates on mount
     checkUpdates()
+    window.mirehub.app.version().then((info) => {
+      setCurrentAppVersion(info.version)
+    })
   }, [checkUpdates])
 
   // Auto-dismiss install status after 5 seconds
@@ -48,6 +56,11 @@ export function NotificationCenter() {
     }
   }, [availableUpdates, installUpdate])
 
+  const handleCheckAll = useCallback(() => {
+    checkUpdates()
+    checkForUpdate()
+  }, [checkUpdates, checkForUpdate])
+
   const formatTime = (ts: number | null) => {
     if (!ts) return t('time.never')
     const date = new Date(ts)
@@ -80,11 +93,11 @@ export function NotificationCenter() {
             <div className="notification-panel-actions">
               <button
                 className="notification-refresh"
-                onClick={checkUpdates}
-                disabled={isChecking}
+                onClick={handleCheckAll}
+                disabled={isChecking || appUpdateStatus === 'checking'}
                 title={t('updates.checkTooltip')}
               >
-                {isChecking ? '...' : '↻'}
+                {isChecking || appUpdateStatus === 'checking' ? '...' : '\u21BB'}
               </button>
               {availableUpdates.length > 1 && (
                 <button className="notification-update-all" onClick={handleInstallAll}>
@@ -106,8 +119,59 @@ export function NotificationCenter() {
           )}
 
           <div className="notification-panel-content">
+            {/* App update entry */}
+            <div
+              className={`notification-item${appUpdateAvailable ? ' notification-item--update' : ''}`}
+            >
+              <div className="notification-item-info">
+                <span className="notification-item-name">Mirehub</span>
+                <span className="notification-item-version">
+                  {currentAppVersion ?? '...'}
+                  {appUpdateStatus === 'available' && appNewVersion && (
+                    <>{' \u2192 '}<span className="notification-item-latest">{appNewVersion}</span></>
+                  )}
+                  {appUpdateStatus === 'downloading' && (
+                    <>{' \u2192 '}<span className="notification-item-latest">{appNewVersion} ({downloadPercent}%)</span></>
+                  )}
+                  {appUpdateStatus === 'downloaded' && appNewVersion && (
+                    <>{' \u2192 '}<span className="notification-item-latest">{appNewVersion}</span></>
+                  )}
+                  {appUpdateStatus === 'checking' && (
+                    <> &mdash; {t('appUpdate.checking')}</>
+                  )}
+                  {(appUpdateStatus === 'idle' || appUpdateStatus === 'not-available') && (
+                    <> &mdash; {t('appUpdate.upToDate')}</>
+                  )}
+                </span>
+                <span className="notification-item-scope">{t('appUpdate.appScope')}</span>
+              </div>
+              <div className="notification-item-actions">
+                {appUpdateStatus === 'available' && (
+                  <button className="notification-item-btn" onClick={downloadUpdate}>
+                    {t('appUpdate.download')}
+                  </button>
+                )}
+                {appUpdateStatus === 'downloading' && (
+                  <button className="notification-item-btn" disabled>
+                    {downloadPercent}%
+                  </button>
+                )}
+                {appUpdateStatus === 'downloaded' && (
+                  <button className="notification-item-btn notification-item-btn--install" onClick={installAppUpdate}>
+                    {t('appUpdate.installAndRestart')}
+                  </button>
+                )}
+                {appUpdateStatus === 'error' && (
+                  <button className="notification-item-btn" onClick={checkForUpdate}>
+                    {t('appUpdate.checkNow')}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Tool updates */}
             {updates.length === 0 && !isChecking ? (
-              <p className="notification-empty">{t('updates.noInfo')}</p>
+              !appUpdateAvailable && <p className="notification-empty">{t('updates.noInfo')}</p>
             ) : (
               updates.map((update) => (
                 <div
@@ -120,7 +184,7 @@ export function NotificationCenter() {
                       <span className="notification-item-version">
                         {update.currentVersion}
                         {update.updateAvailable && (
-                          <> {' → '} <span className="notification-item-latest">{update.latestVersion}</span> </>
+                          <> {' \u2192 '} <span className="notification-item-latest">{update.latestVersion}</span> </>
                         )}
                       </span>
                     ) : (
