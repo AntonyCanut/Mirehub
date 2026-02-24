@@ -162,7 +162,26 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.KANBAN_LIST,
     async (_event, { workspaceId }: { workspaceId?: string }) => {
       if (!workspaceId) return []
-      return readKanbanTasks(workspaceId)
+      const tasks = readKanbanTasks(workspaceId)
+
+      // Migration: assign ticketNumber to tasks that don't have one
+      const needsMigration = tasks.some((t) => t.ticketNumber == null)
+      if (needsMigration) {
+        // Sort by createdAt to assign numbers in chronological order
+        const sorted = [...tasks].sort((a, b) => a.createdAt - b.createdAt)
+        let nextNum = 1
+        for (const t of sorted) {
+          if (t.ticketNumber == null) {
+            // Find the actual task in the array and assign
+            const original = tasks.find((o) => o.id === t.id)!
+            original.ticketNumber = nextNum
+          }
+          nextNum = Math.max(nextNum, (t.ticketNumber ?? nextNum) + 1)
+        }
+        writeKanbanTasks(workspaceId, tasks)
+      }
+
+      return tasks
     },
   )
 
@@ -179,10 +198,16 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
         status?: KanbanStatus
       },
     ) => {
+      const tasks = readKanbanTasks(data.workspaceId)
+
+      // Calculate next ticket number
+      const maxTicketNumber = tasks.reduce((max, t) => Math.max(max, t.ticketNumber ?? 0), 0)
+
       const task: KanbanTask = {
         id: uuid(),
         workspaceId: data.workspaceId,
         targetProjectId: data.targetProjectId,
+        ticketNumber: maxTicketNumber + 1,
         title: data.title,
         description: data.description,
         status: data.status || 'TODO',
@@ -190,7 +215,6 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       }
-      const tasks = readKanbanTasks(data.workspaceId)
       tasks.push(task)
       writeKanbanTasks(data.workspaceId, tasks)
       return task
@@ -366,6 +390,16 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
       task.attachments = task.attachments.filter((a) => a.id !== attachmentId)
       task.updatedAt = Date.now()
       writeKanbanTasks(workspaceId, tasks)
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_GET_WORKING_TICKET,
+    async (_event, { workspaceId }: { workspaceId: string }) => {
+      const tasks = readKanbanTasks(workspaceId)
+      const working = tasks.find((t) => t.status === 'WORKING')
+      if (!working) return null
+      return { ticketNumber: working.ticketNumber ?? null }
     },
   )
 }

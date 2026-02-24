@@ -71,6 +71,7 @@ export interface KanbanTask {
   id: string
   workspaceId: string
   targetProjectId?: string
+  ticketNumber?: number
   title: string
   description: string
   status: KanbanStatus
@@ -510,6 +511,7 @@ export const IPC_CHANNELS = {
   KANBAN_ATTACH_FILE: 'kanban:attachFile',
   KANBAN_ATTACH_FROM_CLIPBOARD: 'kanban:attachFromClipboard',
   KANBAN_REMOVE_ATTACHMENT: 'kanban:removeAttachment',
+  KANBAN_GET_WORKING_TICKET: 'kanban:getWorkingTicket',
 
   // Updates
   UPDATE_CHECK: 'update:check',

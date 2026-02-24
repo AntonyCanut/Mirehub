@@ -9,7 +9,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:app": "npm run build && electron-builder --mac",
-    "build:dmg": "npm run build && electron-builder --mac --publish never",
+    "build:local": "npm run build && electron-builder --mac --publish never",
     "lint": "eslint src/ --ext .ts,.tsx",
     "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx,css,json}'",
@@ -78,26 +78,10 @@
       "category": "public.app-category.developer-tools",
       "icon": "build/icon.icns",
       "target": [
-        "dmg",
         "zip"
       ],
       "hardenedRuntime": true,
       "gatekeeperAssess": false
-    },
-    "dmg": {
-      "title": "Mirehub ${version}",
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
     },
     "files": [
       "dist/**/*",
@@ -107,6 +91,7 @@
       "node_modules/node-pty/**",
       "node_modules/better-sqlite3/**"
     ],
+    "generateBlockmap": false,
     "npmRebuild": true,
     "publish": {
       "provider": "github",

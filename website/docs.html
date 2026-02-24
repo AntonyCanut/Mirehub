@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr" class="lang-fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirehub — Documentation</title>
+  <meta name="description" content="Documentation complete de Mirehub : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts. Guide d'utilisation avec screenshots.">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Skip to content -->
+  <a href="#main" class="skip-link">
+    <span data-lang="fr">Aller au contenu</span>
+    <span data-lang="en">Skip to content</span>
+  </a>
+
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Mirehub">
+        <img src="assets/icon-128.png" alt="" width="32" height="32">
+        <span>Mirehub</span>
+      </a>
+      <nav class="nav" id="nav" aria-label="Navigation principale">
+        <a href="index.html">
+          <span data-lang="fr">Accueil</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="index.html#features">
+          <span data-lang="fr">Fonctionnalites</span>
+          <span data-lang="en">Features</span>
+        </a>
+        <a href="index.html#download">
+          <span data-lang="fr">Telecharger</span>
+          <span data-lang="en">Download</span>
+        </a>
+        <a href="docs.html" class="nav-current" aria-current="page">
+          <span data-lang="fr">Documentation</span>
+          <span data-lang="en">Docs</span>
+        </a>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle" id="lang-toggle" aria-label="Switch language">
+          <span data-lang="fr">EN</span>
+          <span data-lang="en">FR</span>
+        </button>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="docs-layout">
+      <!-- Sidebar -->
+      <aside class="docs-sidebar" id="docs-sidebar">
+        <div class="docs-sidebar-inner">
+          <h2 class="docs-sidebar-title">
+            <span data-lang="fr">Documentation</span>
+            <span data-lang="en">Documentation</span>
+          </h2>
+          <nav class="docs-nav" aria-label="Documentation">
+            <a href="#getting-started" class="docs-nav-link active">
+              <span data-lang="fr">Demarrage rapide</span>
+              <span data-lang="en">Getting started</span>
+            </a>
+            <a href="#workspace" class="docs-nav-link">
+              <span data-lang="fr">Workspaces</span>
+              <span data-lang="en">Workspaces</span>
+            </a>
+            <a href="#terminal" class="docs-nav-link">Terminal</a>
+            <a href="#claude-ai" class="docs-nav-link">Claude AI</a>
+            <a href="#git" class="docs-nav-link">Git</a>
+            <a href="#kanban" class="docs-nav-link">Kanban</a>
+            <a href="#npm" class="docs-nav-link">NPM</a>
+            <a href="#todos" class="docs-nav-link">TODO Scanner</a>
+            <a href="#stats" class="docs-nav-link">
+              <span data-lang="fr">Statistiques</span>
+              <span data-lang="en">Statistics</span>
+            </a>
+            <a href="#prompts" class="docs-nav-link">Prompts</a>
+            <a href="#shortcuts" class="docs-nav-link">
+              <span data-lang="fr">Raccourcis clavier</span>
+              <span data-lang="en">Keyboard shortcuts</span>
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Sidebar toggle (mobile) -->
+      <button class="docs-sidebar-toggle" id="docs-sidebar-toggle" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Content -->
+      <div class="docs-content">
+        <!-- Hero -->
+        <div class="docs-hero">
+          <h1>
+            <span data-lang="fr">Documentation Mirehub</span>
+            <span data-lang="en">Mirehub Documentation</span>
+          </h1>
+          <p>
+            <span data-lang="fr">Guide complet de toutes les fonctionnalites de Mirehub, votre IDE macOS natif.</span>
+            <span data-lang="en">Complete guide to all Mirehub features, your native macOS IDE.</span>
+          </p>
+        </div>
+
+        <!-- Getting Started -->
+        <section class="docs-section" id="getting-started">
+          <h2>
+            <span data-lang="fr">Demarrage rapide</span>
+            <span data-lang="en">Getting started</span>
+          </h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Mirehub est un IDE macOS natif qui reunit 8 outils de developpement dans une seule fenetre : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques et Prompts. Aucune configuration n'est necessaire.</span>
+              <span data-lang="en">Mirehub is a native macOS IDE that combines 8 development tools in a single window: Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistics and Prompts. No configuration needed.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Installation</span>
+              <span data-lang="en">Installation</span>
+            </h3>
+            <ol>
+              <li>
+                <span data-lang="fr">Telechargez le fichier <code>.dmg</code> depuis la <a href="https://github.com/AntonyCanut/Mirehub/releases/latest" target="_blank" rel="noopener">page des releases GitHub</a></span>
+                <span data-lang="en">Download the <code>.dmg</code> file from the <a href="https://github.com/AntonyCanut/Mirehub/releases/latest" target="_blank" rel="noopener">GitHub releases page</a></span>
+              </li>
+              <li>
+                <span data-lang="fr">Ouvrez le <code>.dmg</code> et glissez Mirehub dans votre dossier Applications</span>
+                <span data-lang="en">Open the <code>.dmg</code> and drag Mirehub to your Applications folder</span>
+              </li>
+              <li>
+                <span data-lang="fr">Lancez Mirehub et pointez vers votre premier projet</span>
+                <span data-lang="en">Launch Mirehub and point to your first project</span>
+              </li>
+            </ol>
+            <h3>
+              <span data-lang="fr">Configuration requise</span>
+              <span data-lang="en">System requirements</span>
+            </h3>
+            <ul>
+              <li>macOS 12+ (Monterey)</li>
+              <li>Apple Silicon &amp; Intel</li>
+              <li>~150 MB</li>
+              <li>
+                <span data-lang="fr">Claude Code installe (pour les fonctionnalites IA)</span>
+                <span data-lang="en">Claude Code installed (for AI features)</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Vue d'ensemble de l'interface</span>
+              <span data-lang="en">Interface overview</span>
+            </h3>
+            <p>
+              <span data-lang="fr">L'interface se compose de trois zones principales : la barre laterale (workspaces et fichiers), la barre d'outils (onglets de navigation entre les vues) et la zone de contenu principale.</span>
+              <span data-lang="en">The interface consists of three main areas: the sidebar (workspaces and files), the toolbar (navigation tabs between views) and the main content area.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/hero-terminal.png" alt="Mirehub — Vue d'ensemble de l'interface" width="1200" height="750" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue d'ensemble : barre laterale avec workspaces, onglets de navigation, terminal split avec Claude Code et scripts NPM rapides.</span>
+              <span data-lang="en">Overview: sidebar with workspaces, navigation tabs, split terminal with Claude Code and quick NPM scripts.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Workspace -->
+        <section class="docs-section" id="workspace">
+          <h2>Workspaces</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Les workspaces sont au coeur de Mirehub. Chaque workspace represente un environnement de travail isole qui peut contenir plusieurs projets. Chaque workspace possede sa propre configuration Claude, son Kanban, et ses scripts.</span>
+              <span data-lang="en">Workspaces are at the heart of Mirehub. Each workspace represents an isolated working environment that can contain multiple projects. Each workspace has its own Claude configuration, Kanban board, and scripts.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Arborescence de fichiers avec icones par type de fichier</span>
+                <span data-lang="en">File tree with per-type file icons</span>
+              </li>
+              <li>
+                <span data-lang="fr">Fichiers recents en acces rapide</span>
+                <span data-lang="en">Quick-access recent files</span>
+              </li>
+              <li>
+                <span data-lang="fr">Basculement instantane entre projets</span>
+                <span data-lang="en">Instant project switching</span>
+              </li>
+              <li>
+                <span data-lang="fr">Configuration isolee par workspace (Claude, Kanban, etc.)</span>
+                <span data-lang="en">Isolated per-workspace config (Claude, Kanban, etc.)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Detection automatique de Git, Claude Code et Makefile dans chaque projet</span>
+                <span data-lang="en">Automatic detection of Git, Claude Code and Makefile in each project</span>
+              </li>
+            </ul>
+          </div>
+          <div class="docs-screenshot">
+            <div class="docs-legacy-badge">
+              <span data-lang="fr">Capture d'une version precedente</span>
+              <span data-lang="en">Screenshot from an earlier version</span>
+            </div>
+            <img src="screenshots/screenshot-workspace.png" alt="Workspaces — Arborescence et fichiers recents" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Barre laterale avec arborescence de fichiers, detection automatique des configurations projet, et fichiers recents en bas.</span>
+              <span data-lang="en">Sidebar with file tree, automatic project configuration detection, and recent files at the bottom.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Terminal -->
+        <section class="docs-section" id="terminal">
+          <h2>Terminal</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Mirehub integre un terminal complet base sur xterm.js. Ce n'est pas un gadget — c'est un vrai emulateur de terminal avec support complet des sequences ANSI, onglets multiples et split panes.</span>
+              <span data-lang="en">Mirehub integrates a full terminal based on xterm.js. This is not a gimmick — it's a real terminal emulator with full ANSI sequence support, multiple tabs and split panes.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Onglets multiples (<kbd>Cmd+T</kbd> pour creer)</span>
+                <span data-lang="en">Multiple tabs (<kbd>Cmd+T</kbd> to create)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Split panes — horizontal (<kbd>Cmd+D</kbd>) ou vertical (<kbd>Cmd+Shift+D</kbd>), jusqu'a 4 par onglet</span>
+                <span data-lang="en">Split panes — horizontal (<kbd>Cmd+D</kbd>) or vertical (<kbd>Cmd+Shift+D</kbd>), up to 4 per tab</span>
+              </li>
+              <li>
+                <span data-lang="fr">Zoom sur un pane (<kbd>Cmd+Shift+Enter</kbd>)</span>
+                <span data-lang="en">Zoom a pane (<kbd>Cmd+Shift+Enter</kbd>)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Navigation entre panes avec <kbd>Cmd+Alt+fleches</kbd></span>
+                <span data-lang="en">Navigate between panes with <kbd>Cmd+Alt+arrows</kbd></span>
+              </li>
+              <li>
+                <span data-lang="fr">Scripts NPM du projet accessibles en un clic dans la barre d'outils</span>
+                <span data-lang="en">Project NPM scripts accessible in one click from the toolbar</span>
+              </li>
+              <li>
+                <span data-lang="fr">Lancement direct de Claude Code dans un pane</span>
+                <span data-lang="en">Direct Claude Code launch in a pane</span>
+              </li>
+            </ul>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-terminal.png" alt="Terminal — Split pane avec Claude Code" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Terminal split : Claude Code a gauche, shell classique a droite. La barre d'outils affiche la branche Git active et tous les scripts NPM du projet.</span>
+              <span data-lang="en">Split terminal: Claude Code on the left, regular shell on the right. The toolbar shows the active Git branch and all project NPM scripts.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-claude.png" alt="Terminal — Claude Code lance" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Claude Code lance directement dans le terminal integre. Les scripts NPM specifiques au sous-projet sont detectes automatiquement.</span>
+              <span data-lang="en">Claude Code launched directly in the integrated terminal. Sub-project specific NPM scripts are auto-detected.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Claude AI -->
+        <section class="docs-section" id="claude-ai">
+          <h2>Claude AI</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Mirehub offre une integration complete avec Claude Code, le copilote IA le plus puissant du marche. Au-dela du terminal, un tableau de bord dedie permet de controler finement le comportement de l'agent.</span>
+              <span data-lang="en">Mirehub offers complete integration with Claude Code, the most powerful AI copilot on the market. Beyond the terminal, a dedicated dashboard lets you finely control the agent's behavior.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Onglet Permissions</span>
+              <span data-lang="en">Permissions tab</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Configurez les permissions granulaires de Claude : outils autorises et bloques, mode d'approbation, acces au systeme de fichiers.</span>
+              <span data-lang="en">Configure Claude's granular permissions: allowed and blocked tools, approval mode, file system access.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Onglet Profil &amp; Skills</span>
+              <span data-lang="en">Profile &amp; Skills tab</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Visualisez votre CLAUDE.md parse et mis en forme. Gerez les profils et skills de votre agent directement depuis l'interface.</span>
+              <span data-lang="en">View your CLAUDE.md parsed and formatted. Manage your agent profiles and skills directly from the interface.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <div class="docs-legacy-badge">
+              <span data-lang="fr">Capture d'une version precedente</span>
+              <span data-lang="en">Screenshot from an earlier version</span>
+            </div>
+            <img src="screenshots/screenshot-claude-profil.png" alt="Claude AI — Profil et Skills" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue Profil &amp; Skills : votre CLAUDE.md parse et affiche proprement, avec les sections du profil, les instructions d'equipe, et les configurations d'agents.</span>
+              <span data-lang="en">Profile &amp; Skills view: your CLAUDE.md parsed and displayed cleanly, with profile sections, team instructions, and agent configurations.</span>
+            </p>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Onglet CLAUDE.md</span>
+              <span data-lang="en">CLAUDE.md tab</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Editez votre fichier CLAUDE.md directement dans l'application, sans ouvrir un editeur externe. Les modifications sont sauvegardees immediatement.</span>
+              <span data-lang="en">Edit your CLAUDE.md file directly in the application, without opening an external editor. Changes are saved immediately.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <div class="docs-legacy-badge">
+              <span data-lang="fr">Capture d'une version precedente</span>
+              <span data-lang="en">Screenshot from an earlier version</span>
+            </div>
+            <img src="screenshots/screenshot-claude-md.png" alt="Claude AI — Editeur CLAUDE.md" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Editeur CLAUDE.md integre : modifiez les instructions de votre agent sans quitter Mirehub. Bouton Enregistrer en haut a droite.</span>
+              <span data-lang="en">Built-in CLAUDE.md editor: modify your agent instructions without leaving Mirehub. Save button in the top right.</span>
+            </p>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Onglet Historique</span>
+              <span data-lang="en">History tab</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Retrouvez l'historique complet de toutes vos sessions Claude. Filtrez par date, reprenez une conversation passee ou analysez les resultats d'une session precedente.</span>
+              <span data-lang="en">Access the complete history of all your Claude sessions. Filter by date, resume a past conversation or analyze previous session results.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <div class="docs-legacy-badge">
+              <span data-lang="fr">Capture d'une version precedente</span>
+              <span data-lang="en">Screenshot from an earlier version</span>
+            </div>
+            <img src="screenshots/screenshot-claude-history.png" alt="Claude AI — Historique des sessions" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Historique des sessions Claude : retrouvez n'importe quelle conversation passee et reprenez exactement la ou vous vous etiez arrete.</span>
+              <span data-lang="en">Claude session history: find any past conversation and resume exactly where you left off.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Git -->
+        <section class="docs-section" id="git">
+          <h2>Git</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Mirehub integre une interface Git visuelle complete. Branches, commits, staging, diffs, stash, push — tout est accessible sans taper une seule commande.</span>
+              <span data-lang="en">Mirehub integrates a complete visual Git interface. Branches, commits, staging, diffs, stash, push — everything is accessible without typing a single command.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Vue d'ensemble des branches locales avec indicateurs ahead/behind</span>
+                <span data-lang="en">Local branch overview with ahead/behind indicators</span>
+              </li>
+              <li>
+                <span data-lang="fr">Historique de commits avec graphe visuel</span>
+                <span data-lang="en">Commit history with visual graph</span>
+              </li>
+              <li>
+                <span data-lang="fr">Staging area : fichiers modified et staged separes</span>
+                <span data-lang="en">Staging area: modified and staged files separated</span>
+              </li>
+              <li>
+                <span data-lang="fr">Zone de commit integree (<kbd>Cmd+Enter</kbd> pour valider)</span>
+                <span data-lang="en">Integrated commit area (<kbd>Cmd+Enter</kbd> to commit)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Operations : Checkout, Create, Rename, Merge, Delete, Fetch, Pull, Push, Stash</span>
+                <span data-lang="en">Operations: Checkout, Create, Rename, Merge, Delete, Fetch, Pull, Push, Stash</span>
+              </li>
+              <li>
+                <span data-lang="fr">Diff viewer inline pour comparer les changements</span>
+                <span data-lang="en">Inline diff viewer to compare changes</span>
+              </li>
+            </ul>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-git.png" alt="Git — Interface visuelle" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue Git : branches locales, historique de commits, zone de staging avec fichiers modifies et stages, et zone de commit integree.</span>
+              <span data-lang="en">Git view: local branches, commit history, staging area with modified and staged files, and integrated commit area.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Kanban -->
+        <section class="docs-section" id="kanban">
+          <h2>Kanban</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Le Kanban integre vous permet de gerer vos taches directement a cote de votre code. Plus besoin d'ouvrir Trello ou Notion — vos taches vivent dans votre workspace.</span>
+              <span data-lang="en">The integrated Kanban lets you manage tasks right next to your code. No need to open Trello or Notion — your tasks live in your workspace.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Colonnes</span>
+              <span data-lang="en">Columns</span>
+            </h3>
+            <p>
+              <span data-lang="fr">5 colonnes adaptees au workflow de developpement :</span>
+              <span data-lang="en">5 columns adapted to development workflow:</span>
+            </p>
+            <ol>
+              <li><strong>TODO</strong> — <span data-lang="fr">A faire</span><span data-lang="en">To do</span></li>
+              <li><strong>WORKING</strong> — <span data-lang="fr">En cours</span><span data-lang="en">In progress</span></li>
+              <li><strong>PENDING</strong> — <span data-lang="fr">En attente</span><span data-lang="en">Waiting</span></li>
+              <li><strong>DONE</strong> — <span data-lang="fr">Termine</span><span data-lang="en">Done</span></li>
+              <li><strong>FAILED</strong> — <span data-lang="fr">Echoue</span><span data-lang="en">Failed</span></li>
+            </ol>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Filtres par tags (bug, feature, refactor, docs, urgent) et par scope</span>
+                <span data-lang="en">Filter by tags (bug, feature, refactor, docs, urgent) and by scope</span>
+              </li>
+              <li>
+                <span data-lang="fr">Niveaux de priorite : low, medium, high, critical</span>
+                <span data-lang="en">Priority levels: low, medium, high, critical</span>
+              </li>
+              <li>
+                <span data-lang="fr">Drag &amp; drop entre colonnes</span>
+                <span data-lang="en">Drag &amp; drop between columns</span>
+              </li>
+              <li>
+                <span data-lang="fr">Integration Claude : envoyez une tache directement a Claude, le resultat met a jour le ticket</span>
+                <span data-lang="en">Claude integration: send a task directly to Claude, the result updates the ticket</span>
+              </li>
+              <li>
+                <span data-lang="fr">Persistance locale dans le projet (<code>.workspaces/kanban.json</code>)</span>
+                <span data-lang="en">Local persistence in the project (<code>.workspaces/kanban.json</code>)</span>
+              </li>
+            </ul>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-kanban.png" alt="Kanban — Tableau de taches" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue Kanban : 5 colonnes (A faire, En cours, En attente, Echoue, Termine), filtres par tags et priorite, recherche et scopes.</span>
+              <span data-lang="en">Kanban view: 5 columns (To do, In progress, Waiting, Failed, Done), tag and priority filters, search and scopes.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- NPM -->
+        <section class="docs-section" id="npm">
+          <h2>NPM</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Le gestionnaire NPM visuel affiche tous vos packages d'un coup d'oeil. Les mises a jour sont detectees automatiquement, et l'upgrade se fait en un clic.</span>
+              <span data-lang="en">The visual NPM manager displays all your packages at a glance. Updates are detected automatically, and upgrading is one click away.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Liste de tous les packages avec badges DEP/DEV</span>
+                <span data-lang="en">All packages listed with DEP/DEV badges</span>
+              </li>
+              <li>
+                <span data-lang="fr">Detection automatique des mises a jour disponibles</span>
+                <span data-lang="en">Automatic detection of available updates</span>
+              </li>
+              <li>
+                <span data-lang="fr">Upgrade individuel ou global en un clic</span>
+                <span data-lang="en">Individual or global one-click upgrade</span>
+              </li>
+              <li>
+                <span data-lang="fr">Detection des packages deprecies</span>
+                <span data-lang="en">Deprecated package detection</span>
+              </li>
+              <li>
+                <span data-lang="fr">Audit de securite des dependances</span>
+                <span data-lang="en">Dependency security audit</span>
+              </li>
+            </ul>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-npm.png" alt="NPM — Gestionnaire de packages" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue NPM : liste de tous les packages avec badges DEP/DEV, detection automatique des mises a jour, et upgrade global en un clic.</span>
+              <span data-lang="en">NPM view: all packages listed with DEP/DEV badges, automatic update detection, and one-click global upgrade.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- TODOs -->
+        <section class="docs-section" id="todos">
+          <h2>TODO Scanner</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Le TODO Scanner parcourt automatiquement votre codebase pour trouver tous les marqueurs de dette technique : <code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, <code>NOTE</code>, <code>XXX</code>. Fini les commentaires oublies dans le code.</span>
+              <span data-lang="en">The TODO Scanner automatically scans your codebase for all technical debt markers: <code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, <code>NOTE</code>, <code>XXX</code>. No more forgotten comments in code.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Scan automatique de tout le projet</span>
+                <span data-lang="en">Automatic full-project scan</span>
+              </li>
+              <li>
+                <span data-lang="fr">Filtres par type (TODO, FIXME, HACK, NOTE, XXX)</span>
+                <span data-lang="en">Filter by type (TODO, FIXME, HACK, NOTE, XXX)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Clic direct vers la ligne source du fichier</span>
+                <span data-lang="en">Direct click to the source file line</span>
+              </li>
+              <li>
+                <span data-lang="fr">Compteurs par type pour mesurer la dette technique</span>
+                <span data-lang="en">Per-type counters to measure technical debt</span>
+              </li>
+            </ul>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-todos.png" alt="TODO Scanner — Detection de dette technique" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue TODO Scanner : scan automatique de toute la codebase, filtres par type (TODO, FIXME, HACK, NOTE, XXX), avec lien direct vers le fichier source.</span>
+              <span data-lang="en">TODO Scanner view: automatic full-codebase scan, filter by type (TODO, FIXME, HACK, NOTE, XXX), with direct link to source file.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="docs-section" id="stats">
+          <h2>
+            <span data-lang="fr">Statistiques</span>
+            <span data-lang="en">Statistics</span>
+          </h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Comprenez votre codebase en un coup d'oeil. Ideal avant un refactoring, un audit ou simplement pour suivre l'evolution de votre projet.</span>
+              <span data-lang="en">Understand your codebase at a glance. Ideal before a refactoring, an audit, or simply to track your project's evolution.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Metriques affichees</span>
+              <span data-lang="en">Displayed metrics</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Nombre total de fichiers</span>
+                <span data-lang="en">Total file count</span>
+              </li>
+              <li>
+                <span data-lang="fr">Nombre total de lignes de code</span>
+                <span data-lang="en">Total lines of code</span>
+              </li>
+              <li>
+                <span data-lang="fr">Repartition par type de fichier / langage</span>
+                <span data-lang="en">Distribution by file type / language</span>
+              </li>
+              <li>
+                <span data-lang="fr">Classement des fichiers les plus volumineux</span>
+                <span data-lang="en">Largest files ranking</span>
+              </li>
+            </ul>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-stats.png" alt="Statistiques — Analyse du projet" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue Statistiques : nombre total de fichiers et lignes, repartition par type de fichier avec graphes, et classement des fichiers les plus volumineux.</span>
+              <span data-lang="en">Statistics view: total files and lines count, distribution by file type with graphs, and largest files ranking.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Prompts -->
+        <section class="docs-section" id="prompts">
+          <h2>Prompts</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">La bibliotheque de prompts contient des templates prets a l'emploi, organises par categorie. Envoyez-les directement a Claude ou transformez-les en tickets Kanban.</span>
+              <span data-lang="en">The prompt library contains ready-to-use templates, organized by category. Send them directly to Claude or turn them into Kanban tickets.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Categories</span>
+              <span data-lang="en">Categories</span>
+            </h3>
+            <ul>
+              <li>
+                <strong>
+                  <span data-lang="fr">Developpement</span>
+                  <span data-lang="en">Development</span>
+                </strong> —
+                <span data-lang="fr">Prompts pour ecrire du code, refactorer, optimiser</span>
+                <span data-lang="en">Prompts to write code, refactor, optimize</span>
+              </li>
+              <li>
+                <strong>
+                  <span data-lang="fr">Qualite</span>
+                  <span data-lang="en">Quality</span>
+                </strong> —
+                <span data-lang="fr">Prompts pour les tests, la revue de code, l'audit</span>
+                <span data-lang="en">Prompts for tests, code review, audit</span>
+              </li>
+              <li>
+                <strong>Documentation</strong> —
+                <span data-lang="fr">Prompts pour generer de la doc, des commentaires, des README</span>
+                <span data-lang="en">Prompts to generate docs, comments, READMEs</span>
+              </li>
+              <li>
+                <strong>DevOps</strong> —
+                <span data-lang="fr">Prompts pour CI/CD, Docker, deploiement</span>
+                <span data-lang="en">Prompts for CI/CD, Docker, deployment</span>
+              </li>
+            </ul>
+            <h3>
+              <span data-lang="fr">Utilisation</span>
+              <span data-lang="en">Usage</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Cliquez sur un prompt pour le copier, l'envoyer a Claude, ou le transformer en ticket Kanban. Vos meilleures pratiques, a un clic.</span>
+              <span data-lang="en">Click a prompt to copy it, send it to Claude, or turn it into a Kanban ticket. Your best practices, one click away.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-prompts.png" alt="Prompts — Bibliotheque de templates" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Vue Prompts : bibliotheque de templates organises par categorie (Developpement, Qualite, Documentation, DevOps, General), avec envoi direct a Claude ou creation de ticket Kanban.</span>
+              <span data-lang="en">Prompts view: template library organized by category (Development, Quality, Documentation, DevOps, General), with direct send to Claude or Kanban ticket creation.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Keyboard Shortcuts -->
+        <section class="docs-section" id="shortcuts">
+          <h2>
+            <span data-lang="fr">Raccourcis clavier</span>
+            <span data-lang="en">Keyboard shortcuts</span>
+          </h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Mirehub est concu pour etre utilise au clavier. Voici les raccourcis principaux :</span>
+              <span data-lang="en">Mirehub is designed for keyboard use. Here are the main shortcuts:</span>
+            </p>
+          </div>
+
+          <h3>Terminal</h3>
+          <div class="docs-shortcuts-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    <span data-lang="fr">Raccourci</span>
+                    <span data-lang="en">Shortcut</span>
+                  </th>
+                  <th>
+                    <span data-lang="fr">Action</span>
+                    <span data-lang="en">Action</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><kbd>Cmd+T</kbd></td>
+                  <td>
+                    <span data-lang="fr">Nouvel onglet terminal</span>
+                    <span data-lang="en">New terminal tab</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+W</kbd></td>
+                  <td>
+                    <span data-lang="fr">Fermer le pane actif (ou l'onglet si un seul pane)</span>
+                    <span data-lang="en">Close active pane (or tab if single pane)</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+D</kbd></td>
+                  <td>
+                    <span data-lang="fr">Split horizontal (pane a droite)</span>
+                    <span data-lang="en">Horizontal split (pane to the right)</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+Shift+D</kbd></td>
+                  <td>
+                    <span data-lang="fr">Split vertical (pane en dessous)</span>
+                    <span data-lang="en">Vertical split (pane below)</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+Shift+Enter</kbd></td>
+                  <td>
+                    <span data-lang="fr">Zoom/dezoom le pane actif</span>
+                    <span data-lang="en">Zoom/unzoom active pane</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+Alt+fleches</kbd></td>
+                  <td>
+                    <span data-lang="fr">Naviguer entre les panes</span>
+                    <span data-lang="en">Navigate between panes</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+Shift+[</kbd> / <kbd>]</kbd></td>
+                  <td>
+                    <span data-lang="fr">Onglet precedent / suivant</span>
+                    <span data-lang="en">Previous / next tab</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+1</kbd> ... <kbd>Cmd+9</kbd></td>
+                  <td>
+                    <span data-lang="fr">Aller a l'onglet N</span>
+                    <span data-lang="en">Jump to tab N</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Workspace</h3>
+          <div class="docs-shortcuts-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    <span data-lang="fr">Raccourci</span>
+                    <span data-lang="en">Shortcut</span>
+                  </th>
+                  <th>
+                    <span data-lang="fr">Action</span>
+                    <span data-lang="en">Action</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><kbd>Cmd+Shift+N</kbd></td>
+                  <td>
+                    <span data-lang="fr">Creer un nouveau workspace</span>
+                    <span data-lang="en">Create new workspace</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>
+            <span data-lang="fr">Fichiers &amp; Editeur</span>
+            <span data-lang="en">Files &amp; Editor</span>
+          </h3>
+          <div class="docs-shortcuts-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    <span data-lang="fr">Raccourci</span>
+                    <span data-lang="en">Shortcut</span>
+                  </th>
+                  <th>
+                    <span data-lang="fr">Action</span>
+                    <span data-lang="en">Action</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><kbd>Cmd+S</kbd></td>
+                  <td>
+                    <span data-lang="fr">Sauvegarder le fichier</span>
+                    <span data-lang="en">Save file</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Cmd+clic</kbd></td>
+                  <td>
+                    <span data-lang="fr">Selectionner un fichier pour la comparaison diff (2 max)</span>
+                    <span data-lang="en">Select file for diff comparison (2 max)</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Git</h3>
+          <div class="docs-shortcuts-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    <span data-lang="fr">Raccourci</span>
+                    <span data-lang="en">Shortcut</span>
+                  </th>
+                  <th>
+                    <span data-lang="fr">Action</span>
+                    <span data-lang="en">Action</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><kbd>Cmd+Enter</kbd></td>
+                  <td>
+                    <span data-lang="fr">Commit (dans la zone de message)</span>
+                    <span data-lang="en">Commit (in the message area)</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>
+            <span data-lang="fr">General</span>
+            <span data-lang="en">General</span>
+          </h3>
+          <div class="docs-shortcuts-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    <span data-lang="fr">Raccourci</span>
+                    <span data-lang="en">Shortcut</span>
+                  </th>
+                  <th>
+                    <span data-lang="fr">Action</span>
+                    <span data-lang="en">Action</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><kbd>Escape</kbd></td>
+                  <td>
+                    <span data-lang="fr">Fermer la modale / annuler</span>
+                    <span data-lang="en">Close modal / cancel</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><kbd>Enter</kbd></td>
+                  <td>
+                    <span data-lang="fr">Confirmer l'action</span>
+                    <span data-lang="en">Confirm action</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Back to home -->
+        <div class="docs-back">
+          <a href="index.html" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span data-lang="fr">Retour a l'accueil</span>
+            <span data-lang="en">Back to home</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <span data-lang="fr">Cree par <strong>akc</strong></span>
+        <span data-lang="en">Built by <strong>akc</strong></span>
+        <span class="sep">&middot;</span>
+        <span data-lang="fr">Licence MIT</span>
+        <span data-lang="en">MIT License</span>
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/AntonyCanut/Mirehub" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

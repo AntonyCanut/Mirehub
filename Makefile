@@ -1,4 +1,4 @@
-.PHONY: dev build clean install lint format test typecheck build-app app dmg open-dmg
+.PHONY: dev build clean install lint format test typecheck build-app app
 
 # Développement
 dev: node_modules
@@ -16,17 +16,11 @@ node_modules: package.json
 build: node_modules
 	npm run build
 
-# Package macOS app (.app + .dmg + .zip) dans release/
+# Package macOS app (.app + .zip) dans release/
 app: build
 	npx electron-builder --mac --publish never
 
-dmg: app
-
 build-app: app
-
-# Ouvrir le DMG généré
-open-dmg:
-	@open release/Workspaces-*.dmg 2>/dev/null || echo "Pas de DMG trouvé. Lancez 'make dmg' d'abord."
 
 # Qualité
 lint: node_modules

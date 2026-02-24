@@ -261,11 +261,14 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       kanbanFilePath = `~/.mirehub/kanban/${currentWorkspaceId}.json`
     }
 
+    const ticketLabel = task.ticketNumber != null ? `T-${String(task.ticketNumber).padStart(2, '0')}` : task.id.slice(0, 8)
+
     const promptParts = [
       `Tu travailles sur un ticket Kanban.`,
       ``,
-      `## Ticket`,
+      `## Ticket ${ticketLabel}`,
       `- **ID**: ${task.id}`,
+      `- **Numero**: ${ticketLabel}`,
       `- **Titre**: ${task.title}`,
       task.description ? `- **Description**: ${task.description}` : null,
       `- **Priorite**: ${task.priority}`,
@@ -329,7 +332,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       const termStore = useTerminalTabStore.getState()
       const { activeWorkspaceId } = useWorkspaceStore.getState()
       if (activeWorkspaceId) {
-        tabId = termStore.createTab(activeWorkspaceId, cwd, `[IA] ${task.title}`, initialCommand)
+        const tabLabel = task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[IA] ${task.title}`
+        tabId = termStore.createTab(activeWorkspaceId, cwd, tabLabel, initialCommand)
         if (tabId) {
           termStore.setTabColor(tabId, '#fab387')
           set((state) => ({

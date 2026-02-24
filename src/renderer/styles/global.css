@@ -695,6 +695,13 @@ body {
   border: 1px solid var(--success);
 }
 
+.workspace-ia-tag--ticket {
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  font-family: 'Menlo', monospace;
+}
+
 @keyframes ia-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }

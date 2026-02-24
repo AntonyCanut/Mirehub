@@ -217,6 +217,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_ATTACH_FROM_CLIPBOARD, { taskId, workspaceId, dataBase64, filename, mimeType }),
     removeAttachment: (taskId: string, workspaceId: string, attachmentId: string): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_REMOVE_ATTACHMENT, { taskId, workspaceId, attachmentId }),
+    getWorkingTicket: (workspaceId: string): Promise<{ ticketNumber: number | null } | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_GET_WORKING_TICKET, { workspaceId }),
   },
 
   // Workspace storage

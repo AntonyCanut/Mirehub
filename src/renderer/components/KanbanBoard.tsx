@@ -40,6 +40,11 @@ function getClipboardImageExtension(mimeType: string): string {
   return '.png'
 }
 
+function formatTicketNumber(n?: number): string {
+  if (n == null) return ''
+  return `T-${String(n).padStart(2, '0')}`
+}
+
 const COLUMNS: { status: KanbanStatus; labelKey: string; color: string }[] = [
   { status: 'TODO', labelKey: 'kanban.todo', color: '#89b4fa' },
   { status: 'WORKING', labelKey: 'kanban.working', color: '#fab387' },
@@ -766,7 +771,10 @@ export function KanbanBoard() {
                     <div className="kanban-archive-list">
                       {archivedTasks.map((task) => (
                         <div key={task.id} className="kanban-archive-item">
-                          <span className="kanban-archive-item-title">{task.title}</span>
+                          <span className="kanban-archive-item-title">
+                            {task.ticketNumber != null && <span className="kanban-card-ticket-number">{formatTicketNumber(task.ticketNumber)}</span>}
+                            {task.title}
+                          </span>
                           <button
                             className="kanban-archive-restore-btn"
                             onClick={() => handleRestoreFromArchive(task)}
@@ -880,6 +888,9 @@ function KanbanCard({
           className="kanban-card-priority"
           style={{ backgroundColor: priorityColors[task.priority] }}
         />
+        {task.ticketNumber != null && (
+          <span className="kanban-card-ticket-number">{formatTicketNumber(task.ticketNumber)}</span>
+        )}
         <span className="kanban-card-title">{task.title}</span>
         <button
           className="kanban-card-delete"
@@ -1055,7 +1066,7 @@ function TaskDetailPanel({
   return (
     <div className="kanban-detail" onPaste={handlePaste} tabIndex={-1}>
       <div className="kanban-detail-header">
-        <span className="kanban-detail-id">#{task.id.slice(0, 8)}</span>
+        <span className="kanban-detail-id">{task.ticketNumber != null ? formatTicketNumber(task.ticketNumber) : `#${task.id.slice(0, 8)}`}</span>
         <button className="kanban-detail-close" onClick={onClose}>&times;</button>
       </div>
 

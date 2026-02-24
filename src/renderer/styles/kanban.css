@@ -334,6 +334,15 @@
   flex-shrink: 0;
 }
 
+.kanban-card-ticket-number {
+  font-family: 'Menlo', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
 .kanban-card-title {
   flex: 1;
   font-size: 12px;

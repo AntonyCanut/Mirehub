@@ -101,6 +101,18 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
   const isFlashing = workspace.id === flashingWorkspaceId
   const workspaceClaudeStatus = useClaudeStore((s) => s.workspaceClaudeStatus[workspace.id])
 
+  const [workingTicketNumber, setWorkingTicketNumber] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (workspaceClaudeStatus === 'working') {
+      window.mirehub.kanban.getWorkingTicket(workspace.id).then((result) => {
+        setWorkingTicketNumber(result?.ticketNumber ?? null)
+      }).catch(() => setWorkingTicketNumber(null))
+    } else {
+      setWorkingTicketNumber(null)
+    }
+  }, [workspace.id, workspaceClaudeStatus])
+
   const handleToggle = useCallback(() => {
     setExpanded((prev) => !prev)
   }, [])
@@ -344,7 +356,12 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
         )}
 
         {workspaceClaudeStatus === 'working' && (
-          <span className="workspace-ia-tag workspace-ia-tag--working">{t('workspace.aiWorking')}</span>
+          <>
+            <span className="workspace-ia-tag workspace-ia-tag--working">{t('workspace.aiWorking')}</span>
+            {workingTicketNumber != null && (
+              <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketNumber).padStart(2, '0')}</span>
+            )}
+          </>
         )}
         {workspaceClaudeStatus === 'finished' && (
           <span className="workspace-ia-tag workspace-ia-tag--finished">{t('workspace.aiFinish')}</span>
