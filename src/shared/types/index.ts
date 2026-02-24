@@ -487,6 +487,21 @@ export interface McpCatalogEntry {
   official: boolean
 }
 
+// SSH Key types
+export type SshKeyType = 'ed25519' | 'rsa'
+
+export interface SshKeyInfo {
+  id: string
+  name: string
+  type: SshKeyType
+  fingerprint: string
+  publicKeyPath: string
+  privateKeyPath: string
+  comment: string
+  createdAt: number
+  isDefault: boolean
+}
+
 // IPC Channel types
 export const IPC_CHANNELS = {
   // Terminal
@@ -696,4 +711,13 @@ export const IPC_CHANNELS = {
   APP_UPDATE_DOWNLOAD: 'appUpdate:download',
   APP_UPDATE_INSTALL: 'appUpdate:install',
   APP_UPDATE_STATUS: 'appUpdate:status',
+
+  // SSH Keys
+  SSH_LIST_KEYS: 'ssh:listKeys',
+  SSH_GENERATE_KEY: 'ssh:generateKey',
+  SSH_READ_PUBLIC_KEY: 'ssh:readPublicKey',
+  SSH_IMPORT_KEY: 'ssh:importKey',
+  SSH_DELETE_KEY: 'ssh:deleteKey',
+  SSH_OPEN_DIRECTORY: 'ssh:openDirectory',
+  SSH_SELECT_KEY_FILE: 'ssh:selectKeyFile',
 } as const

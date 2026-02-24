@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, McpServerConfig, McpHelpResult } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -432,6 +432,24 @@ const api = {
       ipcRenderer.on(IPC_CHANNELS.APP_UPDATE_STATUS, listener)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.APP_UPDATE_STATUS, listener)
     },
+  },
+
+  // SSH Keys
+  ssh: {
+    listKeys: (): Promise<{ success: boolean; keys: SshKeyInfo[]; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_LIST_KEYS),
+    generateKey: (name: string, type: SshKeyType, comment: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_GENERATE_KEY, { name, type, comment }),
+    readPublicKey: (keyPath: string): Promise<{ success: boolean; content: string; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_READ_PUBLIC_KEY, { keyPath }),
+    importKey: (name: string, privateKey: string, publicKey?: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_IMPORT_KEY, { name, privateKey, publicKey }),
+    deleteKey: (name: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_DELETE_KEY, { name }),
+    openDirectory: (): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_OPEN_DIRECTORY),
+    selectKeyFile: (): Promise<{ success: boolean; canceled?: boolean; filePath?: string; fileName?: string; content?: string; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_SELECT_KEY_FILE),
   },
 
   // Notifications

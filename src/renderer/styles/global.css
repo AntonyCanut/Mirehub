@@ -3374,6 +3374,235 @@ body {
   background: white;
 }
 
+/* Settings button */
+.settings-btn {
+  height: 28px;
+  padding: 0 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.settings-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+.settings-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== SSH Key Management ===== */
+.ssh-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ssh-action-btn {
+  height: 28px;
+  padding: 0 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ssh-action-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  background: var(--bg-tertiary);
+}
+
+.ssh-error {
+  padding: 8px 12px;
+  background: rgba(243, 139, 168, 0.1);
+  border: 1px solid var(--status-danger);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--status-danger);
+}
+
+.ssh-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.ssh-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ssh-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ssh-input {
+  height: 28px;
+  padding: 0 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Menlo', monospace;
+  outline: none;
+}
+.ssh-input:focus {
+  border-color: var(--accent);
+}
+
+.ssh-textarea {
+  padding: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'Menlo', monospace;
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+}
+.ssh-textarea:focus {
+  border-color: var(--accent);
+}
+
+.ssh-btn {
+  height: 28px;
+  padding: 0 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ssh-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+.ssh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ssh-btn--primary {
+  background: var(--accent);
+  color: var(--bg-tertiary);
+  border-color: var(--accent);
+}
+.ssh-btn--primary:hover {
+  opacity: 0.9;
+  color: var(--bg-tertiary);
+}
+.ssh-btn--small {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+.ssh-btn--danger {
+  color: var(--status-danger);
+}
+.ssh-btn--danger:hover {
+  background: rgba(243, 139, 168, 0.1);
+  border-color: var(--status-danger);
+  color: var(--status-danger);
+}
+
+.ssh-loading,
+.ssh-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ssh-key-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ssh-key-card {
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ssh-key-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ssh-key-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: 'Menlo', monospace;
+}
+
+.ssh-key-type {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: inherit;
+}
+
+.ssh-key-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: rgba(137, 180, 250, 0.15);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+.ssh-key-comment {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ssh-key-fingerprint {
+  font-size: 10px;
+  font-family: 'Menlo', monospace;
+  color: var(--text-muted);
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ssh-key-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
 /* Settings gear button in view-switcher */
 .view-btn--settings {
   margin-left: auto;

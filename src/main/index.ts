@@ -17,6 +17,7 @@ import { registerApiHandlers } from './ipc/api'
 import { registerDatabaseHandlers } from './ipc/database'
 import { registerAppUpdateHandlers } from './ipc/appUpdate'
 import { registerMcpHandlers } from './ipc/mcp'
+import { registerSshHandlers } from './ipc/ssh'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
 import { databaseService } from './services/database'
@@ -116,6 +117,7 @@ app.whenReady().then(() => {
   registerDatabaseHandlers(ipcMain)
   registerAppUpdateHandlers(ipcMain)
   registerMcpHandlers(ipcMain)
+  registerSshHandlers(ipcMain)
 
   // Ensure activity hook script exists and start watching
   ensureActivityHookScript()
