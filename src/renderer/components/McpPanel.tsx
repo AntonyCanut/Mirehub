@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, type FormEvent } from 'react'
 import { useI18n } from '../lib/i18n'
 import { MCP_CATALOG, MCP_CATEGORIES, MCP_CATEGORY_ICONS } from '../../shared/constants/mcpCatalog'
 import type { McpCategory, McpCatalogEntry } from '../../shared/types'
+import { CopyableError } from './CopyableError'
 
 type McpView = 'catalog' | 'installed'
 
@@ -10,6 +11,31 @@ interface McpPanelProps {
   settings: Record<string, unknown>
   projectPath: string
   onServersChange: (servers: Record<string, { command: string; args?: string[]; env?: Record<string, string> }>, settings: Record<string, unknown>) => void
+}
+
+function McpHelpOutput({ text }: { text: string }) {
+  const { t } = useI18n()
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [text])
+
+  return (
+    <div className="claude-mcp-help-output-wrapper">
+      <button
+        className="claude-mcp-help-copy-btn"
+        onClick={handleCopy}
+        title={t('common.copy')}
+      >
+        {copied ? '\u2713' : '\u2398'}
+      </button>
+      <pre className="claude-mcp-help-output">{text}</pre>
+    </div>
+  )
 }
 
 export function McpPanel({ mcpServers, settings, projectPath, onServersChange }: McpPanelProps) {
@@ -440,10 +466,13 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
                           <div className="claude-mcp-help-loading">{t('claude.mcpHelpLoading')}</div>
                         )}
                         {mcpHelpData[name]?.error && (
-                          <div className="claude-mcp-help-error">{t('claude.mcpHelpError')}: {mcpHelpData[name].error}</div>
+                          <CopyableError
+                            error={`${t('claude.mcpHelpError')}: ${mcpHelpData[name].error}`}
+                            className="claude-mcp-help-error-copyable"
+                          />
                         )}
                         {mcpHelpData[name]?.output && (
-                          <pre className="claude-mcp-help-output">{mcpHelpData[name].output}</pre>
+                          <McpHelpOutput text={mcpHelpData[name].output!} />
                         )}
                         {!mcpHelpData[name]?.loading && !mcpHelpData[name]?.output && !mcpHelpData[name]?.error && (
                           <div className="claude-mcp-help-loading">{t('claude.mcpHelpEmpty')}</div>

@@ -2,6 +2,28 @@ import { IpcMain } from 'electron'
 import { execFileSync } from 'child_process'
 import { IPC_CHANNELS, GitLogEntry, GitStatus, GitTag, GitBlameLine, GitRemote } from '../../shared/types'
 
+// ---------------------------------------------------------------------------
+// Input validation helpers (CWE-78 defense-in-depth)
+// execFileSync with array args already prevents shell injection, but we also
+// guard against git option/argument injection from IPC inputs.
+// ---------------------------------------------------------------------------
+
+/** Validate a git ref (branch, tag, remote name) — rejects option injection. */
+function validateRef(ref: string): string {
+  if (!ref || ref.startsWith('-')) {
+    throw new Error(`Invalid git ref: "${ref}"`)
+  }
+  return ref
+}
+
+/** Validate a commit hash — must be hexadecimal. */
+function validateHash(hash: string): string {
+  if (!hash || !/^[0-9a-fA-F]+$/.test(hash)) {
+    throw new Error(`Invalid commit hash: "${hash}"`)
+  }
+  return hash
+}
+
 /** Execute a git command safely using execFileSync (no shell interpretation). */
 function execGit(args: string[], cwd: string): string {
   return execFileSync('git', args, {

@@ -5832,6 +5832,40 @@ body {
   word-break: break-word;
 }
 
+.claude-mcp-help-output-wrapper {
+  position: relative;
+}
+
+.claude-mcp-help-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.claude-mcp-help-output-wrapper:hover .claude-mcp-help-copy-btn {
+  opacity: 1;
+}
+
+.claude-mcp-help-copy-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.claude-mcp-help-error-copyable .copyable-error-text {
+  color: var(--danger);
+  font-size: 12px;
+}
+
 .claude-mcp-help-error {
   color: var(--danger);
   font-size: 12px;
