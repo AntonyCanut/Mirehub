@@ -219,6 +219,16 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_REMOVE_ATTACHMENT, { taskId, workspaceId, attachmentId }),
     getWorkingTicket: (workspaceId: string): Promise<{ ticketNumber: number | null } | null> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_GET_WORKING_TICKET, { workspaceId }),
+    watch: (workspaceId: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_WATCH, { workspaceId }),
+    unwatch: (): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_UNWATCH),
+    onFileChanged: (callback: (data: { workspaceId: string }) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, payload: { workspaceId: string }) =>
+        callback(payload)
+      ipcRenderer.on(IPC_CHANNELS.KANBAN_FILE_CHANGED, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.KANBAN_FILE_CHANGED, listener)
+    },
   },
 
   // Workspace storage

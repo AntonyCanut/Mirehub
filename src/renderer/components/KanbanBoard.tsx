@@ -129,13 +129,25 @@ export function KanbanBoard() {
     }
   }, [activeWorkspaceId, loadTasks])
 
-  // Periodic sync: re-read kanban.json while WORKING tasks exist (catches hook/Claude changes)
+  // File watcher: instant sync when kanban.json changes on disk (replaces 5s polling)
   const hasWorkingTasks = tasks.some((t) => t.status === 'WORKING')
   useEffect(() => {
-    if (!hasWorkingTasks) return
-    const interval = setInterval(() => syncTasksFromFile(), 5000)
-    return () => clearInterval(interval)
-  }, [hasWorkingTasks, syncTasksFromFile])
+    if (!activeWorkspaceId || !hasWorkingTasks) return
+    // Start watching the kanban file for external changes (Claude, hooks)
+    window.mirehub.kanban.watch(activeWorkspaceId)
+    const unsubscribe = window.mirehub.kanban.onFileChanged(({ workspaceId }) => {
+      if (workspaceId === activeWorkspaceId) {
+        syncTasksFromFile()
+      }
+    })
+    // Fallback polling at 30s in case fs.watch misses an event
+    const fallback = setInterval(() => syncTasksFromFile(), 30000)
+    return () => {
+      unsubscribe()
+      clearInterval(fallback)
+      window.mirehub.kanban.unwatch()
+    }
+  }, [activeWorkspaceId, hasWorkingTasks, syncTasksFromFile])
 
   // Load prompt templates when create form opens
   useEffect(() => {

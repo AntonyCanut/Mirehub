@@ -5449,6 +5449,190 @@ body {
   font-size: 13px;
 }
 
+/* ===== Claude Workflow ===== */
+.claude-workflow {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.claude-workflow-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.claude-workflow-info {
+  flex: 1;
+}
+
+.claude-workflow-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.claude-workflow-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.claude-workflow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.claude-workflow-badge--deployed {
+  background: rgba(166, 227, 161, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(166, 227, 161, 0.3);
+}
+
+.claude-workflow-badge--not-deployed {
+  background: rgba(108, 112, 134, 0.1);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.claude-workflow-badge-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.claude-workflow-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.claude-workflow-action-btn {
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.claude-workflow-action-btn:hover { opacity: 0.85; }
+.claude-workflow-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.claude-workflow-action-btn--deploy {
+  background: var(--claude-color);
+  color: white;
+}
+
+.claude-workflow-action-btn--deploy-all {
+  background: transparent;
+  color: var(--claude-color);
+  border: 1px solid var(--claude-color);
+}
+
+.claude-workflow-action-btn--remove {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.claude-workflow-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.claude-workflow-section {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.claude-workflow-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+}
+
+.claude-workflow-section-header:hover {
+  background: var(--bg-surface);
+}
+
+.claude-workflow-section-chevron {
+  font-size: 9px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.claude-workflow-section-chevron--open {
+  transform: rotate(90deg);
+}
+
+.claude-workflow-section-title {
+  font-weight: 600;
+  flex: 1;
+}
+
+.claude-workflow-section-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.claude-workflow-section-items {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 10px 30px;
+}
+
+.claude-workflow-section-item {
+  position: relative;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.claude-workflow-section-item::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 11px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--claude-color);
+  opacity: 0.6;
+}
+
 /* ===== API Tester Panel ===== */
 .api-panel {
   display: flex;

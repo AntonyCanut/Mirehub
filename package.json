@@ -91,7 +91,6 @@
       "node_modules/node-pty/**",
       "node_modules/better-sqlite3/**"
     ],
-    "generateBlockmap": false,
     "npmRebuild": true,
     "publish": {
       "provider": "github",

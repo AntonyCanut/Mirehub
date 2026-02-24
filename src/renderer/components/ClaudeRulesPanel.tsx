@@ -5,8 +5,9 @@ import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useI18n } from '../lib/i18n'
 import { SessionHistory } from './SessionHistory'
 import { ClaudeDefaultsLibrary } from './ClaudeDefaultsLibrary'
+import { DEFAULT_WORKFLOWS, WORKFLOW_MARKER, generateWorkflowMarkdown } from '../../shared/constants/defaultWorkflows'
 
-type SubTab = 'permissions' | 'claudemd' | 'profile' | 'mcp' | 'history' | 'library'
+type SubTab = 'permissions' | 'claudemd' | 'profile' | 'mcp' | 'history' | 'library' | 'workflow'
 
 interface AgentFile {
   name: string
@@ -23,7 +24,7 @@ const PERMISSION_MODES = [
 const TOOL_SUGGESTIONS = ['Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep', 'WebFetch', 'WebSearch', 'Task', 'NotebookEdit']
 
 export function ClaudeRulesPanel() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { activeProjectId, projects, workspaces } = useWorkspaceStore()
   const activeProject = projects.find((p) => p.id === activeProjectId)
   const activeWorkspace = workspaces.find((w) => w.id === activeProject?.workspaceId)
@@ -57,6 +58,11 @@ export function ClaudeRulesPanel() {
   const [mcpHelpData, setMcpHelpData] = useState<Record<string, { loading: boolean; output?: string; error?: string }>>({})
   const [mcpExpandedHelp, setMcpExpandedHelp] = useState<string | null>(null)
 
+  // Workflow state
+  const [workflowDeployed, setWorkflowDeployed] = useState(false)
+  const [workflowDeploying, setWorkflowDeploying] = useState(false)
+  const [workflowExpandedSections, setWorkflowExpandedSections] = useState<Set<string>>(new Set())
+
   const loadData = useCallback(async () => {
     if (!activeProject) return
     setLoading(true)
@@ -70,8 +76,10 @@ export function ClaudeRulesPanel() {
         setSettings({})
         setMcpServers({})
       }
-      setClaudeMd(result.claudeMd ?? '')
+      const md = result.claudeMd ?? ''
+      setClaudeMd(md)
       setClaudeMdDirty(false)
+      setWorkflowDeployed(md.includes(WORKFLOW_MARKER))
 
       // Validate settings (project + workspace env)
       const wsName = activeWorkspace?.name
@@ -154,6 +162,77 @@ export function ClaudeRulesPanel() {
     await window.mirehub.project.writeClaudeSettings(activeProject.path, newSettings)
     if (mcpExpandedHelp === name) setMcpExpandedHelp(null)
   }, [activeProject, mcpServers, settings, mcpExpandedHelp])
+
+  // Workflow handlers
+  const handleDeployWorkflow = useCallback(async () => {
+    if (!activeProject) return
+    setWorkflowDeploying(true)
+    try {
+      const result = await window.mirehub.project.scanClaude(activeProject.path)
+      const currentMd = result.claudeMd ?? ''
+      if (!currentMd.includes(WORKFLOW_MARKER)) {
+        const workflow = DEFAULT_WORKFLOWS[locale] ?? DEFAULT_WORKFLOWS.fr
+        const workflowMd = generateWorkflowMarkdown(workflow)
+        const newMd = currentMd.trim() ? currentMd.trim() + '\n\n' + workflowMd : workflowMd
+        await window.mirehub.project.writeClaudeMd(activeProject.path, newMd)
+        setClaudeMd(newMd)
+        setWorkflowDeployed(true)
+      }
+    } catch { /* ignore */ }
+    setWorkflowDeploying(false)
+  }, [activeProject, locale])
+
+  const handleRemoveWorkflow = useCallback(async () => {
+    if (!activeProject) return
+    setWorkflowDeploying(true)
+    try {
+      const result = await window.mirehub.project.scanClaude(activeProject.path)
+      const currentMd = result.claudeMd ?? ''
+      if (currentMd.includes(WORKFLOW_MARKER)) {
+        const markerIdx = currentMd.indexOf(WORKFLOW_MARKER)
+        const newMd = currentMd.slice(0, markerIdx).trimEnd()
+        await window.mirehub.project.writeClaudeMd(activeProject.path, newMd)
+        setClaudeMd(newMd)
+        setWorkflowDeployed(false)
+      }
+    } catch { /* ignore */ }
+    setWorkflowDeploying(false)
+  }, [activeProject])
+
+  const handleDeployWorkflowAll = useCallback(async () => {
+    if (!activeWorkspace) return
+    setWorkflowDeploying(true)
+    const wsProjects = projects.filter(p => p.workspaceId === activeWorkspace.id && p.hasClaude)
+    const workflow = DEFAULT_WORKFLOWS[locale] ?? DEFAULT_WORKFLOWS.fr
+    const workflowMd = generateWorkflowMarkdown(workflow)
+    for (const proj of wsProjects) {
+      try {
+        const result = await window.mirehub.project.scanClaude(proj.path)
+        const currentMd = result.claudeMd ?? ''
+        if (!currentMd.includes(WORKFLOW_MARKER)) {
+          const newMd = currentMd.trim() ? currentMd.trim() + '\n\n' + workflowMd : workflowMd
+          await window.mirehub.project.writeClaudeMd(proj.path, newMd)
+        }
+      } catch { /* continue */ }
+    }
+    // Refresh current project state
+    if (activeProject) {
+      const result = await window.mirehub.project.scanClaude(activeProject.path)
+      const md = result.claudeMd ?? ''
+      setClaudeMd(md)
+      setWorkflowDeployed(md.includes(WORKFLOW_MARKER))
+    }
+    setWorkflowDeploying(false)
+  }, [activeWorkspace, projects, activeProject, locale])
+
+  const toggleWorkflowSection = useCallback((sectionId: string) => {
+    setWorkflowExpandedSections(prev => {
+      const next = new Set(prev)
+      if (next.has(sectionId)) next.delete(sectionId)
+      else next.add(sectionId)
+      return next
+    })
+  }, [])
 
   const handleGetMcpHelp = useCallback(async (name: string) => {
     if (mcpExpandedHelp === name) {
@@ -390,6 +469,13 @@ export function ClaudeRulesPanel() {
           onClick={() => setSubTab('mcp')}
         >
           {t('claude.mcp')}
+        </button>
+        <button
+          className={`claude-rules-tab${subTab === 'workflow' ? ' claude-rules-tab--active' : ''}`}
+          onClick={() => setSubTab('workflow')}
+        >
+          {t('claude.workflow')}
+          {workflowDeployed && <span className="claude-workflow-badge-dot" />}
         </button>
         <button
           className={`claude-rules-tab${subTab === 'library' ? ' claude-rules-tab--active' : ''}`}
@@ -801,6 +887,78 @@ export function ClaudeRulesPanel() {
             )}
           </div>
         )}
+        {subTab === 'workflow' && (() => {
+          const workflow = DEFAULT_WORKFLOWS[locale] ?? DEFAULT_WORKFLOWS.fr
+          const claudeProjects = projects.filter(p => p.workspaceId === activeWorkspace?.id && p.hasClaude)
+          return (
+            <div className="claude-workflow">
+              <div className="claude-workflow-header">
+                <div className="claude-workflow-info">
+                  <h3 className="claude-workflow-title">{t('claude.workflowTitle')}</h3>
+                  <p className="claude-workflow-desc">{t('claude.workflowDesc')}</p>
+                </div>
+                <div className="claude-workflow-status">
+                  {workflowDeployed ? (
+                    <span className="claude-workflow-badge claude-workflow-badge--deployed">{t('claude.workflowDeployed')}</span>
+                  ) : (
+                    <span className="claude-workflow-badge claude-workflow-badge--not-deployed">{t('claude.workflowNotDeployed')}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="claude-workflow-actions">
+                {workflowDeployed ? (
+                  <button
+                    className="claude-workflow-action-btn claude-workflow-action-btn--remove"
+                    onClick={handleRemoveWorkflow}
+                    disabled={workflowDeploying}
+                  >
+                    {workflowDeploying ? t('claude.workflowDeploying') : t('claude.workflowRemove')}
+                  </button>
+                ) : (
+                  <button
+                    className="claude-workflow-action-btn claude-workflow-action-btn--deploy"
+                    onClick={handleDeployWorkflow}
+                    disabled={workflowDeploying}
+                  >
+                    {workflowDeploying ? t('claude.workflowDeploying') : t('claude.workflowDeploy')}
+                  </button>
+                )}
+                {claudeProjects.length > 1 && (
+                  <button
+                    className="claude-workflow-action-btn claude-workflow-action-btn--deploy-all"
+                    onClick={handleDeployWorkflowAll}
+                    disabled={workflowDeploying}
+                  >
+                    {t('claude.workflowDeployAll')}
+                  </button>
+                )}
+              </div>
+
+              <div className="claude-workflow-sections">
+                {workflow.sections.map(section => (
+                  <div key={section.id} className="claude-workflow-section">
+                    <button
+                      className="claude-workflow-section-header"
+                      onClick={() => toggleWorkflowSection(section.id)}
+                    >
+                      <span className={`claude-workflow-section-chevron${workflowExpandedSections.has(section.id) ? ' claude-workflow-section-chevron--open' : ''}`}>&#x25B6;</span>
+                      <span className="claude-workflow-section-title">{section.title}</span>
+                      <span className="claude-workflow-section-count">{t('claude.workflowSection', { count: String(section.items.length) })}</span>
+                    </button>
+                    {workflowExpandedSections.has(section.id) && (
+                      <ul className="claude-workflow-section-items">
+                        {section.items.map((item, i) => (
+                          <li key={i} className="claude-workflow-section-item">{item}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
         {subTab === 'library' && (
           <ClaudeDefaultsLibrary onDeploySuccess={loadAgentsAndSkills} />
         )}

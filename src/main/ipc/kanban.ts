@@ -1,4 +1,4 @@
-import { IpcMain, dialog } from 'electron'
+import { IpcMain, BrowserWindow, dialog } from 'electron'
 import { v4 as uuid } from 'uuid'
 import fs from 'fs'
 import path from 'path'
@@ -146,6 +146,55 @@ function writeKanbanTasks(workspaceId: string, tasks: KanbanTask[]): void {
   const filePath = getKanbanPath(workspaceId)
   getKanbanDir()
   fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), 'utf-8')
+}
+
+// File watcher state for kanban files
+let activeWatcher: fs.FSWatcher | null = null
+let watchedWorkspaceId: string | null = null
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+function broadcastFileChanged(workspaceId: string): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    win.webContents.send(IPC_CHANNELS.KANBAN_FILE_CHANGED, { workspaceId })
+  }
+}
+
+function stopWatcher(): void {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    debounceTimer = null
+  }
+  if (activeWatcher) {
+    activeWatcher.close()
+    activeWatcher = null
+  }
+  watchedWorkspaceId = null
+}
+
+function startWatcher(workspaceId: string): void {
+  stopWatcher()
+  const filePath = getKanbanPath(workspaceId)
+  if (!fs.existsSync(filePath)) return
+
+  watchedWorkspaceId = workspaceId
+  try {
+    activeWatcher = fs.watch(filePath, { persistent: false }, () => {
+      // Debounce: coalesce rapid writes into one notification
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        debounceTimer = null
+        if (watchedWorkspaceId === workspaceId) {
+          broadcastFileChanged(workspaceId)
+        }
+      }, 150)
+    })
+    activeWatcher.on('error', () => {
+      // File might be deleted/recreated — restart watcher
+      stopWatcher()
+    })
+  } catch {
+    // fs.watch can fail on some edge cases — silently ignore
+  }
 }
 
 export function registerKanbanHandlers(ipcMain: IpcMain): void {
@@ -400,6 +449,20 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
       const working = tasks.find((t) => t.status === 'WORKING')
       if (!working) return null
       return { ticketNumber: working.ticketNumber ?? null }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_WATCH,
+    async (_event, { workspaceId }: { workspaceId: string }) => {
+      startWatcher(workspaceId)
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_UNWATCH,
+    async () => {
+      stopWatcher()
     },
   )
 }
