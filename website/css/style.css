@@ -1113,6 +1113,209 @@ a:hover { color: var(--accent-hover); }
   white-space: nowrap;
 }
 
+/* --- Docs Callout Boxes --- */
+.docs-callout {
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.docs-callout-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+.docs-callout-content {
+  flex: 1;
+}
+.docs-callout-content p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.docs-callout-content p + p {
+  margin-top: 8px;
+}
+.docs-callout--tip {
+  background: rgba(166, 227, 161, 0.08);
+  border: 1px solid rgba(166, 227, 161, 0.2);
+  color: var(--success);
+}
+.docs-callout--tip .docs-callout-content { color: var(--text-secondary); }
+.docs-callout--note {
+  background: rgba(137, 180, 250, 0.08);
+  border: 1px solid rgba(137, 180, 250, 0.2);
+  color: var(--accent);
+}
+.docs-callout--note .docs-callout-content { color: var(--text-secondary); }
+.docs-callout--warning {
+  background: rgba(250, 179, 135, 0.08);
+  border: 1px solid rgba(250, 179, 135, 0.2);
+  color: var(--warning);
+}
+.docs-callout--warning .docs-callout-content { color: var(--text-secondary); }
+.docs-callout--info {
+  background: rgba(203, 166, 247, 0.08);
+  border: 1px solid rgba(203, 166, 247, 0.2);
+  color: var(--purple);
+}
+.docs-callout--info .docs-callout-content { color: var(--text-secondary); }
+
+/* --- Docs Steps --- */
+.docs-steps {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+.docs-steps li {
+  counter-increment: step;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(69, 71, 90, 0.3);
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.docs-steps li:last-child {
+  border-bottom: none;
+}
+.docs-steps li::before {
+  content: counter(step);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  background: rgba(137, 180, 250, 0.1);
+  color: var(--accent);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* --- Docs Feature Overview Grid --- */
+.docs-feature-overview {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+.docs-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.docs-feature-item strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+.docs-feature-item-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .docs-feature-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Docs h4 styling --- */
+.docs-section h4,
+.docs-text h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+/* --- Docs Sub-Nav --- */
+.docs-nav-group {
+  margin-bottom: 4px;
+}
+.docs-nav-group-title {
+  display: block;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
+}
+.docs-nav-group-title:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+.docs-nav-group-title.active {
+  background: rgba(137, 180, 250, 0.1);
+  color: var(--accent);
+}
+
+/* --- Docs Code Block --- */
+.docs-code-block {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+.docs-code-block code {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: none;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* --- Docs Separator --- */
+.docs-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 32px 0;
+  border: none;
+}
+
+/* --- Docs Badge --- */
+.docs-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.docs-badge--new {
+  background: rgba(166, 227, 161, 0.15);
+  color: var(--success);
+}
+.docs-badge--pro {
+  background: rgba(203, 166, 247, 0.15);
+  color: var(--purple);
+}
+
 /* --- Docs Back --- */
 .docs-back {
   margin-top: 48px;
