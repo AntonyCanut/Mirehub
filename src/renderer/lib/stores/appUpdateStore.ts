@@ -80,14 +80,17 @@ export const useAppUpdateStore = create<AppUpdateStore>((set) => ({
           set({ status: 'not-available' })
           break
         case 'downloading':
-          set({ status: 'downloading', downloadPercent: data.percent ?? 0 })
+          set({ status: 'downloading', downloadPercent: data.percent ?? 0, showModal: true })
           break
         case 'downloaded':
           set({ status: 'downloaded', downloadPercent: 100 })
           break
-        case 'error':
+        case 'error': {
+          const current = useAppUpdateStore.getState()
+          if (current.status === 'downloaded') break
           set({ status: 'error', errorMessage: data.message ?? null })
           break
+        }
       }
     })
   },

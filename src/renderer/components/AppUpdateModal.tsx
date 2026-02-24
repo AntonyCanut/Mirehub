@@ -3,7 +3,7 @@ import { useAppUpdateStore } from '../lib/stores/appUpdateStore'
 import { useI18n } from '../lib/i18n'
 
 export function AppUpdateModal() {
-  const { status, version, downloadPercent, showModal, dismissModal, downloadUpdate, installUpdate } =
+  const { status, version, downloadPercent, showModal, errorMessage, dismissModal, downloadUpdate, installUpdate, checkForUpdate } =
     useAppUpdateStore()
   const { t } = useI18n()
 
@@ -74,9 +74,17 @@ export function AppUpdateModal() {
         {status === 'error' && (
           <>
             <p className="app-update-modal-version">{t('appUpdate.error')}</p>
+            {errorMessage && (
+              <p className="app-update-modal-error-detail">
+                {t('appUpdate.errorDetail', { message: errorMessage })}
+              </p>
+            )}
             <div className="app-update-modal-actions">
               <button className="app-update-btn app-update-btn--secondary" onClick={dismissModal}>
                 {t('common.close')}
+              </button>
+              <button className="app-update-btn app-update-btn--primary" onClick={checkForUpdate}>
+                {t('appUpdate.retry')}
               </button>
             </div>
           </>

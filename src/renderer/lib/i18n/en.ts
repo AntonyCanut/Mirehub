@@ -747,6 +747,8 @@ export const en = {
   'appUpdate.notAvailable': 'No update available.',
   'appUpdate.upToDate': 'Up to date',
   'appUpdate.checking': 'Checking...',
+  'appUpdate.retry': 'Retry',
+  'appUpdate.errorDetail': 'Details: {message}',
   'appUpdate.appScope': 'application',
 
   // Code Analysis

@@ -5,6 +5,9 @@ import { StorageService } from '../services/storage'
 
 const storage = new StorageService()
 
+type UpdatePhase = 'idle' | 'checking' | 'downloading' | 'downloaded'
+let updatePhase: UpdatePhase = 'idle'
+
 function sendStatusToRenderer(
   status: string,
   data?: Record<string, unknown>,
@@ -21,6 +24,7 @@ export function registerAppUpdateHandlers(ipcMain: IpcMain): void {
 
   // Forward autoUpdater events to renderer
   autoUpdater.on('checking-for-update', () => {
+    updatePhase = 'checking'
     sendStatusToRenderer('checking')
   })
 
@@ -32,20 +36,29 @@ export function registerAppUpdateHandlers(ipcMain: IpcMain): void {
   })
 
   autoUpdater.on('update-not-available', () => {
+    updatePhase = 'idle'
     sendStatusToRenderer('not-available')
   })
 
   autoUpdater.on('download-progress', (progress) => {
+    updatePhase = 'downloading'
     sendStatusToRenderer('downloading', {
       percent: Math.round(progress.percent),
     })
   })
 
   autoUpdater.on('update-downloaded', () => {
+    updatePhase = 'downloaded'
     sendStatusToRenderer('downloaded')
   })
 
   autoUpdater.on('error', (err) => {
+    if (updatePhase === 'downloaded') {
+      // eslint-disable-next-line no-console
+      console.warn('[appUpdate] Ignoring late error after download completed:', err.message)
+      return
+    }
+    updatePhase = 'idle'
     sendStatusToRenderer('error', { message: String(err.message ?? err) })
   })
 

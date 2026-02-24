@@ -747,6 +747,8 @@ export const fr = {
   'appUpdate.notAvailable': 'Aucune mise a jour disponible.',
   'appUpdate.upToDate': 'A jour',
   'appUpdate.checking': 'Verification...',
+  'appUpdate.retry': 'Reessayer',
+  'appUpdate.errorDetail': 'Details : {message}',
   'appUpdate.appScope': 'application',
 
   // Code Analysis
