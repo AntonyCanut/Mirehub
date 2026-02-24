@@ -82,7 +82,11 @@ export function registerAppUpdateHandlers(ipcMain: IpcMain): void {
   })
 
   ipcMain.handle(IPC_CHANNELS.APP_UPDATE_INSTALL, () => {
-    autoUpdater.quitAndInstall()
+    // Defer quitAndInstall so the IPC response is sent before the app quits.
+    // Without this, the synchronous quit blocks the IPC channel and nothing happens.
+    setImmediate(() => {
+      autoUpdater.quitAndInstall(false, true)
+    })
   })
 
   // Auto-check on startup (5s delay)

@@ -10,9 +10,22 @@ interface ManagedTerminal {
   id: string
   pty: IPty
   cwd: string
+  disposables: Array<{ dispose(): void }>
 }
 
 const terminals = new Map<string, ManagedTerminal>()
+
+/**
+ * Dispose listeners BEFORE killing the pty process.
+ * This prevents native callbacks from firing into a dying JS context (SIGABRT).
+ */
+function disposeTerminal(terminal: ManagedTerminal): void {
+  for (const d of terminal.disposables) {
+    d.dispose()
+  }
+  terminal.disposables.length = 0
+  terminal.pty.kill()
+}
 
 /**
  * Ensure a custom ZDOTDIR with a .zshenv and .zshrc that properly
@@ -96,30 +109,36 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
         env: shellEnv,
       })
 
-      const managed: ManagedTerminal = { id, pty, cwd }
+      const managed: ManagedTerminal = { id, pty, cwd, disposables: [] }
       terminals.set(id, managed)
 
       // Forward output to renderer (try-catch guards against render frame disposal during reload)
-      pty.onData((data: string) => {
-        for (const win of BrowserWindow.getAllWindows()) {
-          try {
-            if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
-              win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, { id, data })
-            }
-          } catch { /* render frame disposed — ignore */ }
-        }
-      })
+      managed.disposables.push(
+        pty.onData((data: string) => {
+          // Guard: ignore callbacks for terminals already removed from the map
+          if (!terminals.has(id)) return
+          for (const win of BrowserWindow.getAllWindows()) {
+            try {
+              if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+                win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, { id, data })
+              }
+            } catch { /* render frame disposed — ignore */ }
+          }
+        }),
+      )
 
-      pty.onExit(({ exitCode, signal }) => {
-        terminals.delete(id)
-        for (const win of BrowserWindow.getAllWindows()) {
-          try {
-            if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
-              win.webContents.send(IPC_CHANNELS.TERMINAL_CLOSE, { id, exitCode, signal })
-            }
-          } catch { /* render frame disposed — ignore */ }
-        }
-      })
+      managed.disposables.push(
+        pty.onExit(({ exitCode, signal }) => {
+          terminals.delete(id)
+          for (const win of BrowserWindow.getAllWindows()) {
+            try {
+              if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+                win.webContents.send(IPC_CHANNELS.TERMINAL_CLOSE, { id, exitCode, signal })
+              }
+            } catch { /* render frame disposed — ignore */ }
+          }
+        }),
+      )
 
       return { id, pid: pty.pid }
     },
@@ -145,15 +164,23 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(IPC_CHANNELS.TERMINAL_CLOSE, async (_event, { id }: { id: string }) => {
     const terminal = terminals.get(id)
     if (terminal) {
-      terminal.pty.kill()
       terminals.delete(id)
+      disposeTerminal(terminal)
+      // Notify renderer manually since onExit won't fire after dispose
+      for (const win of BrowserWindow.getAllWindows()) {
+        try {
+          if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+            win.webContents.send(IPC_CHANNELS.TERMINAL_CLOSE, { id, exitCode: 0, signal: 0 })
+          }
+        } catch { /* render frame disposed — ignore */ }
+      }
     }
   })
 }
 
 export function cleanupTerminals(): void {
-  for (const [id, terminal] of terminals) {
-    terminal.pty.kill()
-    terminals.delete(id)
+  for (const [, terminal] of terminals) {
+    disposeTerminal(terminal)
   }
+  terminals.clear()
 }

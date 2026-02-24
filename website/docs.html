@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mirehub — Documentation</title>
-  <meta name="description" content="Documentation complete de Mirehub : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts, Database Explorer, API Tester. Guide d'utilisation avec screenshots.">
+  <meta name="description" content="Documentation complete de Mirehub : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts, Database Explorer, Code Analysis, API Tester. Guide d'utilisation avec screenshots.">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -86,6 +86,7 @@
             </a>
             <a href="#prompts" class="docs-nav-link">Prompts</a>
             <a href="#database" class="docs-nav-link">Database Explorer</a>
+            <a href="#code-analysis" class="docs-nav-link">Code Analysis</a>
             <a href="#api-tester" class="docs-nav-link">API Tester</a>
             <a href="#shortcuts" class="docs-nav-link">
               <span data-lang="fr">Raccourcis clavier</span>
@@ -126,8 +127,8 @@
           </h2>
           <div class="docs-text">
             <p>
-              <span data-lang="fr">Mirehub est un IDE macOS natif qui reunit 10 outils de developpement dans une seule fenetre : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts, Database Explorer et API Tester. Aucune configuration n'est necessaire. Les mises a jour sont automatiques.</span>
-              <span data-lang="en">Mirehub is a native macOS IDE that combines 10 development tools in a single window: Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistics, Prompts, Database Explorer and API Tester. No configuration needed. Updates are automatic.</span>
+              <span data-lang="fr">Mirehub est un IDE macOS natif qui reunit 11 outils de developpement dans une seule fenetre : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts, Database Explorer, Code Analysis et API Tester. Aucune configuration n'est necessaire. Les mises a jour sont automatiques.</span>
+              <span data-lang="en">Mirehub is a native macOS IDE that combines 11 development tools in a single window: Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistics, Prompts, Database Explorer, Code Analysis and API Tester. No configuration needed. Updates are automatic.</span>
             </p>
             <h3>
               <span data-lang="fr">Installation</span>
@@ -432,8 +433,49 @@
               <span data-lang="en">MCP tab</span>
             </h3>
             <p>
-              <span data-lang="fr">Gerez les serveurs MCP (Model Context Protocol) de votre workspace. Ajoutez des serveurs depuis un catalogue ou manuellement, configurez leurs arguments et variables d'environnement, et consultez leur documentation integree.</span>
-              <span data-lang="en">Manage MCP (Model Context Protocol) servers for your workspace. Add servers from a catalog or manually, configure their arguments and environment variables, and view their built-in documentation.</span>
+              <span data-lang="fr">Le panneau MCP (Model Context Protocol) permet de donner a Claude des super-pouvoirs en connectant des serveurs d'outils externes. Mirehub fournit un catalogue de serveurs pre-configures et la possibilite d'en ajouter manuellement.</span>
+              <span data-lang="en">The MCP (Model Context Protocol) panel lets you give Claude superpowers by connecting external tool servers. Mirehub provides a pre-configured server catalog and the ability to add custom ones.</span>
+            </p>
+
+            <h4>
+              <span data-lang="fr">Catalogue de serveurs</span>
+              <span data-lang="en">Server catalog</span>
+            </h4>
+            <p>
+              <span data-lang="fr">Parcourez un catalogue de serveurs MCP classes par categorie. Chaque serveur affiche son nom, sa description, un badge "officiel" le cas echeant, et la liste de ses fonctionnalites. Installation en un clic — Mirehub configure automatiquement la commande et les arguments.</span>
+              <span data-lang="en">Browse an MCP server catalog organized by category. Each server shows its name, description, an "official" badge where applicable, and its feature list. One-click install — Mirehub automatically configures the command and arguments.</span>
+            </p>
+            <p>
+              <span data-lang="fr">Categories disponibles :</span>
+              <span data-lang="en">Available categories:</span>
+            </p>
+            <ul>
+              <li><strong>Database</strong> — <span data-lang="fr">Acces aux bases de donnees via MCP</span><span data-lang="en">Database access via MCP</span></li>
+              <li><strong>File System</strong> — <span data-lang="fr">Lecture, ecriture et navigation de fichiers</span><span data-lang="en">Read, write and browse files</span></li>
+              <li><strong>Web</strong> — <span data-lang="fr">Scraping, fetch, navigation web</span><span data-lang="en">Scraping, fetch, web navigation</span></li>
+              <li><strong>AI</strong> — <span data-lang="fr">Integration avec d'autres modeles d'IA</span><span data-lang="en">Integration with other AI models</span></li>
+              <li><strong>Dev Tools</strong> — <span data-lang="fr">Outils de developpement (linting, formatting, etc.)</span><span data-lang="en">Development tools (linting, formatting, etc.)</span></li>
+              <li><strong>Cloud</strong> — <span data-lang="fr">Services cloud (AWS, GCP, Azure)</span><span data-lang="en">Cloud services (AWS, GCP, Azure)</span></li>
+              <li><strong>Communication</strong> — <span data-lang="fr">Slack, email, notifications</span><span data-lang="en">Slack, email, notifications</span></li>
+              <li><strong>Utilities</strong> — <span data-lang="fr">Outils generaux (PDF, images, etc.)</span><span data-lang="en">General tools (PDF, images, etc.)</span></li>
+            </ul>
+
+            <h4>
+              <span data-lang="fr">Configuration &amp; variables d'environnement</span>
+              <span data-lang="en">Configuration &amp; environment variables</span>
+            </h4>
+            <p>
+              <span data-lang="fr">Chaque serveur MCP peut etre configure avec des arguments personnalises et des variables d'environnement (cles API, tokens d'authentification, etc.). Lors de l'installation, Mirehub demande les variables requises avec des indications de remplissage. Vous pouvez aussi ajouter un serveur MCP manuellement en specifiant la commande, les arguments et les variables d'environnement.</span>
+              <span data-lang="en">Each MCP server can be configured with custom arguments and environment variables (API keys, auth tokens, etc.). During installation, Mirehub prompts for required variables with placeholder guidance. You can also add a custom MCP server manually by specifying the command, arguments and environment variables.</span>
+            </p>
+
+            <h4>
+              <span data-lang="fr">Documentation integree</span>
+              <span data-lang="en">Built-in documentation</span>
+            </h4>
+            <p>
+              <span data-lang="fr">Consultez la documentation de chaque serveur MCP directement dans Mirehub. Le bouton "Aide" affiche la sortie d'aide du serveur, copiable en un clic. Pratique pour verifier les commandes disponibles sans quitter l'application.</span>
+              <span data-lang="en">View each MCP server's documentation directly in Mirehub. The "Help" button shows the server's help output, copyable in one click. Convenient for checking available commands without leaving the app.</span>
             </p>
             <h3>
               <span data-lang="fr">Onglet Workflow</span>
@@ -958,36 +1000,228 @@
           </div>
         </section>
 
+        <!-- Code Analysis -->
+        <section class="docs-section" id="code-analysis">
+          <h2>Code Analysis</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Le panneau Code Analysis fournit un audit complet de la qualite et de la securite de votre code. Il detecte automatiquement les outils d'analyse installes sur votre systeme, les filtre selon les langages de votre projet, et produit des rapports detailles avec note globale.</span>
+              <span data-lang="en">The Code Analysis panel provides a comprehensive quality and security audit of your code. It automatically detects analysis tools installed on your system, filters them by your project's languages, and produces detailed reports with an overall grade.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Detection intelligente des outils</span>
+              <span data-lang="en">Smart tool detection</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Mirehub detecte automatiquement les outils d'analyse installes sur votre machine et n'affiche que ceux pertinents pour votre projet, en fonction des langages detectes dans votre codebase. Langages supportes : Python, JavaScript, TypeScript, Go, Java, Ruby, C, C++, PHP, Terraform, Kubernetes, Docker, CloudFormation. Les outils universels sont toujours affiches.</span>
+              <span data-lang="en">Mirehub automatically detects analysis tools installed on your machine and only shows those relevant to your project, based on languages detected in your codebase. Supported languages: Python, JavaScript, TypeScript, Go, Java, Ruby, C, C++, PHP, Terraform, Kubernetes, Docker, CloudFormation. Universal tools are always shown.</span>
+            </p>
+            <p>
+              <span data-lang="fr">Si un outil n'est pas installe, vous pouvez l'installer directement depuis le panneau avec suivi de progression en temps reel.</span>
+              <span data-lang="en">If a tool is not installed, you can install it directly from the panel with real-time progress tracking.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Categories d'analyse</span>
+              <span data-lang="en">Analysis categories</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr"><strong>Securite</strong> — Detection de vulnerabilites, failles de securite, references CWE</span>
+                <span data-lang="en"><strong>Security</strong> — Vulnerability detection, security flaws, CWE references</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Qualite</strong> — Linting, bonnes pratiques, code style, complexite</span>
+                <span data-lang="en"><strong>Quality</strong> — Linting, best practices, code style, complexity</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Dependances</strong> — Audit des packages, vulnerabilites connues</span>
+                <span data-lang="en"><strong>Dependencies</strong> — Package audit, known vulnerabilities</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Infrastructure</strong> — Terraform, Kubernetes, Docker, CloudFormation</span>
+                <span data-lang="en"><strong>Infrastructure</strong> — Terraform, Kubernetes, Docker, CloudFormation</span>
+              </li>
+            </ul>
+
+            <h3>
+              <span data-lang="fr">Rapports &amp; findings</span>
+              <span data-lang="en">Reports &amp; findings</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Chaque analyse produit un rapport detaille avec des findings classes par severite :</span>
+              <span data-lang="en">Each analysis produces a detailed report with findings sorted by severity:</span>
+            </p>
+            <ul>
+              <li><strong>Critical</strong> — <span data-lang="fr">Problemes bloquants necessitant une correction immediate</span><span data-lang="en">Blocking issues requiring immediate fix</span></li>
+              <li><strong>High</strong> — <span data-lang="fr">Problemes importants a corriger rapidement</span><span data-lang="en">Important issues to fix soon</span></li>
+              <li><strong>Medium</strong> — <span data-lang="fr">Ameliorations recommandees</span><span data-lang="en">Recommended improvements</span></li>
+              <li><strong>Low</strong> — <span data-lang="fr">Suggestions mineures</span><span data-lang="en">Minor suggestions</span></li>
+              <li><strong>Info</strong> — <span data-lang="fr">Informations et recommandations</span><span data-lang="en">Information and recommendations</span></li>
+            </ul>
+            <p>
+              <span data-lang="fr">Chaque finding affiche le fichier, la ligne et la colonne exactes, un extrait du code problematique, le nom de la regle, un lien vers la documentation de la regle, et l'identifiant CWE le cas echeant. Cliquez sur un finding pour naviguer directement dans le fichier source.</span>
+              <span data-lang="en">Each finding shows the exact file, line and column, a snippet of the problematic code, the rule name, a link to the rule documentation, and the CWE identifier where applicable. Click a finding to navigate directly to the source file.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Note globale du projet</span>
+              <span data-lang="en">Project-wide grade</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Mirehub calcule automatiquement une note de A a F pour votre projet, basee sur le nombre de findings critiques, hauts et moyens. La note est affichee en permanence dans l'en-tete du panneau — un coup d'oeil suffit pour connaitre la sante de votre code.</span>
+              <span data-lang="en">Mirehub automatically calculates a grade from A to F for your project, based on the number of critical, high and medium findings. The grade is displayed permanently in the panel header — one glance tells you your code health.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Creation de tickets Kanban</span>
+              <span data-lang="en">Kanban ticket creation</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Selectionnez les findings a corriger et creez des tickets Kanban en masse. Plusieurs modes de regroupement disponibles :</span>
+              <span data-lang="en">Select the findings to fix and create Kanban tickets in bulk. Several grouping modes available:</span>
+            </p>
+            <ul>
+              <li>
+                <span data-lang="fr"><strong>Individuel</strong> — Un ticket par finding</span>
+                <span data-lang="en"><strong>Individual</strong> — One ticket per finding</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Par fichier</strong> — Regrouper les findings du meme fichier</span>
+                <span data-lang="en"><strong>By file</strong> — Group findings from the same file</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Par regle</strong> — Regrouper les violations de la meme regle</span>
+                <span data-lang="en"><strong>By rule</strong> — Group violations of the same rule</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Par severite</strong> — Regrouper par niveau de severite</span>
+                <span data-lang="en"><strong>By severity</strong> — Group by severity level</span>
+              </li>
+            </ul>
+            <p>
+              <span data-lang="fr">Les tickets crees peuvent ensuite etre envoyes directement a Claude AI pour correction automatique depuis le Kanban.</span>
+              <span data-lang="en">Created tickets can then be sent directly to Claude AI for automatic fix from the Kanban board.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-code-analysis.png" alt="Code Analysis — Audit qualite et securite" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Panneau Code Analysis : outils detectes automatiquement dans la barre laterale, findings classes par severite avec extraits de code, note globale du projet (A-F), et creation de tickets Kanban en masse.</span>
+              <span data-lang="en">Code Analysis panel: auto-detected tools in the sidebar, findings sorted by severity with code snippets, project-wide grade (A-F), and bulk Kanban ticket creation.</span>
+            </p>
+          </div>
+        </section>
+
         <!-- API Tester -->
         <section class="docs-section" id="api-tester">
           <h2>API Tester</h2>
           <div class="docs-text">
             <p>
-              <span data-lang="fr">Le testeur d'API integre vous permet de tester vos endpoints REST sans quitter Mirehub. Fini les allers-retours avec Postman ou Insomnia.</span>
-              <span data-lang="en">The built-in API tester lets you test your REST endpoints without leaving Mirehub. No more switching to Postman or Insomnia.</span>
+              <span data-lang="fr">Un client API complet integre directement dans Mirehub. Organisez vos requetes en collections, gerez plusieurs environnements, validez vos reponses avec des assertions automatiques et surveillez vos endpoints avec des health checks. Fini les allers-retours avec Postman ou Insomnia.</span>
+              <span data-lang="en">A full API client built right into Mirehub. Organize requests into collections, manage multiple environments, validate responses with automated assertions, and monitor your endpoints with health checks. No more switching to Postman or Insomnia.</span>
             </p>
+
             <h3>
-              <span data-lang="fr">Fonctionnalites</span>
-              <span data-lang="en">Features</span>
+              <span data-lang="fr">Requetes HTTP</span>
+              <span data-lang="en">HTTP requests</span>
             </h3>
             <ul>
               <li>
-                <span data-lang="fr">Methodes HTTP : GET, POST, PUT, PATCH, DELETE</span>
-                <span data-lang="en">HTTP methods: GET, POST, PUT, PATCH, DELETE</span>
+                <span data-lang="fr">Toutes les methodes HTTP : <strong>GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS</strong></span>
+                <span data-lang="en">All HTTP methods: <strong>GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS</strong></span>
               </li>
               <li>
-                <span data-lang="fr">Configuration des headers et du body (JSON, form-data)</span>
-                <span data-lang="en">Configure headers and body (JSON, form-data)</span>
+                <span data-lang="fr">Configuration des headers avec activation/desactivation individuelle</span>
+                <span data-lang="en">Header configuration with individual enable/disable toggle</span>
               </li>
               <li>
-                <span data-lang="fr">Affichage des reponses JSON formatees avec coloration syntaxique</span>
+                <span data-lang="fr">Body multi-format : JSON (auto-formate), form-data, texte brut, ou vide</span>
+                <span data-lang="en">Multi-format body: JSON (auto-formatted), form-data, plain text, or empty</span>
+              </li>
+              <li>
+                <span data-lang="fr">Reponses JSON formatees avec coloration syntaxique</span>
                 <span data-lang="en">Formatted JSON responses with syntax highlighting</span>
               </li>
               <li>
-                <span data-lang="fr">Indicateurs de statut HTTP et temps de reponse</span>
-                <span data-lang="en">HTTP status indicators and response time</span>
+                <span data-lang="fr">Indicateurs visuels : code HTTP colore (2xx, 3xx, 4xx, 5xx), temps de reponse, taille</span>
+                <span data-lang="en">Visual indicators: color-coded HTTP status (2xx, 3xx, 4xx, 5xx), response time, size</span>
+              </li>
+              <li>
+                <span data-lang="fr">Duplication de requetes en un clic</span>
+                <span data-lang="en">One-click request duplication</span>
               </li>
             </ul>
+
+            <h3>Collections</h3>
+            <p>
+              <span data-lang="fr">Organisez vos requetes en collections nommees. Chaque collection regroupe un ensemble de requetes liees (par exemple, toutes les routes d'une API). Creez, renommez, dupliquez et supprimez des collections depuis la barre laterale.</span>
+              <span data-lang="en">Organize your requests into named collections. Each collection groups related requests together (e.g., all routes of an API). Create, rename, duplicate and delete collections from the sidebar.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Environnements &amp; variables</span>
+              <span data-lang="en">Environments &amp; variables</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Definissez plusieurs environnements (dev, staging, production) avec des variables cle-valeur. Selectionnez l'environnement actif et les variables sont automatiquement substituees dans vos URLs, headers et body. Plus besoin de modifier manuellement vos URLs entre les environnements.</span>
+              <span data-lang="en">Define multiple environments (dev, staging, production) with key-value variables. Select the active environment and variables are automatically substituted in your URLs, headers and body. No more manually changing URLs between environments.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Assertions &amp; tests automatiques</span>
+              <span data-lang="en">Assertions &amp; automated tests</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Ajoutez des assertions sur chaque requete pour valider automatiquement les reponses :</span>
+              <span data-lang="en">Add assertions on each request to automatically validate responses:</span>
+            </p>
+            <ul>
+              <li>
+                <span data-lang="fr"><strong>Code de statut</strong> — Verifier que la reponse retourne le code attendu (200, 404, etc.)</span>
+                <span data-lang="en"><strong>Status code</strong> — Verify the response returns the expected code (200, 404, etc.)</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Body contains</strong> — Verifier la presence d'une chaine dans le body</span>
+                <span data-lang="en"><strong>Body contains</strong> — Check for a string in the response body</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Header contains</strong> — Verifier la presence d'un header specifique</span>
+                <span data-lang="en"><strong>Header contains</strong> — Check for a specific response header</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>JSON Path</strong> — Evaluer un chemin JSON et verifier sa valeur</span>
+                <span data-lang="en"><strong>JSON Path</strong> — Evaluate a JSON path and check its value</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Temps de reponse</strong> — S'assurer que la reponse arrive sous un seuil (ex. &lt; 500ms)</span>
+                <span data-lang="en"><strong>Response time</strong> — Ensure response arrives under a threshold (e.g. &lt; 500ms)</span>
+              </li>
+            </ul>
+            <p>
+              <span data-lang="fr">Les resultats s'affichent dans un onglet dedie avec des badges pass/fail visuels.</span>
+              <span data-lang="en">Results display in a dedicated tab with visual pass/fail badges.</span>
+            </p>
+
+            <h3>Health checks</h3>
+            <p>
+              <span data-lang="fr">Surveillez la disponibilite de vos endpoints avec des health checks dedies. Configurez l'URL et le code de statut attendu, puis lancez-les individuellement ou tous d'un coup. Chaque health check affiche un indicateur visuel (vert = OK, rouge = echec) avec le code de statut, le temps de reponse et l'horodatage.</span>
+              <span data-lang="en">Monitor your endpoint availability with dedicated health checks. Configure the URL and expected status code, then run them individually or all at once. Each health check shows a visual indicator (green = OK, red = failure) with status code, response time, and timestamp.</span>
+            </p>
+
+            <h3>Import / Export</h3>
+            <p>
+              <span data-lang="fr">Exportez l'integralite de vos tests API (collections, environnements, health checks) vers un fichier pour le partager avec votre equipe ou le versionner dans Git. Importez un fichier existant pour reprendre le travail d'un collegue.</span>
+              <span data-lang="en">Export your entire API test suite (collections, environments, health checks) to a file to share with your team or version in Git. Import an existing file to pick up a colleague's work.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-api.png" alt="API Tester — Client API complet" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Client API integre : collections de requetes dans la barre laterale, configuration des headers et body, reponses JSON formatees avec assertions automatiques, environnements multiples et health checks.</span>
+              <span data-lang="en">Built-in API client: request collections in the sidebar, header and body configuration, formatted JSON responses with automated assertions, multiple environments and health checks.</span>
+            </p>
           </div>
         </section>
 

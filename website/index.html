@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mirehub — L'IDE macOS natif propulse par Claude AI</title>
-  <meta name="description" content="Mirehub remplace 10 outils par une seule app macOS native. Terminal, Kanban, Git, NPM, Claude AI, Database, API Tester — tout unifie, zero configuration. Telechargez gratuitement.">
+  <meta name="description" content="Mirehub remplace 11 outils par une seule app macOS native. Terminal, Kanban, Git, NPM, Claude AI, Database, API Tester, Code Analysis — tout unifie, zero configuration. Telechargez gratuitement.">
   <meta property="og:title" content="Mirehub — Arretez de jongler entre vos outils. Codez.">
-  <meta property="og:description" content="10 outils de dev dans une seule app macOS native avec Claude AI integre. Gratuit et open source.">
+  <meta property="og:description" content="11 outils de dev dans une seule app macOS native avec Claude AI integre. Terminal, Git, Kanban, API Tester, Code Analysis et plus. Gratuit et open source.">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
@@ -74,8 +74,8 @@
             <span data-lang="en">Stop juggling<br>your tools. <em>Code.</em></span>
           </h1>
           <p class="hero-subtitle">
-            <span data-lang="fr">Terminal + Claude AI + Git + Kanban + 6 autres outils, dans une seule fenetre macOS.</span>
-            <span data-lang="en">Terminal + Claude AI + Git + Kanban + 6 more tools, in a single macOS window.</span>
+            <span data-lang="fr">Terminal + Claude AI + Git + Kanban + 7 autres outils, dans une seule fenetre macOS.</span>
+            <span data-lang="en">Terminal + Claude AI + Git + Kanban + 7 more tools, in a single macOS window.</span>
           </p>
           <p class="hero-description">
             <span data-lang="fr">Fini les 8 onglets ouverts, les raccourcis pour changer d'app, les contextes perdus. Mirehub reunit tout ce dont vous avez besoin pour coder, piloter votre projet et collaborer avec l'IA — sans quitter votre fenetre.</span>
@@ -112,7 +112,7 @@
       <div class="container">
         <div class="stats-row animate-in">
           <div class="stat-item">
-            <span class="stat-number">10</span>
+            <span class="stat-number">11</span>
             <span class="stat-label">
               <span data-lang="fr">outils integres</span>
               <span data-lang="en">integrated tools</span>
@@ -150,8 +150,8 @@
     <section class="section" id="features">
       <div class="container">
         <h2 class="section-title animate-in">
-          <span data-lang="fr">10 outils. Une seule fenetre.<br>Zero friction.</span>
-          <span data-lang="en">10 tools. One window.<br>Zero friction.</span>
+          <span data-lang="fr">11 outils. Une seule fenetre.<br>Zero friction.</span>
+          <span data-lang="en">11 tools. One window.<br>Zero friction.</span>
         </h2>
         <p class="section-subtitle animate-in">
           <span data-lang="fr">Chaque outil est pense pour fonctionner avec les autres. Pas de plugins a installer, pas de configuration a gerer.</span>
@@ -314,6 +314,20 @@
               <span data-lang="en">Connect to your databases directly from the app. PostgreSQL, MySQL, MongoDB, SQLite, MSSQL — browse tables, run queries and visualize results without leaving Mirehub.</span>
             </p>
           </div>
+          <!-- Code Analysis -->
+          <div class="feature-card" data-screenshot="code-analysis">
+            <div class="feature-icon feature-icon--claude">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 12l2 2 4-4"/>
+                <path d="M12 3a9.004 9.004 0 0 0-8.716 6.747A9.01 9.01 0 0 0 12 21a9.01 9.01 0 0 0 8.716-11.253A9.004 9.004 0 0 0 12 3z"/>
+              </svg>
+            </div>
+            <h3>Code Analysis</h3>
+            <p>
+              <span data-lang="fr">Analysez la qualite et la securite de votre code. Detection automatique des outils installes, filtrage par langage, niveaux de severite (critical, high, medium, low), note globale du projet (A-F), et creation de tickets Kanban a partir des findings. Votre audit qualite, en un clic.</span>
+              <span data-lang="en">Analyze your code quality and security. Auto-detection of installed tools, language-aware filtering, severity levels (critical, high, medium, low), project-wide grading (A-F), and Kanban ticket creation from findings. Your quality audit, one click away.</span>
+            </p>
+          </div>
           <!-- API Tester -->
           <div class="feature-card" data-screenshot="api">
             <div class="feature-icon feature-icon--warning">
@@ -323,8 +337,8 @@
             </div>
             <h3>API Tester</h3>
             <p>
-              <span data-lang="fr">Testez vos API REST sans ouvrir Postman. Envoyez des requetes GET, POST, PUT, DELETE, visualisez les reponses en JSON formate, gerez vos headers et body. Tout integre, zero friction.</span>
-              <span data-lang="en">Test your REST APIs without opening Postman. Send GET, POST, PUT, DELETE requests, view formatted JSON responses, manage headers and body. Fully integrated, zero friction.</span>
+              <span data-lang="fr">Un vrai client API integre, pas un gadget. Collections de requetes, environnements avec substitution de variables, assertions automatiques (status, body, headers, JSON path, temps de reponse), chaines de requetes, health checks avec monitoring — le tout sauvegarde par projet. Postman peut prendre sa retraite.</span>
+              <span data-lang="en">A real built-in API client, not a toy. Request collections, environments with variable substitution, automated assertions (status, body, headers, JSON path, response time), request chains, health checks with monitoring — all saved per project. Postman can retire.</span>
             </p>
           </div>
         </div>
@@ -357,6 +371,7 @@
           <button class="tab" data-tab="stats" role="tab" aria-selected="false">Stats</button>
           <button class="tab" data-tab="prompts" role="tab" aria-selected="false">Prompts</button>
           <button class="tab" data-tab="database" role="tab" aria-selected="false">Database</button>
+          <button class="tab" data-tab="code-analysis" role="tab" aria-selected="false">Code Analysis</button>
           <button class="tab" data-tab="api" role="tab" aria-selected="false">API Tester</button>
         </div>
         <div class="screenshot-viewer animate-in">
@@ -437,11 +452,18 @@
               <span data-lang="en">Built-in database explorer: connect to PostgreSQL, MySQL, MongoDB, SQLite or MSSQL. Browse tables, run SQL queries and view results in an interactive table.</span>
             </p>
           </div>
+          <div class="screenshot-panel" id="tab-code-analysis" role="tabpanel">
+            <img src="screenshots/screenshot-code-analysis.png" alt="Vue Code Analysis" loading="lazy">
+            <p class="screenshot-caption">
+              <span data-lang="fr">Analyse de code : outils detectes automatiquement selon le langage, findings classes par severite, note globale du projet (A-F), et creation en masse de tickets Kanban pour corriger les problemes trouves.</span>
+              <span data-lang="en">Code analysis: tools auto-detected by language, findings sorted by severity, project-wide grade (A-F), and bulk Kanban ticket creation to fix the issues found.</span>
+            </p>
+          </div>
           <div class="screenshot-panel" id="tab-api" role="tabpanel">
             <img src="screenshots/screenshot-api.png" alt="Vue API Tester" loading="lazy">
             <p class="screenshot-caption">
-              <span data-lang="fr">Testeur d'API integre : envoyez des requetes HTTP (GET, POST, PUT, DELETE), configurez les headers et le body, visualisez les reponses JSON formatees. Fini les allers-retours avec Postman.</span>
-              <span data-lang="en">Built-in API tester: send HTTP requests (GET, POST, PUT, DELETE), configure headers and body, view formatted JSON responses. No more switching to Postman.</span>
+              <span data-lang="fr">Client API complet : collections de requetes organisees, environnements avec variables, assertions automatiques (status, JSON path, temps de reponse), health checks avec indicateurs visuels. Import/export pour partager vos tests avec l'equipe.</span>
+              <span data-lang="en">Full API client: organized request collections, environments with variables, automated assertions (status, JSON path, response time), health checks with visual indicators. Import/export to share your tests with the team.</span>
             </p>
           </div>
         </div>
@@ -500,8 +522,8 @@
             <span data-lang="en">Built by a dev, for devs</span>
           </h2>
           <p>
-            <span data-lang="fr">Mirehub est ne d'une frustration simple : pourquoi faut-il 10 apps pour faire le travail d'une seule ? Terminal, gestionnaire Git, Kanban, client NPM, scanner TODO, statistiques, editeur de prompts, panneau Claude AI avec MCP et workflows, explorateur de bases de donnees, testeur d'API — tout est la, dans une app macOS native, rapide et elegante. Mises a jour automatiques, open source, gratuit, sans tracking.</span>
-            <span data-lang="en">Mirehub was born from a simple frustration: why do we need 10 apps to do the job of one? Terminal, Git manager, Kanban, NPM client, TODO scanner, statistics, prompt editor, Claude AI panel with MCP and workflows, database explorer, API tester — it's all here, in a fast and elegant native macOS app. Auto-updates, open source, free, no tracking.</span>
+            <span data-lang="fr">Mirehub est ne d'une frustration simple : pourquoi faut-il 11 apps pour faire le travail d'une seule ? Terminal, gestionnaire Git, Kanban, client NPM, scanner TODO, statistiques, editeur de prompts, panneau Claude AI avec MCP et workflows, explorateur de bases de donnees, testeur d'API, analyse de code — tout est la, dans une app macOS native, rapide et elegante. Mises a jour automatiques, open source, gratuit, sans tracking.</span>
+            <span data-lang="en">Mirehub was born from a simple frustration: why do we need 11 apps to do the job of one? Terminal, Git manager, Kanban, NPM client, TODO scanner, statistics, prompt editor, Claude AI panel with MCP and workflows, database explorer, API tester, code analysis — it's all here, in a fast and elegant native macOS app. Auto-updates, open source, free, no tracking.</span>
           </p>
           <div class="dev-features">
             <div class="dev-feature">
