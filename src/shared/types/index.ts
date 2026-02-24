@@ -141,6 +141,7 @@ export interface AppSettings {
   defaultAutoClauderTemplateId?: string
   notificationSound: boolean
   checkUpdatesOnLaunch: boolean
+  autoCloseCompletedTerminals: boolean
 }
 
 export interface ProjectInfo {
@@ -469,6 +470,21 @@ export interface McpHelpResult {
   success: boolean
   output: string
   error?: string
+}
+
+export type McpCategory = 'filesystem' | 'database' | 'web' | 'ai' | 'devtools' | 'cloud' | 'communication' | 'utilities'
+
+export interface McpCatalogEntry {
+  id: string
+  name: string
+  description: string
+  command: string
+  args: string[]
+  env?: Record<string, string>
+  envPlaceholders?: Record<string, string>
+  category: McpCategory
+  features: string[]
+  official: boolean
 }
 
 // IPC Channel types

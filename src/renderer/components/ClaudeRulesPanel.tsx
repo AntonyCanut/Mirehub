@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Editor, { OnMount } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useI18n } from '../lib/i18n'
 import { SessionHistory } from './SessionHistory'
 import { ClaudeDefaultsLibrary } from './ClaudeDefaultsLibrary'
+import { McpPanel } from './McpPanel'
 import { DEFAULT_WORKFLOWS, WORKFLOW_MARKER, generateWorkflowMarkdown } from '../../shared/constants/defaultWorkflows'
 
 type SubTab = 'permissions' | 'claudemd' | 'profile' | 'mcp' | 'history' | 'library' | 'workflow'
@@ -50,13 +51,6 @@ export function ClaudeRulesPanel() {
 
   // MCP state
   const [mcpServers, setMcpServers] = useState<Record<string, { command: string; args?: string[]; env?: Record<string, string> }>>({})
-  const [mcpAddingNew, setMcpAddingNew] = useState(false)
-  const [mcpNewName, setMcpNewName] = useState('')
-  const [mcpNewCommand, setMcpNewCommand] = useState('')
-  const [mcpNewArgs, setMcpNewArgs] = useState('')
-  const [mcpNewEnv, setMcpNewEnv] = useState('')
-  const [mcpHelpData, setMcpHelpData] = useState<Record<string, { loading: boolean; output?: string; error?: string }>>({})
-  const [mcpExpandedHelp, setMcpExpandedHelp] = useState<string | null>(null)
 
   // Workflow state
   const [workflowDeployed, setWorkflowDeployed] = useState(false)
@@ -118,50 +112,11 @@ export function ClaudeRulesPanel() {
     setInstallingHooks(false)
   }, [activeProject, activeWorkspace])
 
-  // MCP handlers
-  const handleAddMcpServer = useCallback(async (e: FormEvent) => {
-    e.preventDefault()
-    if (!activeProject || !mcpNewName.trim() || !mcpNewCommand.trim()) return
-    const args = mcpNewArgs.trim() ? mcpNewArgs.trim().split('\n').map(a => a.trim()).filter(Boolean) : undefined
-    let env: Record<string, string> | undefined
-    if (mcpNewEnv.trim()) {
-      env = {}
-      for (const line of mcpNewEnv.trim().split('\n')) {
-        const eq = line.indexOf('=')
-        if (eq > 0) {
-          env[line.slice(0, eq).trim()] = line.slice(eq + 1).trim()
-        }
-      }
-      if (Object.keys(env).length === 0) env = undefined
-    }
-    const newServer = { command: mcpNewCommand.trim(), ...(args ? { args } : {}), ...(env ? { env } : {}) }
-    const newServers = { ...mcpServers, [mcpNewName.trim()]: newServer }
+  // MCP change handler
+  const handleMcpServersChange = useCallback((newServers: Record<string, { command: string; args?: string[]; env?: Record<string, string> }>, newSettings: Record<string, unknown>) => {
     setMcpServers(newServers)
-    const newSettings = { ...settings, mcpServers: newServers }
     setSettings(newSettings)
-    await window.mirehub.project.writeClaudeSettings(activeProject.path, newSettings)
-    setMcpNewName('')
-    setMcpNewCommand('')
-    setMcpNewArgs('')
-    setMcpNewEnv('')
-    setMcpAddingNew(false)
-  }, [activeProject, mcpNewName, mcpNewCommand, mcpNewArgs, mcpNewEnv, mcpServers, settings])
-
-  const handleRemoveMcpServer = useCallback(async (name: string) => {
-    if (!activeProject) return
-    const newServers = { ...mcpServers }
-    delete newServers[name]
-    setMcpServers(newServers)
-    const newSettings = { ...settings }
-    if (Object.keys(newServers).length > 0) {
-      newSettings.mcpServers = newServers
-    } else {
-      delete newSettings.mcpServers
-    }
-    setSettings(newSettings)
-    await window.mirehub.project.writeClaudeSettings(activeProject.path, newSettings)
-    if (mcpExpandedHelp === name) setMcpExpandedHelp(null)
-  }, [activeProject, mcpServers, settings, mcpExpandedHelp])
+  }, [])
 
   // Workflow handlers
   const handleDeployWorkflow = useCallback(async () => {
@@ -233,28 +188,6 @@ export function ClaudeRulesPanel() {
       return next
     })
   }, [])
-
-  const handleGetMcpHelp = useCallback(async (name: string) => {
-    if (mcpExpandedHelp === name) {
-      setMcpExpandedHelp(null)
-      return
-    }
-    setMcpExpandedHelp(name)
-    if (mcpHelpData[name]?.output || mcpHelpData[name]?.error) return
-    setMcpHelpData(prev => ({ ...prev, [name]: { loading: true } }))
-    try {
-      const config = mcpServers[name]
-      if (!config) return
-      const result = await window.mirehub.mcp.getHelp(name, config)
-      if (result.success) {
-        setMcpHelpData(prev => ({ ...prev, [name]: { loading: false, output: result.output } }))
-      } else {
-        setMcpHelpData(prev => ({ ...prev, [name]: { loading: false, error: result.error || 'Unknown error' } }))
-      }
-    } catch (err) {
-      setMcpHelpData(prev => ({ ...prev, [name]: { loading: false, error: String(err) } }))
-    }
-  }, [mcpExpandedHelp, mcpHelpData, mcpServers])
 
   const loadAgentsAndSkills = useCallback(async () => {
     if (!activeProject) return
@@ -773,119 +706,13 @@ export function ClaudeRulesPanel() {
             )}
           </div>
         )}
-        {subTab === 'mcp' && (
-          <div className="claude-rules-mcp">
-            <div className="claude-mcp-header">
-              <span className="claude-mcp-title">{t('claude.mcpServers')}</span>
-              {!mcpAddingNew && (
-                <button className="claude-mcp-add-btn" onClick={() => setMcpAddingNew(true)}>
-                  {t('claude.mcpAddServer')}
-                </button>
-              )}
-            </div>
-
-            {mcpAddingNew && (
-              <form className="claude-mcp-add-form" onSubmit={handleAddMcpServer}>
-                <div className="claude-mcp-form-row">
-                  <label className="claude-mcp-form-label">{t('claude.mcpServerName')}</label>
-                  <input
-                    className="claude-mcp-form-input"
-                    value={mcpNewName}
-                    onChange={e => setMcpNewName(e.target.value)}
-                    placeholder="filesystem"
-                    autoFocus
-                  />
-                </div>
-                <div className="claude-mcp-form-row">
-                  <label className="claude-mcp-form-label">{t('claude.mcpServerCommand')}</label>
-                  <input
-                    className="claude-mcp-form-input"
-                    value={mcpNewCommand}
-                    onChange={e => setMcpNewCommand(e.target.value)}
-                    placeholder="npx"
-                  />
-                </div>
-                <div className="claude-mcp-form-row">
-                  <label className="claude-mcp-form-label">{t('claude.mcpServerArgs')}</label>
-                  <textarea
-                    className="claude-mcp-form-textarea"
-                    value={mcpNewArgs}
-                    onChange={e => setMcpNewArgs(e.target.value)}
-                    placeholder={"-y\n@modelcontextprotocol/server-filesystem\n/tmp"}
-                    rows={3}
-                  />
-                </div>
-                <div className="claude-mcp-form-row">
-                  <label className="claude-mcp-form-label">{t('claude.mcpServerEnv')}</label>
-                  <textarea
-                    className="claude-mcp-form-textarea"
-                    value={mcpNewEnv}
-                    onChange={e => setMcpNewEnv(e.target.value)}
-                    placeholder={"API_KEY=xxx\nDEBUG=true"}
-                    rows={2}
-                  />
-                </div>
-                <div className="claude-mcp-form-actions">
-                  <button type="button" className="claude-mcp-action-btn" onClick={() => setMcpAddingNew(false)}>
-                    {t('common.cancel')}
-                  </button>
-                  <button type="submit" className="claude-mcp-add-btn" disabled={!mcpNewName.trim() || !mcpNewCommand.trim()}>
-                    {t('common.add')}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {Object.keys(mcpServers).length === 0 ? (
-              <div className="claude-mcp-empty">{t('claude.mcpNoServers')}</div>
-            ) : (
-              <div className="claude-mcp-server-list">
-                {Object.entries(mcpServers).map(([name, config]) => (
-                  <div key={name} className="claude-mcp-server-item">
-                    <div className="claude-mcp-server-header">
-                      <div className="claude-mcp-server-info">
-                        <div className="claude-mcp-server-name">{name}</div>
-                        <div className="claude-mcp-server-command">
-                          {config.command}{config.args ? ' ' + config.args.join(' ') : ''}
-                        </div>
-                        {config.env && Object.keys(config.env).length > 0 && (
-                          <div className="claude-mcp-server-env-chips">
-                            {Object.keys(config.env).map(key => (
-                              <span key={key} className="claude-mcp-env-chip">{key}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="claude-mcp-server-actions">
-                        <button className="claude-mcp-action-btn" onClick={() => handleGetMcpHelp(name)}>
-                          {mcpExpandedHelp === name ? t('claude.mcpHideHelp') : t('claude.mcpShowHelp')}
-                        </button>
-                        <button className="claude-mcp-action-btn claude-mcp-action-btn--danger" onClick={() => handleRemoveMcpServer(name)}>
-                          {t('claude.mcpRemoveServer')}
-                        </button>
-                      </div>
-                    </div>
-                    {mcpExpandedHelp === name && (
-                      <div className="claude-mcp-help-panel">
-                        {mcpHelpData[name]?.loading && (
-                          <div className="claude-mcp-help-loading">{t('claude.mcpHelpLoading')}</div>
-                        )}
-                        {mcpHelpData[name]?.error && (
-                          <div className="claude-mcp-help-error">{t('claude.mcpHelpError')}: {mcpHelpData[name].error}</div>
-                        )}
-                        {mcpHelpData[name]?.output && (
-                          <pre className="claude-mcp-help-output">{mcpHelpData[name].output}</pre>
-                        )}
-                        {!mcpHelpData[name]?.loading && !mcpHelpData[name]?.output && !mcpHelpData[name]?.error && (
-                          <div className="claude-mcp-help-loading">{t('claude.mcpHelpEmpty')}</div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        {subTab === 'mcp' && activeProject && (
+          <McpPanel
+            mcpServers={mcpServers}
+            settings={settings}
+            projectPath={activeProject.path}
+            onServersChange={handleMcpServersChange}
+          />
         )}
         {subTab === 'workflow' && (() => {
           const workflow = DEFAULT_WORKFLOWS[locale] ?? DEFAULT_WORKFLOWS.fr

@@ -193,6 +193,16 @@ function getClaudeStore() {
   }
 }
 
+// Lazy getter for kanbanStore to avoid circular imports
+function getKanbanStore() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('./kanbanStore').useKanbanStore
+  } catch {
+    return null
+  }
+}
+
 export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
   tabs: [],
   activeTabId: null,
@@ -293,6 +303,9 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
       if (store) for (let i = 0; i < claudePaneCount; i++) store.decrementWorkspaceClaude(tab.workspaceId)
     }
 
+    // Notify kanban store that this tab was closed (may update WORKING → PENDING)
+    getKanbanStore()?.getState().handleTabClosed(id)
+
     const newTabs = tabs.filter((t) => t.id !== id)
 
     let newActiveId = activeTabId
@@ -382,6 +395,18 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
   },
 
   closeOtherTabs: (id: string) => {
+    const { tabs } = get()
+    const removedTabs = tabs.filter((t) => t.id !== id)
+    // Notify kanban and claude stores for each removed tab
+    const kanbanStore = getKanbanStore()?.getState()
+    const claudeStoreState = getClaudeStore()?.getState()
+    for (const tab of removedTabs) {
+      kanbanStore?.handleTabClosed(tab.id)
+      const claudePaneCount = countClaudePanes(tab.paneTree)
+      if (claudePaneCount > 0 && claudeStoreState) {
+        for (let i = 0; i < claudePaneCount; i++) claudeStoreState.decrementWorkspaceClaude(tab.workspaceId)
+      }
+    }
     set((state) => ({
       tabs: state.tabs.filter((t) => t.id === id),
       activeTabId: id,
@@ -392,6 +417,17 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     const { tabs } = get()
     const index = tabs.findIndex((t) => t.id === id)
     if (index === -1) return
+    const removedTabs = tabs.slice(index + 1)
+    // Notify kanban and claude stores for each removed tab
+    const kanbanStore = getKanbanStore()?.getState()
+    const claudeStoreState = getClaudeStore()?.getState()
+    for (const tab of removedTabs) {
+      kanbanStore?.handleTabClosed(tab.id)
+      const claudePaneCount = countClaudePanes(tab.paneTree)
+      if (claudePaneCount > 0 && claudeStoreState) {
+        for (let i = 0; i < claudePaneCount; i++) claudeStoreState.decrementWorkspaceClaude(tab.workspaceId)
+      }
+    }
     const kept = tabs.slice(0, index + 1)
     const newActiveId = kept.find((t) => t.id === get().activeTabId)
       ? get().activeTabId

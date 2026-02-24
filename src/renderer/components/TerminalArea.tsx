@@ -285,6 +285,16 @@ export function TerminalArea() {
     [closeTab],
   )
 
+  const handleTabMouseDown = useCallback(
+    (e: React.MouseEvent, tabId: string) => {
+      if (e.button === 1) {
+        e.preventDefault()
+        closeTab(tabId)
+      }
+    },
+    [closeTab],
+  )
+
   const handleNewTab = useCallback(() => {
     if (activeWorkspaceId && envCwd) {
       createTab(activeWorkspaceId, envCwd)
@@ -316,6 +326,7 @@ export function TerminalArea() {
               dragOverIndex === index ? 'tab-drag-over' : ''
             }${tab.color === '#fab387' ? ' tab--streaming' : ''}`}
             onClick={() => setActiveTab(tab.id)}
+            onMouseDown={(e) => handleTabMouseDown(e, tab.id)}
             onDoubleClick={() => handleDoubleClick(tab.id, tab.label)}
             draggable={editingTabId !== tab.id}
             onDragStart={(e) => handleDragStart(e, index)}

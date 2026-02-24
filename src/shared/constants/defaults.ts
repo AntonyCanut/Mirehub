@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   autoClauderEnabled: false,
   notificationSound: true,
   checkUpdatesOnLaunch: true,
+  autoCloseCompletedTerminals: false,
 }
 
 export const MAX_PANES_PER_TAB = 4

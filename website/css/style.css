@@ -701,7 +701,7 @@ a:hover { color: var(--accent-hover); }
 
 .dev-features {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   text-align: left;
 }
@@ -764,7 +764,7 @@ a:hover { color: var(--accent-hover); }
   .feature-highlight-card { grid-template-columns: 1fr; gap: 24px; }
   .feature-highlight-card--reverse { direction: ltr; }
   .workspace-block { grid-template-columns: 1fr; gap: 32px; }
-  .dev-features { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .dev-features { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
 }
 
 @media (max-width: 768px) {
@@ -820,7 +820,7 @@ a:hover { color: var(--accent-hover); }
   .stat-divider { display: none; }
 
   .dev-block h2 { font-size: 26px; }
-  .dev-features { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .dev-features { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
 }
 
 @media (max-width: 480px) {

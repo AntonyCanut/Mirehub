@@ -29,6 +29,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoClauderEnabled: false,
   notificationSound: true,
   checkUpdatesOnLaunch: true,
+  autoCloseCompletedTerminals: false,
 }
 
 export function SettingsPanel() {
@@ -196,6 +197,20 @@ export function SettingsPanel() {
             <button
               className={`settings-toggle${settings.autoClauderEnabled ? ' settings-toggle--active' : ''}`}
               onClick={() => updateSetting('autoClauderEnabled', !settings.autoClauderEnabled)}
+            >
+              <span className="settings-toggle-knob" />
+            </button>
+          </div>
+        </div>
+
+        {/* Kanban */}
+        <div className="settings-group">
+          <h4 className="settings-group-title">{t('settings.kanban')}</h4>
+          <div className="settings-row">
+            <label className="settings-label">{t('settings.autoCloseCompletedTerminals')}</label>
+            <button
+              className={`settings-toggle${settings.autoCloseCompletedTerminals ? ' settings-toggle--active' : ''}`}
+              onClick={() => updateSetting('autoCloseCompletedTerminals', !settings.autoCloseCompletedTerminals)}
             >
               <span className="settings-toggle-knob" />
             </button>

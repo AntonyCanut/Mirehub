@@ -5449,6 +5449,306 @@ body {
   font-size: 13px;
 }
 
+/* ===== MCP View Tabs ===== */
+.mcp-view-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.mcp-view-tab {
+  flex: 1;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  background: none;
+  color: var(--text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.mcp-view-tab:hover {
+  color: var(--text-primary);
+}
+
+.mcp-view-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ===== MCP Catalog ===== */
+.mcp-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.mcp-catalog-search {
+  position: relative;
+}
+
+.mcp-catalog-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.mcp-catalog-search-input:focus {
+  border-color: var(--accent);
+}
+
+.mcp-catalog-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Category chips */
+.mcp-catalog-categories {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mcp-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 500;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mcp-cat-chip:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.mcp-cat-chip--active {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-color: var(--accent);
+}
+
+.mcp-cat-chip--active:hover {
+  opacity: 0.9;
+  color: var(--bg-primary);
+  border-color: var(--accent);
+}
+
+.mcp-cat-chip-icon {
+  font-size: 12px;
+}
+
+/* Catalog grid */
+.mcp-catalog-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mcp-catalog-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.mcp-catalog-group-icon {
+  font-size: 14px;
+}
+
+.mcp-catalog-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mcp-catalog-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: border-color 0.15s;
+}
+
+.mcp-catalog-card:hover {
+  border-color: var(--text-muted);
+}
+
+.mcp-catalog-card--installed {
+  opacity: 0.7;
+}
+
+.mcp-catalog-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mcp-catalog-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mcp-catalog-badge-official {
+  display: inline-block;
+  padding: 1px 5px;
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.mcp-catalog-badge-installed {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--success, #4ade80);
+  background: rgba(74, 222, 128, 0.1);
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.mcp-catalog-install-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.mcp-catalog-install-btn:hover {
+  opacity: 0.9;
+}
+
+.mcp-catalog-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.mcp-catalog-card-features {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.mcp-catalog-feature-chip {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-family: 'Menlo', monospace;
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.mcp-catalog-feature-more {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: transparent;
+}
+
+/* Install overlay / modal */
+.mcp-install-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.mcp-install-modal {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 380px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.mcp-install-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mcp-install-modal-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Installed view extras */
+.mcp-installed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.mcp-server-cat-icon {
+  margin-right: 4px;
+}
+
+.mcp-server-description {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+.mcp-server-features {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
 /* ===== Claude Workflow ===== */
 .claude-workflow {
   display: flex;

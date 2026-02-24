@@ -45,6 +45,7 @@ interface KanbanActions {
   attachFiles: (taskId: string) => Promise<void>
   attachFromClipboard: (taskId: string, dataBase64: string, filename: string, mimeType: string) => Promise<void>
   removeAttachment: (taskId: string, attachmentId: string) => Promise<void>
+  handleTabClosed: (tabId: string) => void
 }
 
 type KanbanStore = KanbanState & KanbanActions
@@ -98,6 +99,14 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       const newTasks: KanbanTask[] = await window.mirehub.kanban.list(currentWorkspaceId)
 
       let taskFinished = false
+      const tabsToClose: string[] = []
+
+      // Check if auto-close setting is enabled
+      let autoCloseEnabled = false
+      try {
+        const settings = await window.mirehub.settings.get()
+        autoCloseEnabled = settings.autoCloseCompletedTerminals ?? false
+      } catch { /* default to false */ }
 
       // Detect status transitions for tasks with a terminal tab
       for (const newTask of newTasks) {
@@ -110,10 +119,12 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         if (newTask.status === 'DONE') {
           termStore.setTabColor(tabId, '#a6e3a1')
           taskFinished = true
+          if (autoCloseEnabled) tabsToClose.push(tabId)
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
           taskFinished = true
+          if (autoCloseEnabled) tabsToClose.push(tabId)
         }
         if (newTask.status === 'PENDING') {
           termStore.setTabColor(tabId, '#f9e2af')
@@ -123,6 +134,24 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       }
 
       set({ tasks: newTasks })
+
+      // Auto-close terminal tabs for completed tasks if setting is enabled
+      if (tabsToClose.length > 0) {
+        const termStore = useTerminalTabStore.getState()
+        // Remove kanban tab mappings for closed tabs
+        const newKanbanTabIds = { ...get().kanbanTabIds }
+        for (const tabId of tabsToClose) {
+          const taskId = Object.keys(newKanbanTabIds).find((id) => newKanbanTabIds[id] === tabId)
+          if (taskId) delete newKanbanTabIds[taskId]
+        }
+        set({ kanbanTabIds: newKanbanTabIds })
+        // Close tabs with a small delay to let the color change be visible
+        setTimeout(() => {
+          for (const tabId of tabsToClose) {
+            termStore.closeTab(tabId)
+          }
+        }, 2000)
+      }
 
       // After a task finishes (DONE/FAILED), pick the next one with a delay
       if (taskFinished) {
@@ -394,6 +423,33 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           }, 3000)
         }
       }, 200)
+    }
+  },
+
+  handleTabClosed: (tabId: string) => {
+    const { kanbanTabIds, tasks, currentWorkspaceId } = get()
+    // Find the task linked to this tab
+    const taskId = Object.keys(kanbanTabIds).find((id) => kanbanTabIds[id] === tabId)
+    if (!taskId) return
+
+    // Remove the tab mapping
+    const newTabIds = { ...kanbanTabIds }
+    delete newTabIds[taskId]
+    set({ kanbanTabIds: newTabIds })
+
+    // If task was WORKING, set it to PENDING
+    const task = tasks.find((t) => t.id === taskId)
+    if (task && task.status === 'WORKING' && currentWorkspaceId) {
+      const updatedTasks = tasks.map((t) =>
+        t.id === taskId ? { ...t, status: 'PENDING' as KanbanStatus, updatedAt: Date.now() } : t,
+      )
+      set({ tasks: updatedTasks })
+      // Persist to file
+      window.mirehub.kanban.update({
+        id: taskId,
+        status: 'PENDING',
+        workspaceId: currentWorkspaceId,
+      }).catch(() => { /* best-effort */ })
     }
   },
 

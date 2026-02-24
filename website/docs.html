@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mirehub — Documentation</title>
-  <meta name="description" content="Documentation complete de Mirehub : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts. Guide d'utilisation avec screenshots.">
+  <meta name="description" content="Documentation complete de Mirehub : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts, Database Explorer, API Tester. Guide d'utilisation avec screenshots.">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -85,6 +85,8 @@
               <span data-lang="en">Statistics</span>
             </a>
             <a href="#prompts" class="docs-nav-link">Prompts</a>
+            <a href="#database" class="docs-nav-link">Database Explorer</a>
+            <a href="#api-tester" class="docs-nav-link">API Tester</a>
             <a href="#shortcuts" class="docs-nav-link">
               <span data-lang="fr">Raccourcis clavier</span>
               <span data-lang="en">Keyboard shortcuts</span>
@@ -124,8 +126,8 @@
           </h2>
           <div class="docs-text">
             <p>
-              <span data-lang="fr">Mirehub est un IDE macOS natif qui reunit 8 outils de developpement dans une seule fenetre : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques et Prompts. Aucune configuration n'est necessaire.</span>
-              <span data-lang="en">Mirehub is a native macOS IDE that combines 8 development tools in a single window: Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistics and Prompts. No configuration needed.</span>
+              <span data-lang="fr">Mirehub est un IDE macOS natif qui reunit 10 outils de developpement dans une seule fenetre : Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistiques, Prompts, Database Explorer et API Tester. Aucune configuration n'est necessaire. Les mises a jour sont automatiques.</span>
+              <span data-lang="en">Mirehub is a native macOS IDE that combines 10 development tools in a single window: Terminal, Claude AI, Git, Kanban, NPM, TODO Scanner, Statistics, Prompts, Database Explorer and API Tester. No configuration needed. Updates are automatic.</span>
             </p>
             <h3>
               <span data-lang="fr">Installation</span>
@@ -362,6 +364,25 @@
               <span data-lang="en">Claude session history: find any past conversation and resume exactly where you left off.</span>
             </p>
           </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Onglet MCP</span>
+              <span data-lang="en">MCP tab</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Gerez les serveurs MCP (Model Context Protocol) de votre workspace. Ajoutez des serveurs depuis un catalogue ou manuellement, configurez leurs arguments et variables d'environnement, et consultez leur documentation integree.</span>
+              <span data-lang="en">Manage MCP (Model Context Protocol) servers for your workspace. Add servers from a catalog or manually, configure their arguments and environment variables, and view their built-in documentation.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Onglet Workflow</span>
+              <span data-lang="en">Workflow tab</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Configurez un workflow d'orchestration pour Claude : plan mode, strategie de sous-agents, boucle d'amelioration continue, verification avant completion, et gestion autonome des bugs. Deployez le workflow sur un ou tous vos projets en un clic.</span>
+              <span data-lang="en">Configure an orchestration workflow for Claude: plan mode, subagent strategy, continuous improvement loop, pre-completion verification, and autonomous bug fixing. Deploy the workflow to one or all your projects in one click.</span>
+            </p>
+          </div>
         </section>
 
         <!-- Git -->
@@ -455,6 +476,30 @@
               <li>
                 <span data-lang="fr">Integration Claude : envoyez une tache directement a Claude, le resultat met a jour le ticket</span>
                 <span data-lang="en">Claude integration: send a task directly to Claude, the result updates the ticket</span>
+              </li>
+              <li>
+                <span data-lang="fr">Numerotation automatique des tickets (T-01, T-02, etc.)</span>
+                <span data-lang="en">Automatic ticket numbering (T-01, T-02, etc.)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Rafraichissement temps reel (fs.watch) — les changements de Claude apparaissent instantanement</span>
+                <span data-lang="en">Real-time refresh (fs.watch) — changes from Claude appear instantly</span>
+              </li>
+              <li>
+                <span data-lang="fr">Archivage manuel des taches terminees</span>
+                <span data-lang="en">Manual archiving of completed tasks</span>
+              </li>
+              <li>
+                <span data-lang="fr">Pieces jointes et images (collage depuis le presse-papier)</span>
+                <span data-lang="en">Attachments and images (paste from clipboard)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Edition complete par double-clic (modale avec tous les champs)</span>
+                <span data-lang="en">Full editing via double-click (modal with all fields)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Gestion automatique des terminaux lies aux tickets</span>
+                <span data-lang="en">Automatic terminal management linked to tickets</span>
               </li>
               <li>
                 <span data-lang="fr">Persistance locale dans le projet (<code>.workspaces/kanban.json</code>)</span>
@@ -653,6 +698,87 @@
               <span data-lang="fr">Vue Prompts : bibliotheque de templates organises par categorie (Developpement, Qualite, Documentation, DevOps, General), avec envoi direct a Claude ou creation de ticket Kanban.</span>
               <span data-lang="en">Prompts view: template library organized by category (Development, Quality, Documentation, DevOps, General), with direct send to Claude or Kanban ticket creation.</span>
             </p>
+          </div>
+        </section>
+
+        <!-- Database Explorer -->
+        <section class="docs-section" id="database">
+          <h2>Database Explorer</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">L'explorateur de bases de donnees vous permet de vous connecter a vos bases directement depuis Mirehub. Plus besoin d'ouvrir un client SQL a cote.</span>
+              <span data-lang="en">The database explorer lets you connect to your databases directly from Mirehub. No need to open a separate SQL client.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Bases supportees</span>
+              <span data-lang="en">Supported databases</span>
+            </h3>
+            <ul>
+              <li><strong>PostgreSQL</strong></li>
+              <li><strong>MySQL</strong></li>
+              <li><strong>MongoDB</strong></li>
+              <li><strong>SQLite</strong></li>
+              <li><strong>MSSQL</strong> (Microsoft SQL Server)</li>
+            </ul>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Connexion securisee avec sauvegarde chiffree des identifiants</span>
+                <span data-lang="en">Secure connection with encrypted credential storage</span>
+              </li>
+              <li>
+                <span data-lang="fr">Exploration des tables et collections</span>
+                <span data-lang="en">Browse tables and collections</span>
+              </li>
+              <li>
+                <span data-lang="fr">Execution de requetes SQL / MongoDB</span>
+                <span data-lang="en">Execute SQL / MongoDB queries</span>
+              </li>
+              <li>
+                <span data-lang="fr">Affichage des resultats dans un tableau interactif</span>
+                <span data-lang="en">View results in an interactive table</span>
+              </li>
+              <li>
+                <span data-lang="fr">Connexions par workspace — chaque projet a ses propres bases</span>
+                <span data-lang="en">Per-workspace connections — each project has its own databases</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- API Tester -->
+        <section class="docs-section" id="api-tester">
+          <h2>API Tester</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Le testeur d'API integre vous permet de tester vos endpoints REST sans quitter Mirehub. Fini les allers-retours avec Postman ou Insomnia.</span>
+              <span data-lang="en">The built-in API tester lets you test your REST endpoints without leaving Mirehub. No more switching to Postman or Insomnia.</span>
+            </p>
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Methodes HTTP : GET, POST, PUT, PATCH, DELETE</span>
+                <span data-lang="en">HTTP methods: GET, POST, PUT, PATCH, DELETE</span>
+              </li>
+              <li>
+                <span data-lang="fr">Configuration des headers et du body (JSON, form-data)</span>
+                <span data-lang="en">Configure headers and body (JSON, form-data)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Affichage des reponses JSON formatees avec coloration syntaxique</span>
+                <span data-lang="en">Formatted JSON responses with syntax highlighting</span>
+              </li>
+              <li>
+                <span data-lang="fr">Indicateurs de statut HTTP et temps de reponse</span>
+                <span data-lang="en">HTTP status indicators and response time</span>
+              </li>
+            </ul>
           </div>
         </section>
 
