@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useTerminalTabStore, type PaneNode } from '../lib/stores/terminalTabStore'
 import type { ProjectInfo } from '../../shared/types'
@@ -40,6 +40,7 @@ export function ProjectToolbar() {
   const [projectInfos, setProjectInfos] = useState<ProjectMakeInfo[]>([])
 
   const workspaceProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
+  const workspaceProjectPaths = useMemo(() => workspaceProjects.map((p) => p.path).join(','), [workspaceProjects])
 
   useEffect(() => {
     if (workspaceProjects.length === 0) {
@@ -67,7 +68,8 @@ export function ProjectToolbar() {
     ).then((results) => {
       setProjectInfos(results.filter((r): r is ProjectMakeInfo => r !== null && r.targets.length > 0))
     })
-  }, [workspaceProjects.map((p) => p.path).join(',')])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceProjectPaths])
 
   const runMakeTarget = useCallback(
     (projectPath: string, target: string) => {

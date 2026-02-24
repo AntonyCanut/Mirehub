@@ -798,6 +798,9 @@ export const en = {
   'analysis.reanalyze': 'Re-analyze',
   'analysis.ticketsCreatedReanalyze': '{count} ticket(s) created. Re-analyze after fix.',
   'analysis.projectGrade': 'Project grade',
+  'analysis.emptyTitle': 'No analysis launched',
+  'analysis.emptyHint': 'Run an analysis to detect issues in your project',
+  'analysis.launchAnalysis': 'Launch analysis',
   'view.analysis': 'Analysis',
 
   // Title bar

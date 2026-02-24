@@ -72,17 +72,6 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
     return groups
   }, [filteredCatalog])
 
-  // Install from catalog
-  const handleCatalogInstall = useCallback((entry: McpCatalogEntry) => {
-    if (entry.envPlaceholders && Object.keys(entry.envPlaceholders).length > 0) {
-      setInstallingEntry(entry)
-      setInstallEnvValues({ ...entry.envPlaceholders })
-      return
-    }
-    // No env needed, install directly
-    doInstall(entry, {})
-  }, [mcpServers, settings, projectPath])
-
   const doInstall = useCallback(async (entry: McpCatalogEntry, envValues: Record<string, string>) => {
     const env: Record<string, string> = {}
     let hasEnv = false
@@ -104,6 +93,17 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
     setInstallingEntry(null)
     setInstallEnvValues({})
   }, [mcpServers, settings, projectPath, onServersChange])
+
+  // Install from catalog
+  const handleCatalogInstall = useCallback((entry: McpCatalogEntry) => {
+    if (entry.envPlaceholders && Object.keys(entry.envPlaceholders).length > 0) {
+      setInstallingEntry(entry)
+      setInstallEnvValues({ ...entry.envPlaceholders })
+      return
+    }
+    // No env needed, install directly
+    doInstall(entry, {})
+  }, [doInstall])
 
   const handleConfirmInstall = useCallback(async (e: FormEvent) => {
     e.preventDefault()

@@ -33,7 +33,7 @@ export function FileDiffViewer() {
       })
       .catch((err) => setError(String(err)))
       .finally(() => setLoading(false))
-  }, [diffFiles])
+  }, [diffFiles, t])
 
   const handleClose = useCallback(() => {
     clearSelection()

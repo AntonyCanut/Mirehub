@@ -199,7 +199,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
 
     setShowCreateModal(false)
     setCreateProjectName('')
-  }, [createProjectName, workspace.id])
+  }, [createProjectName, workspace.id, t])
 
   // Close add menu on click outside
   useEffect(() => {

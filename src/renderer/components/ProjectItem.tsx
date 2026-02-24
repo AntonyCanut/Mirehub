@@ -52,7 +52,7 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
         useViewStore.getState().setViewMode('terminal')
       }
     }
-  }, [isActive, project.id, setActiveProject])
+  }, [isActive, project.id, project.workspaceId, setActiveProject])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()

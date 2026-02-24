@@ -56,6 +56,7 @@ export function TerminalArea() {
         }
       })
       .catch(() => setEnvCwd(activeProject?.path || ''))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWorkspaceId, activeWorkspace?.name, activeProject?.path, projects.length])
 
   const [editingTabId, setEditingTabId] = useState<string | null>(null)

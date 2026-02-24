@@ -290,6 +290,7 @@ export function Terminal({ cwd, shell, initialCommand, externalSessionId, isVisi
       }
       xterm.dispose()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cwd, shell, initialCommand, externalSessionId, fitTerminal])
 
   // Focus the terminal when it becomes visible

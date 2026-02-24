@@ -798,6 +798,9 @@ export const fr = {
   'analysis.reanalyze': 'Re-analyser',
   'analysis.ticketsCreatedReanalyze': '{count} ticket(s) cree(s). Re-analysez apres correction.',
   'analysis.projectGrade': 'Note du projet',
+  'analysis.emptyTitle': 'Aucune analyse lancee',
+  'analysis.emptyHint': 'Lancez une analyse pour detecter les problemes de votre projet',
+  'analysis.launchAnalysis': 'Lancer l\'analyse',
   'view.analysis': 'Analyse',
 
   // Title bar

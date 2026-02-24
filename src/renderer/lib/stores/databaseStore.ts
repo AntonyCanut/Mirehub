@@ -131,6 +131,7 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
     }
 
     set((state) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [id]: _, ...nextStatuses } = state.connectionStatuses
 
       const nextConns = { ...state.connectionsByWorkspace }

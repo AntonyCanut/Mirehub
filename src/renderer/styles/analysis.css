@@ -1022,13 +1022,46 @@
   justify-content: center;
   flex: 1;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
   gap: 8px;
 }
 
+.analysis-content-empty-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
 .analysis-content-empty-hint {
-  font-size: 11px;
+  font-size: 12px;
   opacity: 0.7;
+  max-width: 280px;
+  text-align: center;
+}
+
+/* Central launch button */
+.analysis-launch-btn {
+  height: 40px;
+  padding: 0 24px;
+  margin-top: 12px;
+  background: var(--accent);
+  color: var(--bg-tertiary);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analysis-launch-btn:hover { opacity: 0.85; }
+
+.analysis-launch-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Ticket Modal */

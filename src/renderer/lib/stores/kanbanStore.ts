@@ -348,6 +348,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     try {
       await window.mirehub.kanban.writePrompt(cwd, task.id, prompt)
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Failed to write prompt file for task:', task.id, err)
       return
     }

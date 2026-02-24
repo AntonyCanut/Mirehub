@@ -344,7 +344,7 @@ export function GitPanel() {
       setRemotes([])
     }
     setLoading(false)
-  }, [activeProject?.path])
+  }, [activeProject])
 
   useEffect(() => {
     refresh()
@@ -437,6 +437,7 @@ export function GitPanel() {
       setCommitMessage('')
       refresh()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Commit failed:', err)
     }
   }, [activeProject, status, commitMessage, refresh])

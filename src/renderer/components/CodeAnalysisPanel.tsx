@@ -79,7 +79,7 @@ export function CodeAnalysisPanel() {
 
   const [tools, setTools] = useState<AnalysisToolDef[]>([])
   const [reports, setReports] = useState<AnalysisReport[]>([])
-  const [activeReportId, setActiveReportId] = useState<string | null>(null)
+  const [activeReportId, setActiveReportId] = useState<string | null>(ALL_REPORTS_ID)
   const [runningTools, setRunningTools] = useState<Set<string>>(new Set())
   const [severityFilter, setSeverityFilter] = useState<AnalysisSeverity | 'all'>('all')
   const [selectedFindings, setSelectedFindings] = useState<Set<string>>(new Set())
@@ -200,7 +200,7 @@ export function CodeAnalysisPanel() {
       const loaded = await window.mirehub.analysis.loadReports(activeProject.path)
       if (loaded.length > 0) {
         setReports(loaded)
-        setActiveReportId(loaded[0]!.id)
+        setActiveReportId(ALL_REPORTS_ID)
       }
     } catch {
       // silently fail
@@ -222,7 +222,7 @@ export function CodeAnalysisPanel() {
     detectTools()
     loadProjectStats()
     setReports([])
-    setActiveReportId(null)
+    setActiveReportId(ALL_REPORTS_ID)
     setSelectedFindings(new Set())
     setInstallOutput({})
     setActiveInstallTool(null)
@@ -598,7 +598,7 @@ export function CodeAnalysisPanel() {
             )}
 
             {/* "Tous" entry */}
-            {reports.length > 1 && (
+            {reports.length > 0 && (
               <div
                 className={`analysis-tool-item analysis-tool-item--tous${activeReportId === ALL_REPORTS_ID ? ' analysis-tool-item--active' : ''}`}
                 onClick={() => setActiveReportId(ALL_REPORTS_ID)}
@@ -715,13 +715,20 @@ export function CodeAnalysisPanel() {
                 </div>
               )}
 
-              {/* Empty state: no reports yet, nothing running */}
+              {/* Empty state: no reports yet, nothing running — central launch button */}
               {reports.length === 0 && !isAnyRunning && (
                 <div className="analysis-content-empty">
-                  <span>{t('analysis.noFindings')}</span>
-                  <span className="analysis-content-empty-hint">
-                    {'\u25B6'} {t('analysis.runAll')}
-                  </span>
+                  <span className="analysis-content-empty-icon">{'\u{1F50D}'}</span>
+                  <span>{t('analysis.emptyTitle')}</span>
+                  <span className="analysis-content-empty-hint">{t('analysis.emptyHint')}</span>
+                  {installedCount > 0 && (
+                    <button
+                      className="analysis-launch-btn"
+                      onClick={runAll}
+                    >
+                      {'\u25B6'} {t('analysis.launchAnalysis')}
+                    </button>
+                  )}
                 </div>
               )}
 

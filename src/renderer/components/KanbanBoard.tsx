@@ -177,6 +177,7 @@ export function KanbanBoard() {
       if (updated) setSelectedTask(updated)
       else setSelectedTask(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, selectedTask?.id])
 
   // Sync editingTask with store
@@ -185,6 +186,7 @@ export function KanbanBoard() {
       const updated = tasks.find((t) => t.id === editingTask.id)
       if (!updated) setEditingTask(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, editingTask?.id])
 
   // Filtered tasks
@@ -1040,7 +1042,7 @@ function TaskDetailPanel({
   }
 
   const statusColumn = COLUMNS.find((c) => c.status === task.status)
-  const taskLabels = task.labels || []
+  const taskLabels = useMemo(() => task.labels || [], [task.labels])
 
   const toggleLabel = useCallback((label: string) => {
     const updated = taskLabels.includes(label)

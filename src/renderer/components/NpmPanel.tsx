@@ -63,7 +63,7 @@ export function NpmPanel() {
         return next
       })
     }
-  }, [activeProject, loadPackages])
+  }, [activeProject, loadPackages, t])
 
   const handleUpdateAll = useCallback(async () => {
     if (!activeProject) return
@@ -81,7 +81,7 @@ export function NpmPanel() {
     } finally {
       setUpdateAllLoading(false)
     }
-  }, [activeProject, loadPackages])
+  }, [activeProject, loadPackages, t])
 
   if (!activeProject) {
     return (

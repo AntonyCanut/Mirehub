@@ -211,7 +211,7 @@ export function FileViewer() {
     } finally {
       setSaving(false)
     }
-  }, [selectedFilePath, setEditorDirty])
+  }, [selectedFilePath, setEditorDirty, t])
 
   const handleEditorMount: OnMount = useCallback((editor) => {
     editorRef.current = editor

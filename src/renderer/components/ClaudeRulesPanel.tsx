@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Editor, { OnMount } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
@@ -210,11 +210,11 @@ export function ClaudeRulesPanel() {
   }, [loadData, loadAgentsAndSkills])
 
   // Permissions — Claude Code expects: { permissions: { allow: [...], deny: [...] } }
-  const permsObj = (typeof settings.permissions === 'object' && settings.permissions !== null)
+  const permsObj = useMemo(() => (typeof settings.permissions === 'object' && settings.permissions !== null)
     ? settings.permissions as { allow?: string[]; deny?: string[] }
-    : {}
-  const allowList: string[] = permsObj.allow ?? []
-  const denyList: string[] = permsObj.deny ?? []
+    : {}, [settings.permissions])
+  const allowList = useMemo(() => permsObj.allow ?? [], [permsObj])
+  const denyList = useMemo(() => permsObj.deny ?? [], [permsObj])
 
   // Permission mode is stored in a separate key (not in permissions, which must be an object)
   const permissionMode: string = (settings as Record<string, unknown>)._mirehubMode as string ?? 'default'
@@ -285,7 +285,7 @@ export function ClaudeRulesPanel() {
       keybindings: [2048 | 49],
       run: () => { handleSaveClaudeMd() },
     })
-  }, [handleSaveClaudeMd])
+  }, [handleSaveClaudeMd, t])
 
   // Agent & Skill actions
   const handleOpenItem = useCallback(async (type: 'agent' | 'skill', filename: string) => {

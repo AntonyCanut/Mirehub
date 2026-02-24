@@ -91,6 +91,7 @@ export function DatabaseSidebar({
 
   // Backup state per connection
   const [backupsByConnection, setBackupsByConnection] = useState<Record<string, DbBackupEntry[]>>({})
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_expandedBackups, setExpandedBackups] = useState<Set<string>>(new Set())
   const [backingUp, setBackingUp] = useState<Set<string>>(new Set())
   const [restoring, setRestoring] = useState<string | null>(null)

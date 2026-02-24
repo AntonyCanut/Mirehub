@@ -68,19 +68,6 @@ export function SettingsPanel() {
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null)
   const [sshError, setSshError] = useState<string | null>(null)
 
-  useEffect(() => {
-    setLoading(true)
-    window.mirehub.settings.get().then((s: AppSettings) => {
-      setSettings({ ...DEFAULT_SETTINGS, ...s })
-      if (s.locale) {
-        setLocale(s.locale)
-      }
-      setLoading(false)
-    })
-    window.mirehub.app.version().then(setAppVersion)
-    loadSshKeys()
-  }, [setLocale])
-
   const loadSshKeys = useCallback(async () => {
     setSshLoading(true)
     setSshError(null)
@@ -97,6 +84,19 @@ export function SettingsPanel() {
       setSshLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    setLoading(true)
+    window.mirehub.settings.get().then((s: AppSettings) => {
+      setSettings({ ...DEFAULT_SETTINGS, ...s })
+      if (s.locale) {
+        setLocale(s.locale)
+      }
+      setLoading(false)
+    })
+    window.mirehub.app.version().then(setAppVersion)
+    loadSshKeys()
+  }, [setLocale, loadSshKeys])
 
   const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
