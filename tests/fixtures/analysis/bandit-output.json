@@ -1,0 +1,61 @@
+{
+  "results": [
+    {
+      "test_id": "B101",
+      "test_name": "assert_used",
+      "filename": "app/auth.py",
+      "line_number": 33,
+      "col_offset": 0,
+      "end_col_offset": 25,
+      "issue_severity": "LOW",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "code": "33    assert user.is_admin\n"
+    },
+    {
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string",
+      "filename": "app/config.py",
+      "line_number": 8,
+      "col_offset": 0,
+      "end_col_offset": 30,
+      "issue_severity": "HIGH",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_text": "Possible hardcoded password: 'admin123'",
+      "code": "8     password = 'admin123'\n"
+    },
+    {
+      "test_id": "B602",
+      "test_name": "subprocess_popen_with_shell_equals_true",
+      "filename": "app/runner.py",
+      "line_number": 15,
+      "col_offset": 4,
+      "end_col_offset": 45,
+      "issue_severity": "MEDIUM",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_text": "subprocess call with shell=True identified, security issue.",
+      "code": "15    subprocess.Popen(cmd, shell=True)\n"
+    }
+  ],
+  "errors": [],
+  "generated_at": "2026-02-24T10:00:00Z",
+  "metrics": {
+    "_totals": {
+      "SEVERITY.HIGH": 1,
+      "SEVERITY.MEDIUM": 1,
+      "SEVERITY.LOW": 1
+    }
+  }
+}

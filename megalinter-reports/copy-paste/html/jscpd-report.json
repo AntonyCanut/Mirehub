@@ -1,0 +1,5386 @@
+{
+  "statistics": {
+    "detectionDate": "2026-02-24T12:34:50.663Z",
+    "formats": {
+      "typescript": {
+        "sources": {
+          "src/main/services/database/drivers/sqlite.ts": {
+            "lines": 243,
+            "tokens": 2200,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 39,
+            "duplicatedTokens": 309,
+            "percentage": 16.05,
+            "percentageTokens": 14.05,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/drivers/postgresql.ts": {
+            "lines": 313,
+            "tokens": 2539,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 50,
+            "duplicatedTokens": 381,
+            "percentage": 15.97,
+            "percentageTokens": 15.01,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/drivers/mysql.ts": {
+            "lines": 271,
+            "tokens": 2554,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 37,
+            "duplicatedTokens": 321,
+            "percentage": 13.65,
+            "percentageTokens": 12.57,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/drivers/mssql.ts": {
+            "lines": 346,
+            "tokens": 2749,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 90,
+            "percentage": 2.89,
+            "percentageTokens": 3.27,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/drivers/mongodb.ts": {
+            "lines": 281,
+            "tokens": 2687,
+            "sources": 1,
+            "clones": 5,
+            "duplicatedLines": 46,
+            "duplicatedTokens": 453,
+            "percentage": 16.37,
+            "percentageTokens": 16.86,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/drivers/base.ts": {
+            "lines": 32,
+            "tokens": 306,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/workspaceStore.ts": {
+            "lines": 472,
+            "tokens": 5079,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 56,
+            "duplicatedTokens": 566,
+            "percentage": 11.86,
+            "percentageTokens": 11.14,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/viewStore.ts": {
+            "lines": 120,
+            "tokens": 1439,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/updateStore.ts": {
+            "lines": 75,
+            "tokens": 779,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/terminalTabStore.ts": {
+            "lines": 700,
+            "tokens": 7552,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 32,
+            "duplicatedTokens": 488,
+            "percentage": 4.57,
+            "percentageTokens": 6.46,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/kanbanStore.ts": {
+            "lines": 499,
+            "tokens": 5342,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 204,
+            "percentage": 2.81,
+            "percentageTokens": 3.82,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/databaseStore.ts": {
+            "lines": 199,
+            "tokens": 1924,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/claudeStore.ts": {
+            "lines": 313,
+            "tokens": 3179,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 20,
+            "duplicatedTokens": 178,
+            "percentage": 6.39,
+            "percentageTokens": 5.6,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/stores/appUpdateStore.ts": {
+            "lines": 93,
+            "tokens": 726,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/i18n/index.ts": {
+            "lines": 33,
+            "tokens": 377,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/i18n/fr.ts": {
+            "lines": 804,
+            "tokens": 5311,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/i18n/en.ts": {
+            "lines": 804,
+            "tokens": 5311,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/index.ts": {
+            "lines": 92,
+            "tokens": 660,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/crypto.ts": {
+            "lines": 28,
+            "tokens": 211,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/database/backup.ts": {
+            "lines": 399,
+            "tokens": 4082,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/shared/types/index.ts": {
+            "lines": 816,
+            "tokens": 5017,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/shared/constants/mcpCatalog.ts": {
+            "lines": 246,
+            "tokens": 2103,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/shared/constants/defaults.ts": {
+            "lines": 19,
+            "tokens": 154,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/shared/constants/defaultWorkflows.ts": {
+            "lines": 191,
+            "tokens": 1041,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/shared/constants/defaultSkills.ts": {
+            "lines": 472,
+            "tokens": 1129,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/shared/constants/defaultProfiles.ts": {
+            "lines": 412,
+            "tokens": 835,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/types/global.d.ts": {
+            "lines": 6,
+            "tokens": 37,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/lib/monacoSetup.ts": {
+            "lines": 21,
+            "tokens": 230,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/storage.ts": {
+            "lines": 190,
+            "tokens": 1705,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/services/activityHooks.ts": {
+            "lines": 196,
+            "tokens": 1653,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 19,
+            "duplicatedTokens": 196,
+            "percentage": 9.69,
+            "percentageTokens": 11.86,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/workspaceEnv.ts": {
+            "lines": 158,
+            "tokens": 1373,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/workspace.ts": {
+            "lines": 139,
+            "tokens": 1364,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/updates.ts": {
+            "lines": 261,
+            "tokens": 2305,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 13,
+            "duplicatedTokens": 205,
+            "percentage": 4.98,
+            "percentageTokens": 8.89,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/terminal.ts": {
+            "lines": 158,
+            "tokens": 1348,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/ssh.ts": {
+            "lines": 239,
+            "tokens": 2371,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/session.ts": {
+            "lines": 20,
+            "tokens": 196,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/mcp.ts": {
+            "lines": 23,
+            "tokens": 333,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/kanban.ts": {
+            "lines": 467,
+            "tokens": 4140,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 55,
+            "duplicatedTokens": 478,
+            "percentage": 11.78,
+            "percentageTokens": 11.55,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/git.ts": {
+            "lines": 564,
+            "tokens": 5833,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/filesystem.ts": {
+            "lines": 215,
+            "tokens": 2122,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/database.ts": {
+            "lines": 496,
+            "tokens": 4220,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 84,
+            "percentage": 1.41,
+            "percentageTokens": 1.99,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/claudeDefaults.ts": {
+            "lines": 83,
+            "tokens": 921,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/claude.ts": {
+            "lines": 177,
+            "tokens": 1562,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 26,
+            "duplicatedTokens": 264,
+            "percentage": 14.69,
+            "percentageTokens": 16.9,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/appUpdate.ts": {
+            "lines": 83,
+            "tokens": 716,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/app.ts": {
+            "lines": 34,
+            "tokens": 310,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/ipc/api.ts": {
+            "lines": 335,
+            "tokens": 3054,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 84,
+            "percentage": 2.09,
+            "percentageTokens": 2.75,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/workspaceStore.test.ts": {
+            "lines": 299,
+            "tokens": 2901,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 16,
+            "duplicatedTokens": 194,
+            "percentage": 5.35,
+            "percentageTokens": 6.69,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/viewStore.test.ts": {
+            "lines": 316,
+            "tokens": 2893,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/updates.test.ts": {
+            "lines": 339,
+            "tokens": 3391,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 27,
+            "duplicatedTokens": 413,
+            "percentage": 7.96,
+            "percentageTokens": 12.18,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/types.test.ts": {
+            "lines": 94,
+            "tokens": 866,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/terminalTabStore.test.ts": {
+            "lines": 438,
+            "tokens": 4913,
+            "sources": 1,
+            "clones": 10,
+            "duplicatedLines": 64,
+            "duplicatedTokens": 906,
+            "percentage": 14.61,
+            "percentageTokens": 18.44,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/storage.test.ts": {
+            "lines": 285,
+            "tokens": 2601,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 54,
+            "duplicatedTokens": 395,
+            "percentage": 18.95,
+            "percentageTokens": 15.19,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/database-service.test.ts": {
+            "lines": 345,
+            "tokens": 3000,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/database-drivers.test.ts": {
+            "lines": 450,
+            "tokens": 3655,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/database-crypto.test.ts": {
+            "lines": 234,
+            "tokens": 1927,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/database-backup.test.ts": {
+            "lines": 487,
+            "tokens": 4125,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 27,
+            "duplicatedTokens": 197,
+            "percentage": 5.54,
+            "percentageTokens": 4.78,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/unit/collapseExpand.test.ts": {
+            "lines": 185,
+            "tokens": 1369,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/mocks/electron.ts": {
+            "lines": 66,
+            "tokens": 665,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/workspaceEnv-ipc.test.ts": {
+            "lines": 374,
+            "tokens": 3892,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 70,
+            "duplicatedTokens": 724,
+            "percentage": 18.72,
+            "percentageTokens": 18.6,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/workspace-ipc.test.ts": {
+            "lines": 176,
+            "tokens": 1802,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 101,
+            "percentage": 8.52,
+            "percentageTokens": 5.6,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/updates-ipc.test.ts": {
+            "lines": 219,
+            "tokens": 2188,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 107,
+            "percentage": 6.85,
+            "percentageTokens": 4.89,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/terminal-session-navigation.test.ts": {
+            "lines": 388,
+            "tokens": 4203,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 52,
+            "duplicatedTokens": 714,
+            "percentage": 13.4,
+            "percentageTokens": 16.99,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/terminal-ipc.test.ts": {
+            "lines": 191,
+            "tokens": 1694,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 107,
+            "percentage": 7.85,
+            "percentageTokens": 6.32,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/session-ipc.test.ts": {
+            "lines": 94,
+            "tokens": 833,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 55,
+            "duplicatedTokens": 467,
+            "percentage": 58.51,
+            "percentageTokens": 56.06,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/project-ipc.test.ts": {
+            "lines": 278,
+            "tokens": 2658,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 24,
+            "duplicatedTokens": 184,
+            "percentage": 8.63,
+            "percentageTokens": 6.92,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/kanban-ipc.test.ts": {
+            "lines": 169,
+            "tokens": 1564,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 129,
+            "percentage": 8.88,
+            "percentageTokens": 8.25,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/kanban-claude.test.ts": {
+            "lines": 868,
+            "tokens": 9339,
+            "sources": 1,
+            "clones": 44,
+            "duplicatedLines": 536,
+            "duplicatedTokens": 7798,
+            "percentage": 61.75,
+            "percentageTokens": 83.5,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/git-ipc.test.ts": {
+            "lines": 640,
+            "tokens": 6186,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 85,
+            "percentage": 1.56,
+            "percentageTokens": 1.37,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/filesystem-ipc.test.ts": {
+            "lines": 512,
+            "tokens": 5675,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 24,
+            "duplicatedTokens": 239,
+            "percentage": 4.69,
+            "percentageTokens": 4.21,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/claude-ipc.test.ts": {
+            "lines": 249,
+            "tokens": 1922,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/integration/app-ipc.test.ts": {
+            "lines": 92,
+            "tokens": 879,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 26,
+            "duplicatedTokens": 237,
+            "percentage": 28.26,
+            "percentageTokens": 26.96,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/helpers/storage.ts": {
+            "lines": 38,
+            "tokens": 303,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/preload/index.ts": {
+            "lines": 498,
+            "tokens": 9351,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main/index.ts": {
+            "lines": 324,
+            "tokens": 2886,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "tests/setup.ts": {
+            "lines": 5,
+            "tokens": 35,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "vitest.config.ts": {
+            "lines": 23,
+            "tokens": 190,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "vite.config.ts": {
+            "lines": 58,
+            "tokens": 427,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 20872,
+          "tokens": 189412,
+          "sources": 77,
+          "clones": 68,
+          "duplicatedLines": 738,
+          "duplicatedTokens": 8649,
+          "percentage": 3.54,
+          "percentageTokens": 4.57,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "css": {
+        "sources": {
+          "src/renderer/styles/terminal.css": {
+            "lines": 123,
+            "tokens": 746,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/styles/multiagent.css": {
+            "lines": 310,
+            "tokens": 1759,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/styles/fileexplorer.css": {
+            "lines": 164,
+            "tokens": 937,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/styles/claude.css": {
+            "lines": 354,
+            "tokens": 2048,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 951,
+          "tokens": 5490,
+          "sources": 4,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "javascript": {
+        "sources": {
+          "src/renderer/components/WorkspaceItem.tsx": {
+            "lines": 276,
+            "tokens": 2543,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/TodoScanner.tsx": {
+            "lines": 55,
+            "tokens": 648,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/TerminalArea.tsx": {
+            "lines": 78,
+            "tokens": 731,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/Terminal.tsx": {
+            "lines": 44,
+            "tokens": 246,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/TabBar.tsx": {
+            "lines": 69,
+            "tokens": 793,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SplitContainer.tsx": {
+            "lines": 105,
+            "tokens": 989,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SidebarFileTree.tsx": {
+            "lines": 80,
+            "tokens": 735,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/Sidebar.tsx": {
+            "lines": 133,
+            "tokens": 1279,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ShortcutsPanel.tsx": {
+            "lines": 4,
+            "tokens": 70,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SettingsPanel.tsx": {
+            "lines": 413,
+            "tokens": 4090,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SessionModal.tsx": {
+            "lines": 39,
+            "tokens": 477,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SessionHistory.tsx": {
+            "lines": 19,
+            "tokens": 227,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/PromptTemplates.tsx": {
+            "lines": 155,
+            "tokens": 1588,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ProjectToolbar.tsx": {
+            "lines": 11,
+            "tokens": 142,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ProjectStats.tsx": {
+            "lines": 88,
+            "tokens": 974,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ProjectItem.tsx": {
+            "lines": 116,
+            "tokens": 1044,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/NpmPanel.tsx": {
+            "lines": 96,
+            "tokens": 982,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/NotificationCenter.tsx": {
+            "lines": 135,
+            "tokens": 1508,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/MultiAgentView.tsx": {
+            "lines": 79,
+            "tokens": 677,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/McpPanel.tsx": {
+            "lines": 245,
+            "tokens": 2593,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/GlobalSearch.tsx": {
+            "lines": 52,
+            "tokens": 592,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/FileViewer.tsx": {
+            "lines": 92,
+            "tokens": 773,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/FileExplorer.tsx": {
+            "lines": 271,
+            "tokens": 2409,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/FileDiffViewer.tsx": {
+            "lines": 1,
+            "tokens": 12,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ErrorBoundary.tsx": {
+            "lines": 111,
+            "tokens": 692,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseSidebar.tsx": {
+            "lines": 220,
+            "tokens": 2076,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseResultsTable.tsx": {
+            "lines": 78,
+            "tokens": 672,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseQueryArea.tsx": {
+            "lines": 88,
+            "tokens": 673,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseExplorer.tsx": {
+            "lines": 99,
+            "tokens": 810,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseConnectionModal.tsx": {
+            "lines": 224,
+            "tokens": 1956,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/CopyableError.tsx": {
+            "lines": 5,
+            "tokens": 54,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ContextMenu.tsx": {
+            "lines": 16,
+            "tokens": 145,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ConfirmModal.tsx": {
+            "lines": 10,
+            "tokens": 120,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/CommandPalette.tsx": {
+            "lines": 32,
+            "tokens": 348,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeSessionPanel.tsx": {
+            "lines": 69,
+            "tokens": 631,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeRulesPanel.tsx": {
+            "lines": 408,
+            "tokens": 4028,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeInfoPanel.tsx": {
+            "lines": 75,
+            "tokens": 724,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeDefaultsLibrary.tsx": {
+            "lines": 81,
+            "tokens": 859,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/AutoClauder.tsx": {
+            "lines": 32,
+            "tokens": 320,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/AppUpdateModal.tsx": {
+            "lines": 51,
+            "tokens": 482,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "website/js/main.js": {
+            "lines": 297,
+            "tokens": 2851,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/App.tsx": {
+            "lines": 222,
+            "tokens": 2271,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 138,
+            "duplicatedTokens": 1308,
+            "percentage": 62.16,
+            "percentageTokens": 57.6,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "eslint.config.mjs": {
+            "lines": 35,
+            "tokens": 249,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 4809,
+          "tokens": 46083,
+          "sources": 43,
+          "clones": 1,
+          "duplicatedLines": 69,
+          "duplicatedTokens": 654,
+          "percentage": 1.43,
+          "percentageTokens": 1.42,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "tsx": {
+        "sources": {
+          "src/renderer/components/WorkspaceItem.tsx": {
+            "lines": 595,
+            "tokens": 5767,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 16,
+            "duplicatedTokens": 116,
+            "percentage": 2.69,
+            "percentageTokens": 2.01,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/TodoScanner.tsx": {
+            "lines": 173,
+            "tokens": 1865,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/TitleBar.tsx": {
+            "lines": 14,
+            "tokens": 128,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/TerminalArea.tsx": {
+            "lines": 395,
+            "tokens": 3530,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/Terminal.tsx": {
+            "lines": 437,
+            "tokens": 3544,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/TabBar.tsx": {
+            "lines": 192,
+            "tokens": 2011,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SplitContainer.tsx": {
+            "lines": 232,
+            "tokens": 2383,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SidebarFileTree.tsx": {
+            "lines": 307,
+            "tokens": 3312,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 47,
+            "duplicatedTokens": 336,
+            "percentage": 15.31,
+            "percentageTokens": 10.14,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/Sidebar.tsx": {
+            "lines": 253,
+            "tokens": 2436,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 65,
+            "duplicatedTokens": 727,
+            "percentage": 25.69,
+            "percentageTokens": 29.84,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ShortcutsPanel.tsx": {
+            "lines": 99,
+            "tokens": 1080,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SettingsPanel.tsx": {
+            "lines": 663,
+            "tokens": 6638,
+            "sources": 1,
+            "clones": 12,
+            "duplicatedLines": 68,
+            "duplicatedTokens": 790,
+            "percentage": 10.26,
+            "percentageTokens": 11.9,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SessionModal.tsx": {
+            "lines": 77,
+            "tokens": 925,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/SessionHistory.tsx": {
+            "lines": 129,
+            "tokens": 1589,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/PromptTemplates.tsx": {
+            "lines": 380,
+            "tokens": 3932,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ProjectToolbar.tsx": {
+            "lines": 112,
+            "tokens": 1180,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ProjectStats.tsx": {
+            "lines": 204,
+            "tokens": 2106,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ProjectItem.tsx": {
+            "lines": 312,
+            "tokens": 3160,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 103,
+            "percentage": 1.6,
+            "percentageTokens": 3.26,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/NpmPanel.tsx": {
+            "lines": 230,
+            "tokens": 2496,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 180,
+            "percentage": 5.22,
+            "percentageTokens": 7.21,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/NotificationCenter.tsx": {
+            "lines": 227,
+            "tokens": 2417,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/MultiAgentView.tsx": {
+            "lines": 193,
+            "tokens": 1679,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/McpPanel.tsx": {
+            "lines": 461,
+            "tokens": 5313,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/GlobalSearch.tsx": {
+            "lines": 203,
+            "tokens": 1975,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 9,
+            "duplicatedTokens": 100,
+            "percentage": 4.43,
+            "percentageTokens": 5.06,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/FileViewer.tsx": {
+            "lines": 502,
+            "tokens": 4930,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 190,
+            "percentage": 2.79,
+            "percentageTokens": 3.85,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/FileExplorer.tsx": {
+            "lines": 484,
+            "tokens": 4610,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 47,
+            "duplicatedTokens": 336,
+            "percentage": 9.71,
+            "percentageTokens": 7.29,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/FileDiffViewer.tsx": {
+            "lines": 126,
+            "tokens": 1353,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 180,
+            "percentage": 9.52,
+            "percentageTokens": 13.3,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ErrorBoundary.tsx": {
+            "lines": 138,
+            "tokens": 921,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseSidebar.tsx": {
+            "lines": 656,
+            "tokens": 5909,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 24,
+            "duplicatedTokens": 280,
+            "percentage": 3.66,
+            "percentageTokens": 4.74,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseResultsTable.tsx": {
+            "lines": 192,
+            "tokens": 1856,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseQueryArea.tsx": {
+            "lines": 321,
+            "tokens": 2560,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseExplorer.tsx": {
+            "lines": 297,
+            "tokens": 2652,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/DatabaseConnectionModal.tsx": {
+            "lines": 414,
+            "tokens": 3921,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/CopyableError.tsx": {
+            "lines": 31,
+            "tokens": 270,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ContextMenu.tsx": {
+            "lines": 73,
+            "tokens": 607,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ConfirmModal.tsx": {
+            "lines": 59,
+            "tokens": 526,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/CommandPalette.tsx": {
+            "lines": 214,
+            "tokens": 2275,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 9,
+            "duplicatedTokens": 100,
+            "percentage": 4.21,
+            "percentageTokens": 4.4,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeSessionPanel.tsx": {
+            "lines": 139,
+            "tokens": 1233,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeRulesPanel.tsx": {
+            "lines": 797,
+            "tokens": 8837,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 56,
+            "duplicatedTokens": 460,
+            "percentage": 7.03,
+            "percentageTokens": 5.21,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeInfoPanel.tsx": {
+            "lines": 205,
+            "tokens": 2058,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/ClaudeDefaultsLibrary.tsx": {
+            "lines": 219,
+            "tokens": 2270,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 20,
+            "duplicatedTokens": 192,
+            "percentage": 9.13,
+            "percentageTokens": 8.46,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/AutoClauder.tsx": {
+            "lines": 154,
+            "tokens": 963,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/components/AppUpdateModal.tsx": {
+            "lines": 86,
+            "tokens": 771,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/main.tsx": {
+            "lines": 21,
+            "tokens": 156,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/renderer/App.tsx": {
+            "lines": 504,
+            "tokens": 5141,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 11520,
+          "tokens": 113285,
+          "sources": 43,
+          "clones": 21,
+          "duplicatedLines": 202,
+          "duplicatedTokens": 2045,
+          "percentage": 1.75,
+          "percentageTokens": 1.81,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "bash": {
+        "sources": {
+          ".workspaces/hooks/kanban-done.sh": {
+            "lines": 18,
+            "tokens": 41,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 18,
+          "tokens": 41,
+          "sources": 1,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "markdown": {
+        "sources": {
+          "a5fcffc6-5c70-4d27-998e-d251a004d62a-megalinter_file_names_cspell.txt": {
+            "lines": 137,
+            "tokens": 1091,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 137,
+          "tokens": 1091,
+          "sources": 1,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 38307,
+      "tokens": 355402,
+      "sources": 169,
+      "clones": 90,
+      "duplicatedLines": 1009,
+      "duplicatedTokens": 11348,
+      "percentage": 2.63,
+      "percentageTokens": 3.19,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "}\n    } catch (err) {\n      const executionTime = Date.now() - startTime\n      return {\n        columns: [],\n        rows: [],\n        rowCount: 0,\n        executionTime,\n        error: String(err),\n      }\n    }\n  }\n\n  cancelQuery(): void {\n    if",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/postgresql.ts",
+        "start": 273,
+        "end": 287,
+        "startLoc": {
+          "line": 273,
+          "column": 7,
+          "position": 2204
+        },
+        "endLoc": {
+          "line": 287,
+          "column": 3,
+          "position": 2297
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/sqlite.ts",
+        "start": 199,
+        "end": 213,
+        "startLoc": {
+          "line": 199,
+          "column": 7,
+          "position": 1898
+        },
+        "endLoc": {
+          "line": 213,
+          "column": 80,
+          "position": 1991
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": "}\n\n    return { columns, indexes, rowCount }\n  }\n\n  async executeQuery(sql: string, limit?: number, offset?: number): Promise<DbQueryResult> {\n    if (!this.pool) throw new Error('Not connected')\n\n    const startTime = Date.now()\n\n    try {\n      let",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/mysql.ts",
+        "start": 173,
+        "end": 184,
+        "startLoc": {
+          "line": 173,
+          "column": 5,
+          "position": 1635
+        },
+        "endLoc": {
+          "line": 184,
+          "column": 4,
+          "position": 1730
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/postgresql.ts",
+        "start": 217,
+        "end": 228,
+        "startLoc": {
+          "line": 217,
+          "column": 5,
+          "position": 1652
+        },
+        "endLoc": {
+          "line": 228,
+          "column": 60,
+          "position": 1747
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ".trim()\n      const isSelect = wrappedSql.toUpperCase().startsWith('SELECT')\n\n      if (isSelect && limit !== undefined && !queryHasLimitClause(wrappedSql)) {\n        wrappedSql = wrappedSql.replace(/;\\s*$/, '')\n        wrappedSql = `${wrappedSql} LIMIT ${limit}`\n        if (offset !== undefined && offset > 0) {\n          wrappedSql = `${wrappedSql} OFFSET ${offset}`\n        }\n      }\n\n      this",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/mysql.ts",
+        "start": 184,
+        "end": 195,
+        "startLoc": {
+          "line": 184,
+          "column": 4,
+          "position": 1737
+        },
+        "endLoc": {
+          "line": 195,
+          "column": 5,
+          "position": 1860
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/sqlite.ts",
+        "start": 150,
+        "end": 161,
+        "startLoc": {
+          "line": 150,
+          "column": 9,
+          "position": 1385
+        },
+        "endLoc": {
+          "line": 161,
+          "column": 3,
+          "position": 1508
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "= null\n      }\n    } catch (err) {\n      const executionTime = Date.now() - startTime\n      return {\n        columns: [],\n        rows: [],\n        rowCount: 0,\n        executionTime,\n        error: String(err),\n      }\n    }\n  }\n\n  cancelQuery(): void {\n    if (this.activeConnection",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/mysql.ts",
+        "start": 231,
+        "end": 246,
+        "startLoc": {
+          "line": 231,
+          "column": 2,
+          "position": 2217
+        },
+        "endLoc": {
+          "line": 246,
+          "column": 17,
+          "position": 2320
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/postgresql.ts",
+        "start": 272,
+        "end": 287,
+        "startLoc": {
+          "line": 272,
+          "column": 2,
+          "position": 2199
+        },
+        "endLoc": {
+          "line": 287,
+          "column": 13,
+          "position": 2302
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "=== 'VIEW' ? 'view' : 'table',\n        rowCount,\n      })\n    }\n\n    return tables\n  }\n\n  async getTableInfo(table: string, schema?: string): Promise<DbTableInfo> {\n    if (!this.pool) throw new Error('Not connected')\n    const targetSchema = schema || 'dbo'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/mssql.ts",
+        "start": 103,
+        "end": 113,
+        "startLoc": {
+          "line": 103,
+          "column": 2,
+          "position": 942
+        },
+        "endLoc": {
+          "line": 113,
+          "column": 6,
+          "position": 1032
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/postgresql.ts",
+        "start": 102,
+        "end": 112,
+        "startLoc": {
+          "line": 102,
+          "column": 2,
+          "position": 951
+        },
+        "endLoc": {
+          "line": 112,
+          "column": 9,
+          "position": 1041
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "const executionTime = Date.now() - startTime\n        const columns = docs.length > 0 ? Object.keys(docs[0]!) : []\n\n        return {\n          columns,\n          rows: docs as unknown as Record<string, unknown>[],\n          rowCount: docs.length,\n          executionTime",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/mongodb.ts",
+        "start": 197,
+        "end": 204,
+        "startLoc": {
+          "line": 197,
+          "column": 9,
+          "position": 1906
+        },
+        "endLoc": {
+          "line": 204,
+          "column": 14,
+          "position": 1998
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/mongodb.ts",
+        "start": 170,
+        "end": 177,
+        "startLoc": {
+          "line": 170,
+          "column": 9,
+          "position": 1631
+        },
+        "endLoc": {
+          "line": 177,
+          "column": 10,
+          "position": 1723
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "const columns = docs.length > 0 ? Object.keys(docs[0]!) : []\n\n      return {\n        columns,\n        rows: docs as unknown as Record<string, unknown>[],\n        rowCount: docs.length,\n        totalRows,\n        executionTime,\n      }\n    } catch",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/mongodb.ts",
+        "start": 233,
+        "end": 242,
+        "startLoc": {
+          "line": 233,
+          "column": 7,
+          "position": 2255
+        },
+        "endLoc": {
+          "line": 242,
+          "column": 6,
+          "position": 2343
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/mongodb.ts",
+        "start": 171,
+        "end": 182,
+        "startLoc": {
+          "line": 171,
+          "column": 9,
+          "position": 1648
+        },
+        "endLoc": {
+          "line": 182,
+          "column": 6,
+          "position": 1738
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "}\n    } catch (err) {\n      const executionTime = Date.now() - startTime\n      return {\n        columns: [],\n        rows: [],\n        rowCount: 0,\n        executionTime,\n        error: String(err),\n      }\n    }\n  }\n\n  cancelQuery(): void {\n    // MongoDB Node.js driver does not support direct query cancellation",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/services/database/drivers/mongodb.ts",
+        "start": 241,
+        "end": 255,
+        "startLoc": {
+          "line": 241,
+          "column": 7,
+          "position": 2338
+        },
+        "endLoc": {
+          "line": 255,
+          "column": 69,
+          "position": 2431
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/database/drivers/sqlite.ts",
+        "start": 199,
+        "end": 213,
+        "startLoc": {
+          "line": 199,
+          "column": 7,
+          "position": 1898
+        },
+        "endLoc": {
+          "line": 213,
+          "column": 80,
+          "position": 1991
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "set((state) => ({\n          projects: [...state.projects, project],\n          activeProjectId: project.id,\n          activeWorkspaceId: workspace.id,\n          workspaces: state.workspaces.map((w) =>\n            w.id === workspace.id ? { ...w, projectIds: [...w.projectIds, project.id] } : w,\n          ),\n        }))\n\n        const",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/lib/stores/workspaceStore.ts",
+        "start": 189,
+        "end": 198,
+        "startLoc": {
+          "line": 189,
+          "column": 9,
+          "position": 1834
+        },
+        "endLoc": {
+          "line": 198,
+          "column": 6,
+          "position": 1946
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/lib/stores/workspaceStore.ts",
+        "start": 131,
+        "end": 140,
+        "startLoc": {
+          "line": 131,
+          "column": 9,
+          "position": 1316
+        },
+        "endLoc": {
+          "line": 140,
+          "column": 57,
+          "position": 1428
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "const termStore = useTerminalTabStore.getState()\n        termStore.createSplitTab(workspace.id, cwd, 'Claude + Terminal', 'claude', null)\n      } else {\n        set({ activeWorkspaceId: workspace.id })\n      }\n\n      return workspace\n    } catch (err) {\n      console.error('Failed to create workspace from new project:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/lib/stores/workspaceStore.ts",
+        "start": 201,
+        "end": 209,
+        "startLoc": {
+          "line": 201,
+          "column": 9,
+          "position": 1980
+        },
+        "endLoc": {
+          "line": 209,
+          "column": 47,
+          "position": 2061
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/lib/stores/workspaceStore.ts",
+        "start": 145,
+        "end": 153,
+        "startLoc": {
+          "line": 145,
+          "column": 9,
+          "position": 1468
+        },
+        "endLoc": {
+          "line": 153,
+          "column": 30,
+          "position": 1549
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": "try {\n        const scanResult = await window.mirehub.project.scanClaude(dirPath)\n        if (scanResult?.hasClaude) {\n          project.hasClaude = true\n        }\n      } catch {\n        // Scan failure is non-blocking\n      }\n\n      set((state) => ({\n        projects: [...state.projects, project],\n        workspaces",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/lib/stores/workspaceStore.ts",
+        "start": 241,
+        "end": 252,
+        "startLoc": {
+          "line": 241,
+          "column": 7,
+          "position": 2423
+        },
+        "endLoc": {
+          "line": 252,
+          "column": 11,
+          "position": 2513
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/lib/stores/workspaceStore.ts",
+        "start": 122,
+        "end": 133,
+        "startLoc": {
+          "line": 122,
+          "column": 9,
+          "position": 1253
+        },
+        "endLoc": {
+          "line": 133,
+          "column": 16,
+          "position": 1343
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": ": (workspaceId?: string) => {\n    const { tabs, activeTabId } = get()\n    const scopedTabs = workspaceId ? tabs.filter((t) => t.workspaceId === workspaceId) : tabs\n    if (scopedTabs.length <= 1) return\n    const index = scopedTabs.findIndex((t) => t.id === activeTabId)\n    const prevIndex",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/lib/stores/terminalTabStore.ts",
+        "start": 372,
+        "end": 377,
+        "startLoc": {
+          "line": 372,
+          "column": 13,
+          "position": 3958
+        },
+        "endLoc": {
+          "line": 377,
+          "column": 10,
+          "position": 4068
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/lib/stores/terminalTabStore.ts",
+        "start": 362,
+        "end": 367,
+        "startLoc": {
+          "line": 362,
+          "column": 13,
+          "position": 3793
+        },
+        "endLoc": {
+          "line": 367,
+          "column": 10,
+          "position": 3903
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ")\n    // Notify kanban and claude stores for each removed tab\n    const kanbanStore = getKanbanStore()?.getState()\n    const claudeStoreState = getClaudeStore()?.getState()\n    for (const tab of removedTabs) {\n      kanbanStore?.handleTabClosed(tab.id)\n      const claudePaneCount = countClaudePanes(tab.paneTree)\n      if (claudePaneCount > 0 && claudeStoreState) {\n        for (let i = 0; i < claudePaneCount; i++) claudeStoreState.decrementWorkspaceClaude(tab.workspaceId)\n      }\n    }\n    const",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/lib/stores/terminalTabStore.ts",
+        "start": 420,
+        "end": 431,
+        "startLoc": {
+          "line": 420,
+          "column": 2,
+          "position": 4656
+        },
+        "endLoc": {
+          "line": 431,
+          "column": 6,
+          "position": 4790
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/lib/stores/terminalTabStore.ts",
+        "start": 399,
+        "end": 410,
+        "startLoc": {
+          "line": 399,
+          "column": 3,
+          "position": 4382
+        },
+        "endLoc": {
+          "line": 410,
+          "column": 4,
+          "position": 4516
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": ")\n    set((state) => ({\n      tasks: state.tasks.map((t) => {\n        if (t.id !== taskId) return t\n        return { ...t, attachments: [...(t.attachments || []), attachment], updatedAt: Date.now() }\n      }),\n    }))\n  },",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/lib/stores/kanbanStore.ts",
+        "start": 476,
+        "end": 483,
+        "startLoc": {
+          "line": 476,
+          "column": 9,
+          "position": 5049
+        },
+        "endLoc": {
+          "line": 483,
+          "column": 2,
+          "position": 5151
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/lib/stores/kanbanStore.ts",
+        "start": 463,
+        "end": 471,
+        "startLoc": {
+          "line": 463,
+          "column": 9,
+          "position": 4851
+        },
+        "endLoc": {
+          "line": 471,
+          "column": 2,
+          "position": 4955
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "workspaceId\n        setTimeout(() => {\n          const current = get().workspaceClaudeStatus[wsId]\n          if (current === 'finished') {\n            set({\n              workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [wsId]: 'idle' },\n            })\n          }\n        }, 30000)\n      }\n    })",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/lib/stores/claudeStore.ts",
+        "start": 223,
+        "end": 233,
+        "startLoc": {
+          "line": 223,
+          "column": 2,
+          "position": 2308
+        },
+        "endLoc": {
+          "line": 233,
+          "column": 2,
+          "position": 2397
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/lib/stores/claudeStore.ts",
+        "start": 110,
+        "end": 120,
+        "startLoc": {
+          "line": 110,
+          "column": 2,
+          "position": 1056
+        },
+        "endLoc": {
+          "line": 120,
+          "column": 6,
+          "position": 1146
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 17,
+      "fragment": "</div>\n            <div className=\"modal-footer\">\n              <button className=\"modal-btn modal-btn--secondary\" onClick={() => setShowNewProjectModal(false)}>\n                {t('common.cancel')}\n              </button>\n              <button\n                className=\"modal-btn modal-btn--primary\"\n                onClick={handleCreateFromNew}\n                disabled={!newProjectName.trim()}\n              >\n                {t('sidebar.chooseLocationAndCreate')}\n              </button>\n            </div>\n          </div>\n        </div>\n      )}\n      {workspaces",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/Sidebar.tsx",
+        "start": 164,
+        "end": 180,
+        "startLoc": {
+          "line": 164,
+          "column": 13,
+          "position": 1539
+        },
+        "endLoc": {
+          "line": 180,
+          "column": 11,
+          "position": 1655
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/WorkspaceItem.tsx",
+        "start": 525,
+        "end": 542,
+        "startLoc": {
+          "line": 525,
+          "column": 13,
+          "position": 5158
+        },
+        "endLoc": {
+          "line": 542,
+          "column": 14,
+          "position": 5275
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": ".length > 0 && (\n        <div className=\"sidebar-section\">\n          <button className=\"sidebar-section-header\" onClick={() => setShowRecent((v) => !v)}>\n            <span className={`sidebar-section-chevron${showRecent ? ' sidebar-section-chevron--expanded' : ''}`}>\n              <svg width=\"8\" height=\"8\" viewBox=\"0 0 8 8\" fill=\"none\">\n                <path d=\"M2.5 1L5.5 4L2.5 7\" stroke=\"currentColor\" strokeWidth=\"1.2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" />\n              </svg>\n            </span>\n            <span className=\"sidebar-section-title\">{t",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/Sidebar.tsx",
+        "start": 226,
+        "end": 234,
+        "startLoc": {
+          "line": 226,
+          "column": 12,
+          "position": 2116
+        },
+        "endLoc": {
+          "line": 234,
+          "column": 2,
+          "position": 2278
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/Sidebar.tsx",
+        "start": 198,
+        "end": 206,
+        "startLoc": {
+          "line": 198,
+          "column": 10,
+          "position": 1799
+        },
+        "endLoc": {
+          "line": 206,
+          "column": 9,
+          "position": 1961
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": ".map((filePath) => (\n                <button\n                  key={filePath}\n                  className=\"sidebar-file-item\"\n                  onClick={() => openFile(filePath)}\n                  title={filePath}\n                >\n                  {filePath.split('/').pop()}\n                </button>\n              ))}\n            </div>\n          )}\n        </div>\n      )}\n    </",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/Sidebar.tsx",
+        "start": 238,
+        "end": 252,
+        "startLoc": {
+          "line": 238,
+          "column": 2,
+          "position": 2337
+        },
+        "endLoc": {
+          "line": 252,
+          "column": 3,
+          "position": 2429
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/Sidebar.tsx",
+        "start": 210,
+        "end": 225,
+        "startLoc": {
+          "line": 210,
+          "column": 10,
+          "position": 2016
+        },
+        "endLoc": {
+          "line": 225,
+          "column": 2,
+          "position": 2109
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "&& (\n            <div className=\"settings-section\">\n              <div className=\"settings-card\">\n                <div className=\"settings-row\">\n                  <div className=\"settings-row-info\">\n                    <label className=\"settings-label\">{t('settings.theme'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 287,
+        "end": 292,
+        "startLoc": {
+          "line": 287,
+          "column": 2,
+          "position": 2926
+        },
+        "endLoc": {
+          "line": 292,
+          "column": 17,
+          "position": 2987
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 259,
+        "end": 264,
+        "startLoc": {
+          "line": 259,
+          "column": 2,
+          "position": 2667
+        },
+        "endLoc": {
+          "line": 264,
+          "column": 20,
+          "position": 2728
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "&& (\n            <div className=\"settings-section\">\n              <div className=\"settings-card\">\n                <div className=\"settings-row\">\n                  <div className=\"settings-row-info\">\n                    <label className=\"settings-label\">{t('settings.defaultShell'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 343,
+        "end": 348,
+        "startLoc": {
+          "line": 343,
+          "column": 2,
+          "position": 3474
+        },
+        "endLoc": {
+          "line": 348,
+          "column": 24,
+          "position": 3535
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 259,
+        "end": 264,
+        "startLoc": {
+          "line": 259,
+          "column": 2,
+          "position": 2667
+        },
+        "endLoc": {
+          "line": 264,
+          "column": 20,
+          "position": 2728
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": "&& (\n                  <div className=\"ssh-form\">\n                    <div className=\"ssh-form-row\">\n                      <label className=\"settings-label\">{t('settings.sshKeyName')}</label>\n                      <input\n                        type=\"text\"\n                        className=\"ssh-input\"\n                        value={importName}\n                        onChange={(e) => setImportName(e.target.value)}\n                        placeholder=\"my_key",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 453,
+        "end": 462,
+        "startLoc": {
+          "line": 453,
+          "column": 2,
+          "position": 4517
+        },
+        "endLoc": {
+          "line": 462,
+          "column": 7,
+          "position": 4607
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 403,
+        "end": 412,
+        "startLoc": {
+          "line": 403,
+          "column": 2,
+          "position": 4048
+        },
+        "endLoc": {
+          "line": 412,
+          "column": 11,
+          "position": 4138
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "&& (\n            <div className=\"settings-section\">\n              <div className=\"settings-card\">\n                <div className=\"settings-row\">\n                  <div className=\"settings-row-info\">\n                    <label className=\"settings-label\">{t('settings.detectionColor'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 535,
+        "end": 540,
+        "startLoc": {
+          "line": 535,
+          "column": 2,
+          "position": 5354
+        },
+        "endLoc": {
+          "line": 540,
+          "column": 26,
+          "position": 5415
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 259,
+        "end": 264,
+        "startLoc": {
+          "line": 259,
+          "column": 2,
+          "position": 2667
+        },
+        "endLoc": {
+          "line": 264,
+          "column": 20,
+          "position": 2728
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "&& (\n            <div className=\"settings-section\">\n              <div className=\"settings-card\">\n                <div className=\"settings-row\">\n                  <div className=\"settings-row-info\">\n                    <label className=\"settings-label\">{t('settings.autoCloseCompletedTerminals'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 569,
+        "end": 574,
+        "startLoc": {
+          "line": 569,
+          "column": 2,
+          "position": 5695
+        },
+        "endLoc": {
+          "line": 574,
+          "column": 39,
+          "position": 5756
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 259,
+        "end": 264,
+        "startLoc": {
+          "line": 259,
+          "column": 2,
+          "position": 2667
+        },
+        "endLoc": {
+          "line": 264,
+          "column": 20,
+          "position": 2728
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "&& (\n            <div className=\"settings-section\">\n              <div className=\"settings-card\">\n                <div className=\"settings-row\">\n                  <div className=\"settings-row-info\">\n                    <label className=\"settings-label\">{t('settings.sound'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 589,
+        "end": 594,
+        "startLoc": {
+          "line": 589,
+          "column": 2,
+          "position": 5892
+        },
+        "endLoc": {
+          "line": 594,
+          "column": 17,
+          "position": 5953
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SettingsPanel.tsx",
+        "start": 259,
+        "end": 264,
+        "startLoc": {
+          "line": 259,
+          "column": 2,
+          "position": 2667
+        },
+        "endLoc": {
+          "line": 264,
+          "column": 20,
+          "position": 2728
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "<span className={`project-item-chevron${expanded ? ' project-item-chevron--expanded' : ''}`}>\n          <svg width=\"8\" height=\"8\" viewBox=\"0 0 8 8\" fill=\"none\">\n            <path d=\"M2.5 1L5.5 4L2.5 7\" stroke=\"currentColor\" strokeWidth=\"1.2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" />\n          </svg>\n        </span>\n        <span className=\"project-item-icon",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/ProjectItem.tsx",
+        "start": 192,
+        "end": 197,
+        "startLoc": {
+          "line": 192,
+          "column": 9,
+          "position": 2096
+        },
+        "endLoc": {
+          "line": 197,
+          "column": 18,
+          "position": 2199
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/Sidebar.tsx",
+        "start": 201,
+        "end": 206,
+        "startLoc": {
+          "line": 201,
+          "column": 13,
+          "position": 1854
+        },
+        "endLoc": {
+          "line": 206,
+          "column": 22,
+          "position": 1957
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", error: result.error ?? '' }), success: false })\n      }\n      await loadPackages()\n    } catch (err) {\n      setFeedback({ message: t('npm.error', { error: String(err) }), success: false })\n    } finally {\n      setUpdateAllLoading",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/NpmPanel.tsx",
+        "start": 76,
+        "end": 82,
+        "startLoc": {
+          "line": 76,
+          "column": 6,
+          "position": 953
+        },
+        "endLoc": {
+          "line": 82,
+          "column": 20,
+          "position": 1043
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/NpmPanel.tsx",
+        "start": 54,
+        "end": 60,
+        "startLoc": {
+          "line": 54,
+          "column": 12,
+          "position": 686
+        },
+        "endLoc": {
+          "line": 60,
+          "column": 20,
+          "position": 776
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 14,
+      "fragment": ")\n\n  const loadChildren = useCallback(async () => {\n    setLoading(true)\n    try {\n      const entries = await window.mirehub.fs.readDir(entry.path)\n      setChildren(entries)\n    } catch {\n      setChildren([])\n    }\n    setLoading(false)\n  }, [entry.path])\n\n  const handleToggle",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/FileExplorer.tsx",
+        "start": 50,
+        "end": 63,
+        "startLoc": {
+          "line": 50,
+          "column": 5,
+          "position": 689
+        },
+        "endLoc": {
+          "line": 63,
+          "column": 13,
+          "position": 787
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SidebarFileTree.tsx",
+        "start": 25,
+        "end": 38,
+        "startLoc": {
+          "line": 25,
+          "column": 20,
+          "position": 318
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 12,
+          "position": 416
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 24,
+      "fragment": "const getFileIcon = (name: string, isDir: boolean): string => {\n    if (isDir) return '\\u{1F4C1}'\n    const ext = name.split('.').pop()?.toLowerCase()\n    switch (ext) {\n      case 'ts':\n      case 'tsx':\n        return '\\u{1F535}'\n      case 'js':\n      case 'jsx':\n        return '\\u{1F7E1}'\n      case 'json':\n        return '\\u{1F7E2}'\n      case 'css':\n        return '\\u{1F7E3}'\n      case 'md':\n        return '\\u{1F4DD}'\n      case 'html':\n        return '\\u{1F7E0}'\n      default:\n        return '\\u{1F4C4}'\n    }\n  }\n\n  const sortedChildren",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/FileExplorer.tsx",
+        "start": 174,
+        "end": 197,
+        "startLoc": {
+          "line": 174,
+          "column": 3,
+          "position": 1902
+        },
+        "endLoc": {
+          "line": 197,
+          "column": 15,
+          "position": 2068
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SidebarFileTree.tsx",
+        "start": 189,
+        "end": 212,
+        "startLoc": {
+          "line": 189,
+          "column": 3,
+          "position": 2241
+        },
+        "endLoc": {
+          "line": 212,
+          "column": 11,
+          "position": 2407
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": "\" viewBox=\"0 0 10 10\" fill=\"none\">\n              <path\n                d=\"M3 2L7 5L3 8\"\n                stroke=\"currentColor\"\n                strokeWidth=\"1.3\"\n                strokeLinecap=\"round\"\n                strokeLinejoin=\"round\"\n              />\n            </svg>\n          </span>\n        )}\n        <span className=\"file-tree-icon",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/FileExplorer.tsx",
+        "start": 210,
+        "end": 221,
+        "startLoc": {
+          "line": 210,
+          "column": 2,
+          "position": 2216
+        },
+        "endLoc": {
+          "line": 221,
+          "column": 15,
+          "position": 2288
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/SidebarFileTree.tsx",
+        "start": 225,
+        "end": 236,
+        "startLoc": {
+          "line": 225,
+          "column": 2,
+          "position": 2591
+        },
+        "endLoc": {
+          "line": 236,
+          "column": 16,
+          "position": 2663
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ": Record<string, string> = {\n      '.ts': 'typescript', '.tsx': 'typescriptreact', '.js': 'javascript',\n      '.jsx': 'javascriptreact', '.json': 'json', '.css': 'css',\n      '.html': 'html', '.md': 'markdown', '.py': 'python',\n      '.rs': 'rust', '.go': 'go', '.sh': 'shell',\n      '.yml'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/FileDiffViewer.tsx",
+        "start": 45,
+        "end": 50,
+        "startLoc": {
+          "line": 45,
+          "column": 4,
+          "position": 531
+        },
+        "endLoc": {
+          "line": 50,
+          "column": 7,
+          "position": 622
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/FileViewer.tsx",
+        "start": 8,
+        "end": 21,
+        "startLoc": {
+          "line": 8,
+          "column": 16,
+          "position": 93
+        },
+        "endLoc": {
+          "line": 21,
+          "column": 8,
+          "position": 192
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 13,
+      "fragment": "${table.name}${table.rowCount != null ? ` (${table.rowCount} rows)` : ''}`}\n                      >\n                        <span className=\"db-tree-table-icon\">\n                          {table.type === 'view' ? 'V' : table.type === 'collection' ? 'C' : 'T'}\n                        </span>\n                        <span className=\"db-tree-table-name\">{table.name}</span>\n                        {table.rowCount != null && (\n                          <span className=\"db-tree-count\">{table.rowCount}</span>\n                        )}\n                      </div>\n                    ))}\n\n                  {",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/DatabaseSidebar.tsx",
+        "start": 558,
+        "end": 570,
+        "startLoc": {
+          "line": 558,
+          "column": 3,
+          "position": 4999
+        },
+        "endLoc": {
+          "line": 570,
+          "column": 2,
+          "position": 5139
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/DatabaseSidebar.tsx",
+        "start": 535,
+        "end": 546,
+        "startLoc": {
+          "line": 535,
+          "column": 2,
+          "position": 4756
+        },
+        "endLoc": {
+          "line": 546,
+          "column": 3,
+          "position": 4895
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": "\"\n            viewBox=\"0 0 16 16\"\n            fill=\"none\"\n          >\n            <circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" strokeWidth=\"1.5\" />\n            <path d=\"M10.5 10.5L14 14\" stroke=\"currentColor\" strokeWidth=\"1.5\" strokeLinecap=\"round\" />\n          </svg>\n          <input\n            ref={inputRef}\n            className=\"command-palette-input",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/CommandPalette.tsx",
+        "start": 176,
+        "end": 185,
+        "startLoc": {
+          "line": 176,
+          "column": 3,
+          "position": 1887
+        },
+        "endLoc": {
+          "line": 185,
+          "column": 22,
+          "position": 1987
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/GlobalSearch.tsx",
+        "start": 131,
+        "end": 140,
+        "startLoc": {
+          "line": 131,
+          "column": 3,
+          "position": 1203
+        },
+        "endLoc": {
+          "line": 140,
+          "column": 20,
+          "position": 1303
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": "}\n                onMount={handleEditorMount}\n                beforeMount={(monaco) => {\n                  monaco.editor.defineTheme('catppuccin-mocha', {\n                    base: 'vs-dark',\n                    inherit: true,\n                    rules: [\n                      { token: 'comment', foreground: '6c7086', fontStyle: 'italic' },\n                      { token: 'keyword', foreground: 'cba6f7' },\n                      { token: 'string'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/ClaudeRulesPanel.tsx",
+        "start": 531,
+        "end": 540,
+        "startLoc": {
+          "line": 531,
+          "column": 2,
+          "position": 6332
+        },
+        "endLoc": {
+          "line": 540,
+          "column": 9,
+          "position": 6431
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/FileViewer.tsx",
+        "start": 412,
+        "end": 421,
+        "startLoc": {
+          "line": 412,
+          "column": 13,
+          "position": 3872
+        },
+        "endLoc": {
+          "line": 421,
+          "column": 18,
+          "position": 3971
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": "monaco.editor.defineTheme('catppuccin-mocha', {\n                    base: 'vs-dark',\n                    inherit: true,\n                    rules: [\n                      { token: 'comment', foreground: '6c7086', fontStyle: 'italic' },\n                      { token: 'keyword', foreground: 'cba6f7' },\n                      { token: 'string', foreground: 'a6e3a1' },\n                    ]",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/ClaudeRulesPanel.tsx",
+        "start": 534,
+        "end": 541,
+        "startLoc": {
+          "line": 534,
+          "column": 19,
+          "position": 6354
+        },
+        "endLoc": {
+          "line": 541,
+          "column": 2,
+          "position": 6443
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/FileDiffViewer.tsx",
+        "start": 88,
+        "end": 95,
+        "startLoc": {
+          "line": 88,
+          "column": 15,
+          "position": 1015
+        },
+        "endLoc": {
+          "line": 95,
+          "column": 2,
+          "position": 1104
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 21,
+      "fragment": ".name}</span>\n                          <button\n                            className=\"claude-profile-file-action\"\n                            onClick={() => handleOpenItem('skill', skill.filename)}\n                            title={t('common.edit')}\n                          >\n                            {t('common.edit')}\n                          </button>\n                          <button\n                            className=\"claude-profile-file-action claude-profile-file-action--danger\"\n                            onClick={() => handleDeleteItem('skill', skill.filename)}\n                            title={t('common.delete')}\n                          >\n                            {t('common.delete')}\n                          </button>\n                        </div>\n                      ))}\n                    </div>\n                  )}\n                </div>\n              <",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/ClaudeRulesPanel.tsx",
+        "start": 685,
+        "end": 705,
+        "startLoc": {
+          "line": 685,
+          "column": 6,
+          "position": 7869
+        },
+        "endLoc": {
+          "line": 705,
+          "column": 2,
+          "position": 8005
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/ClaudeRulesPanel.tsx",
+        "start": 651,
+        "end": 672,
+        "startLoc": {
+          "line": 651,
+          "column": 6,
+          "position": 7535
+        },
+        "endLoc": {
+          "line": 672,
+          "column": 2,
+          "position": 7672
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": ".description}</p>\n                  <div className=\"claude-library-card-actions\">\n                    {isDeployed ? (\n                      <span className=\"claude-library-badge--deployed\">{t('claude.deployed')}</span>\n                    ) : (\n                      <button\n                        className=\"claude-library-deploy-btn\"\n                        onClick={() => handleDeploySkill(skill.id)}\n                        disabled={deploying !== null}\n                      >\n                        {deploying === skill",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/components/ClaudeDefaultsLibrary.tsx",
+        "start": 198,
+        "end": 208,
+        "startLoc": {
+          "line": 198,
+          "column": 6,
+          "position": 2106
+        },
+        "endLoc": {
+          "line": 208,
+          "column": 6,
+          "position": 2202
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/components/ClaudeDefaultsLibrary.tsx",
+        "start": 164,
+        "end": 174,
+        "startLoc": {
+          "line": 164,
+          "column": 8,
+          "position": 1747
+        },
+        "endLoc": {
+          "line": 174,
+          "column": 8,
+          "position": 1843
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 20,
+      "fragment": ")\n\n  const claudeDir = path.join(projectPath, '.claude')\n  if (!fs.existsSync(claudeDir)) {\n    fs.mkdirSync(claudeDir, { recursive: true })\n  }\n\n  const settingsPath = path.join(claudeDir, 'settings.local.json')\n  let settings: Record<string, unknown> = {}\n  if (fs.existsSync(settingsPath)) {\n    try {\n      settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))\n    } catch { /* ignore corrupt file */ }\n  }\n\n  if (!settings.hooks) {\n    settings.hooks = {}\n  }\n  const hooks = settings.hooks as Record<string, unknown[]>\n  if",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/ipc/kanban.ts",
+        "start": 43,
+        "end": 62,
+        "startLoc": {
+          "line": 43,
+          "column": 2,
+          "position": 199
+        },
+        "endLoc": {
+          "line": 62,
+          "column": 3,
+          "position": 395
+        }
+      },
+      "secondFile": {
+        "name": "src/main/services/activityHooks.ts",
+        "start": 63,
+        "end": 83,
+        "startLoc": {
+          "line": 63,
+          "column": 2,
+          "position": 279
+        },
+        "endLoc": {
+          "line": 83,
+          "column": 6,
+          "position": 476
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 19,
+      "fragment": ",\n        addedAt: Date.now(),\n      }\n\n      const tasks = readKanbanTasks(workspaceId)\n      const task = tasks.find((t) => t.id === taskId)\n      if (task) {\n        if (!task.attachments) task.attachments = []\n        task.attachments.push(attachment)\n        task.updatedAt = Date.now()\n        writeKanbanTasks(workspaceId, tasks)\n      }\n\n      return attachment\n    },\n  )\n\n  ipcMain.handle(\n    IPC_CHANNELS.KANBAN_REMOVE_ATTACHMENT",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/ipc/kanban.ts",
+        "start": 403,
+        "end": 421,
+        "startLoc": {
+          "line": 403,
+          "column": 7,
+          "position": 3539
+        },
+        "endLoc": {
+          "line": 421,
+          "column": 25,
+          "position": 3680
+        }
+      },
+      "secondFile": {
+        "name": "src/main/ipc/kanban.ts",
+        "start": 362,
+        "end": 380,
+        "startLoc": {
+          "line": 362,
+          "column": 5,
+          "position": 3202
+        },
+        "endLoc": {
+          "line": 380,
+          "column": 29,
+          "position": 3343
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": "?.on('data', (data: Buffer) => {\n    for (const win of BrowserWindow.getAllWindows()) {\n      try {\n        if (!win.isDestroyed() && !win.webContents.isDestroyed()) {\n          win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, {\n            id: managed.session.terminalId,\n            data: data.toString(),\n          })\n        }\n      } catch { /* render frame disposed */ }\n    }\n  })\n\n  proc.on",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/ipc/claude.ts",
+        "start": 64,
+        "end": 77,
+        "startLoc": {
+          "line": 64,
+          "column": 7,
+          "position": 609
+        },
+        "endLoc": {
+          "line": 77,
+          "column": 3,
+          "position": 741
+        }
+      },
+      "secondFile": {
+        "name": "src/main/ipc/claude.ts",
+        "start": 51,
+        "end": 64,
+        "startLoc": {
+          "line": 51,
+          "column": 7,
+          "position": 476
+        },
+        "endLoc": {
+          "line": 64,
+          "column": 7,
+          "position": 608
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": ",\n      filters: [{ name: 'JSON', extensions: ['json'] }],\n      properties: ['openFile'],\n    })\n    if (result.canceled || result.filePaths.length === 0) {\n      return { success: false, data: null }\n    }\n    try",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/main/ipc/api.ts",
+        "start": 321,
+        "end": 328,
+        "startLoc": {
+          "line": 321,
+          "column": 19,
+          "position": 2865
+        },
+        "endLoc": {
+          "line": 328,
+          "column": 4,
+          "position": 2949
+        }
+      },
+      "secondFile": {
+        "name": "src/main/ipc/database.ts",
+        "start": 306,
+        "end": 313,
+        "startLoc": {
+          "line": 306,
+          "column": 30,
+          "position": 2736
+        },
+        "endLoc": {
+          "line": 313,
+          "column": 6,
+          "position": 2820
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": ", async () => {\n      const ws = makeWorkspace()\n      const project = makeProject()\n      useWorkspaceStore.setState({ workspaces: [ws] })\n      mockProjectApi.selectDir.mockResolvedValue('/tmp/test')\n      mockProjectApi.add.mockResolvedValue(project)\n      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })\n\n      await",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/workspaceStore.test.ts",
+        "start": 194,
+        "end": 202,
+        "startLoc": {
+          "line": 194,
+          "column": 44,
+          "position": 1726
+        },
+        "endLoc": {
+          "line": 202,
+          "column": 6,
+          "position": 1823
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/workspaceStore.test.ts",
+        "start": 179,
+        "end": 187,
+        "startLoc": {
+          "line": 179,
+          "column": 46,
+          "position": 1549
+        },
+        "endLoc": {
+          "line": 187,
+          "column": 6,
+          "position": 1646
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": "function compareVersions(current: string, latest: string): boolean {\n  const c = extractVersion(current)\n  const l = extractVersion(latest)\n  if (c === l) return false\n  const cParts = c.split('.').map(Number)\n  const lParts = l.split('.').map(Number)\n  for (let i = 0; i < 3; i++) {\n    if ((lParts[i] ?? 0) > (cParts[i] ?? 0)) return true\n    if ((lParts[i] ?? 0) < (cParts[i] ?? 0)) return false\n  }\n  return false\n}\n\n// Ancienne logique (pour reference et test de regression)",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/updates.test.ts",
+        "start": 20,
+        "end": 33,
+        "startLoc": {
+          "line": 20,
+          "column": 1,
+          "position": 75
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 59,
+          "position": 280
+        }
+      },
+      "secondFile": {
+        "name": "src/main/ipc/updates.ts",
+        "start": 68,
+        "end": 81,
+        "startLoc": {
+          "line": 68,
+          "column": 1,
+          "position": 493
+        },
+        "endLoc": {
+          "line": 81,
+          "column": 6,
+          "position": 698
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": ", () => {\n      const json = JSON.stringify({\n        'express': { current: '4.18.0', wanted: '4.18.2', latest: '5.0.0', type: 'dependencies' },\n        'vitest': { current: '3.0.0', wanted: '3.2.4', latest: '3.2.4', type: 'devDependencies' },\n      })\n\n      const entries = parseNpmOutdated(json)\n      const",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/updates.test.ts",
+        "start": 313,
+        "end": 320,
+        "startLoc": {
+          "line": 313,
+          "column": 43,
+          "position": 3058
+        },
+        "endLoc": {
+          "line": 320,
+          "column": 6,
+          "position": 3162
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/updates.test.ts",
+        "start": 261,
+        "end": 269,
+        "startLoc": {
+          "line": 261,
+          "column": 39,
+          "position": 2509
+        },
+        "endLoc": {
+          "line": 269,
+          "column": 7,
+          "position": 2614
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": ", () => {\n      const id1 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')\n      const id2 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')\n      useTerminalTabStore.getState().setActiveTab(id1)\n\n      useTerminalTabStore.getState().activateNext",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 160,
+        "end": 165,
+        "startLoc": {
+          "line": 160,
+          "column": 39,
+          "position": 1708
+        },
+        "endLoc": {
+          "line": 165,
+          "column": 13,
+          "position": 1779
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 42,
+        "end": 47,
+        "startLoc": {
+          "line": 42,
+          "column": 36,
+          "position": 428
+        },
+        "endLoc": {
+          "line": 47,
+          "column": 9,
+          "position": 499
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": ", () => {\n      const id1 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')\n      const id2 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')\n      useTerminalTabStore.getState().setActiveTab(id1)\n\n      useTerminalTabStore.getState().activatePrev",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 172,
+        "end": 177,
+        "startLoc": {
+          "line": 172,
+          "column": 41,
+          "position": 1838
+        },
+        "endLoc": {
+          "line": 177,
+          "column": 13,
+          "position": 1909
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 42,
+        "end": 47,
+        "startLoc": {
+          "line": 42,
+          "column": 36,
+          "position": 428
+        },
+        "endLoc": {
+          "line": 47,
+          "column": 9,
+          "position": 499
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 7,
+      "fragment": ", () => {\n      const tabId = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')\n      const originalPaneId = useTerminalTabStore.getState().tabs[0]!.activePaneId\n\n      const newPaneId = useTerminalTabStore.getState().splitPane(tabId, originalPaneId, 'horizontal')\n\n      // Active pane is the new one, close it",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 308,
+        "end": 314,
+        "startLoc": {
+          "line": 308,
+          "column": 54,
+          "position": 3352
+        },
+        "endLoc": {
+          "line": 314,
+          "column": 40,
+          "position": 3430
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 295,
+        "end": 300,
+        "startLoc": {
+          "line": 295,
+          "column": 30,
+          "position": 3203
+        },
+        "endLoc": {
+          "line": 300,
+          "column": 7,
+          "position": 3280
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 7,
+      "fragment": ", () => {\n      const tabId = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')\n      const paneId = useTerminalTabStore.getState().tabs[0]!.activePaneId\n      useTerminalTabStore.getState().splitPane(tabId, paneId, 'horizontal')\n      const splitId = useTerminalTabStore.getState().tabs[0]!.paneTree.id\n\n      useTerminalTabStore.getState().resizePane(tabId, splitId, 0.0",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 348,
+        "end": 354,
+        "startLoc": {
+          "line": 348,
+          "column": 34,
+          "position": 3794
+        },
+        "endLoc": {
+          "line": 354,
+          "column": 4,
+          "position": 3902
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 334,
+        "end": 342,
+        "startLoc": {
+          "line": 334,
+          "column": 29,
+          "position": 3633
+        },
+        "endLoc": {
+          "line": 342,
+          "column": 4,
+          "position": 3743
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "const split: PaneSplit = {\n      type: 'split',\n      id: 's1',\n      direction: 'horizontal',\n      children: [\n        { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null, externalSessionId: null },\n        { type: 'leaf', id: 'p2', sessionId: null, initialCommand: null, externalSessionId: null },\n      ],\n      ratio: 0.5,\n    }\n    expect(collectLeafIds",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 427,
+        "end": 437,
+        "startLoc": {
+          "line": 427,
+          "column": 5,
+          "position": 4767
+        },
+        "endLoc": {
+          "line": 437,
+          "column": 15,
+          "position": 4892
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/terminalTabStore.test.ts",
+        "start": 413,
+        "end": 423,
+        "startLoc": {
+          "line": 413,
+          "column": 5,
+          "position": 4612
+        },
+        "endLoc": {
+          "line": 423,
+          "column": 12,
+          "position": 4737
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": "vi.mock('os', async () => {\n  const actual = await vi.importActual<typeof import('os')>('os')\n  return {\n    ...actual,\n    default: {\n      ...actual,\n      homedir: () => TEST_DIR,\n    },\n    homedir: () => TEST_DIR,\n  }\n})\n\n// Mock child_process.exec to avoid running real CLI tools",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/unit/database-backup.test.ts",
+        "start": 14,
+        "end": 26,
+        "startLoc": {
+          "line": 14,
+          "column": 1,
+          "position": 132
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 59,
+          "position": 228
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/storage.test.ts",
+        "start": 11,
+        "end": 23,
+        "startLoc": {
+          "line": 11,
+          "column": 1,
+          "position": 124
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 21,
+          "position": 220
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ")\n\nvi.mock('os', async () => {\n  const actual = await vi.importActual<typeof import('os')>('os')\n  return {\n    ...actual,\n    default: {\n      ...actual,\n      homedir: () => TEST_DIR,\n    },\n    homedir: () => TEST_DIR,\n  }\n})\n\ndescribe",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 15,
+          "position": 137
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 9,
+          "position": 236
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/storage.test.ts",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 2,
+          "position": 121
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 21,
+          "position": 220
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 7,
+      "fragment": "],\n      })\n\n      expect(result.success).toBe(true)\n      const entries = fs.readdirSync(result.envPath)\n      const symlinks = entries.filter((e: string) => fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())\n      expect(symlinks).toHaveLength(1",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 147,
+        "end": 153,
+        "startLoc": {
+          "line": 147,
+          "column": 12,
+          "position": 1521
+        },
+        "endLoc": {
+          "line": 153,
+          "column": 2,
+          "position": 1608
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 124,
+        "end": 131,
+        "startLoc": {
+          "line": 124,
+          "column": 5,
+          "position": 1315
+        },
+        "endLoc": {
+          "line": 131,
+          "column": 2,
+          "position": 1403
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "],\n      })\n\n      expect(result.success).toBe(true)\n      const entries = fs.readdirSync(result.envPath)\n      const symlinks = entries.filter((e: string) => fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())\n      expect(symlinks).toHaveLength(1)\n      expect(symlinks).toContain('project-alpha'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 160,
+        "end": 167,
+        "startLoc": {
+          "line": 160,
+          "column": 12,
+          "position": 1673
+        },
+        "endLoc": {
+          "line": 167,
+          "column": 16,
+          "position": 1771
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 124,
+        "end": 154,
+        "startLoc": {
+          "line": 124,
+          "column": 5,
+          "position": 1315
+        },
+        "endLoc": {
+          "line": 154,
+          "column": 15,
+          "position": 1619
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": ")\n\n// Mock os.homedir to use temp directory\nvi.mock('os', async () => {\n  const actual = await vi.importActual<typeof import('os')>('os')\n  return {\n    ...actual,\n    default: {\n      ...actual,\n      homedir: () => TEST_DIR,\n    },\n    homedir: () => TEST_DIR,\n  }\n})\n\n// Mock uuid to return predictable IDs",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/workspace-ipc.test.ts",
+        "start": 8,
+        "end": 23,
+        "startLoc": {
+          "line": 8,
+          "column": 11,
+          "position": 112
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 39,
+          "position": 213
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/database-backup.test.ts",
+        "start": 11,
+        "end": 23,
+        "startLoc": {
+          "line": 11,
+          "column": 2,
+          "position": 127
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 21,
+          "position": 220
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 7,
+      "fragment": ", () => {\n    it('cycles only through tabs of the given workspace', () => {\n      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')\n      const a2 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A2')\n      useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')\n\n      useTerminalTabStore",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 97,
+        "end": 103,
+        "startLoc": {
+          "line": 97,
+          "column": 34,
+          "position": 966
+        },
+        "endLoc": {
+          "line": 103,
+          "column": 20,
+          "position": 1056
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 59,
+        "end": 65,
+        "startLoc": {
+          "line": 59,
+          "column": 34,
+          "position": 571
+        },
+        "endLoc": {
+          "line": 65,
+          "column": 35,
+          "position": 661
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "('ws-1')\n      expect(useTerminalTabStore.getState().activeTabId).toBe(a1)\n    })\n\n    it('does nothing if workspace has only one tab', () => {\n      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')\n      useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')\n      useTerminalTabStore.getState().setActiveTab(a1)\n\n      useTerminalTabStore.getState().activatePrev",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 110,
+        "end": 119,
+        "startLoc": {
+          "line": 110,
+          "column": 13,
+          "position": 1112
+        },
+        "endLoc": {
+          "line": 119,
+          "column": 13,
+          "position": 1213
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 73,
+        "end": 82,
+        "startLoc": {
+          "line": 73,
+          "column": 13,
+          "position": 720
+        },
+        "endLoc": {
+          "line": 82,
+          "column": 13,
+          "position": 821
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 7,
+      "fragment": ", () => {\n      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')\n      const a2 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A2')\n      useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')\n\n      useTerminalTabStore.getState().setActiveTab(a1)\n      useTerminalTabStore",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 209,
+        "end": 215,
+        "startLoc": {
+          "line": 209,
+          "column": 57,
+          "position": 2124
+        },
+        "endLoc": {
+          "line": 215,
+          "column": 20,
+          "position": 2213
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 60,
+        "end": 105,
+        "startLoc": {
+          "line": 60,
+          "column": 50,
+          "position": 584
+        },
+        "endLoc": {
+          "line": 105,
+          "column": 51,
+          "position": 1069
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": ", () => {\n      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')\n      useTerminalTabStore.getState().createTab('ws-1', '/a', 'A2')\n      const b1 = useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')\n\n      // closeOtherTabs keeps only the specified tab",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 234,
+        "end": 239,
+        "startLoc": {
+          "line": 234,
+          "column": 54,
+          "position": 2400
+        },
+        "endLoc": {
+          "line": 239,
+          "column": 47,
+          "position": 2477
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/terminal-session-navigation.test.ts",
+        "start": 163,
+        "end": 168,
+        "startLoc": {
+          "line": 163,
+          "column": 74,
+          "position": 1674
+        },
+        "endLoc": {
+          "line": 168,
+          "column": 41,
+          "position": 1751
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "const mockWebContentsSend = vi.fn()\nvi.mock('electron', () => ({\n  BrowserWindow: {\n    getAllWindows: () => [\n      {\n        isDestroyed: () => false,\n        webContents: {\n          send: mockWebContentsSend,\n          isDestroyed: () => false,\n        },\n      },\n    ],\n  },\n}))\n\ndescribe('Terminal IPC Handlers'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/terminal-ipc.test.ts",
+        "start": 50,
+        "end": 65,
+        "startLoc": {
+          "line": 50,
+          "column": 1,
+          "position": 515
+        },
+        "endLoc": {
+          "line": 65,
+          "column": 24,
+          "position": 622
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/updates-ipc.test.ts",
+        "start": 22,
+        "end": 37,
+        "startLoc": {
+          "line": 22,
+          "column": 1,
+          "position": 190
+        },
+        "endLoc": {
+          "line": 37,
+          "column": 22,
+          "position": 297
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ")\n\nvi.mock('os', async () => {\n  const actual = await vi.importActual<typeof import('os')>('os')\n  return {\n    ...actual,\n    default: {\n      ...actual,\n      homedir: () => TEST_DIR,\n    },\n    homedir: () => TEST_DIR,\n  }\n})\n\ndescribe('Session IPC Handlers'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/session-ipc.test.ts",
+        "start": 8,
+        "end": 22,
+        "startLoc": {
+          "line": 8,
+          "column": 11,
+          "position": 112
+        },
+        "endLoc": {
+          "line": 22,
+          "column": 23,
+          "position": 213
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/storage.test.ts",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 2,
+          "position": 121
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 28,
+          "position": 238
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ")\n\nvi.mock('os', async () => {\n  const actual = await vi.importActual<typeof import('os')>('os')\n  return {\n    ...actual,\n    default: {\n      ...actual,\n      homedir: () => TEST_DIR,\n    },\n    homedir: () => TEST_DIR,\n  }\n})\n\n// Mock Electron dialog",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/project-ipc.test.ts",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 15,
+          "position": 131
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 24,
+          "position": 230
+        }
+      },
+      "secondFile": {
+        "name": "tests/unit/storage.test.ts",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 2,
+          "position": 121
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 21,
+          "position": 220
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", { recursive: true, force: true })\n    }\n  })\n\n  afterAll(() => {\n    if (fs.existsSync(TEST_DIR)) {\n      fs.rmSync(TEST_DIR, { recursive: true, force: true })\n    }\n  })\n\n  it('enregistre tous les handlers project'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/project-ipc.test.ts",
+        "start": 65,
+        "end": 75,
+        "startLoc": {
+          "line": 65,
+          "column": 11,
+          "position": 610
+        },
+        "endLoc": {
+          "line": 75,
+          "column": 39,
+          "position": 695
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 52,
+        "end": 62,
+        "startLoc": {
+          "line": 52,
+          "column": 2,
+          "position": 560
+        },
+        "endLoc": {
+          "line": 62,
+          "column": 42,
+          "position": 645
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "${process.pid}-${Date.now()}`)\nconst dataDir = path.join(TEST_DIR, '.mirehub')\n\nvi.mock('os', async () => {\n  const actual = await vi.importActual<typeof import('os')>('os')\n  return {\n    ...actual,\n    default: {\n      ...actual,\n      homedir: () => TEST_DIR,\n    },\n    homedir: () => TEST_DIR,\n  }\n})\n\nlet",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-ipc.test.ts",
+        "start": 7,
+        "end": 22,
+        "startLoc": {
+          "line": 7,
+          "column": 27,
+          "position": 82
+        },
+        "endLoc": {
+          "line": 22,
+          "column": 4,
+          "position": 211
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/session-ipc.test.ts",
+        "start": 7,
+        "end": 23,
+        "startLoc": {
+          "line": 7,
+          "column": 28,
+          "position": 82
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 21,
+          "position": 220
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask() // no targetProjectId",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 166,
+        "end": 174,
+        "startLoc": {
+          "line": 166,
+          "column": 53,
+          "position": 1508
+        },
+        "endLoc": {
+          "line": 174,
+          "column": 22,
+          "position": 1673
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 108,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 108,
+          "column": 15,
+          "position": 960
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      // Simulate the Terminal component mounting and creating a PTY session",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 194,
+        "end": 209,
+        "startLoc": {
+          "line": 194,
+          "column": 7,
+          "position": 1810
+        },
+        "endLoc": {
+          "line": 209,
+          "column": 71,
+          "position": 2014
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 100,
+        "end": 115,
+        "startLoc": {
+          "line": 100,
+          "column": 7,
+          "position": 806
+        },
+        "endLoc": {
+          "line": 115,
+          "column": 27,
+          "position": 1010
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 18,
+      "fragment": ", async () => {\n      vi.useFakeTimers()\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      // Simulate PTY session ready",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 256,
+        "end": 273,
+        "startLoc": {
+          "line": 256,
+          "column": 74,
+          "position": 2438
+        },
+        "endLoc": {
+          "line": 273,
+          "column": 30,
+          "position": 2661
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 192,
+        "end": 115,
+        "startLoc": {
+          "line": 192,
+          "column": 68,
+          "position": 1791
+        },
+        "endLoc": {
+          "line": 115,
+          "column": 27,
+          "position": 1010
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 20,
+      "fragment": "useTerminalTabStore.setState({\n        tabs: [{\n          id: 'tab-new-1',\n          label: '[IA] Fix bug in auth',\n          color: '#fab387',\n          hasActivity: false,\n          paneTree: { type: 'leaf' as const, id: 'pane-1', sessionId: 'pty-session-1', initialCommand: null, externalSessionId: null },\n          activePaneId: 'pane-1',\n          zoomedPaneId: null,\n          workspaceId: 'ws-1',\n          cwd: '/tmp/workspace-env',\n          initialCommand: null,\n        }],\n        createTab: mockCreateTab as ReturnType<typeof useTerminalTabStore.getState>['createTab'],\n        setTabColor: mockSetTabColor,\n        setActiveTab: mockSetActiveTab as ReturnType<typeof useTerminalTabStore.getState>['setActiveTab'],\n        setTabActivity: mockSetTabActivity,\n      })\n\n      // Advance past poll (200ms) + Claude init delay (3000ms) + Enter delay (100ms)",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 274,
+        "end": 293,
+        "startLoc": {
+          "line": 274,
+          "column": 7,
+          "position": 2664
+        },
+        "endLoc": {
+          "line": 293,
+          "column": 80,
+          "position": 2849
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 210,
+        "end": 229,
+        "startLoc": {
+          "line": 210,
+          "column": 7,
+          "position": 2017
+        },
+        "endLoc": {
+          "line": 229,
+          "column": 65,
+          "position": 2202
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      const",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 312,
+        "end": 328,
+        "startLoc": {
+          "line": 312,
+          "column": 26,
+          "position": 2995
+        },
+        "endLoc": {
+          "line": 328,
+          "column": 6,
+          "position": 3211
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 115,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 115,
+          "column": 27,
+          "position": 1010
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      expect",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 340,
+        "end": 356,
+        "startLoc": {
+          "line": 340,
+          "column": 24,
+          "position": 3311
+        },
+        "endLoc": {
+          "line": 356,
+          "column": 7,
+          "position": 3527
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 115,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 115,
+          "column": 27,
+          "position": 1010
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      const writtenPrompt",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 393,
+        "end": 409,
+        "startLoc": {
+          "line": 393,
+          "column": 49,
+          "position": 3934
+        },
+        "endLoc": {
+          "line": 409,
+          "column": 14,
+          "position": 4152
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 328,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 328,
+          "column": 12,
+          "position": 3213
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      const initialCommand",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 414,
+        "end": 430,
+        "startLoc": {
+          "line": 414,
+          "column": 59,
+          "position": 4204
+        },
+        "endLoc": {
+          "line": 430,
+          "column": 15,
+          "position": 4422
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 328,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 328,
+          "column": 12,
+          "position": 3213
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      // Should NOT switch view — user stays on kanban to keep writing tickets",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 436,
+        "end": 452,
+        "startLoc": {
+          "line": 436,
+          "column": 62,
+          "position": 4485
+        },
+        "endLoc": {
+          "line": 452,
+          "column": 73,
+          "position": 4701
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 115,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 115,
+          "column": 27,
+          "position": 1010
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ", async () => {\n      vi.useFakeTimers()\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const tasks",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 513,
+        "end": 522,
+        "startLoc": {
+          "line": 513,
+          "column": 45,
+          "position": 5226
+        },
+        "endLoc": {
+          "line": 522,
+          "column": 6,
+          "position": 5390
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 192,
+        "end": 107,
+        "startLoc": {
+          "line": 192,
+          "column": 68,
+          "position": 1791
+        },
+        "endLoc": {
+          "line": 107,
+          "column": 5,
+          "position": 951
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", async () => {\n      vi.useFakeTimers()\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const tasks = [\n        makeTask({ id: 'task-1', status: 'WORKING'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 542,
+        "end": 552,
+        "startLoc": {
+          "line": 542,
+          "column": 55,
+          "position": 5580
+        },
+        "endLoc": {
+          "line": 552,
+          "column": 10,
+          "position": 5764
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 192,
+        "end": 523,
+        "startLoc": {
+          "line": 192,
+          "column": 68,
+          "position": 1791
+        },
+        "endLoc": {
+          "line": 523,
+          "column": 7,
+          "position": 5410
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      // Existing WORKING task",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 570,
+        "end": 578,
+        "startLoc": {
+          "line": 570,
+          "column": 47,
+          "position": 5926
+        },
+        "endLoc": {
+          "line": 578,
+          "column": 25,
+          "position": 6081
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 107,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 107,
+          "column": 6,
+          "position": 949
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", async () => {\n      vi.useFakeTimers()\n\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      useKanbanStore",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 595,
+        "end": 605,
+        "startLoc": {
+          "line": 595,
+          "column": 49,
+          "position": 6229
+        },
+        "endLoc": {
+          "line": 605,
+          "column": 15,
+          "position": 6392
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 192,
+        "end": 107,
+        "startLoc": {
+          "line": 192,
+          "column": 68,
+          "position": 1791
+        },
+        "endLoc": {
+          "line": 107,
+          "column": 6,
+          "position": 949
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": ", async () => {\n      vi.useFakeTimers()\n\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      useKanbanStore.setState({\n        tasks: [\n          makeTask({ id: 'task-1', status: 'WORKING' }),\n          makeTask({ id: 'task-2', status: 'TODO', priority: 'medium'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 632,
+        "end": 645,
+        "startLoc": {
+          "line": 632,
+          "column": 51,
+          "position": 6620
+        },
+        "endLoc": {
+          "line": 645,
+          "column": 9,
+          "position": 6835
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 192,
+        "end": 608,
+        "startLoc": {
+          "line": 192,
+          "column": 68,
+          "position": 1791
+        },
+        "endLoc": {
+          "line": 608,
+          "column": 7,
+          "position": 6444
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ")\n\n      useKanbanStore.setState({\n        tasks: [\n          makeTask({ id: 'task-1', status: 'WORKING' }),\n          makeTask({ id: 'task-2', status: 'TODO', priority: 'high', createdAt: 2000 }),\n        ],\n        kanbanTabIds: { 'task-1': 'tab-abc' },\n      })\n\n      mockKanbanList",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 667,
+        "end": 677,
+        "startLoc": {
+          "line": 667,
+          "column": 2,
+          "position": 7018
+        },
+        "endLoc": {
+          "line": 677,
+          "column": 15,
+          "position": 7110
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 603,
+        "end": 613,
+        "startLoc": {
+          "line": 603,
+          "column": 2,
+          "position": 6388
+        },
+        "endLoc": {
+          "line": 613,
+          "column": 45,
+          "position": 6480
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", async () => {\n      vi.useFakeTimers()\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const tasks = [\n        makeTask({ id: 'task-low'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 695,
+        "end": 705,
+        "startLoc": {
+          "line": 695,
+          "column": 33,
+          "position": 7250
+        },
+        "endLoc": {
+          "line": 705,
+          "column": 11,
+          "position": 7428
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 192,
+        "end": 523,
+        "startLoc": {
+          "line": 192,
+          "column": 68,
+          "position": 1791
+        },
+        "endLoc": {
+          "line": 523,
+          "column": 9,
+          "position": 5404
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", async () => {\n      vi.useFakeTimers()\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const tasks = [\n        makeTask({ id: 'task-new'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 724,
+        "end": 734,
+        "startLoc": {
+          "line": 724,
+          "column": 41,
+          "position": 7649
+        },
+        "endLoc": {
+          "line": 734,
+          "column": 11,
+          "position": 7827
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 192,
+        "end": 523,
+        "startLoc": {
+          "line": 192,
+          "column": 68,
+          "position": 1791
+        },
+        "endLoc": {
+          "line": 523,
+          "column": 9,
+          "position": 5404
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask({",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 799,
+        "end": 807,
+        "startLoc": {
+          "line": 799,
+          "column": 51,
+          "position": 8416
+        },
+        "endLoc": {
+          "line": 807,
+          "column": 2,
+          "position": 8579
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 107,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 107,
+          "column": 2,
+          "position": 957
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ")\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      const writtenPrompt = mockKanbanWritePrompt.mock.calls[0]![2] as string\n      expect(writtenPrompt).toContain('Fichiers joints'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 812,
+        "end": 821,
+        "startLoc": {
+          "line": 812,
+          "column": 2,
+          "position": 8683
+        },
+        "endLoc": {
+          "line": 821,
+          "column": 18,
+          "position": 8767
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 401,
+        "end": 410,
+        "startLoc": {
+          "line": 401,
+          "column": 2,
+          "position": 4097
+        },
+        "endLoc": {
+          "line": 410,
+          "column": 10,
+          "position": 4181
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask() // no attachments",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 828,
+        "end": 836,
+        "startLoc": {
+          "line": 828,
+          "column": 65,
+          "position": 8823
+        },
+        "endLoc": {
+          "line": 836,
+          "column": 18,
+          "position": 8988
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 108,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 108,
+          "column": 15,
+          "position": 960
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      const writtenPrompt = mockKanbanWritePrompt.mock.calls[0]![2] as string\n      expect(writtenPrompt).not",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 837,
+        "end": 845,
+        "startLoc": {
+          "line": 837,
+          "column": 7,
+          "position": 8991
+        },
+        "endLoc": {
+          "line": 845,
+          "column": 4,
+          "position": 9070
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 402,
+        "end": 410,
+        "startLoc": {
+          "line": 402,
+          "column": 7,
+          "position": 4100
+        },
+        "endLoc": {
+          "line": 410,
+          "column": 10,
+          "position": 4179
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ", async () => {\n      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')\n      useWorkspaceStore.setState({\n        activeWorkspaceId: 'ws-1',\n        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],\n        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],\n      })\n\n      const task = makeTask()\n      useKanbanStore.setState({ tasks: [task] })\n\n      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')\n      mockKanbanUpdate.mockResolvedValue(undefined)\n\n      await useKanbanStore.getState().sendToClaude(task)\n\n      expect(mockSetViewMode",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 850,
+        "end": 866,
+        "startLoc": {
+          "line": 850,
+          "column": 59,
+          "position": 9103
+        },
+        "endLoc": {
+          "line": 866,
+          "column": 16,
+          "position": 9321
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/kanban-claude.test.ts",
+        "start": 99,
+        "end": 356,
+        "startLoc": {
+          "line": 99,
+          "column": 44,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 356,
+          "column": 15,
+          "position": 3529
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", { recursive: true, force: true })\n    }\n  })\n\n  afterAll(() => {\n    if (fs.existsSync(TEST_DIR)) {\n      fs.rmSync(TEST_DIR, { recursive: true, force: true })\n    }\n  })\n\n  it('enregistre tous les handlers git'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/git-ipc.test.ts",
+        "start": 47,
+        "end": 57,
+        "startLoc": {
+          "line": 47,
+          "column": 8,
+          "position": 444
+        },
+        "endLoc": {
+          "line": 57,
+          "column": 35,
+          "position": 529
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 52,
+        "end": 62,
+        "startLoc": {
+          "line": 52,
+          "column": 2,
+          "position": 560
+        },
+        "endLoc": {
+          "line": 62,
+          "column": 42,
+          "position": 645
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", { recursive: true, force: true })\n    }\n  })\n\n  afterAll(() => {\n    if (fs.existsSync(TEST_DIR)) {\n      fs.rmSync(TEST_DIR, { recursive: true, force: true })\n    }\n  })\n\n  it('enregistre les 8 handlers filesystem'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/filesystem-ipc.test.ts",
+        "start": 29,
+        "end": 39,
+        "startLoc": {
+          "line": 29,
+          "column": 13,
+          "position": 297
+        },
+        "endLoc": {
+          "line": 39,
+          "column": 39,
+          "position": 382
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/workspaceEnv-ipc.test.ts",
+        "start": 52,
+        "end": 62,
+        "startLoc": {
+          "line": 52,
+          "column": 2,
+          "position": 560
+        },
+        "endLoc": {
+          "line": 62,
+          "column": 42,
+          "position": 645
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "}, null, 2)\n      fs.writeFileSync(filePath, jsonContent, 'utf-8')\n\n      const result = await mockIpcMain._invoke('fs:readFile', { path: filePath })\n\n      expect(result.content).toBe(jsonContent)\n      expect(result.error).toBeNull()\n    }",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/filesystem-ipc.test.ts",
+        "start": 139,
+        "end": 146,
+        "startLoc": {
+          "line": 139,
+          "column": 2,
+          "position": 1602
+        },
+        "endLoc": {
+          "line": 146,
+          "column": 2,
+          "position": 1679
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/filesystem-ipc.test.ts",
+        "start": 126,
+        "end": 133,
+        "startLoc": {
+          "line": 126,
+          "column": 2,
+          "position": 1432
+        },
+        "endLoc": {
+          "line": 133,
+          "column": 26,
+          "position": 1509
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "${process.pid}-${Date.now()}`)\nconst dataDir = path.join(TEST_DIR, '.mirehub')\n\nvi.mock('os', async () => {\n  const actual = await vi.importActual<typeof import('os')>('os')\n  return {\n    ...actual,\n    default: {\n      ...actual,\n      homedir: () => TEST_DIR,\n    },\n    homedir: () => TEST_DIR,\n  }\n})\n\n// Mock Electron's Notification",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/app-ipc.test.ts",
+        "start": 8,
+        "end": 23,
+        "startLoc": {
+          "line": 8,
+          "column": 24,
+          "position": 94
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 32,
+          "position": 223
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/session-ipc.test.ts",
+        "start": 7,
+        "end": 23,
+        "startLoc": {
+          "line": 7,
+          "column": 28,
+          "position": 82
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 21,
+          "position": 220
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ", () => {\n  let mockIpcMain: ReturnType<typeof createMockIpcMain>\n\n  beforeEach(async () => {\n    vi.resetModules()\n\n    if (fs.existsSync(dataDir)) {\n      fs.rmSync(dataDir, { recursive: true, force: true })\n    }\n    fs.mkdirSync(dataDir, { recursive: true })\n\n    const { registerAppHandlers",
+      "tokens": 0,
+      "firstFile": {
+        "name": "tests/integration/app-ipc.test.ts",
+        "start": 34,
+        "end": 45,
+        "startLoc": {
+          "line": 34,
+          "column": 19,
+          "position": 290
+        },
+        "endLoc": {
+          "line": 45,
+          "column": 20,
+          "position": 398
+        }
+      },
+      "secondFile": {
+        "name": "tests/integration/session-ipc.test.ts",
+        "start": 22,
+        "end": 33,
+        "startLoc": {
+          "line": 22,
+          "column": 23,
+          "position": 214
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 24,
+          "position": 322
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 70,
+      "fragment": " }}>\n                <NpmPanel />\n              </div>\n            )}\n            {viewMode === 'file' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <FileViewer />\n              </div>\n            )}\n            {viewMode === 'diff' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <FileDiffViewer />\n              </div>\n            )}\n            {viewMode === 'claude' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <ClaudeRulesPanel />\n              </div>\n            )}\n            {viewMode === 'settings' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <SettingsPanel />\n              </div>\n            )}\n            {viewMode === 'search' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <GlobalSearch />\n              </div>\n            )}\n            {viewMode === 'todos' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <TodoScanner />\n              </div>\n            )}\n            {viewMode === 'shortcuts' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <ShortcutsPanel />\n              </div>\n            )}\n            {viewMode === 'stats' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <ProjectStats />\n              </div>\n            )}\n            {viewMode === 'prompts' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <PromptTemplates />\n              </div>\n            )}\n            {viewMode === 'api' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <ApiTesterPanel />\n              </div>\n            )}\n            {viewMode === 'database' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <DatabaseExplorer />\n              </div>\n            )}\n            {viewMode === 'analysis' && (\n              <div className=\"view-panel\" style={{ display: 'flex' }}>\n                <CodeAnalysisPanel />\n              </div>\n            )}\n          </div>\n        </div>\n      </div>\n      {sessionChecked && pendingSession && (\n        <SessionModal\n          session={pendingSession",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/renderer/App.tsx",
+        "start": 422,
+        "end": 491,
+        "startLoc": {
+          "line": 422,
+          "column": 7,
+          "position": 4403
+        },
+        "endLoc": {
+          "line": 491,
+          "column": 15,
+          "position": 5057
+        }
+      },
+      "secondFile": {
+        "name": "src/renderer/App.tsx",
+        "start": 418,
+        "end": 447,
+        "startLoc": {
+          "line": 418,
+          "column": 7,
+          "position": 4357
+        },
+        "endLoc": {
+          "line": 447,
+          "column": 2,
+          "position": 4648
+        }
+      }
+    }
+  ],
+  "filename": "/node-deps/node_modules/@jscpd/html-reporter/dist/templates/main.pug"
+}

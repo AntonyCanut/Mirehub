@@ -1,0 +1,266 @@
+[0001]  WARN no explicit name and version provided for directory source, deriving artifact ID from the given path (which is not ideal)
+NAME                                                                VERSION                             TYPE                                      
+7-Zip                                                               16.04                               binary                  (+1 duplicate)    
+7-Zip                                                               20.02                               binary                  (+3 duplicates)   
+7-Zip                                                               21.02                               binary                                    
+7-Zip                                                               21.07                               binary                  (+1 duplicate)    
+@azure-rest/core-client                                             2.5.1                               npm                                       
+@azure/abort-controller                                             2.1.2                               npm                                       
+@azure/core-auth                                                    1.10.1                              npm                                       
+@azure/core-client                                                  1.10.1                              npm                                       
+@azure/core-http-compat                                             2.3.2                               npm                                       
+@azure/core-lro                                                     2.7.2                               npm                                       
+@azure/core-paging                                                  1.6.2                               npm                                       
+@azure/core-rest-pipeline                                           1.22.2                              npm                                       
+@azure/core-tracing                                                 1.3.1                               npm                                       
+@azure/core-util                                                    1.13.1                              npm                                       
+@azure/identity                                                     4.13.0                              npm                                       
+@azure/keyvault-common                                              2.0.0                               npm                                       
+@azure/keyvault-keys                                                4.10.0                              npm                                       
+@azure/logger                                                       1.3.0                               npm                                       
+@azure/msal-browser                                                 4.28.2                              npm                                       
+@azure/msal-common                                                  15.14.2                             npm                                       
+@azure/msal-node                                                    3.8.7                               npm                                       
+@js-joda/core                                                       5.7.0                               npm                                       
+@monaco-editor/loader                                               1.7.0                               npm                                       
+@monaco-editor/react                                                4.7.0                               npm                                       
+@mongodb-js/saslprep                                                1.4.6                               npm                                       
+@tediousjs/connection-string                                        0.6.0                               npm                                       
+@types/node                                                         22.19.11                            npm                                       
+@types/readable-stream                                              4.0.23                              npm                                       
+@types/trusted-types                                                2.0.7                               npm                                       
+@types/webidl-conversions                                           7.0.3                               npm                                       
+@types/whatwg-url                                                   13.0.0                              npm                                       
+@typespec/ts-http-runtime                                           0.3.3                               npm                                       
+Authenticode(R) - signing and verifying tool                        10.0.22000.194                      binary                                    
+Authenticode(R) - signing and verifying tool                        6.1.7600.16385                      binary                                    
+ConPTY Interface Library                                            1.23.251008001                      binary                  (+3 duplicates)   
+Console Window and PTY Host (Open Source)                           1.23.251008001                      binary                  (+3 duplicates)   
+NuGet                                                               2.8.50926.602                       dotnet                                    
+Squirrel                                                            2.0.1.1                             dotnet                  (+2 duplicates)   
+Squirrel-based application                                          1.9.1.0                             binary                                    
+StubExecutable                                                      UNKNOWN                             binary                                    
+Windows Installer XML Toolset                                       3.10.0.2103                         binary                                    
+Windows Installer XML Toolset                                       3.10.0.2103                         dotnet                  (+6 duplicates)   
+WriteZipToSetup                                                     UNKNOWN                             binary                                    
+abort-controller                                                    3.0.0                               npm                                       
+actions/cache                                                       v1                                  github-action                             
+actions/checkout                                                    v1                                  github-action                             
+actions/checkout                                                    v2                                  github-action           (+6 duplicates)   
+actions/checkout                                                    v4                                  github-action           (+2 duplicates)   
+actions/checkout                                                    v6                                  github-action                             
+actions/configure-pages                                             v5                                  github-action                             
+actions/deploy-pages                                                v4                                  github-action                             
+actions/setup-node                                                  v1                                  github-action           (+5 duplicates)   
+actions/setup-node                                                  v2                                  github-action                             
+actions/setup-node                                                  v3                                  github-action                             
+actions/setup-node                                                  v4                                  github-action           (+1 duplicate)    
+actions/setup-node                                                  v6.1.0                              github-action                             
+actions/upload-pages-artifact                                       v3                                  github-action                             
+agent-base                                                          7.1.4                               npm                                       
+ajv                                                                 8.18.0                              npm                                       
+ajv-formats                                                         3.0.1                               npm                                       
+app-builder                                                         UNKNOWN                             binary                  (+2 duplicates)   
+argparse                                                            2.0.1                               npm                                       
+atomically                                                          2.1.1                               npm                                       
+aws-ssl-profiles                                                    1.1.2                               npm                                       
+base64-js                                                           1.5.1                               npm                                       
+better-sqlite3                                                      12.6.2                              npm                                       
+bindings                                                            1.5.0                               npm                                       
+bl                                                                  4.1.0                               npm                                       
+bl                                                                  6.1.6                               npm                                       
+bson                                                                7.2.0                               npm                                       
+buffer                                                              5.7.1                               npm                                       
+buffer                                                              6.0.3                               npm                                       
+buffer-equal-constant-time                                          1.0.1                               npm                                       
+builder-util-runtime                                                9.5.1                               npm                                       
+bundle-name                                                         4.1.0                               npm                                       
+chownr                                                              1.1.4                               npm                                       
+commander                                                           11.1.0                              npm                                       
+conf                                                                14.0.0                              npm                                       
+coverallsapp/github-action                                          master                              github-action           (+1 duplicate)    
+debounce-fn                                                         6.0.0                               npm                                       
+debug                                                               4.4.3                               npm                                       
+decompress-response                                                 6.0.0                               npm                                       
+deep-extend                                                         0.6.0                               npm                                       
+default-browser                                                     5.5.0                               npm                                       
+default-browser-id                                                  5.0.1                               npm                                       
+define-lazy-prop                                                    3.0.0                               npm                                       
+denque                                                              2.1.0                               npm                                       
+detect-libc                                                         2.1.2                               npm                                       
+dompurify                                                           3.2.7                               npm                                       
+dot-prop                                                            9.0.0                               npm                                       
+ecdsa-sig-formatter                                                 1.0.11                              npm                                       
+electron-store                                                      10.1.0                              npm                                       
+electron-updater                                                    6.8.3                               npm                                       
+end-of-stream                                                       1.4.5                               npm                                       
+env-paths                                                           3.0.0                               npm                                       
+event-target-shim                                                   5.0.1                               npm                                       
+events                                                              3.3.0                               npm                                       
+expand-template                                                     2.0.3                               npm                                       
+fast-deep-equal                                                     3.1.3                               npm                                       
+fast-uri                                                            3.1.0                               npm                                       
+fastify/workflows/.github/workflows/plugins-ci-package-manager.yml  v5                                  github-action-workflow                    
+fastify/workflows/.github/workflows/plugins-ci.yml                  v5                                  github-action-workflow                    
+file-uri-to-path                                                    1.0.0                               npm                                       
+fs-constants                                                        1.0.0                               npm                                       
+fs-extra                                                            10.1.0                              npm                                       
+generate-function                                                   2.3.1                               npm                                       
+github-from-package                                                 0.0.0                               npm                                       
+github.com/aclements/go-rabin                                       v0.0.0-20170911142644-d0b643ea1a4c  go-module               (+10 duplicates)  
+github.com/alecthomas/kingpin                                       v2.2.6+incompatible                 go-module               (+10 duplicates)  
+github.com/alecthomas/template                                      v0.0.0-20190718012654-fb15b899a751  go-module               (+10 duplicates)  
+github.com/alecthomas/units                                         v0.0.0-20211218093645-b94a6e3cc137  go-module               (+10 duplicates)  
+github.com/aws/aws-sdk-go                                           v1.45.7                             go-module               (+10 duplicates)  
+github.com/biessek/golang-ico                                       v0.0.0-20180326222316-d348d9ea4670  go-module               (+10 duplicates)  
+github.com/develar/app-builder                                      v0.0.0-20241212193511-580c34f2e193  go-module               (+10 duplicates)  
+github.com/develar/errors                                           v0.9.0                              go-module               (+10 duplicates)  
+github.com/develar/go-fs-util                                       v0.0.0-20190620175131-69a2d4542206  go-module               (+10 duplicates)  
+github.com/develar/go-pkcs12                                        v0.0.0-20181115143544-54baa4f32c6a  go-module               (+10 duplicates)  
+github.com/disintegration/imaging                                   v1.6.2                              go-module               (+10 duplicates)  
+github.com/dustin/go-humanize                                       v1.0.1                              go-module               (+10 duplicates)  
+github.com/evanw/esbuild                                            v0.0.0-20251101233416-208f539945b1  go-module               (+1 duplicate)    
+github.com/jmespath/go-jmespath                                     v0.4.0                              go-module               (+10 duplicates)  
+github.com/json-iterator/go                                         v1.1.12                             go-module               (+10 duplicates)  
+github.com/jsummers/gobmp                                           v0.0.0-20230614200233-a9de23ed2e25  go-module               (+10 duplicates)  
+github.com/mattn/go-colorable                                       v0.1.13                             go-module               (+10 duplicates)  
+github.com/mattn/go-isatty                                          v0.0.19                             go-module               (+10 duplicates)  
+github.com/mcuadros/go-version                                      v0.0.0-20190830083331-035f6764e8d2  go-module               (+10 duplicates)  
+github.com/minio/blake2b-simd                                       v0.0.0-20160723061019-3f5f724cb5b1  go-module               (+10 duplicates)  
+github.com/mitchellh/go-homedir                                     v1.1.0                              go-module               (+10 duplicates)  
+github.com/modern-go/concurrent                                     v0.0.0-20180306012644-bacd9c7ef1dd  go-module               (+10 duplicates)  
+github.com/modern-go/reflect2                                       v1.0.2                              go-module               (+10 duplicates)  
+github.com/oxtoacart/bpool                                          v0.0.0-20190530202638-03653db5a59c  go-module               (+10 duplicates)  
+github.com/phayes/permbits                                          v0.0.0-20190612203442-39d7c581d2ee  go-module               (+10 duplicates)  
+github.com/pkg/errors                                               v0.9.1                              go-module               (+10 duplicates)  
+github.com/pkg/xattr                                                v0.4.9                              go-module               (+7 duplicates)   
+github.com/segmentio/ksuid                                          v1.0.4                              go-module               (+10 duplicates)  
+github.com/zieckey/goini                                            v0.0.0-20180118150432-0da17d361d26  go-module               (+10 duplicates)  
+go.uber.org/multierr                                                v1.11.0                             go-module               (+10 duplicates)  
+go.uber.org/zap                                                     v1.25.0                             go-module               (+10 duplicates)  
+golang.org/x/image                                                  v0.12.0                             go-module               (+10 duplicates)  
+golang.org/x/sys                                                    v0.0.0-20220715151400-c0bba94af5f8  go-module               (+1 duplicate)    
+golang.org/x/sys                                                    v0.12.0                             go-module               (+7 duplicates)   
+gopkg.in/alessio/shellescape.v1                                     v1.0.0-20170105083845-52074bc9df61  go-module               (+10 duplicates)  
+graceful-fs                                                         4.2.11                              npm                                       
+howett.net/plist                                                    v1.0.0                              go-module               (+10 duplicates)  
+http-proxy-agent                                                    7.0.2                               npm                                       
+https-proxy-agent                                                   7.0.6                               npm                                       
+iconv-lite                                                          0.7.2                               npm                                       
+ieee754                                                             1.2.1                               npm                                       
+ignore                                                              7.0.5                               npm                                       
+inherits                                                            2.0.4                               npm                                       
+ini                                                                 1.3.8                               npm                                       
+ip-address                                                          10.1.0                              npm                                       
+is-docker                                                           3.0.0                               npm                                       
+is-inside-container                                                 1.0.0                               npm                                       
+is-property                                                         1.0.2                               npm                                       
+is-wsl                                                              3.1.1                               npm                                       
+js-md4                                                              0.3.2                               npm                                       
+js-yaml                                                             4.1.1                               npm                                       
+json-schema-traverse                                                1.0.0                               npm                                       
+json-schema-typed                                                   8.0.2                               npm                                       
+jsonfile                                                            6.2.0                               npm                                       
+jsonwebtoken                                                        9.0.3                               npm                                       
+jwa                                                                 2.0.1                               npm                                       
+jws                                                                 4.0.1                               npm                                       
+lazy-val                                                            1.0.5                               npm                                       
+lodash.escaperegexp                                                 4.1.2                               npm                                       
+lodash.includes                                                     4.3.0                               npm                                       
+lodash.isboolean                                                    3.0.3                               npm                                       
+lodash.isequal                                                      4.5.0                               npm                                       
+lodash.isinteger                                                    4.0.4                               npm                                       
+lodash.isnumber                                                     3.0.3                               npm                                       
+lodash.isplainobject                                                4.0.6                               npm                                       
+lodash.isstring                                                     4.0.1                               npm                                       
+lodash.once                                                         4.1.1                               npm                                       
+long                                                                5.3.2                               npm                                       
+lru.min                                                             1.1.4                               npm                                       
+marked                                                              14.0.0                              npm                                       
+memory-pager                                                        1.5.0                               npm                                       
+mimic-function                                                      5.0.1                               npm                                       
+mimic-response                                                      3.1.0                               npm                                       
+minimist                                                            1.2.8                               npm                                       
+mirehub                                                             0.1.0                               npm                                       
+mkdirp-classic                                                      0.5.3                               npm                                       
+monaco-editor                                                       0.55.1                              npm                                       
+mongodb                                                             7.1.0                               npm                                       
+mongodb-connection-string-url                                       7.0.1                               npm                                       
+ms                                                                  2.1.3                               npm                                       
+mssql                                                               12.2.0                              npm                                       
+mysql2                                                              3.17.4                              npm                                       
+named-placeholders                                                  1.1.6                               npm                                       
+napi-build-utils                                                    2.0.0                               npm                                       
+native-duplexpair                                                   1.0.0                               npm                                       
+node-abi                                                            3.87.0                              npm                                       
+node-addon-api                                                      7.1.1                               npm                                       
+node-pty                                                            1.1.0                               npm                                       
+once                                                                1.4.0                               npm                                       
+open                                                                10.2.0                              npm                                       
+pg                                                                  8.18.0                              npm                                       
+pg-cloudflare                                                       1.3.0                               npm                                       
+pg-connection-string                                                2.11.0                              npm                                       
+pg-int8                                                             1.0.1                               npm                                       
+pg-pool                                                             3.11.0                              npm                                       
+pg-protocol                                                         1.11.0                              npm                                       
+pg-types                                                            2.2.0                               npm                                       
+pgpass                                                              1.0.5                               npm                                       
+postgres-array                                                      2.0.0                               npm                                       
+postgres-bytea                                                      1.0.1                               npm                                       
+postgres-date                                                       1.0.7                               npm                                       
+postgres-interval                                                   1.2.0                               npm                                       
+prebuild-install                                                    7.1.3                               npm                                       
+process                                                             0.11.10                             npm                                       
+pump                                                                3.0.3                               npm                                       
+punycode                                                            2.3.1                               npm                                       
+rc                                                                  1.2.8                               npm                                       
+rcedit                                                              0.2.0                               binary                                    
+react                                                               19.2.4                              npm                                       
+react-dom                                                           19.2.4                              npm                                       
+readable-stream                                                     3.6.2                               npm                                       
+readable-stream                                                     4.7.0                               npm                                       
+require-from-string                                                 2.0.2                               npm                                       
+run-applescript                                                     7.1.0                               npm                                       
+safe-buffer                                                         5.2.1                               npm                                       
+safer-buffer                                                        2.1.2                               npm                                       
+sax                                                                 1.4.4                               npm                                       
+scheduler                                                           0.27.0                              npm                                       
+semver                                                              7.7.4                               npm                                       
+simple-concat                                                       1.0.1                               npm                                       
+simple-get                                                          4.0.1                               npm                                       
+smart-buffer                                                        4.2.0                               npm                                       
+socks                                                               2.8.7                               npm                                       
+sparse-bitfield                                                     3.0.3                               npm                                       
+split2                                                              4.2.0                               npm                                       
+sprintf-js                                                          1.1.3                               npm                                       
+sql-escaper                                                         1.3.3                               npm                                       
+state-local                                                         1.0.7                               npm                                       
+stdlib                                                              go1.21.13                           go-module               (+10 duplicates)  
+stdlib                                                              go1.23.12                           go-module               (+1 duplicate)    
+string_decoder                                                      1.3.0                               npm                                       
+strip-json-comments                                                 2.0.1                               npm                                       
+stubborn-fs                                                         2.0.0                               npm                                       
+stubborn-utils                                                      1.0.2                               npm                                       
+tar-fs                                                              2.1.4                               npm                                       
+tar-stream                                                          2.2.0                               npm                                       
+tarn                                                                3.0.2                               npm                                       
+tedious                                                             19.2.1                              npm                                       
+tiny-typed-emitter                                                  2.1.0                               npm                                       
+tr46                                                                5.1.1                               npm                                       
+tslib                                                               2.8.1                               npm                                       
+tunnel-agent                                                        0.6.0                               npm                                       
+type-fest                                                           4.41.0                              npm                                       
+uint8array-extras                                                   1.5.0                               npm                                       
+undici-types                                                        6.21.0                              npm                                       
+universalify                                                        2.0.1                               npm                                       
+util-deprecate                                                      1.0.2                               npm                                       
+uuid                                                                11.1.0                              npm                                       
+uuid                                                                8.3.2                               npm                                       
+webidl-conversions                                                  7.0.0                               npm                                       
+whatwg-url                                                          14.2.0                              npm                                       
+when-exit                                                           2.1.5                               npm                                       
+winpty                                                              UNKNOWN                             binary                  (+1 duplicate)    
+winpty-agent                                                        UNKNOWN                             binary                  (+1 duplicate)    
+wrappy                                                              1.0.2                               npm                                       
+wsl-utils                                                           0.1.0                               npm                                       
+xtend                                                               4.0.2                               npm

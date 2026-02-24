@@ -1,0 +1,1018 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Copy/Paste Detector Report</title><link href="styles/tailwind.css" rel="stylesheet"><link href="styles/prism.css" rel="stylesheet"></head><body class="bg-gray-100"><header class="bg-white shadow py-4"><div class="container mx-auto px-4"><h1 class="text-3xl font-semibold text-gray-800">jscpd - copy/paste report</h1></div></header><main class="container mx-auto my-8 p-4 bg-white shadow rounded"><section class="mb-8" id="dashboard"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Dashboard</h2><div class="grid grid-cols-4 gap-4"><div class="bg-blue-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-blue-800 mb-2">Total Files</h3><span class="text-4xl font-bold text-blue-800">169</span></div><div class="bg-green-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-green-800 mb-2">Total Lines of Code</h3><span class="text-4xl font-bold text-green-800">38307</span></div><div class="bg-yellow-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-yellow-800 mb-2">Number of Clones</h3><span class="text-4xl font-bold text-yellow-800">90</span></div><div class="bg-red-200 p-4 rounded text-center"><h3 class="text-lg font-semibold text-red-800 mb-2">Duplicated Lines</h3><span class="text-4xl font-bold text-red-800">1009 (2.63%)</span></div></div></section><section class="mb-8" id="formats"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Formats with Duplications</h2><table class="w-full table-auto"><thead><tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"><th class="py-3 px-6 text-left">Format</th><th class="py-3 px-6 text-left">Files</th><th class="py-3 px-6 text-left">Lines</th><th class="py-3 px-6 text-left">Clones</th><th class="py-3 px-6 text-left">Duplicated Lines</th><th class="py-3 px-6 text-left">Duplicated Tokens</th></tr></thead><tbody><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#typescript-clones">typescript</a></td><td class="py-3 px-6">77</td><td class="py-3 px-6">20872</td><td class="py-3 px-6">68</td><td class="py-3 px-6">738</td><td class="py-3 px-6">8649</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#css-clones">css</a></td><td class="py-3 px-6">4</td><td class="py-3 px-6">951</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#javascript-clones">javascript</a></td><td class="py-3 px-6">43</td><td class="py-3 px-6">4809</td><td class="py-3 px-6">1</td><td class="py-3 px-6">69</td><td class="py-3 px-6">654</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#tsx-clones">tsx</a></td><td class="py-3 px-6">43</td><td class="py-3 px-6">11520</td><td class="py-3 px-6">21</td><td class="py-3 px-6">202</td><td class="py-3 px-6">2045</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#bash-clones">bash</a></td><td class="py-3 px-6">1</td><td class="py-3 px-6">18</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr><tr class="bg-white border-b border-gray-200 text-gray-800 text-sm"><td class="py-3 px-6"><a class="text-blue-600 hover:underline" href="#markdown-clones">markdown</a></td><td class="py-3 px-6">1</td><td class="py-3 px-6">137</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td><td class="py-3 px-6">0</td></tr></tbody></table></section><section class="mb-8" id="txt-clones"><a name="typescript-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">typescript</h2><div class="divide-y divide-gray-200 border-b-2"><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/postgresql.ts (Line 273:7 - Line 287:3), src/main/services/database/drivers/sqlite.ts (Line 199:7 - Line 213:80)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn0" onclick="toggleCodeBlock('cloneGroup0', 'expandBtn0', 'collapseBtn0')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn0" onclick="toggleCodeBlock('cloneGroup0', 'expandBtn0', 'collapseBtn0')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup0"><code class="language-typescript text-sm text-gray-800">}
+    } catch (err) {
+      const executionTime = Date.now() - startTime
+      return {
+        columns: [],
+        rows: [],
+        rowCount: 0,
+        executionTime,
+        error: String(err),
+      }
+    }
+  }
+
+  cancelQuery(): void {
+    if</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/mysql.ts (Line 173:5 - Line 184:4), src/main/services/database/drivers/postgresql.ts (Line 217:5 - Line 228:60)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn1" onclick="toggleCodeBlock('cloneGroup1', 'expandBtn1', 'collapseBtn1')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn1" onclick="toggleCodeBlock('cloneGroup1', 'expandBtn1', 'collapseBtn1')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup1"><code class="language-typescript text-sm text-gray-800">}
+
+    return { columns, indexes, rowCount }
+  }
+
+  async executeQuery(sql: string, limit?: number, offset?: number): Promise&lt;DbQueryResult&gt; {
+    if (!this.pool) throw new Error('Not connected')
+
+    const startTime = Date.now()
+
+    try {
+      let</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/mysql.ts (Line 184:4 - Line 195:5), src/main/services/database/drivers/sqlite.ts (Line 150:9 - Line 161:3)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn2" onclick="toggleCodeBlock('cloneGroup2', 'expandBtn2', 'collapseBtn2')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn2" onclick="toggleCodeBlock('cloneGroup2', 'expandBtn2', 'collapseBtn2')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup2"><code class="language-typescript text-sm text-gray-800">.trim()
+      const isSelect = wrappedSql.toUpperCase().startsWith('SELECT')
+
+      if (isSelect &amp;&amp; limit !== undefined &amp;&amp; !queryHasLimitClause(wrappedSql)) {
+        wrappedSql = wrappedSql.replace(/;\s*$/, '')
+        wrappedSql = `${wrappedSql} LIMIT ${limit}`
+        if (offset !== undefined &amp;&amp; offset &gt; 0) {
+          wrappedSql = `${wrappedSql} OFFSET ${offset}`
+        }
+      }
+
+      this</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/mysql.ts (Line 231:2 - Line 246:17), src/main/services/database/drivers/postgresql.ts (Line 272:2 - Line 287:13)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn3" onclick="toggleCodeBlock('cloneGroup3', 'expandBtn3', 'collapseBtn3')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn3" onclick="toggleCodeBlock('cloneGroup3', 'expandBtn3', 'collapseBtn3')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup3"><code class="language-typescript text-sm text-gray-800">= null
+      }
+    } catch (err) {
+      const executionTime = Date.now() - startTime
+      return {
+        columns: [],
+        rows: [],
+        rowCount: 0,
+        executionTime,
+        error: String(err),
+      }
+    }
+  }
+
+  cancelQuery(): void {
+    if (this.activeConnection</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/mssql.ts (Line 103:2 - Line 113:6), src/main/services/database/drivers/postgresql.ts (Line 102:2 - Line 112:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn4" onclick="toggleCodeBlock('cloneGroup4', 'expandBtn4', 'collapseBtn4')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn4" onclick="toggleCodeBlock('cloneGroup4', 'expandBtn4', 'collapseBtn4')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup4"><code class="language-typescript text-sm text-gray-800">=== 'VIEW' ? 'view' : 'table',
+        rowCount,
+      })
+    }
+
+    return tables
+  }
+
+  async getTableInfo(table: string, schema?: string): Promise&lt;DbTableInfo&gt; {
+    if (!this.pool) throw new Error('Not connected')
+    const targetSchema = schema || 'dbo'</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/mongodb.ts (Line 197:9 - Line 204:14), src/main/services/database/drivers/mongodb.ts (Line 170:9 - Line 177:10)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn5" onclick="toggleCodeBlock('cloneGroup5', 'expandBtn5', 'collapseBtn5')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn5" onclick="toggleCodeBlock('cloneGroup5', 'expandBtn5', 'collapseBtn5')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup5"><code class="language-typescript text-sm text-gray-800">const executionTime = Date.now() - startTime
+        const columns = docs.length &gt; 0 ? Object.keys(docs[0]!) : []
+
+        return {
+          columns,
+          rows: docs as unknown as Record&lt;string, unknown&gt;[],
+          rowCount: docs.length,
+          executionTime</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/mongodb.ts (Line 233:7 - Line 242:6), src/main/services/database/drivers/mongodb.ts (Line 171:9 - Line 182:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn6" onclick="toggleCodeBlock('cloneGroup6', 'expandBtn6', 'collapseBtn6')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn6" onclick="toggleCodeBlock('cloneGroup6', 'expandBtn6', 'collapseBtn6')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup6"><code class="language-typescript text-sm text-gray-800">const columns = docs.length &gt; 0 ? Object.keys(docs[0]!) : []
+
+      return {
+        columns,
+        rows: docs as unknown as Record&lt;string, unknown&gt;[],
+        rowCount: docs.length,
+        totalRows,
+        executionTime,
+      }
+    } catch</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/services/database/drivers/mongodb.ts (Line 241:7 - Line 255:69), src/main/services/database/drivers/sqlite.ts (Line 199:7 - Line 213:80)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn7" onclick="toggleCodeBlock('cloneGroup7', 'expandBtn7', 'collapseBtn7')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn7" onclick="toggleCodeBlock('cloneGroup7', 'expandBtn7', 'collapseBtn7')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup7"><code class="language-typescript text-sm text-gray-800">}
+    } catch (err) {
+      const executionTime = Date.now() - startTime
+      return {
+        columns: [],
+        rows: [],
+        rowCount: 0,
+        executionTime,
+        error: String(err),
+      }
+    }
+  }
+
+  cancelQuery(): void {
+    // MongoDB Node.js driver does not support direct query cancellation</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/lib/stores/workspaceStore.ts (Line 189:9 - Line 198:6), src/renderer/lib/stores/workspaceStore.ts (Line 131:9 - Line 140:57)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn8" onclick="toggleCodeBlock('cloneGroup8', 'expandBtn8', 'collapseBtn8')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn8" onclick="toggleCodeBlock('cloneGroup8', 'expandBtn8', 'collapseBtn8')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup8"><code class="language-typescript text-sm text-gray-800">set((state) =&gt; ({
+          projects: [...state.projects, project],
+          activeProjectId: project.id,
+          activeWorkspaceId: workspace.id,
+          workspaces: state.workspaces.map((w) =&gt;
+            w.id === workspace.id ? { ...w, projectIds: [...w.projectIds, project.id] } : w,
+          ),
+        }))
+
+        const</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/lib/stores/workspaceStore.ts (Line 201:9 - Line 209:47), src/renderer/lib/stores/workspaceStore.ts (Line 145:9 - Line 153:30)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn9" onclick="toggleCodeBlock('cloneGroup9', 'expandBtn9', 'collapseBtn9')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn9" onclick="toggleCodeBlock('cloneGroup9', 'expandBtn9', 'collapseBtn9')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup9"><code class="language-typescript text-sm text-gray-800">const termStore = useTerminalTabStore.getState()
+        termStore.createSplitTab(workspace.id, cwd, 'Claude + Terminal', 'claude', null)
+      } else {
+        set({ activeWorkspaceId: workspace.id })
+      }
+
+      return workspace
+    } catch (err) {
+      console.error('Failed to create workspace from new project:'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/lib/stores/workspaceStore.ts (Line 241:7 - Line 252:11), src/renderer/lib/stores/workspaceStore.ts (Line 122:9 - Line 133:16)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn10" onclick="toggleCodeBlock('cloneGroup10', 'expandBtn10', 'collapseBtn10')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn10" onclick="toggleCodeBlock('cloneGroup10', 'expandBtn10', 'collapseBtn10')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup10"><code class="language-typescript text-sm text-gray-800">try {
+        const scanResult = await window.mirehub.project.scanClaude(dirPath)
+        if (scanResult?.hasClaude) {
+          project.hasClaude = true
+        }
+      } catch {
+        // Scan failure is non-blocking
+      }
+
+      set((state) =&gt; ({
+        projects: [...state.projects, project],
+        workspaces</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/lib/stores/terminalTabStore.ts (Line 372:13 - Line 377:10), src/renderer/lib/stores/terminalTabStore.ts (Line 362:13 - Line 367:10)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn11" onclick="toggleCodeBlock('cloneGroup11', 'expandBtn11', 'collapseBtn11')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn11" onclick="toggleCodeBlock('cloneGroup11', 'expandBtn11', 'collapseBtn11')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup11"><code class="language-typescript text-sm text-gray-800">: (workspaceId?: string) =&gt; {
+    const { tabs, activeTabId } = get()
+    const scopedTabs = workspaceId ? tabs.filter((t) =&gt; t.workspaceId === workspaceId) : tabs
+    if (scopedTabs.length &lt;= 1) return
+    const index = scopedTabs.findIndex((t) =&gt; t.id === activeTabId)
+    const prevIndex</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/lib/stores/terminalTabStore.ts (Line 420:2 - Line 431:6), src/renderer/lib/stores/terminalTabStore.ts (Line 399:3 - Line 410:4)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn12" onclick="toggleCodeBlock('cloneGroup12', 'expandBtn12', 'collapseBtn12')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn12" onclick="toggleCodeBlock('cloneGroup12', 'expandBtn12', 'collapseBtn12')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup12"><code class="language-typescript text-sm text-gray-800">)
+    // Notify kanban and claude stores for each removed tab
+    const kanbanStore = getKanbanStore()?.getState()
+    const claudeStoreState = getClaudeStore()?.getState()
+    for (const tab of removedTabs) {
+      kanbanStore?.handleTabClosed(tab.id)
+      const claudePaneCount = countClaudePanes(tab.paneTree)
+      if (claudePaneCount &gt; 0 &amp;&amp; claudeStoreState) {
+        for (let i = 0; i &lt; claudePaneCount; i++) claudeStoreState.decrementWorkspaceClaude(tab.workspaceId)
+      }
+    }
+    const</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/lib/stores/kanbanStore.ts (Line 476:9 - Line 483:2), src/renderer/lib/stores/kanbanStore.ts (Line 463:9 - Line 471:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn13" onclick="toggleCodeBlock('cloneGroup13', 'expandBtn13', 'collapseBtn13')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn13" onclick="toggleCodeBlock('cloneGroup13', 'expandBtn13', 'collapseBtn13')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup13"><code class="language-typescript text-sm text-gray-800">)
+    set((state) =&gt; ({
+      tasks: state.tasks.map((t) =&gt; {
+        if (t.id !== taskId) return t
+        return { ...t, attachments: [...(t.attachments || []), attachment], updatedAt: Date.now() }
+      }),
+    }))
+  },</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/lib/stores/claudeStore.ts (Line 223:2 - Line 233:2), src/renderer/lib/stores/claudeStore.ts (Line 110:2 - Line 120:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn14" onclick="toggleCodeBlock('cloneGroup14', 'expandBtn14', 'collapseBtn14')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn14" onclick="toggleCodeBlock('cloneGroup14', 'expandBtn14', 'collapseBtn14')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup14"><code class="language-typescript text-sm text-gray-800">workspaceId
+        setTimeout(() =&gt; {
+          const current = get().workspaceClaudeStatus[wsId]
+          if (current === 'finished') {
+            set({
+              workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [wsId]: 'idle' },
+            })
+          }
+        }, 30000)
+      }
+    })</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/ipc/kanban.ts (Line 43:2 - Line 62:3), src/main/services/activityHooks.ts (Line 63:2 - Line 83:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn36" onclick="toggleCodeBlock('cloneGroup36', 'expandBtn36', 'collapseBtn36')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn36" onclick="toggleCodeBlock('cloneGroup36', 'expandBtn36', 'collapseBtn36')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup36"><code class="language-typescript text-sm text-gray-800">)
+
+  const claudeDir = path.join(projectPath, '.claude')
+  if (!fs.existsSync(claudeDir)) {
+    fs.mkdirSync(claudeDir, { recursive: true })
+  }
+
+  const settingsPath = path.join(claudeDir, 'settings.local.json')
+  let settings: Record&lt;string, unknown&gt; = {}
+  if (fs.existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
+    } catch { /* ignore corrupt file */ }
+  }
+
+  if (!settings.hooks) {
+    settings.hooks = {}
+  }
+  const hooks = settings.hooks as Record&lt;string, unknown[]&gt;
+  if</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/ipc/kanban.ts (Line 403:7 - Line 421:25), src/main/ipc/kanban.ts (Line 362:5 - Line 380:29)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn37" onclick="toggleCodeBlock('cloneGroup37', 'expandBtn37', 'collapseBtn37')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn37" onclick="toggleCodeBlock('cloneGroup37', 'expandBtn37', 'collapseBtn37')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup37"><code class="language-typescript text-sm text-gray-800">,
+        addedAt: Date.now(),
+      }
+
+      const tasks = readKanbanTasks(workspaceId)
+      const task = tasks.find((t) =&gt; t.id === taskId)
+      if (task) {
+        if (!task.attachments) task.attachments = []
+        task.attachments.push(attachment)
+        task.updatedAt = Date.now()
+        writeKanbanTasks(workspaceId, tasks)
+      }
+
+      return attachment
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_REMOVE_ATTACHMENT</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/ipc/claude.ts (Line 64:7 - Line 77:3), src/main/ipc/claude.ts (Line 51:7 - Line 64:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn38" onclick="toggleCodeBlock('cloneGroup38', 'expandBtn38', 'collapseBtn38')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn38" onclick="toggleCodeBlock('cloneGroup38', 'expandBtn38', 'collapseBtn38')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup38"><code class="language-typescript text-sm text-gray-800">?.on('data', (data: Buffer) =&gt; {
+    for (const win of BrowserWindow.getAllWindows()) {
+      try {
+        if (!win.isDestroyed() &amp;&amp; !win.webContents.isDestroyed()) {
+          win.webContents.send(IPC_CHANNELS.TERMINAL_DATA, {
+            id: managed.session.terminalId,
+            data: data.toString(),
+          })
+        }
+      } catch { /* render frame disposed */ }
+    }
+  })
+
+  proc.on</code></pre></div><div class="py-4"><p class="text-gray-600">src/main/ipc/api.ts (Line 321:19 - Line 328:4), src/main/ipc/database.ts (Line 306:30 - Line 313:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn39" onclick="toggleCodeBlock('cloneGroup39', 'expandBtn39', 'collapseBtn39')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn39" onclick="toggleCodeBlock('cloneGroup39', 'expandBtn39', 'collapseBtn39')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup39"><code class="language-typescript text-sm text-gray-800">,
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+      properties: ['openFile'],
+    })
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, data: null }
+    }
+    try</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/workspaceStore.test.ts (Line 194:44 - Line 202:6), tests/unit/workspaceStore.test.ts (Line 179:46 - Line 187:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn40" onclick="toggleCodeBlock('cloneGroup40', 'expandBtn40', 'collapseBtn40')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn40" onclick="toggleCodeBlock('cloneGroup40', 'expandBtn40', 'collapseBtn40')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup40"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const ws = makeWorkspace()
+      const project = makeProject()
+      useWorkspaceStore.setState({ workspaces: [ws] })
+      mockProjectApi.selectDir.mockResolvedValue('/tmp/test')
+      mockProjectApi.add.mockResolvedValue(project)
+      mockMirehub.workspaceEnv.setup.mockResolvedValue({ success: true, envPath: '/tmp/env' })
+
+      await</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/updates.test.ts (Line 20:1 - Line 33:59), src/main/ipc/updates.ts (Line 68:1 - Line 81:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn41" onclick="toggleCodeBlock('cloneGroup41', 'expandBtn41', 'collapseBtn41')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn41" onclick="toggleCodeBlock('cloneGroup41', 'expandBtn41', 'collapseBtn41')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup41"><code class="language-typescript text-sm text-gray-800">function compareVersions(current: string, latest: string): boolean {
+  const c = extractVersion(current)
+  const l = extractVersion(latest)
+  if (c === l) return false
+  const cParts = c.split('.').map(Number)
+  const lParts = l.split('.').map(Number)
+  for (let i = 0; i &lt; 3; i++) {
+    if ((lParts[i] ?? 0) &gt; (cParts[i] ?? 0)) return true
+    if ((lParts[i] ?? 0) &lt; (cParts[i] ?? 0)) return false
+  }
+  return false
+}
+
+// Ancienne logique (pour reference et test de regression)</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/updates.test.ts (Line 313:43 - Line 320:6), tests/unit/updates.test.ts (Line 261:39 - Line 269:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn42" onclick="toggleCodeBlock('cloneGroup42', 'expandBtn42', 'collapseBtn42')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn42" onclick="toggleCodeBlock('cloneGroup42', 'expandBtn42', 'collapseBtn42')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup42"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+      const json = JSON.stringify({
+        'express': { current: '4.18.0', wanted: '4.18.2', latest: '5.0.0', type: 'dependencies' },
+        'vitest': { current: '3.0.0', wanted: '3.2.4', latest: '3.2.4', type: 'devDependencies' },
+      })
+
+      const entries = parseNpmOutdated(json)
+      const</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/terminalTabStore.test.ts (Line 160:39 - Line 165:13), tests/unit/terminalTabStore.test.ts (Line 42:36 - Line 47:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn43" onclick="toggleCodeBlock('cloneGroup43', 'expandBtn43', 'collapseBtn43')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn43" onclick="toggleCodeBlock('cloneGroup43', 'expandBtn43', 'collapseBtn43')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup43"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+      const id1 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      const id2 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      useTerminalTabStore.getState().setActiveTab(id1)
+
+      useTerminalTabStore.getState().activateNext</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/terminalTabStore.test.ts (Line 172:41 - Line 177:13), tests/unit/terminalTabStore.test.ts (Line 42:36 - Line 47:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn44" onclick="toggleCodeBlock('cloneGroup44', 'expandBtn44', 'collapseBtn44')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn44" onclick="toggleCodeBlock('cloneGroup44', 'expandBtn44', 'collapseBtn44')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup44"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+      const id1 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      const id2 = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      useTerminalTabStore.getState().setActiveTab(id1)
+
+      useTerminalTabStore.getState().activatePrev</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/terminalTabStore.test.ts (Line 308:54 - Line 314:40), tests/unit/terminalTabStore.test.ts (Line 295:30 - Line 300:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn45" onclick="toggleCodeBlock('cloneGroup45', 'expandBtn45', 'collapseBtn45')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn45" onclick="toggleCodeBlock('cloneGroup45', 'expandBtn45', 'collapseBtn45')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup45"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+      const tabId = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      const originalPaneId = useTerminalTabStore.getState().tabs[0]!.activePaneId
+
+      const newPaneId = useTerminalTabStore.getState().splitPane(tabId, originalPaneId, 'horizontal')
+
+      // Active pane is the new one, close it</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/terminalTabStore.test.ts (Line 348:34 - Line 354:4), tests/unit/terminalTabStore.test.ts (Line 334:29 - Line 342:4)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn46" onclick="toggleCodeBlock('cloneGroup46', 'expandBtn46', 'collapseBtn46')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn46" onclick="toggleCodeBlock('cloneGroup46', 'expandBtn46', 'collapseBtn46')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup46"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+      const tabId = useTerminalTabStore.getState().createTab('ws-test', '/tmp/test')
+      const paneId = useTerminalTabStore.getState().tabs[0]!.activePaneId
+      useTerminalTabStore.getState().splitPane(tabId, paneId, 'horizontal')
+      const splitId = useTerminalTabStore.getState().tabs[0]!.paneTree.id
+
+      useTerminalTabStore.getState().resizePane(tabId, splitId, 0.0</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/terminalTabStore.test.ts (Line 427:5 - Line 437:15), tests/unit/terminalTabStore.test.ts (Line 413:5 - Line 423:12)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn47" onclick="toggleCodeBlock('cloneGroup47', 'expandBtn47', 'collapseBtn47')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn47" onclick="toggleCodeBlock('cloneGroup47', 'expandBtn47', 'collapseBtn47')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup47"><code class="language-typescript text-sm text-gray-800">const split: PaneSplit = {
+      type: 'split',
+      id: 's1',
+      direction: 'horizontal',
+      children: [
+        { type: 'leaf', id: 'p1', sessionId: null, initialCommand: null, externalSessionId: null },
+        { type: 'leaf', id: 'p2', sessionId: null, initialCommand: null, externalSessionId: null },
+      ],
+      ratio: 0.5,
+    }
+    expect(collectLeafIds</code></pre></div><div class="py-4"><p class="text-gray-600">tests/unit/database-backup.test.ts (Line 14:1 - Line 26:59), tests/unit/storage.test.ts (Line 11:1 - Line 23:21)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn48" onclick="toggleCodeBlock('cloneGroup48', 'expandBtn48', 'collapseBtn48')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn48" onclick="toggleCodeBlock('cloneGroup48', 'expandBtn48', 'collapseBtn48')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup48"><code class="language-typescript text-sm text-gray-800">vi.mock('os', async () =&gt; {
+  const actual = await vi.importActual&lt;typeof import('os')&gt;('os')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: () =&gt; TEST_DIR,
+    },
+    homedir: () =&gt; TEST_DIR,
+  }
+})
+
+// Mock child_process.exec to avoid running real CLI tools</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/workspaceEnv-ipc.test.ts (Line 9:15 - Line 23:9), tests/unit/storage.test.ts (Line 9:2 - Line 23:21)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn49" onclick="toggleCodeBlock('cloneGroup49', 'expandBtn49', 'collapseBtn49')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn49" onclick="toggleCodeBlock('cloneGroup49', 'expandBtn49', 'collapseBtn49')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup49"><code class="language-typescript text-sm text-gray-800">)
+
+vi.mock('os', async () =&gt; {
+  const actual = await vi.importActual&lt;typeof import('os')&gt;('os')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: () =&gt; TEST_DIR,
+    },
+    homedir: () =&gt; TEST_DIR,
+  }
+})
+
+describe</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/workspaceEnv-ipc.test.ts (Line 147:12 - Line 153:2), tests/integration/workspaceEnv-ipc.test.ts (Line 124:5 - Line 131:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn50" onclick="toggleCodeBlock('cloneGroup50', 'expandBtn50', 'collapseBtn50')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn50" onclick="toggleCodeBlock('cloneGroup50', 'expandBtn50', 'collapseBtn50')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup50"><code class="language-typescript text-sm text-gray-800">],
+      })
+
+      expect(result.success).toBe(true)
+      const entries = fs.readdirSync(result.envPath)
+      const symlinks = entries.filter((e: string) =&gt; fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())
+      expect(symlinks).toHaveLength(1</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/workspaceEnv-ipc.test.ts (Line 160:12 - Line 167:16), tests/integration/workspaceEnv-ipc.test.ts (Line 124:5 - Line 154:15)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn51" onclick="toggleCodeBlock('cloneGroup51', 'expandBtn51', 'collapseBtn51')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn51" onclick="toggleCodeBlock('cloneGroup51', 'expandBtn51', 'collapseBtn51')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup51"><code class="language-typescript text-sm text-gray-800">],
+      })
+
+      expect(result.success).toBe(true)
+      const entries = fs.readdirSync(result.envPath)
+      const symlinks = entries.filter((e: string) =&gt; fs.lstatSync(path.join(result.envPath, e)).isSymbolicLink())
+      expect(symlinks).toHaveLength(1)
+      expect(symlinks).toContain('project-alpha'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/workspace-ipc.test.ts (Line 8:11 - Line 23:39), tests/unit/database-backup.test.ts (Line 11:2 - Line 23:21)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn52" onclick="toggleCodeBlock('cloneGroup52', 'expandBtn52', 'collapseBtn52')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn52" onclick="toggleCodeBlock('cloneGroup52', 'expandBtn52', 'collapseBtn52')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup52"><code class="language-typescript text-sm text-gray-800">)
+
+// Mock os.homedir to use temp directory
+vi.mock('os', async () =&gt; {
+  const actual = await vi.importActual&lt;typeof import('os')&gt;('os')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: () =&gt; TEST_DIR,
+    },
+    homedir: () =&gt; TEST_DIR,
+  }
+})
+
+// Mock uuid to return predictable IDs</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/terminal-session-navigation.test.ts (Line 97:34 - Line 103:20), tests/integration/terminal-session-navigation.test.ts (Line 59:34 - Line 65:35)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn53" onclick="toggleCodeBlock('cloneGroup53', 'expandBtn53', 'collapseBtn53')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn53" onclick="toggleCodeBlock('cloneGroup53', 'expandBtn53', 'collapseBtn53')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup53"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+    it('cycles only through tabs of the given workspace', () =&gt; {
+      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')
+      const a2 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A2')
+      useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')
+
+      useTerminalTabStore</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/terminal-session-navigation.test.ts (Line 110:13 - Line 119:13), tests/integration/terminal-session-navigation.test.ts (Line 73:13 - Line 82:13)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn54" onclick="toggleCodeBlock('cloneGroup54', 'expandBtn54', 'collapseBtn54')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn54" onclick="toggleCodeBlock('cloneGroup54', 'expandBtn54', 'collapseBtn54')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup54"><code class="language-typescript text-sm text-gray-800">('ws-1')
+      expect(useTerminalTabStore.getState().activeTabId).toBe(a1)
+    })
+
+    it('does nothing if workspace has only one tab', () =&gt; {
+      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')
+      useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')
+      useTerminalTabStore.getState().setActiveTab(a1)
+
+      useTerminalTabStore.getState().activatePrev</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/terminal-session-navigation.test.ts (Line 209:57 - Line 215:20), tests/integration/terminal-session-navigation.test.ts (Line 60:50 - Line 105:51)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn55" onclick="toggleCodeBlock('cloneGroup55', 'expandBtn55', 'collapseBtn55')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn55" onclick="toggleCodeBlock('cloneGroup55', 'expandBtn55', 'collapseBtn55')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup55"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')
+      const a2 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A2')
+      useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')
+
+      useTerminalTabStore.getState().setActiveTab(a1)
+      useTerminalTabStore</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/terminal-session-navigation.test.ts (Line 234:54 - Line 239:47), tests/integration/terminal-session-navigation.test.ts (Line 163:74 - Line 168:41)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn56" onclick="toggleCodeBlock('cloneGroup56', 'expandBtn56', 'collapseBtn56')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn56" onclick="toggleCodeBlock('cloneGroup56', 'expandBtn56', 'collapseBtn56')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup56"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+      const a1 = useTerminalTabStore.getState().createTab('ws-1', '/a', 'A1')
+      useTerminalTabStore.getState().createTab('ws-1', '/a', 'A2')
+      const b1 = useTerminalTabStore.getState().createTab('ws-2', '/b', 'B1')
+
+      // closeOtherTabs keeps only the specified tab</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/terminal-ipc.test.ts (Line 50:1 - Line 65:24), tests/integration/updates-ipc.test.ts (Line 22:1 - Line 37:22)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn57" onclick="toggleCodeBlock('cloneGroup57', 'expandBtn57', 'collapseBtn57')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn57" onclick="toggleCodeBlock('cloneGroup57', 'expandBtn57', 'collapseBtn57')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup57"><code class="language-typescript text-sm text-gray-800">const mockWebContentsSend = vi.fn()
+vi.mock('electron', () =&gt; ({
+  BrowserWindow: {
+    getAllWindows: () =&gt; [
+      {
+        isDestroyed: () =&gt; false,
+        webContents: {
+          send: mockWebContentsSend,
+          isDestroyed: () =&gt; false,
+        },
+      },
+    ],
+  },
+}))
+
+describe('Terminal IPC Handlers'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/session-ipc.test.ts (Line 8:11 - Line 22:23), tests/unit/storage.test.ts (Line 9:2 - Line 23:28)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn58" onclick="toggleCodeBlock('cloneGroup58', 'expandBtn58', 'collapseBtn58')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn58" onclick="toggleCodeBlock('cloneGroup58', 'expandBtn58', 'collapseBtn58')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup58"><code class="language-typescript text-sm text-gray-800">)
+
+vi.mock('os', async () =&gt; {
+  const actual = await vi.importActual&lt;typeof import('os')&gt;('os')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: () =&gt; TEST_DIR,
+    },
+    homedir: () =&gt; TEST_DIR,
+  }
+})
+
+describe('Session IPC Handlers'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/project-ipc.test.ts (Line 9:15 - Line 23:24), tests/unit/storage.test.ts (Line 9:2 - Line 23:21)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn59" onclick="toggleCodeBlock('cloneGroup59', 'expandBtn59', 'collapseBtn59')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn59" onclick="toggleCodeBlock('cloneGroup59', 'expandBtn59', 'collapseBtn59')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup59"><code class="language-typescript text-sm text-gray-800">)
+
+vi.mock('os', async () =&gt; {
+  const actual = await vi.importActual&lt;typeof import('os')&gt;('os')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: () =&gt; TEST_DIR,
+    },
+    homedir: () =&gt; TEST_DIR,
+  }
+})
+
+// Mock Electron dialog</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/project-ipc.test.ts (Line 65:11 - Line 75:39), tests/integration/workspaceEnv-ipc.test.ts (Line 52:2 - Line 62:42)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn60" onclick="toggleCodeBlock('cloneGroup60', 'expandBtn60', 'collapseBtn60')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn60" onclick="toggleCodeBlock('cloneGroup60', 'expandBtn60', 'collapseBtn60')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup60"><code class="language-typescript text-sm text-gray-800">, { recursive: true, force: true })
+    }
+  })
+
+  afterAll(() =&gt; {
+    if (fs.existsSync(TEST_DIR)) {
+      fs.rmSync(TEST_DIR, { recursive: true, force: true })
+    }
+  })
+
+  it('enregistre tous les handlers project'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-ipc.test.ts (Line 7:27 - Line 22:4), tests/integration/session-ipc.test.ts (Line 7:28 - Line 23:21)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn61" onclick="toggleCodeBlock('cloneGroup61', 'expandBtn61', 'collapseBtn61')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn61" onclick="toggleCodeBlock('cloneGroup61', 'expandBtn61', 'collapseBtn61')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup61"><code class="language-typescript text-sm text-gray-800">${process.pid}-${Date.now()}`)
+const dataDir = path.join(TEST_DIR, '.mirehub')
+
+vi.mock('os', async () =&gt; {
+  const actual = await vi.importActual&lt;typeof import('os')&gt;('os')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: () =&gt; TEST_DIR,
+    },
+    homedir: () =&gt; TEST_DIR,
+  }
+})
+
+let</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 166:53 - Line 174:22), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 108:15)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn62" onclick="toggleCodeBlock('cloneGroup62', 'expandBtn62', 'collapseBtn62')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn62" onclick="toggleCodeBlock('cloneGroup62', 'expandBtn62', 'collapseBtn62')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup62"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask() // no targetProjectId</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 194:7 - Line 209:71), tests/integration/kanban-claude.test.ts (Line 100:7 - Line 115:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn63" onclick="toggleCodeBlock('cloneGroup63', 'expandBtn63', 'collapseBtn63')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn63" onclick="toggleCodeBlock('cloneGroup63', 'expandBtn63', 'collapseBtn63')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup63"><code class="language-typescript text-sm text-gray-800">const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      // Simulate the Terminal component mounting and creating a PTY session</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 256:74 - Line 273:30), tests/integration/kanban-claude.test.ts (Line 192:68 - Line 115:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn64" onclick="toggleCodeBlock('cloneGroup64', 'expandBtn64', 'collapseBtn64')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn64" onclick="toggleCodeBlock('cloneGroup64', 'expandBtn64', 'collapseBtn64')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup64"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      vi.useFakeTimers()
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      // Simulate PTY session ready</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 274:7 - Line 293:80), tests/integration/kanban-claude.test.ts (Line 210:7 - Line 229:65)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn65" onclick="toggleCodeBlock('cloneGroup65', 'expandBtn65', 'collapseBtn65')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn65" onclick="toggleCodeBlock('cloneGroup65', 'expandBtn65', 'collapseBtn65')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup65"><code class="language-typescript text-sm text-gray-800">useTerminalTabStore.setState({
+        tabs: [{
+          id: 'tab-new-1',
+          label: '[IA] Fix bug in auth',
+          color: '#fab387',
+          hasActivity: false,
+          paneTree: { type: 'leaf' as const, id: 'pane-1', sessionId: 'pty-session-1', initialCommand: null, externalSessionId: null },
+          activePaneId: 'pane-1',
+          zoomedPaneId: null,
+          workspaceId: 'ws-1',
+          cwd: '/tmp/workspace-env',
+          initialCommand: null,
+        }],
+        createTab: mockCreateTab as ReturnType&lt;typeof useTerminalTabStore.getState&gt;['createTab'],
+        setTabColor: mockSetTabColor,
+        setActiveTab: mockSetActiveTab as ReturnType&lt;typeof useTerminalTabStore.getState&gt;['setActiveTab'],
+        setTabActivity: mockSetTabActivity,
+      })
+
+      // Advance past poll (200ms) + Claude init delay (3000ms) + Enter delay (100ms)</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 312:26 - Line 328:6), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 115:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn66" onclick="toggleCodeBlock('cloneGroup66', 'expandBtn66', 'collapseBtn66')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn66" onclick="toggleCodeBlock('cloneGroup66', 'expandBtn66', 'collapseBtn66')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup66"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      const</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 340:24 - Line 356:7), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 115:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn67" onclick="toggleCodeBlock('cloneGroup67', 'expandBtn67', 'collapseBtn67')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn67" onclick="toggleCodeBlock('cloneGroup67', 'expandBtn67', 'collapseBtn67')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup67"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      expect</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 393:49 - Line 409:14), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 328:12)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn68" onclick="toggleCodeBlock('cloneGroup68', 'expandBtn68', 'collapseBtn68')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn68" onclick="toggleCodeBlock('cloneGroup68', 'expandBtn68', 'collapseBtn68')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup68"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      const writtenPrompt</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 414:59 - Line 430:15), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 328:12)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn69" onclick="toggleCodeBlock('cloneGroup69', 'expandBtn69', 'collapseBtn69')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn69" onclick="toggleCodeBlock('cloneGroup69', 'expandBtn69', 'collapseBtn69')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup69"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      const initialCommand</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 436:62 - Line 452:73), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 115:27)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn70" onclick="toggleCodeBlock('cloneGroup70', 'expandBtn70', 'collapseBtn70')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn70" onclick="toggleCodeBlock('cloneGroup70', 'expandBtn70', 'collapseBtn70')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup70"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      // Should NOT switch view — user stays on kanban to keep writing tickets</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 513:45 - Line 522:6), tests/integration/kanban-claude.test.ts (Line 192:68 - Line 107:5)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn71" onclick="toggleCodeBlock('cloneGroup71', 'expandBtn71', 'collapseBtn71')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn71" onclick="toggleCodeBlock('cloneGroup71', 'expandBtn71', 'collapseBtn71')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup71"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      vi.useFakeTimers()
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const tasks</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 542:55 - Line 552:10), tests/integration/kanban-claude.test.ts (Line 192:68 - Line 523:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn72" onclick="toggleCodeBlock('cloneGroup72', 'expandBtn72', 'collapseBtn72')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn72" onclick="toggleCodeBlock('cloneGroup72', 'expandBtn72', 'collapseBtn72')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup72"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      vi.useFakeTimers()
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const tasks = [
+        makeTask({ id: 'task-1', status: 'WORKING'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 570:47 - Line 578:25), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 107:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn73" onclick="toggleCodeBlock('cloneGroup73', 'expandBtn73', 'collapseBtn73')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn73" onclick="toggleCodeBlock('cloneGroup73', 'expandBtn73', 'collapseBtn73')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup73"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      // Existing WORKING task</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 595:49 - Line 605:15), tests/integration/kanban-claude.test.ts (Line 192:68 - Line 107:6)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn74" onclick="toggleCodeBlock('cloneGroup74', 'expandBtn74', 'collapseBtn74')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn74" onclick="toggleCodeBlock('cloneGroup74', 'expandBtn74', 'collapseBtn74')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup74"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      vi.useFakeTimers()
+
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      useKanbanStore</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 632:51 - Line 645:9), tests/integration/kanban-claude.test.ts (Line 192:68 - Line 608:7)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn75" onclick="toggleCodeBlock('cloneGroup75', 'expandBtn75', 'collapseBtn75')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn75" onclick="toggleCodeBlock('cloneGroup75', 'expandBtn75', 'collapseBtn75')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup75"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      vi.useFakeTimers()
+
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      useKanbanStore.setState({
+        tasks: [
+          makeTask({ id: 'task-1', status: 'WORKING' }),
+          makeTask({ id: 'task-2', status: 'TODO', priority: 'medium'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 667:2 - Line 677:15), tests/integration/kanban-claude.test.ts (Line 603:2 - Line 613:45)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn76" onclick="toggleCodeBlock('cloneGroup76', 'expandBtn76', 'collapseBtn76')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn76" onclick="toggleCodeBlock('cloneGroup76', 'expandBtn76', 'collapseBtn76')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup76"><code class="language-typescript text-sm text-gray-800">)
+
+      useKanbanStore.setState({
+        tasks: [
+          makeTask({ id: 'task-1', status: 'WORKING' }),
+          makeTask({ id: 'task-2', status: 'TODO', priority: 'high', createdAt: 2000 }),
+        ],
+        kanbanTabIds: { 'task-1': 'tab-abc' },
+      })
+
+      mockKanbanList</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 695:33 - Line 705:11), tests/integration/kanban-claude.test.ts (Line 192:68 - Line 523:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn77" onclick="toggleCodeBlock('cloneGroup77', 'expandBtn77', 'collapseBtn77')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn77" onclick="toggleCodeBlock('cloneGroup77', 'expandBtn77', 'collapseBtn77')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup77"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      vi.useFakeTimers()
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const tasks = [
+        makeTask({ id: 'task-low'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 724:41 - Line 734:11), tests/integration/kanban-claude.test.ts (Line 192:68 - Line 523:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn78" onclick="toggleCodeBlock('cloneGroup78', 'expandBtn78', 'collapseBtn78')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn78" onclick="toggleCodeBlock('cloneGroup78', 'expandBtn78', 'collapseBtn78')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup78"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      vi.useFakeTimers()
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const tasks = [
+        makeTask({ id: 'task-new'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 799:51 - Line 807:2), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 107:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn79" onclick="toggleCodeBlock('cloneGroup79', 'expandBtn79', 'collapseBtn79')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn79" onclick="toggleCodeBlock('cloneGroup79', 'expandBtn79', 'collapseBtn79')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup79"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask({</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 812:2 - Line 821:18), tests/integration/kanban-claude.test.ts (Line 401:2 - Line 410:10)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn80" onclick="toggleCodeBlock('cloneGroup80', 'expandBtn80', 'collapseBtn80')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn80" onclick="toggleCodeBlock('cloneGroup80', 'expandBtn80', 'collapseBtn80')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup80"><code class="language-typescript text-sm text-gray-800">)
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      const writtenPrompt = mockKanbanWritePrompt.mock.calls[0]![2] as string
+      expect(writtenPrompt).toContain('Fichiers joints'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 828:65 - Line 836:18), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 108:15)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn81" onclick="toggleCodeBlock('cloneGroup81', 'expandBtn81', 'collapseBtn81')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn81" onclick="toggleCodeBlock('cloneGroup81', 'expandBtn81', 'collapseBtn81')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup81"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask() // no attachments</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 837:7 - Line 845:4), tests/integration/kanban-claude.test.ts (Line 402:7 - Line 410:10)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn82" onclick="toggleCodeBlock('cloneGroup82', 'expandBtn82', 'collapseBtn82')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn82" onclick="toggleCodeBlock('cloneGroup82', 'expandBtn82', 'collapseBtn82')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup82"><code class="language-typescript text-sm text-gray-800">useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      const writtenPrompt = mockKanbanWritePrompt.mock.calls[0]![2] as string
+      expect(writtenPrompt).not</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/kanban-claude.test.ts (Line 850:59 - Line 866:16), tests/integration/kanban-claude.test.ts (Line 99:44 - Line 356:15)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn83" onclick="toggleCodeBlock('cloneGroup83', 'expandBtn83', 'collapseBtn83')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn83" onclick="toggleCodeBlock('cloneGroup83', 'expandBtn83', 'collapseBtn83')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup83"><code class="language-typescript text-sm text-gray-800">, async () =&gt; {
+      const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
+      useWorkspaceStore.setState({
+        activeWorkspaceId: 'ws-1',
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
+      })
+
+      const task = makeTask()
+      useKanbanStore.setState({ tasks: [task] })
+
+      mockKanbanWritePrompt.mockResolvedValue('/tmp/workspace-env/.workspaces/.kanban-prompt-task-1.md')
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      await useKanbanStore.getState().sendToClaude(task)
+
+      expect(mockSetViewMode</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/git-ipc.test.ts (Line 47:8 - Line 57:35), tests/integration/workspaceEnv-ipc.test.ts (Line 52:2 - Line 62:42)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn84" onclick="toggleCodeBlock('cloneGroup84', 'expandBtn84', 'collapseBtn84')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn84" onclick="toggleCodeBlock('cloneGroup84', 'expandBtn84', 'collapseBtn84')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup84"><code class="language-typescript text-sm text-gray-800">, { recursive: true, force: true })
+    }
+  })
+
+  afterAll(() =&gt; {
+    if (fs.existsSync(TEST_DIR)) {
+      fs.rmSync(TEST_DIR, { recursive: true, force: true })
+    }
+  })
+
+  it('enregistre tous les handlers git'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/filesystem-ipc.test.ts (Line 29:13 - Line 39:39), tests/integration/workspaceEnv-ipc.test.ts (Line 52:2 - Line 62:42)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn85" onclick="toggleCodeBlock('cloneGroup85', 'expandBtn85', 'collapseBtn85')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn85" onclick="toggleCodeBlock('cloneGroup85', 'expandBtn85', 'collapseBtn85')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup85"><code class="language-typescript text-sm text-gray-800">, { recursive: true, force: true })
+    }
+  })
+
+  afterAll(() =&gt; {
+    if (fs.existsSync(TEST_DIR)) {
+      fs.rmSync(TEST_DIR, { recursive: true, force: true })
+    }
+  })
+
+  it('enregistre les 8 handlers filesystem'</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/filesystem-ipc.test.ts (Line 139:2 - Line 146:2), tests/integration/filesystem-ipc.test.ts (Line 126:2 - Line 133:26)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn86" onclick="toggleCodeBlock('cloneGroup86', 'expandBtn86', 'collapseBtn86')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn86" onclick="toggleCodeBlock('cloneGroup86', 'expandBtn86', 'collapseBtn86')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup86"><code class="language-typescript text-sm text-gray-800">}, null, 2)
+      fs.writeFileSync(filePath, jsonContent, 'utf-8')
+
+      const result = await mockIpcMain._invoke('fs:readFile', { path: filePath })
+
+      expect(result.content).toBe(jsonContent)
+      expect(result.error).toBeNull()
+    }</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/app-ipc.test.ts (Line 8:24 - Line 23:32), tests/integration/session-ipc.test.ts (Line 7:28 - Line 23:21)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn87" onclick="toggleCodeBlock('cloneGroup87', 'expandBtn87', 'collapseBtn87')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn87" onclick="toggleCodeBlock('cloneGroup87', 'expandBtn87', 'collapseBtn87')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup87"><code class="language-typescript text-sm text-gray-800">${process.pid}-${Date.now()}`)
+const dataDir = path.join(TEST_DIR, '.mirehub')
+
+vi.mock('os', async () =&gt; {
+  const actual = await vi.importActual&lt;typeof import('os')&gt;('os')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      homedir: () =&gt; TEST_DIR,
+    },
+    homedir: () =&gt; TEST_DIR,
+  }
+})
+
+// Mock Electron's Notification</code></pre></div><div class="py-4"><p class="text-gray-600">tests/integration/app-ipc.test.ts (Line 34:19 - Line 45:20), tests/integration/session-ipc.test.ts (Line 22:23 - Line 33:24)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn88" onclick="toggleCodeBlock('cloneGroup88', 'expandBtn88', 'collapseBtn88')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn88" onclick="toggleCodeBlock('cloneGroup88', 'expandBtn88', 'collapseBtn88')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup88"><code class="language-typescript text-sm text-gray-800">, () =&gt; {
+  let mockIpcMain: ReturnType&lt;typeof createMockIpcMain&gt;
+
+  beforeEach(async () =&gt; {
+    vi.resetModules()
+
+    if (fs.existsSync(dataDir)) {
+      fs.rmSync(dataDir, { recursive: true, force: true })
+    }
+    fs.mkdirSync(dataDir, { recursive: true })
+
+    const { registerAppHandlers</code></pre></div><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="css-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">css</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="javascript-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">javascript</h2><div class="divide-y divide-gray-200 border-b-2"><div class="py-4"><p class="text-gray-600">src/renderer/App.tsx (Line 422:7 - Line 491:15), src/renderer/App.tsx (Line 418:7 - Line 447:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn89" onclick="toggleCodeBlock('cloneGroup89', 'expandBtn89', 'collapseBtn89')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn89" onclick="toggleCodeBlock('cloneGroup89', 'expandBtn89', 'collapseBtn89')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup89"><code class="language-javascript text-sm text-gray-800"> }}&gt;
+                &lt;NpmPanel /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'file' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;FileViewer /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'diff' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;FileDiffViewer /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'claude' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;ClaudeRulesPanel /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'settings' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;SettingsPanel /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'search' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;GlobalSearch /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'todos' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;TodoScanner /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'shortcuts' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;ShortcutsPanel /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'stats' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;ProjectStats /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'prompts' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;PromptTemplates /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'api' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;ApiTesterPanel /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'database' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;DatabaseExplorer /&gt;
+              &lt;/div&gt;
+            )}
+            {viewMode === 'analysis' &amp;&amp; (
+              &lt;div className=&quot;view-panel&quot; style={{ display: 'flex' }}&gt;
+                &lt;CodeAnalysisPanel /&gt;
+              &lt;/div&gt;
+            )}
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      {sessionChecked &amp;&amp; pendingSession &amp;&amp; (
+        &lt;SessionModal
+          session={pendingSession</code></pre></div><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="tsx-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">tsx</h2><div class="divide-y divide-gray-200 border-b-2"><div class="py-4"><p class="text-gray-600">src/renderer/components/Sidebar.tsx (Line 164:13 - Line 180:11), src/renderer/components/WorkspaceItem.tsx (Line 525:13 - Line 542:14)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn15" onclick="toggleCodeBlock('cloneGroup15', 'expandBtn15', 'collapseBtn15')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn15" onclick="toggleCodeBlock('cloneGroup15', 'expandBtn15', 'collapseBtn15')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup15"><code class="language-tsx text-sm text-gray-800">&lt;/div&gt;
+            &lt;div className=&quot;modal-footer&quot;&gt;
+              &lt;button className=&quot;modal-btn modal-btn--secondary&quot; onClick={() =&gt; setShowNewProjectModal(false)}&gt;
+                {t('common.cancel')}
+              &lt;/button&gt;
+              &lt;button
+                className=&quot;modal-btn modal-btn--primary&quot;
+                onClick={handleCreateFromNew}
+                disabled={!newProjectName.trim()}
+              &gt;
+                {t('sidebar.chooseLocationAndCreate')}
+              &lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      )}
+      {workspaces</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/Sidebar.tsx (Line 226:12 - Line 234:2), src/renderer/components/Sidebar.tsx (Line 198:10 - Line 206:9)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn16" onclick="toggleCodeBlock('cloneGroup16', 'expandBtn16', 'collapseBtn16')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn16" onclick="toggleCodeBlock('cloneGroup16', 'expandBtn16', 'collapseBtn16')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup16"><code class="language-tsx text-sm text-gray-800">.length &gt; 0 &amp;&amp; (
+        &lt;div className=&quot;sidebar-section&quot;&gt;
+          &lt;button className=&quot;sidebar-section-header&quot; onClick={() =&gt; setShowRecent((v) =&gt; !v)}&gt;
+            &lt;span className={`sidebar-section-chevron${showRecent ? ' sidebar-section-chevron--expanded' : ''}`}&gt;
+              &lt;svg width=&quot;8&quot; height=&quot;8&quot; viewBox=&quot;0 0 8 8&quot; fill=&quot;none&quot;&gt;
+                &lt;path d=&quot;M2.5 1L5.5 4L2.5 7&quot; stroke=&quot;currentColor&quot; strokeWidth=&quot;1.2&quot; strokeLinecap=&quot;round&quot; strokeLinejoin=&quot;round&quot; /&gt;
+              &lt;/svg&gt;
+            &lt;/span&gt;
+            &lt;span className=&quot;sidebar-section-title&quot;&gt;{t</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/Sidebar.tsx (Line 238:2 - Line 252:3), src/renderer/components/Sidebar.tsx (Line 210:10 - Line 225:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn17" onclick="toggleCodeBlock('cloneGroup17', 'expandBtn17', 'collapseBtn17')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn17" onclick="toggleCodeBlock('cloneGroup17', 'expandBtn17', 'collapseBtn17')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup17"><code class="language-tsx text-sm text-gray-800">.map((filePath) =&gt; (
+                &lt;button
+                  key={filePath}
+                  className=&quot;sidebar-file-item&quot;
+                  onClick={() =&gt; openFile(filePath)}
+                  title={filePath}
+                &gt;
+                  {filePath.split('/').pop()}
+                &lt;/button&gt;
+              ))}
+            &lt;/div&gt;
+          )}
+        &lt;/div&gt;
+      )}
+    &lt;/</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/SettingsPanel.tsx (Line 287:2 - Line 292:17), src/renderer/components/SettingsPanel.tsx (Line 259:2 - Line 264:20)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn18" onclick="toggleCodeBlock('cloneGroup18', 'expandBtn18', 'collapseBtn18')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn18" onclick="toggleCodeBlock('cloneGroup18', 'expandBtn18', 'collapseBtn18')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup18"><code class="language-tsx text-sm text-gray-800">&amp;&amp; (
+            &lt;div className=&quot;settings-section&quot;&gt;
+              &lt;div className=&quot;settings-card&quot;&gt;
+                &lt;div className=&quot;settings-row&quot;&gt;
+                  &lt;div className=&quot;settings-row-info&quot;&gt;
+                    &lt;label className=&quot;settings-label&quot;&gt;{t('settings.theme'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/SettingsPanel.tsx (Line 343:2 - Line 348:24), src/renderer/components/SettingsPanel.tsx (Line 259:2 - Line 264:20)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn19" onclick="toggleCodeBlock('cloneGroup19', 'expandBtn19', 'collapseBtn19')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn19" onclick="toggleCodeBlock('cloneGroup19', 'expandBtn19', 'collapseBtn19')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup19"><code class="language-tsx text-sm text-gray-800">&amp;&amp; (
+            &lt;div className=&quot;settings-section&quot;&gt;
+              &lt;div className=&quot;settings-card&quot;&gt;
+                &lt;div className=&quot;settings-row&quot;&gt;
+                  &lt;div className=&quot;settings-row-info&quot;&gt;
+                    &lt;label className=&quot;settings-label&quot;&gt;{t('settings.defaultShell'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/SettingsPanel.tsx (Line 453:2 - Line 462:7), src/renderer/components/SettingsPanel.tsx (Line 403:2 - Line 412:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn20" onclick="toggleCodeBlock('cloneGroup20', 'expandBtn20', 'collapseBtn20')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn20" onclick="toggleCodeBlock('cloneGroup20', 'expandBtn20', 'collapseBtn20')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup20"><code class="language-tsx text-sm text-gray-800">&amp;&amp; (
+                  &lt;div className=&quot;ssh-form&quot;&gt;
+                    &lt;div className=&quot;ssh-form-row&quot;&gt;
+                      &lt;label className=&quot;settings-label&quot;&gt;{t('settings.sshKeyName')}&lt;/label&gt;
+                      &lt;input
+                        type=&quot;text&quot;
+                        className=&quot;ssh-input&quot;
+                        value={importName}
+                        onChange={(e) =&gt; setImportName(e.target.value)}
+                        placeholder=&quot;my_key</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/SettingsPanel.tsx (Line 535:2 - Line 540:26), src/renderer/components/SettingsPanel.tsx (Line 259:2 - Line 264:20)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn21" onclick="toggleCodeBlock('cloneGroup21', 'expandBtn21', 'collapseBtn21')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn21" onclick="toggleCodeBlock('cloneGroup21', 'expandBtn21', 'collapseBtn21')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup21"><code class="language-tsx text-sm text-gray-800">&amp;&amp; (
+            &lt;div className=&quot;settings-section&quot;&gt;
+              &lt;div className=&quot;settings-card&quot;&gt;
+                &lt;div className=&quot;settings-row&quot;&gt;
+                  &lt;div className=&quot;settings-row-info&quot;&gt;
+                    &lt;label className=&quot;settings-label&quot;&gt;{t('settings.detectionColor'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/SettingsPanel.tsx (Line 569:2 - Line 574:39), src/renderer/components/SettingsPanel.tsx (Line 259:2 - Line 264:20)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn22" onclick="toggleCodeBlock('cloneGroup22', 'expandBtn22', 'collapseBtn22')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn22" onclick="toggleCodeBlock('cloneGroup22', 'expandBtn22', 'collapseBtn22')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup22"><code class="language-tsx text-sm text-gray-800">&amp;&amp; (
+            &lt;div className=&quot;settings-section&quot;&gt;
+              &lt;div className=&quot;settings-card&quot;&gt;
+                &lt;div className=&quot;settings-row&quot;&gt;
+                  &lt;div className=&quot;settings-row-info&quot;&gt;
+                    &lt;label className=&quot;settings-label&quot;&gt;{t('settings.autoCloseCompletedTerminals'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/SettingsPanel.tsx (Line 589:2 - Line 594:17), src/renderer/components/SettingsPanel.tsx (Line 259:2 - Line 264:20)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn23" onclick="toggleCodeBlock('cloneGroup23', 'expandBtn23', 'collapseBtn23')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn23" onclick="toggleCodeBlock('cloneGroup23', 'expandBtn23', 'collapseBtn23')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup23"><code class="language-tsx text-sm text-gray-800">&amp;&amp; (
+            &lt;div className=&quot;settings-section&quot;&gt;
+              &lt;div className=&quot;settings-card&quot;&gt;
+                &lt;div className=&quot;settings-row&quot;&gt;
+                  &lt;div className=&quot;settings-row-info&quot;&gt;
+                    &lt;label className=&quot;settings-label&quot;&gt;{t('settings.sound'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/ProjectItem.tsx (Line 192:9 - Line 197:18), src/renderer/components/Sidebar.tsx (Line 201:13 - Line 206:22)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn24" onclick="toggleCodeBlock('cloneGroup24', 'expandBtn24', 'collapseBtn24')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn24" onclick="toggleCodeBlock('cloneGroup24', 'expandBtn24', 'collapseBtn24')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup24"><code class="language-tsx text-sm text-gray-800">&lt;span className={`project-item-chevron${expanded ? ' project-item-chevron--expanded' : ''}`}&gt;
+          &lt;svg width=&quot;8&quot; height=&quot;8&quot; viewBox=&quot;0 0 8 8&quot; fill=&quot;none&quot;&gt;
+            &lt;path d=&quot;M2.5 1L5.5 4L2.5 7&quot; stroke=&quot;currentColor&quot; strokeWidth=&quot;1.2&quot; strokeLinecap=&quot;round&quot; strokeLinejoin=&quot;round&quot; /&gt;
+          &lt;/svg&gt;
+        &lt;/span&gt;
+        &lt;span className=&quot;project-item-icon</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/NpmPanel.tsx (Line 76:6 - Line 82:20), src/renderer/components/NpmPanel.tsx (Line 54:12 - Line 60:20)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn25" onclick="toggleCodeBlock('cloneGroup25', 'expandBtn25', 'collapseBtn25')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn25" onclick="toggleCodeBlock('cloneGroup25', 'expandBtn25', 'collapseBtn25')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup25"><code class="language-tsx text-sm text-gray-800">, error: result.error ?? '' }), success: false })
+      }
+      await loadPackages()
+    } catch (err) {
+      setFeedback({ message: t('npm.error', { error: String(err) }), success: false })
+    } finally {
+      setUpdateAllLoading</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/FileExplorer.tsx (Line 50:5 - Line 63:13), src/renderer/components/SidebarFileTree.tsx (Line 25:20 - Line 38:12)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn26" onclick="toggleCodeBlock('cloneGroup26', 'expandBtn26', 'collapseBtn26')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn26" onclick="toggleCodeBlock('cloneGroup26', 'expandBtn26', 'collapseBtn26')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup26"><code class="language-tsx text-sm text-gray-800">)
+
+  const loadChildren = useCallback(async () =&gt; {
+    setLoading(true)
+    try {
+      const entries = await window.mirehub.fs.readDir(entry.path)
+      setChildren(entries)
+    } catch {
+      setChildren([])
+    }
+    setLoading(false)
+  }, [entry.path])
+
+  const handleToggle</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/FileExplorer.tsx (Line 174:3 - Line 197:15), src/renderer/components/SidebarFileTree.tsx (Line 189:3 - Line 212:11)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn27" onclick="toggleCodeBlock('cloneGroup27', 'expandBtn27', 'collapseBtn27')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn27" onclick="toggleCodeBlock('cloneGroup27', 'expandBtn27', 'collapseBtn27')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup27"><code class="language-tsx text-sm text-gray-800">const getFileIcon = (name: string, isDir: boolean): string =&gt; {
+    if (isDir) return '\u{1F4C1}'
+    const ext = name.split('.').pop()?.toLowerCase()
+    switch (ext) {
+      case 'ts':
+      case 'tsx':
+        return '\u{1F535}'
+      case 'js':
+      case 'jsx':
+        return '\u{1F7E1}'
+      case 'json':
+        return '\u{1F7E2}'
+      case 'css':
+        return '\u{1F7E3}'
+      case 'md':
+        return '\u{1F4DD}'
+      case 'html':
+        return '\u{1F7E0}'
+      default:
+        return '\u{1F4C4}'
+    }
+  }
+
+  const sortedChildren</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/FileExplorer.tsx (Line 210:2 - Line 221:15), src/renderer/components/SidebarFileTree.tsx (Line 225:2 - Line 236:16)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn28" onclick="toggleCodeBlock('cloneGroup28', 'expandBtn28', 'collapseBtn28')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn28" onclick="toggleCodeBlock('cloneGroup28', 'expandBtn28', 'collapseBtn28')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup28"><code class="language-tsx text-sm text-gray-800">&quot; viewBox=&quot;0 0 10 10&quot; fill=&quot;none&quot;&gt;
+              &lt;path
+                d=&quot;M3 2L7 5L3 8&quot;
+                stroke=&quot;currentColor&quot;
+                strokeWidth=&quot;1.3&quot;
+                strokeLinecap=&quot;round&quot;
+                strokeLinejoin=&quot;round&quot;
+              /&gt;
+            &lt;/svg&gt;
+          &lt;/span&gt;
+        )}
+        &lt;span className=&quot;file-tree-icon</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/FileDiffViewer.tsx (Line 45:4 - Line 50:7), src/renderer/components/FileViewer.tsx (Line 8:16 - Line 21:8)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn29" onclick="toggleCodeBlock('cloneGroup29', 'expandBtn29', 'collapseBtn29')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn29" onclick="toggleCodeBlock('cloneGroup29', 'expandBtn29', 'collapseBtn29')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup29"><code class="language-tsx text-sm text-gray-800">: Record&lt;string, string&gt; = {
+      '.ts': 'typescript', '.tsx': 'typescriptreact', '.js': 'javascript',
+      '.jsx': 'javascriptreact', '.json': 'json', '.css': 'css',
+      '.html': 'html', '.md': 'markdown', '.py': 'python',
+      '.rs': 'rust', '.go': 'go', '.sh': 'shell',
+      '.yml'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/DatabaseSidebar.tsx (Line 558:3 - Line 570:2), src/renderer/components/DatabaseSidebar.tsx (Line 535:2 - Line 546:3)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn30" onclick="toggleCodeBlock('cloneGroup30', 'expandBtn30', 'collapseBtn30')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn30" onclick="toggleCodeBlock('cloneGroup30', 'expandBtn30', 'collapseBtn30')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup30"><code class="language-tsx text-sm text-gray-800">${table.name}${table.rowCount != null ? ` (${table.rowCount} rows)` : ''}`}
+                      &gt;
+                        &lt;span className=&quot;db-tree-table-icon&quot;&gt;
+                          {table.type === 'view' ? 'V' : table.type === 'collection' ? 'C' : 'T'}
+                        &lt;/span&gt;
+                        &lt;span className=&quot;db-tree-table-name&quot;&gt;{table.name}&lt;/span&gt;
+                        {table.rowCount != null &amp;&amp; (
+                          &lt;span className=&quot;db-tree-count&quot;&gt;{table.rowCount}&lt;/span&gt;
+                        )}
+                      &lt;/div&gt;
+                    ))}
+
+                  {</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/CommandPalette.tsx (Line 176:3 - Line 185:22), src/renderer/components/GlobalSearch.tsx (Line 131:3 - Line 140:20)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn31" onclick="toggleCodeBlock('cloneGroup31', 'expandBtn31', 'collapseBtn31')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn31" onclick="toggleCodeBlock('cloneGroup31', 'expandBtn31', 'collapseBtn31')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup31"><code class="language-tsx text-sm text-gray-800">&quot;
+            viewBox=&quot;0 0 16 16&quot;
+            fill=&quot;none&quot;
+          &gt;
+            &lt;circle cx=&quot;7&quot; cy=&quot;7&quot; r=&quot;4.5&quot; stroke=&quot;currentColor&quot; strokeWidth=&quot;1.5&quot; /&gt;
+            &lt;path d=&quot;M10.5 10.5L14 14&quot; stroke=&quot;currentColor&quot; strokeWidth=&quot;1.5&quot; strokeLinecap=&quot;round&quot; /&gt;
+          &lt;/svg&gt;
+          &lt;input
+            ref={inputRef}
+            className=&quot;command-palette-input</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/ClaudeRulesPanel.tsx (Line 531:2 - Line 540:9), src/renderer/components/FileViewer.tsx (Line 412:13 - Line 421:18)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn32" onclick="toggleCodeBlock('cloneGroup32', 'expandBtn32', 'collapseBtn32')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn32" onclick="toggleCodeBlock('cloneGroup32', 'expandBtn32', 'collapseBtn32')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup32"><code class="language-tsx text-sm text-gray-800">}
+                onMount={handleEditorMount}
+                beforeMount={(monaco) =&gt; {
+                  monaco.editor.defineTheme('catppuccin-mocha', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                      { token: 'comment', foreground: '6c7086', fontStyle: 'italic' },
+                      { token: 'keyword', foreground: 'cba6f7' },
+                      { token: 'string'</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/ClaudeRulesPanel.tsx (Line 534:19 - Line 541:2), src/renderer/components/FileDiffViewer.tsx (Line 88:15 - Line 95:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn33" onclick="toggleCodeBlock('cloneGroup33', 'expandBtn33', 'collapseBtn33')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn33" onclick="toggleCodeBlock('cloneGroup33', 'expandBtn33', 'collapseBtn33')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup33"><code class="language-tsx text-sm text-gray-800">monaco.editor.defineTheme('catppuccin-mocha', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                      { token: 'comment', foreground: '6c7086', fontStyle: 'italic' },
+                      { token: 'keyword', foreground: 'cba6f7' },
+                      { token: 'string', foreground: 'a6e3a1' },
+                    ]</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/ClaudeRulesPanel.tsx (Line 685:6 - Line 705:2), src/renderer/components/ClaudeRulesPanel.tsx (Line 651:6 - Line 672:2)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn34" onclick="toggleCodeBlock('cloneGroup34', 'expandBtn34', 'collapseBtn34')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn34" onclick="toggleCodeBlock('cloneGroup34', 'expandBtn34', 'collapseBtn34')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup34"><code class="language-tsx text-sm text-gray-800">.name}&lt;/span&gt;
+                          &lt;button
+                            className=&quot;claude-profile-file-action&quot;
+                            onClick={() =&gt; handleOpenItem('skill', skill.filename)}
+                            title={t('common.edit')}
+                          &gt;
+                            {t('common.edit')}
+                          &lt;/button&gt;
+                          &lt;button
+                            className=&quot;claude-profile-file-action claude-profile-file-action--danger&quot;
+                            onClick={() =&gt; handleDeleteItem('skill', skill.filename)}
+                            title={t('common.delete')}
+                          &gt;
+                            {t('common.delete')}
+                          &lt;/button&gt;
+                        &lt;/div&gt;
+                      ))}
+                    &lt;/div&gt;
+                  )}
+                &lt;/div&gt;
+              &lt;</code></pre></div><div class="py-4"><p class="text-gray-600">src/renderer/components/ClaudeDefaultsLibrary.tsx (Line 198:6 - Line 208:6), src/renderer/components/ClaudeDefaultsLibrary.tsx (Line 164:8 - Line 174:8)</p><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2" id="expandBtn35" onclick="toggleCodeBlock('cloneGroup35', 'expandBtn35', 'collapseBtn35')">Show code</button><button class="bg-gray-500 text-white px-1 py-0.5 text-xs rounded focus:outline-none ml-2 hidden" id="collapseBtn35" onclick="toggleCodeBlock('cloneGroup35', 'expandBtn35', 'collapseBtn35')">Hide code</button><pre class="bg-gray-100 border border-gray-200 p-4 rounded mt-2 hidden" id="cloneGroup35"><code class="language-tsx text-sm text-gray-800">.description}&lt;/p&gt;
+                  &lt;div className=&quot;claude-library-card-actions&quot;&gt;
+                    {isDeployed ? (
+                      &lt;span className=&quot;claude-library-badge--deployed&quot;&gt;{t('claude.deployed')}&lt;/span&gt;
+                    ) : (
+                      &lt;button
+                        className=&quot;claude-library-deploy-btn&quot;
+                        onClick={() =&gt; handleDeploySkill(skill.id)}
+                        disabled={deploying !== null}
+                      &gt;
+                        {deploying === skill</code></pre></div><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="bash-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">bash</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div><a name="markdown-clones"></a><h2 class="text-2xl font-semibold text-gray-700 mb-4">markdown</h2><div class="divide-y divide-gray-200 border-b-2"><!-- Add more clone groups for .txt format as needed         // Add more clone groups for .txt format as needed--></div></section><!-- Add more sections for other formats and clone groups as needed--></main><footer class="bg-white shadow mt-8 py-4"><div class="container mx-auto px-4 text-center"><p class="text-sm text-gray-600">This report is generated by jscpd, an open-source copy/paste detector.</p><p class="text-sm text-gray-600">jscpd is licensed under the MIT License.</p><a class="text-blue-500 text-sm" href="https://github.com/kucherenko/jscpd" target="_blank" rel="noopener noreferrer">View jscpd on GitHub</a></div></footer><script src="js/prism.js"></script><script>function toggleCodeBlock(codeBlockId, expandBtnId, collapseBtnId) {
+  const codeBlock = document.getElementById(codeBlockId);
+  const expandBtn = document.getElementById(expandBtnId);
+  const collapseBtn = document.getElementById(collapseBtnId);
+
+  codeBlock.classList.toggle('hidden');
+  expandBtn.classList.toggle('hidden');
+  collapseBtn.classList.toggle('hidden');
+}</script></body></html>

@@ -1,0 +1,4560 @@
+{
+    "file_extensions": [
+        ".py",
+        ".pyi",
+        ".ipynb",
+        ".pyx",
+        ".pxd",
+        ".yml",
+        ".yaml",
+        ".json",
+        "",
+        ".sh",
+        ".bash",
+        ".dash",
+        ".ksh",
+        ".bicep",
+        ".c",
+        ".h",
+        ".clj",
+        ".cljs",
+        ".cljc",
+        ".edn",
+        ".coffee",
+        ".cpp",
+        ".cc",
+        ".hpp",
+        ".cxx",
+        ".cu",
+        ".hxx",
+        ".c++",
+        ".hh",
+        ".h++",
+        ".cuh",
+        ".cs",
+        ".config",
+        ".csproj",
+        ".props",
+        ".targets",
+        ".css",
+        ".scss",
+        ".saas",
+        ".dart",
+        ".env",
+        ".feature",
+        ".go",
+        ".graphql",
+        ".groovy",
+        ".gvy",
+        ".gradle",
+        ".nf",
+        ".html",
+        ".htm",
+        ".java",
+        ".js",
+        ".jsx",
+        ".kt",
+        ".kts",
+        ".tex",
+        ".lua",
+        ".md",
+        ".pl",
+        ".pm",
+        ".t",
+        ".php",
+        ".ps1",
+        ".psm1",
+        ".psd1",
+        ".ps1xml",
+        ".pssc",
+        ".psrc",
+        ".cdxml",
+        ".proto",
+        ".r",
+        ".R",
+        ".Rmd",
+        ".RMD",
+        ".raku",
+        ".rakumod",
+        ".rakutest",
+        ".pm6",
+        ".pl6",
+        ".p6",
+        ".robot",
+        ".resource",
+        ".rst",
+        ".rb",
+        ".rs",
+        ".scala",
+        ".smk",
+        ".mdx",
+        ".markdown",
+        ".txt",
+        ".jsonc",
+        ".json5",
+        ".sql",
+        ".tf",
+        ".hcl",
+        ".ts",
+        ".vb",
+        ".xml",
+        ".xsd"
+    ],
+    "file_names_regex": [
+        "Containerfile",
+        "(.*\\.)?Dockerfile",
+        "Jenkinsfile",
+        "package\\.json",
+        "Snakefile"
+    ],
+    "flavor_suggestions": [
+        {
+            "new_flavor_linter_names": {
+                "py/iterator": [
+                    "ACTION_ACTIONLINT",
+                    "BASH_EXEC",
+                    "BASH_SHELLCHECK",
+                    "BASH_SHFMT",
+                    "COPYPASTE_JSCPD",
+                    "CSS_STYLELINT",
+                    "HTML_DJLINT",
+                    "HTML_HTMLHINT",
+                    "JAVASCRIPT_STANDARD",
+                    "JSON_JSONLINT",
+                    "JSON_V8R",
+                    "JSON_PRETTIER",
+                    "JSON_NPM_PACKAGE_JSON_LINT",
+                    "MARKDOWN_MARKDOWNLINT",
+                    "MARKDOWN_MARKDOWN_TABLE_FORMATTER",
+                    "REPOSITORY_CHECKOV",
+                    "REPOSITORY_GIT_DIFF",
+                    "REPOSITORY_GITLEAKS",
+                    "REPOSITORY_GRYPE",
+                    "REPOSITORY_KICS",
+                    "REPOSITORY_SECRETLINT",
+                    "REPOSITORY_TRIVY",
+                    "REPOSITORY_TRIVY_SBOM",
+                    "REPOSITORY_TRUFFLEHOG",
+                    "REPOSITORY_KINGFISHER",
+                    "SPELL_CSPELL",
+                    "SPELL_LYCHEE",
+                    "TYPESCRIPT_STANDARD",
+                    "YAML_PRETTIER",
+                    "YAML_YAMLLINT",
+                    "YAML_V8R"
+                ]
+            }
+        }
+    ],
+    "has_updated_sources": 0,
+    "linters": [
+        {
+            "descriptor_id": "ACTION",
+            "descriptor_type": "tooling_format",
+            "elapsed_time_s": 0.7522239590180106,
+            "files": [
+                ".github/workflows/ci.yml",
+                ".github/workflows/pages.yml"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/ci.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/pages.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 2,
+            "is_active": true,
+            "linter_name": "actionlint",
+            "name": "ACTION_ACTIONLINT",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "BASH",
+            "descriptor_type": "language",
+            "elapsed_time_s": 0.035062957991613075,
+            "files": [
+                ".workspaces/hooks/kanban-done.sh"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": 0,
+                    "file": ".workspaces/hooks/kanban-done.sh",
+                    "fixed": false,
+                    "status": "success",
+                    "status_code": 0,
+                    "stdout": "",
+                    "warnings_number": 0
+                }
+            ],
+            "files_number": 1,
+            "is_active": true,
+            "linter_name": "bash-exec",
+            "name": "BASH_EXEC",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "BASH",
+            "descriptor_type": "language",
+            "elapsed_time_s": 0.1151360000076238,
+            "files": [
+                ".workspaces/hooks/kanban-done.sh"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/hooks/kanban-done.sh",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 1,
+            "is_active": true,
+            "linter_name": "shellcheck",
+            "name": "BASH_SHELLCHECK",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "BASH",
+            "descriptor_type": "language",
+            "elapsed_time_s": 0.1142894999939017,
+            "files": [
+                ".workspaces/hooks/kanban-done.sh"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/hooks/kanban-done.sh",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 1,
+            "is_active": true,
+            "linter_name": "shfmt",
+            "name": "BASH_SHFMT",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "COPYPASTE",
+            "descriptor_type": "other",
+            "elapsed_time_s": 9.670010047004325,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "jscpd",
+            "name": "COPYPASTE_JSCPD",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 90,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "CSS",
+            "descriptor_type": "format",
+            "elapsed_time_s": 16.814823424007045,
+            "files": [
+                "src/renderer/styles/analysis.css",
+                "src/renderer/styles/claude.css",
+                "src/renderer/styles/fileexplorer.css",
+                "src/renderer/styles/git.css",
+                "src/renderer/styles/global.css",
+                "src/renderer/styles/kanban.css",
+                "src/renderer/styles/multiagent.css",
+                "src/renderer/styles/terminal.css",
+                "website/css/style.css"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/analysis.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/claude.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/fileexplorer.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/git.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/global.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/kanban.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/multiagent.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/terminal.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/css/style.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 9,
+            "is_active": true,
+            "linter_name": "stylelint",
+            "name": "CSS_STYLELINT",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 1301,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "HTML",
+            "descriptor_type": "format",
+            "elapsed_time_s": 1.4284887090034317,
+            "files": [
+                "src/renderer/index.html",
+                "website/docs.html",
+                "website/index.html"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/docs.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 3,
+            "is_active": true,
+            "linter_name": "djlint",
+            "name": "HTML_DJLINT",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 39,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "HTML",
+            "descriptor_type": "format",
+            "elapsed_time_s": 1.674278708989732,
+            "files": [
+                "src/renderer/index.html",
+                "website/docs.html",
+                "website/index.html"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/docs.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 3,
+            "is_active": true,
+            "linter_name": "htmlhint",
+            "name": "HTML_HTMLHINT",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 9,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "JAVASCRIPT",
+            "descriptor_type": "language",
+            "elapsed_time_s": 5.330311461002566,
+            "files": [
+                "website/js/main.js"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": "website/js/main.js",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 1,
+            "is_active": true,
+            "linter_name": "standard",
+            "name": "JAVASCRIPT_STANDARD",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 1,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "JSON",
+            "descriptor_type": "format",
+            "elapsed_time_s": 1.0675694579840638,
+            "files": [
+                ".claude/settings.json",
+                ".workspaces/kanban.json",
+                "package-lock.json",
+                "package.json",
+                "tests/fixtures/analysis/bandit-empty.json",
+                "tests/fixtures/analysis/bandit-output.json",
+                "tests/fixtures/analysis/eslint-empty.json",
+                "tests/fixtures/analysis/eslint-output.json",
+                "tests/fixtures/analysis/semgrep-empty.json",
+                "tests/fixtures/analysis/semgrep-output.json",
+                "tsconfig.json",
+                "tsconfig.main.json",
+                "tsconfig.renderer.json"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".claude/settings.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/kanban.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package-lock.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.main.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.renderer.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 13,
+            "is_active": true,
+            "linter_name": "jsonlint",
+            "name": "JSON_JSONLINT",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "JSON",
+            "descriptor_type": "format",
+            "elapsed_time_s": 6.5345113780058455,
+            "files": [
+                ".claude/settings.json",
+                ".workspaces/kanban.json",
+                "package-lock.json",
+                "package.json",
+                "tests/fixtures/analysis/bandit-empty.json",
+                "tests/fixtures/analysis/bandit-output.json",
+                "tests/fixtures/analysis/eslint-empty.json",
+                "tests/fixtures/analysis/eslint-output.json",
+                "tests/fixtures/analysis/semgrep-empty.json",
+                "tests/fixtures/analysis/semgrep-output.json",
+                "tsconfig.json",
+                "tsconfig.main.json",
+                "tsconfig.renderer.json"
+            ],
+            "files_lint_results": [],
+            "files_number": 13,
+            "is_active": true,
+            "linter_name": "npm-package-json-lint",
+            "name": "JSON_NPM_PACKAGE_JSON_LINT",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "JSON",
+            "descriptor_type": "format",
+            "elapsed_time_s": 2.3863423760049045,
+            "files": [
+                ".claude/settings.json",
+                ".workspaces/kanban.json",
+                "package-lock.json",
+                "package.json",
+                "tests/fixtures/analysis/bandit-empty.json",
+                "tests/fixtures/analysis/bandit-output.json",
+                "tests/fixtures/analysis/eslint-empty.json",
+                "tests/fixtures/analysis/eslint-output.json",
+                "tests/fixtures/analysis/semgrep-empty.json",
+                "tests/fixtures/analysis/semgrep-output.json",
+                "tsconfig.json",
+                "tsconfig.main.json",
+                "tsconfig.renderer.json"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".claude/settings.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/kanban.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package-lock.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.main.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.renderer.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 13,
+            "is_active": true,
+            "linter_name": "prettier",
+            "name": "JSON_PRETTIER",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "warning",
+            "total_number_errors": 1,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "JSON",
+            "descriptor_type": "format",
+            "elapsed_time_s": 10.743368463008665,
+            "files": [
+                ".claude/settings.json",
+                ".workspaces/kanban.json",
+                "package-lock.json",
+                "package.json",
+                "tests/fixtures/analysis/bandit-empty.json",
+                "tests/fixtures/analysis/bandit-output.json",
+                "tests/fixtures/analysis/eslint-empty.json",
+                "tests/fixtures/analysis/eslint-output.json",
+                "tests/fixtures/analysis/semgrep-empty.json",
+                "tests/fixtures/analysis/semgrep-output.json",
+                "tsconfig.json",
+                "tsconfig.main.json",
+                "tsconfig.renderer.json"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".claude/settings.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/kanban.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package-lock.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.main.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.renderer.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 13,
+            "is_active": true,
+            "linter_name": "v8r",
+            "name": "JSON_V8R",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "MARKDOWN",
+            "descriptor_type": "format",
+            "elapsed_time_s": 3.872266294027213,
+            "files": [
+                ".claude/agents/code-reviewer.md",
+                ".claude/agents/debugger.md",
+                ".claude/agents/doc-writer.md",
+                ".claude/agents/frontend-designer.md",
+                ".claude/agents/integrator.md",
+                ".claude/agents/security-auditor.md",
+                ".claude/commands/security-scan.md",
+                ".claude/commands/test.md",
+                ".claude/plan-documentation.md",
+                ".claude/plans/T-23-analysis-tab.md",
+                ".claude/plans/architecte-code-analysis.md",
+                ".claude/plans/architecture-v2.md",
+                ".claude/plans/designer-frontend-code-analysis-plan.md",
+                "ARCHITECTURE.md",
+                "CLAUDE.md",
+                "README.md",
+                "docs/COMPONENTS.md",
+                "docs/CONTRIBUTING.md",
+                "docs/IPC-API.md",
+                "docs/KEYBOARD-SHORTCUTS.md",
+                "docs/SECURITY.md",
+                "docs/STORES.md",
+                "docs/TESTING.md"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/code-reviewer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/debugger.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/doc-writer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/frontend-designer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/integrator.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/security-auditor.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/security-scan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/test.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plan-documentation.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/T-23-analysis-tab.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecte-code-analysis.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecture-v2.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/designer-frontend-code-analysis-plan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "ARCHITECTURE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "CLAUDE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "README.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/COMPONENTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/CONTRIBUTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/IPC-API.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/KEYBOARD-SHORTCUTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/SECURITY.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/STORES.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/TESTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 23,
+            "is_active": true,
+            "linter_name": "markdownlint",
+            "name": "MARKDOWN_MARKDOWNLINT",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "warning",
+            "total_number_errors": 477,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "MARKDOWN",
+            "descriptor_type": "format",
+            "elapsed_time_s": 1.3334979169885628,
+            "files": [
+                ".claude/agents/code-reviewer.md",
+                ".claude/agents/debugger.md",
+                ".claude/agents/doc-writer.md",
+                ".claude/agents/frontend-designer.md",
+                ".claude/agents/integrator.md",
+                ".claude/agents/security-auditor.md",
+                ".claude/commands/security-scan.md",
+                ".claude/commands/test.md",
+                ".claude/plan-documentation.md",
+                ".claude/plans/T-23-analysis-tab.md",
+                ".claude/plans/architecte-code-analysis.md",
+                ".claude/plans/architecture-v2.md",
+                ".claude/plans/designer-frontend-code-analysis-plan.md",
+                "ARCHITECTURE.md",
+                "CLAUDE.md",
+                "README.md",
+                "docs/COMPONENTS.md",
+                "docs/CONTRIBUTING.md",
+                "docs/IPC-API.md",
+                "docs/KEYBOARD-SHORTCUTS.md",
+                "docs/SECURITY.md",
+                "docs/STORES.md",
+                "docs/TESTING.md"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/code-reviewer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/debugger.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/doc-writer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/frontend-designer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/integrator.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/security-auditor.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/security-scan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/test.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plan-documentation.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/T-23-analysis-tab.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecte-code-analysis.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecture-v2.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/designer-frontend-code-analysis-plan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "ARCHITECTURE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "CLAUDE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "README.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/COMPONENTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/CONTRIBUTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/IPC-API.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/KEYBOARD-SHORTCUTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/SECURITY.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/STORES.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/TESTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 23,
+            "is_active": true,
+            "linter_name": "markdown-table-formatter",
+            "name": "MARKDOWN_MARKDOWN_TABLE_FORMATTER",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "warning",
+            "total_number_errors": 1,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 51.98184889901313,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "checkov",
+            "name": "REPOSITORY_CHECKOV",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 323.1568745219847,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "devskim",
+            "name": "REPOSITORY_DEVSKIM",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 1404,
+            "total_number_warnings": 1632
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 3.465468709997367,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "dustilock",
+            "name": "REPOSITORY_DUSTILOCK",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 2.1203340429929085,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "gitleaks",
+            "name": "REPOSITORY_GITLEAKS",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 0.9550576669862494,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "git_diff",
+            "name": "REPOSITORY_GIT_DIFF",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 62.869723487994634,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "grype",
+            "name": "REPOSITORY_GRYPE",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 95,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 67.79269390698755,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "kics",
+            "name": "REPOSITORY_KICS",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 23.21361951099243,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "kingfisher",
+            "name": "REPOSITORY_KINGFISHER",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 1,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 3.4128373349958565,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "secretlint",
+            "name": "REPOSITORY_SECRETLINT",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 1,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 42.36149960401235,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "syft",
+            "name": "REPOSITORY_SYFT",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 57.19939565198729,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "trivy",
+            "name": "REPOSITORY_TRIVY",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 55.77950498499558,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "trivy-sbom",
+            "name": "REPOSITORY_TRIVY_SBOM",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "REPOSITORY",
+            "descriptor_type": "other",
+            "elapsed_time_s": 49.6379044810019,
+            "files": [],
+            "files_lint_results": [],
+            "files_number": 0,
+            "is_active": true,
+            "linter_name": "trufflehog",
+            "name": "REPOSITORY_TRUFFLEHOG",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "SPELL",
+            "descriptor_type": "other",
+            "elapsed_time_s": 170.8594336620008,
+            "files": [
+                ".claude/agents/code-reviewer.md",
+                ".claude/agents/debugger.md",
+                ".claude/agents/doc-writer.md",
+                ".claude/agents/frontend-designer.md",
+                ".claude/agents/integrator.md",
+                ".claude/agents/security-auditor.md",
+                ".claude/commands/security-scan.md",
+                ".claude/commands/test.md",
+                ".claude/plan-documentation.md",
+                ".claude/plans/T-23-analysis-tab.md",
+                ".claude/plans/architecte-code-analysis.md",
+                ".claude/plans/architecture-v2.md",
+                ".claude/plans/designer-frontend-code-analysis-plan.md",
+                ".claude/settings.json",
+                ".github/workflows/ci.yml",
+                ".github/workflows/pages.yml",
+                ".gitignore",
+                ".prettierrc",
+                ".workspaces/hooks/kanban-done.sh",
+                ".workspaces/kanban.json",
+                "ARCHITECTURE.md",
+                "CLAUDE.md",
+                "LICENSE",
+                "Makefile",
+                "README.md",
+                "docs/COMPONENTS.md",
+                "docs/CONTRIBUTING.md",
+                "docs/IPC-API.md",
+                "docs/KEYBOARD-SHORTCUTS.md",
+                "docs/SECURITY.md",
+                "docs/STORES.md",
+                "docs/TESTING.md",
+                "package-lock.json",
+                "package.json",
+                "src/main/index.ts",
+                "src/main/ipc/analysis.ts",
+                "src/main/ipc/api.ts",
+                "src/main/ipc/app.ts",
+                "src/main/ipc/appUpdate.ts",
+                "src/main/ipc/claude.ts",
+                "src/main/ipc/claudeDefaults.ts",
+                "src/main/ipc/database.ts",
+                "src/main/ipc/filesystem.ts",
+                "src/main/ipc/git.ts",
+                "src/main/ipc/kanban.ts",
+                "src/main/ipc/mcp.ts",
+                "src/main/ipc/project.ts",
+                "src/main/ipc/session.ts",
+                "src/main/ipc/ssh.ts",
+                "src/main/ipc/terminal.ts",
+                "src/main/ipc/updates.ts",
+                "src/main/ipc/workspace.ts",
+                "src/main/ipc/workspaceEnv.ts",
+                "src/main/services/activityHooks.ts",
+                "src/main/services/database/backup.ts",
+                "src/main/services/database/crypto.ts",
+                "src/main/services/database/drivers/base.ts",
+                "src/main/services/database/drivers/mongodb.ts",
+                "src/main/services/database/drivers/mssql.ts",
+                "src/main/services/database/drivers/mysql.ts",
+                "src/main/services/database/drivers/postgresql.ts",
+                "src/main/services/database/drivers/sqlite.ts",
+                "src/main/services/database/index.ts",
+                "src/main/services/storage.ts",
+                "src/preload/index.ts",
+                "src/renderer/index.html",
+                "src/renderer/lib/i18n/en.ts",
+                "src/renderer/lib/i18n/fr.ts",
+                "src/renderer/lib/i18n/index.ts",
+                "src/renderer/lib/monacoSetup.ts",
+                "src/renderer/lib/stores/appUpdateStore.ts",
+                "src/renderer/lib/stores/claudeStore.ts",
+                "src/renderer/lib/stores/databaseStore.ts",
+                "src/renderer/lib/stores/kanbanStore.ts",
+                "src/renderer/lib/stores/terminalTabStore.ts",
+                "src/renderer/lib/stores/updateStore.ts",
+                "src/renderer/lib/stores/viewStore.ts",
+                "src/renderer/lib/stores/workspaceStore.ts",
+                "src/renderer/styles/analysis.css",
+                "src/renderer/styles/claude.css",
+                "src/renderer/styles/fileexplorer.css",
+                "src/renderer/styles/git.css",
+                "src/renderer/styles/global.css",
+                "src/renderer/styles/kanban.css",
+                "src/renderer/styles/multiagent.css",
+                "src/renderer/styles/terminal.css",
+                "src/renderer/types/global.d.ts",
+                "src/renderer/vite-env.d.ts",
+                "src/shared/constants/defaultProfiles.ts",
+                "src/shared/constants/defaultSkills.ts",
+                "src/shared/constants/defaultWorkflows.ts",
+                "src/shared/constants/defaults.ts",
+                "src/shared/constants/mcpCatalog.ts",
+                "src/shared/types/index.ts",
+                "tests/fixtures/analysis/bandit-empty.json",
+                "tests/fixtures/analysis/bandit-output.json",
+                "tests/fixtures/analysis/eslint-empty.json",
+                "tests/fixtures/analysis/eslint-output.json",
+                "tests/fixtures/analysis/semgrep-empty.json",
+                "tests/fixtures/analysis/semgrep-output.json",
+                "tests/helpers/storage.ts",
+                "tests/integration/app-ipc.test.ts",
+                "tests/integration/claude-ipc.test.ts",
+                "tests/integration/database-ipc.test.ts",
+                "tests/integration/filesystem-ipc.test.ts",
+                "tests/integration/git-ipc.test.ts",
+                "tests/integration/kanban-claude.test.ts",
+                "tests/integration/kanban-ipc.test.ts",
+                "tests/integration/project-ipc.test.ts",
+                "tests/integration/session-ipc.test.ts",
+                "tests/integration/terminal-ipc.test.ts",
+                "tests/integration/terminal-session-navigation.test.ts",
+                "tests/integration/updates-ipc.test.ts",
+                "tests/integration/workspace-ipc.test.ts",
+                "tests/integration/workspaceEnv-ipc.test.ts",
+                "tests/mocks/electron.ts",
+                "tests/setup.ts",
+                "tests/unit/collapseExpand.test.ts",
+                "tests/unit/database-backup.test.ts",
+                "tests/unit/database-crypto.test.ts",
+                "tests/unit/database-drivers.test.ts",
+                "tests/unit/database-service.test.ts",
+                "tests/unit/storage.test.ts",
+                "tests/unit/terminalTabStore.test.ts",
+                "tests/unit/types.test.ts",
+                "tests/unit/updates.test.ts",
+                "tests/unit/viewStore.test.ts",
+                "tests/unit/workspaceStore.test.ts",
+                "tsconfig.json",
+                "tsconfig.main.json",
+                "tsconfig.renderer.json",
+                "vite.config.ts",
+                "vitest.config.ts",
+                "website/.nojekyll",
+                "website/css/style.css",
+                "website/docs.html",
+                "website/index.html",
+                "website/js/main.js",
+                "/tmp/lint/e2e4c20f-5624-43de-94f6-d389f8c3c5f3-megalinter_file_names_cspell.txt"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/code-reviewer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/debugger.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/doc-writer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/frontend-designer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/integrator.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/security-auditor.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/security-scan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/test.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plan-documentation.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/T-23-analysis-tab.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecte-code-analysis.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecture-v2.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/designer-frontend-code-analysis-plan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/settings.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/ci.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/pages.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".gitignore",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".prettierrc",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/hooks/kanban-done.sh",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/kanban.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "ARCHITECTURE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "CLAUDE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "LICENSE",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "Makefile",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "README.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/COMPONENTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/CONTRIBUTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/IPC-API.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/KEYBOARD-SHORTCUTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/SECURITY.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/STORES.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/TESTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package-lock.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/analysis.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/api.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/app.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/appUpdate.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/claude.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/claudeDefaults.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/database.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/filesystem.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/git.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/kanban.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/mcp.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/project.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/session.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/ssh.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/terminal.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/updates.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/workspace.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/workspaceEnv.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/activityHooks.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/backup.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/crypto.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/base.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/mongodb.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/mssql.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/mysql.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/postgresql.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/sqlite.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/storage.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/preload/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/i18n/en.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/i18n/fr.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/i18n/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/monacoSetup.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/appUpdateStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/claudeStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/databaseStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/kanbanStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/terminalTabStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/updateStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/viewStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/workspaceStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/analysis.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/claude.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/fileexplorer.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/git.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/global.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/kanban.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/multiagent.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/styles/terminal.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/types/global.d.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/vite-env.d.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaultProfiles.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaultSkills.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaultWorkflows.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaults.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/mcpCatalog.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/types/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/helpers/storage.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/app-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/claude-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/database-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/filesystem-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/git-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/kanban-claude.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/kanban-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/project-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/session-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/terminal-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/terminal-session-navigation.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/updates-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/workspace-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/workspaceEnv-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/mocks/electron.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/setup.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/collapseExpand.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-backup.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-crypto.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-drivers.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-service.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/storage.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/terminalTabStore.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/types.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/updates.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/viewStore.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/workspaceStore.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.main.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.renderer.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "vite.config.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "vitest.config.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/.nojekyll",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/css/style.css",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/docs.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/js/main.js",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "/tmp/lint/e2e4c20f-5624-43de-94f6-d389f8c3c5f3-megalinter_file_names_cspell.txt",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 138,
+            "is_active": true,
+            "linter_name": "cspell",
+            "name": "SPELL_CSPELL",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 7488,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "SPELL",
+            "descriptor_type": "other",
+            "elapsed_time_s": 44.78459518798627,
+            "files": [
+                ".claude/agents/code-reviewer.md",
+                ".claude/agents/debugger.md",
+                ".claude/agents/doc-writer.md",
+                ".claude/agents/frontend-designer.md",
+                ".claude/agents/integrator.md",
+                ".claude/agents/security-auditor.md",
+                ".claude/commands/security-scan.md",
+                ".claude/commands/test.md",
+                ".claude/plan-documentation.md",
+                ".claude/plans/T-23-analysis-tab.md",
+                ".claude/plans/architecte-code-analysis.md",
+                ".claude/plans/architecture-v2.md",
+                ".claude/plans/designer-frontend-code-analysis-plan.md",
+                ".claude/settings.json",
+                ".github/workflows/ci.yml",
+                ".github/workflows/pages.yml",
+                ".workspaces/kanban.json",
+                "ARCHITECTURE.md",
+                "CLAUDE.md",
+                "README.md",
+                "docs/COMPONENTS.md",
+                "docs/CONTRIBUTING.md",
+                "docs/IPC-API.md",
+                "docs/KEYBOARD-SHORTCUTS.md",
+                "docs/SECURITY.md",
+                "docs/STORES.md",
+                "docs/TESTING.md",
+                "package-lock.json",
+                "package.json",
+                "src/renderer/index.html",
+                "tests/fixtures/analysis/bandit-empty.json",
+                "tests/fixtures/analysis/bandit-output.json",
+                "tests/fixtures/analysis/eslint-empty.json",
+                "tests/fixtures/analysis/eslint-output.json",
+                "tests/fixtures/analysis/semgrep-empty.json",
+                "tests/fixtures/analysis/semgrep-output.json",
+                "tsconfig.json",
+                "tsconfig.main.json",
+                "tsconfig.renderer.json",
+                "website/docs.html",
+                "website/index.html"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/code-reviewer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/debugger.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/doc-writer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/frontend-designer.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/integrator.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/agents/security-auditor.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/security-scan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/commands/test.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plan-documentation.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/T-23-analysis-tab.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecte-code-analysis.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/architecture-v2.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/plans/designer-frontend-code-analysis-plan.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".claude/settings.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/ci.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/pages.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".workspaces/kanban.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "ARCHITECTURE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "CLAUDE.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "README.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/COMPONENTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/CONTRIBUTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/IPC-API.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/KEYBOARD-SHORTCUTS.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/SECURITY.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/STORES.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "docs/TESTING.md",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package-lock.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "package.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/bandit-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/eslint-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-empty.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/fixtures/analysis/semgrep-output.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.main.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tsconfig.renderer.json",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/docs.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "website/index.html",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 41,
+            "is_active": true,
+            "linter_name": "lychee",
+            "name": "SPELL_LYCHEE",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 6,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "TYPESCRIPT",
+            "descriptor_type": "language",
+            "elapsed_time_s": 61.16816452902276,
+            "files": [
+                "src/main/index.ts",
+                "src/main/ipc/analysis.ts",
+                "src/main/ipc/api.ts",
+                "src/main/ipc/app.ts",
+                "src/main/ipc/appUpdate.ts",
+                "src/main/ipc/claude.ts",
+                "src/main/ipc/claudeDefaults.ts",
+                "src/main/ipc/database.ts",
+                "src/main/ipc/filesystem.ts",
+                "src/main/ipc/git.ts",
+                "src/main/ipc/kanban.ts",
+                "src/main/ipc/mcp.ts",
+                "src/main/ipc/project.ts",
+                "src/main/ipc/session.ts",
+                "src/main/ipc/ssh.ts",
+                "src/main/ipc/terminal.ts",
+                "src/main/ipc/updates.ts",
+                "src/main/ipc/workspace.ts",
+                "src/main/ipc/workspaceEnv.ts",
+                "src/main/services/activityHooks.ts",
+                "src/main/services/database/backup.ts",
+                "src/main/services/database/crypto.ts",
+                "src/main/services/database/drivers/base.ts",
+                "src/main/services/database/drivers/mongodb.ts",
+                "src/main/services/database/drivers/mssql.ts",
+                "src/main/services/database/drivers/mysql.ts",
+                "src/main/services/database/drivers/postgresql.ts",
+                "src/main/services/database/drivers/sqlite.ts",
+                "src/main/services/database/index.ts",
+                "src/main/services/storage.ts",
+                "src/preload/index.ts",
+                "src/renderer/lib/i18n/en.ts",
+                "src/renderer/lib/i18n/fr.ts",
+                "src/renderer/lib/i18n/index.ts",
+                "src/renderer/lib/monacoSetup.ts",
+                "src/renderer/lib/stores/appUpdateStore.ts",
+                "src/renderer/lib/stores/claudeStore.ts",
+                "src/renderer/lib/stores/databaseStore.ts",
+                "src/renderer/lib/stores/kanbanStore.ts",
+                "src/renderer/lib/stores/terminalTabStore.ts",
+                "src/renderer/lib/stores/updateStore.ts",
+                "src/renderer/lib/stores/viewStore.ts",
+                "src/renderer/lib/stores/workspaceStore.ts",
+                "src/renderer/types/global.d.ts",
+                "src/renderer/vite-env.d.ts",
+                "src/shared/constants/defaultProfiles.ts",
+                "src/shared/constants/defaultSkills.ts",
+                "src/shared/constants/defaultWorkflows.ts",
+                "src/shared/constants/defaults.ts",
+                "src/shared/constants/mcpCatalog.ts",
+                "src/shared/types/index.ts",
+                "tests/helpers/storage.ts",
+                "tests/integration/app-ipc.test.ts",
+                "tests/integration/claude-ipc.test.ts",
+                "tests/integration/database-ipc.test.ts",
+                "tests/integration/filesystem-ipc.test.ts",
+                "tests/integration/git-ipc.test.ts",
+                "tests/integration/kanban-claude.test.ts",
+                "tests/integration/kanban-ipc.test.ts",
+                "tests/integration/project-ipc.test.ts",
+                "tests/integration/session-ipc.test.ts",
+                "tests/integration/terminal-ipc.test.ts",
+                "tests/integration/terminal-session-navigation.test.ts",
+                "tests/integration/updates-ipc.test.ts",
+                "tests/integration/workspace-ipc.test.ts",
+                "tests/integration/workspaceEnv-ipc.test.ts",
+                "tests/mocks/electron.ts",
+                "tests/setup.ts",
+                "tests/unit/collapseExpand.test.ts",
+                "tests/unit/database-backup.test.ts",
+                "tests/unit/database-crypto.test.ts",
+                "tests/unit/database-drivers.test.ts",
+                "tests/unit/database-service.test.ts",
+                "tests/unit/storage.test.ts",
+                "tests/unit/terminalTabStore.test.ts",
+                "tests/unit/types.test.ts",
+                "tests/unit/updates.test.ts",
+                "tests/unit/viewStore.test.ts",
+                "tests/unit/workspaceStore.test.ts",
+                "vite.config.ts",
+                "vitest.config.ts"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": "src/main/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/analysis.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/api.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/app.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/appUpdate.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/claude.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/claudeDefaults.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/database.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/filesystem.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/git.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/kanban.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/mcp.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/project.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/session.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/ssh.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/terminal.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/updates.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/workspace.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/ipc/workspaceEnv.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/activityHooks.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/backup.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/crypto.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/base.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/mongodb.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/mssql.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/mysql.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/postgresql.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/drivers/sqlite.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/database/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/main/services/storage.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/preload/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/i18n/en.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/i18n/fr.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/i18n/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/monacoSetup.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/appUpdateStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/claudeStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/databaseStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/kanbanStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/terminalTabStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/updateStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/viewStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/lib/stores/workspaceStore.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/types/global.d.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/renderer/vite-env.d.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaultProfiles.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaultSkills.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaultWorkflows.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/defaults.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/constants/mcpCatalog.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "src/shared/types/index.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/helpers/storage.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/app-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/claude-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/database-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/filesystem-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/git-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/kanban-claude.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/kanban-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/project-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/session-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/terminal-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/terminal-session-navigation.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/updates-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/workspace-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/integration/workspaceEnv-ipc.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/mocks/electron.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/setup.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/collapseExpand.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-backup.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-crypto.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-drivers.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/database-service.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/storage.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/terminalTabStore.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/types.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/updates.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/viewStore.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "tests/unit/workspaceStore.test.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "vite.config.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": "vitest.config.ts",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 81,
+            "is_active": true,
+            "linter_name": "ts-standard",
+            "name": "TYPESCRIPT_STANDARD",
+            "number_errors": 1,
+            "number_fixed": 0,
+            "return_code": 1,
+            "status": "error",
+            "total_number_errors": 1,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "YAML",
+            "descriptor_type": "format",
+            "elapsed_time_s": 1.6620464170118794,
+            "files": [
+                ".github/workflows/ci.yml",
+                ".github/workflows/pages.yml"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/ci.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/pages.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 2,
+            "is_active": true,
+            "linter_name": "prettier",
+            "name": "YAML_PRETTIER",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "YAML",
+            "descriptor_type": "format",
+            "elapsed_time_s": 4.461619876994519,
+            "files": [
+                ".github/workflows/ci.yml",
+                ".github/workflows/pages.yml"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/ci.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/pages.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 2,
+            "is_active": true,
+            "linter_name": "v8r",
+            "name": "YAML_V8R",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        },
+        {
+            "descriptor_id": "YAML",
+            "descriptor_type": "format",
+            "elapsed_time_s": 0.4726747919921763,
+            "files": [
+                ".github/workflows/ci.yml",
+                ".github/workflows/pages.yml"
+            ],
+            "files_lint_results": [
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/ci.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                },
+                {
+                    "errors_number": null,
+                    "file": ".github/workflows/pages.yml",
+                    "fixed": false,
+                    "status": null,
+                    "status_code": null,
+                    "stdout": null,
+                    "warnings_number": null
+                }
+            ],
+            "files_number": 2,
+            "is_active": true,
+            "linter_name": "yamllint",
+            "name": "YAML_YAMLLINT",
+            "number_errors": 0,
+            "number_fixed": 0,
+            "return_code": 0,
+            "status": "success",
+            "total_number_errors": 0,
+            "total_number_warnings": 0
+        }
+    ],
+    "post_commands_results": [],
+    "pre_commands_results": [],
+    "report_folder": "/tmp/lint/megalinter-reports",
+    "reporters": [
+        {
+            "is_active": true,
+            "master": null,
+            "name": "CONFIG",
+            "processing_order": 0,
+            "report_folder": "/tmp/lint/megalinter-reports",
+            "report_items": []
+        },
+        {
+            "is_active": true,
+            "master": null,
+            "name": "GITLAB_COMMENT",
+            "processing_order": 0,
+            "report_folder": "/tmp/lint/megalinter-reports",
+            "report_items": []
+        },
+        {
+            "is_active": true,
+            "master": null,
+            "name": "JSON",
+            "processing_order": 0,
+            "report_folder": "/tmp/lint/megalinter-reports",
+            "report_items": []
+        },
+        {
+            "is_active": true,
+            "master": null,
+            "name": "CONSOLE",
+            "processing_order": 0,
+            "report_folder": "/tmp/lint/megalinter-reports",
+            "report_items": []
+        },
+        {
+            "is_active": true,
+            "master": null,
+            "name": "UPDATED_SOURCES",
+            "processing_order": 0,
+            "report_folder": "/tmp/lint/megalinter-reports",
+            "report_items": []
+        }
+    ],
+    "request_id": "4cb9e264-117c-11f1-adf6-febf773d2c52",
+    "return_code": 1,
+    "status": "error"
+}

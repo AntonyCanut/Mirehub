@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "check_id": "python.lang.security.audit.eval-detected",
+      "path": "app/utils.py",
+      "start": { "line": 42, "col": 5 },
+      "end": { "line": 42, "col": 25 },
+      "extra": {
+        "message": "Detected use of eval(). Consider safer alternatives.",
+        "severity": "ERROR",
+        "metadata": {
+          "cwe": ["CWE-95"],
+          "source-rule-url": "https://semgrep.dev/r/python.lang.security.audit.eval-detected"
+        },
+        "lines": "    result = eval(user_input)"
+      }
+    },
+    {
+      "check_id": "javascript.express.security.xss",
+      "path": "src/server.js",
+      "start": { "line": 15, "col": 3 },
+      "end": { "line": 15, "col": 30 },
+      "extra": {
+        "message": "Possible XSS vulnerability: user input flows to response without sanitization.",
+        "severity": "WARNING",
+        "metadata": {
+          "cwe": ["CWE-79"],
+          "source-rule-url": "https://semgrep.dev/r/javascript.express.security.xss"
+        },
+        "lines": "  res.send(req.query.input)"
+      }
+    },
+    {
+      "check_id": "typescript.best-practice.no-console",
+      "path": "src/index.ts",
+      "start": { "line": 8, "col": 1 },
+      "end": { "line": 8, "col": 20 },
+      "extra": {
+        "message": "Avoid using console.log in production code.",
+        "severity": "INFO",
+        "metadata": {},
+        "lines": "console.log('debug')"
+      }
+    }
+  ],
+  "errors": []
+}
