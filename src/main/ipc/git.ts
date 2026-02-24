@@ -1,9 +1,10 @@
 import { IpcMain } from 'electron'
-import { execSync } from 'child_process'
+import { execFileSync } from 'child_process'
 import { IPC_CHANNELS, GitLogEntry, GitStatus, GitTag, GitBlameLine, GitRemote } from '../../shared/types'
 
-function exec(cmd: string, cwd: string): string {
-  return execSync(cmd, {
+/** Execute a git command safely using execFileSync (no shell interpretation). */
+function execGit(args: string[], cwd: string): string {
+  return execFileSync('git', args, {
     cwd,
     encoding: 'utf-8',
     timeout: 10000,
@@ -13,7 +14,7 @@ function exec(cmd: string, cwd: string): string {
 
 function hasCommits(cwd: string): boolean {
   try {
-    exec('git rev-parse HEAD', cwd)
+    execGit(['rev-parse', 'HEAD'], cwd)
     return true
   } catch {
     return false
@@ -23,7 +24,7 @@ function hasCommits(cwd: string): boolean {
 export function registerGitHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(IPC_CHANNELS.GIT_INIT, async (_event, { cwd }: { cwd: string }) => {
     try {
-      exec('git init', cwd)
+      execGit(['init'], cwd)
       return { success: true }
     } catch (err) {
       return { success: false, error: String(err) }
@@ -34,11 +35,11 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     try {
       let branch: string
       try {
-        branch = exec('git rev-parse --abbrev-ref HEAD', cwd)
+        branch = execGit(['rev-parse', '--abbrev-ref', 'HEAD'], cwd)
       } catch {
         // HEAD resolution failed — check if it's still a git repo (no commits yet)
         try {
-          exec('git rev-parse --git-dir', cwd)
+          execGit(['rev-parse', '--git-dir'], cwd)
           branch = '(aucun commit)'
         } catch {
           return null
@@ -49,7 +50,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       let behind = 0
       if (branch !== '(aucun commit)') {
         try {
-          const counts = exec('git rev-list --left-right --count HEAD...@{upstream}', cwd)
+          const counts = execGit(['rev-list', '--left-right', '--count', 'HEAD...@{upstream}'], cwd)
           const [a, b] = counts.split('\t')
           ahead = parseInt(a || '0', 10)
           behind = parseInt(b || '0', 10)
@@ -58,7 +59,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
         }
       }
 
-      const statusOutput = exec('git status --porcelain', cwd)
+      const statusOutput = execGit(['status', '--porcelain'], cwd)
       const staged: string[] = []
       const modified: string[] = []
       const untracked: string[] = []
@@ -91,10 +92,10 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
         // Return empty if no commits yet
         if (!hasCommits(cwd)) return []
 
-        const n = limit || 50
+        const n = Math.max(1, Math.floor(Number(limit) || 50))
         const SEP = '\x1f' // Unit separator - won't appear in normal git output
-        const output = exec(
-          `git log -${n} --pretty=format:"%H${SEP}%h${SEP}%an${SEP}%ai${SEP}%s${SEP}%P${SEP}%D"`,
+        const output = execGit(
+          ['log', `-${n}`, `--pretty=format:%H${SEP}%h${SEP}%an${SEP}%ai${SEP}%s${SEP}%P${SEP}%D`],
           cwd,
         )
         const entries: GitLogEntry[] = output.split('\n').filter(Boolean).map((line) => {
@@ -121,7 +122,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       // Return empty if no commits yet (branches reference commits)
       if (!hasCommits(cwd)) return []
 
-      const output = exec('git branch -a --format="%(refname:short)|%(objectname:short)|%(upstream:short)"', cwd)
+      const output = execGit(['branch', '-a', '--format=%(refname:short)|%(objectname:short)|%(upstream:short)'], cwd)
       const branches = output.split('\n').map((line) => {
         const [name, hash, upstream] = line.split('|')
         return { name: name || '', hash: hash || '', upstream: upstream || '' }
@@ -136,7 +137,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_CHECKOUT,
     async (_event, { cwd, branch }: { cwd: string; branch: string }) => {
       try {
-        exec(`git checkout "${branch}"`, cwd)
+        execGit(['checkout', branch], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -146,7 +147,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.GIT_PUSH, async (_event, { cwd }: { cwd: string }) => {
     try {
-      exec('git push', cwd)
+      execGit(['push'], cwd)
       return { success: true }
     } catch (err) {
       return { success: false, error: String(err) }
@@ -155,7 +156,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.GIT_PULL, async (_event, { cwd }: { cwd: string }) => {
     try {
-      exec('git pull', cwd)
+      execGit(['pull'], cwd)
       return { success: true }
     } catch (err) {
       return { success: false, error: String(err) }
@@ -170,9 +171,9 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     ) => {
       try {
         for (const file of files) {
-          exec(`git add "${file}"`, cwd)
+          execGit(['add', file], cwd)
         }
-        exec(`git commit -m "${message.replace(/"/g, '\\"')}"`, cwd)
+        execGit(['commit', '-m', message], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -186,14 +187,14 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       try {
         // For staged diff on repos with no commits, use --cached against empty tree
         if (staged && !hasCommits(cwd)) {
-          let cmd = 'git diff --cached --diff-algorithm=minimal'
-          if (file) cmd += ` -- "${file}"`
-          return exec(cmd, cwd)
+          const args = ['diff', '--cached', '--diff-algorithm=minimal']
+          if (file) args.push('--', file)
+          return execGit(args, cwd)
         }
-        let cmd = 'git diff'
-        if (staged) cmd += ' --cached'
-        if (file) cmd += ` -- "${file}"`
-        return exec(cmd, cwd)
+        const args = ['diff']
+        if (staged) args.push('--cached')
+        if (file) args.push('--', file)
+        return execGit(args, cwd)
       } catch {
         return ''
       }
@@ -202,7 +203,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.GIT_STASH, async (_event, { cwd }: { cwd: string }) => {
     try {
-      exec('git stash', cwd)
+      execGit(['stash'], cwd)
       return { success: true }
     } catch (err) {
       return { success: false, error: String(err) }
@@ -211,7 +212,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.GIT_STASH_POP, async (_event, { cwd }: { cwd: string }) => {
     try {
-      exec('git stash pop', cwd)
+      execGit(['stash', 'pop'], cwd)
       return { success: true }
     } catch (err) {
       return { success: false, error: String(err) }
@@ -225,7 +226,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
         if (!hasCommits(cwd)) {
           return { success: false, error: 'Impossible de creer une branche sans commit initial.' }
         }
-        exec(`git checkout -b "${name}"`, cwd)
+        execGit(['checkout', '-b', name], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -237,7 +238,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_DELETE_BRANCH,
     async (_event, { cwd, name }: { cwd: string; name: string }) => {
       try {
-        exec(`git branch -d "${name}"`, cwd)
+        execGit(['branch', '-d', name], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -249,7 +250,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_MERGE,
     async (_event, { cwd, branch }: { cwd: string; branch: string }) => {
       try {
-        exec(`git merge "${branch}"`, cwd)
+        execGit(['merge', branch], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -259,7 +260,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.GIT_FETCH, async (_event, { cwd }: { cwd: string }) => {
     try {
-      exec('git fetch --all --prune', cwd)
+      execGit(['fetch', '--all', '--prune'], cwd)
       return { success: true }
     } catch (err) {
       return { success: false, error: String(err) }
@@ -271,7 +272,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     async (_event, { cwd, files }: { cwd: string; files: string[] }) => {
       try {
         for (const file of files) {
-          exec(`git add "${file}"`, cwd)
+          execGit(['add', file], cwd)
         }
         return { success: true }
       } catch (err) {
@@ -286,11 +287,11 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       try {
         if (!hasCommits(cwd)) {
           for (const file of files) {
-            exec(`git rm --cached "${file}"`, cwd)
+            execGit(['rm', '--cached', file], cwd)
           }
         } else {
           for (const file of files) {
-            exec(`git reset HEAD -- "${file}"`, cwd)
+            execGit(['reset', 'HEAD', '--', file], cwd)
           }
         }
         return { success: true }
@@ -305,7 +306,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     async (_event, { cwd, files }: { cwd: string; files: string[] }) => {
       try {
         for (const file of files) {
-          exec(`git checkout -- "${file}"`, cwd)
+          execGit(['checkout', '--', file], cwd)
         }
         return { success: true }
       } catch (err) {
@@ -320,7 +321,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       try {
         if (!hasCommits(cwd)) return { files: [], diff: '' }
         // Get list of changed files with status
-        const filesOutput = exec(`git diff-tree --no-commit-id --name-status -r "${hash}"`, cwd)
+        const filesOutput = execGit(['diff-tree', '--no-commit-id', '--name-status', '-r', hash], cwd)
         const files = filesOutput
           .split('\n')
           .filter(Boolean)
@@ -329,7 +330,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
             return { status: status || '?', file: nameParts.join('\t') || '' }
           })
         // Get full diff
-        const diff = exec(`git show --format="" --patch "${hash}"`, cwd)
+        const diff = execGit(['show', '--format=', '--patch', hash], cwd)
         return { files, diff }
       } catch {
         return { files: [], diff: '' }
@@ -339,7 +340,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.GIT_STASH_LIST, async (_event, { cwd }: { cwd: string }) => {
     try {
-      const output = exec('git stash list --format="%gd|%gs|%ci"', cwd)
+      const output = execGit(['stash', 'list', '--format=%gd|%gs|%ci'], cwd)
       if (!output) return []
       return output.split('\n').filter(Boolean).map((line) => {
         const [ref, message, date] = line.split('|')
@@ -354,7 +355,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_RENAME_BRANCH,
     async (_event, { cwd, oldName, newName }: { cwd: string; oldName: string; newName: string }) => {
       try {
-        exec(`git branch -m "${oldName}" "${newName}"`, cwd)
+        execGit(['branch', '-m', oldName, newName], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -368,8 +369,8 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     try {
       if (!hasCommits(cwd)) return []
       const SEP = '\x1f'
-      const output = exec(
-        `git tag -l --sort=-creatordate --format="%(refname:short)${SEP}%(objectname:short)${SEP}%(contents:subject)${SEP}%(creatordate:iso)${SEP}%(objecttype)"`,
+      const output = execGit(
+        ['tag', '-l', '--sort=-creatordate', `--format=%(refname:short)${SEP}%(objectname:short)${SEP}%(contents:subject)${SEP}%(creatordate:iso)${SEP}%(objecttype)`],
         cwd,
       )
       if (!output) return []
@@ -397,9 +398,9 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     ) => {
       try {
         if (message) {
-          exec(`git tag -a "${name}" -m "${message.replace(/"/g, '\\"')}"`, cwd)
+          execGit(['tag', '-a', name, '-m', message], cwd)
         } else {
-          exec(`git tag "${name}"`, cwd)
+          execGit(['tag', name], cwd)
         }
         return { success: true }
       } catch (err) {
@@ -412,7 +413,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_DELETE_TAG,
     async (_event, { cwd, name }: { cwd: string; name: string }) => {
       try {
-        exec(`git tag -d "${name}"`, cwd)
+        execGit(['tag', '-d', name], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -426,7 +427,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_CHERRY_PICK,
     async (_event, { cwd, hash }: { cwd: string; hash: string }) => {
       try {
-        exec(`git cherry-pick "${hash}"`, cwd)
+        execGit(['cherry-pick', hash], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -443,7 +444,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       { cwd, branch1, branch2 }: { cwd: string; branch1: string; branch2: string },
     ) => {
       try {
-        const output = exec(`git diff "${branch1}"..."${branch2}" --stat`, cwd)
+        const output = execGit(['diff', `${branch1}...${branch2}`, '--stat'], cwd)
         return output
       } catch (err) {
         return String(err)
@@ -458,7 +459,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     async (_event, { cwd, file }: { cwd: string; file: string }) => {
       try {
         if (!hasCommits(cwd)) return []
-        const output = exec(`git blame --porcelain "${file}"`, cwd)
+        const output = execGit(['blame', '--porcelain', file], cwd)
         const lines: GitBlameLine[] = []
         const blocks = output.split('\n')
         let currentHash = ''
@@ -505,7 +506,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.GIT_REMOTES, async (_event, { cwd }: { cwd: string }) => {
     try {
-      const output = exec('git remote -v', cwd)
+      const output = execGit(['remote', '-v'], cwd)
       if (!output) return []
       const remoteMap = new Map<string, GitRemote>()
       for (const line of output.split('\n')) {
@@ -530,7 +531,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_ADD_REMOTE,
     async (_event, { cwd, name, url }: { cwd: string; name: string; url: string }) => {
       try {
-        exec(`git remote add "${name}" "${url}"`, cwd)
+        execGit(['remote', 'add', name, url], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -542,7 +543,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_REMOVE_REMOTE,
     async (_event, { cwd, name }: { cwd: string; name: string }) => {
       try {
-        exec(`git remote remove "${name}"`, cwd)
+        execGit(['remote', 'remove', name], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }
@@ -555,7 +556,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     async (_event, { cwd }: { cwd: string }) => {
       try {
         if (!hasCommits(cwd)) return { success: false, error: 'No commits to undo' }
-        exec('git reset --soft HEAD~1', cwd)
+        execGit(['reset', '--soft', 'HEAD~1'], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }

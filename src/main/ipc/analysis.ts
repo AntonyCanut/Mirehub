@@ -1252,10 +1252,6 @@ export function registerAnalysisHandlers(
         return { success: false, installed: false, error: `Unknown tool: ${toolId}` }
       }
 
-      const parts = installCmd.split(/\s+/)
-      const command = parts[0]!
-      const cmdArgs = parts.slice(1)
-
       const sendInstallProgress = (data: { toolId: string; output: string; status: 'running' | 'done' | 'error' }) => {
         if (!getMainWindow) return
         const win = getMainWindow()
@@ -1265,9 +1261,10 @@ export function registerAnalysisHandlers(
       }
 
       return new Promise((resolve) => {
-        const child = spawn(command, cmdArgs, {
+        // Use sh -c to execute the hardcoded install command safely.
+        // installCmd is from a fixed dictionary (INSTALL_COMMANDS), never from user input.
+        const child = spawn('sh', ['-c', installCmd], {
           env: enrichedEnv(),
-          shell: true,
         })
 
         installingProcesses.set(toolId, child)

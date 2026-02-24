@@ -1,5 +1,5 @@
 import { IpcMain, dialog, shell } from 'electron'
-import { execSync } from 'child_process'
+import { execFileSync } from 'child_process'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
@@ -9,7 +9,7 @@ const SSH_DIR = path.join(os.homedir(), '.ssh')
 
 function getFingerprint(pubKeyPath: string): string {
   try {
-    return execSync(`ssh-keygen -lf "${pubKeyPath}"`, {
+    return execFileSync('ssh-keygen', ['-lf', pubKeyPath], {
       encoding: 'utf-8',
       timeout: 5000,
     }).trim()
@@ -131,12 +131,12 @@ export function registerSshHandlers(ipcMain: IpcMain): void {
           return { success: false, error: `Key "${name}" already exists` }
         }
 
-        const args = ['-t', type, '-f', `"${keyPath}"`, '-N', '""']
+        const args = ['-t', type, '-f', keyPath, '-N', '']
         if (comment) {
-          args.push('-C', `"${comment}"`)
+          args.push('-C', comment)
         }
 
-        execSync(`ssh-keygen ${args.join(' ')}`, {
+        execFileSync('ssh-keygen', args, {
           encoding: 'utf-8',
           timeout: 10000,
           stdio: ['pipe', 'pipe', 'pipe'],

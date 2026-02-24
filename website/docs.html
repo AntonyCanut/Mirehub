@@ -217,10 +217,6 @@
             </ul>
           </div>
           <div class="docs-screenshot">
-            <div class="docs-legacy-badge">
-              <span data-lang="fr">Capture d'une version precedente</span>
-              <span data-lang="en">Screenshot from an earlier version</span>
-            </div>
             <img src="screenshots/screenshot-workspace.png" alt="Workspaces — Arborescence et fichiers recents" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Barre laterale avec arborescence de fichiers, detection automatique des configurations projet, et fichiers recents en bas.</span>
@@ -276,10 +272,10 @@
             </p>
           </div>
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-claude.png" alt="Terminal — Claude Code lance" loading="lazy">
+            <img src="screenshots/screenshot-claude.png" alt="Claude AI — Onglet Permissions" loading="lazy">
             <p class="docs-screenshot-caption">
-              <span data-lang="fr">Claude Code lance directement dans le terminal integre. Les scripts NPM specifiques au sous-projet sont detectes automatiquement.</span>
-              <span data-lang="en">Claude Code launched directly in the integrated terminal. Sub-project specific NPM scripts are auto-detected.</span>
+              <span data-lang="fr">Onglet Permissions de Claude AI : hooks d'activite, mode de permission (Bypass, Accept Edits, Plan, Default), outils autorises (Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Task, NotebookEdit) et outils bloques. Controle total sur le comportement de l'agent.</span>
+              <span data-lang="en">Claude AI Permissions tab: activity hooks, permission mode (Bypass, Accept Edits, Plan, Default), allowed tools (Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Task, NotebookEdit) and blocked tools. Full control over agent behavior.</span>
             </p>
           </div>
         </section>
@@ -305,19 +301,15 @@
               <span data-lang="en">Profile &amp; Skills tab</span>
             </h3>
             <p>
-              <span data-lang="fr">Visualisez votre CLAUDE.md parse et mis en forme. Gerez les profils et skills de votre agent directement depuis l'interface.</span>
-              <span data-lang="en">View your CLAUDE.md parsed and formatted. Manage your agent profiles and skills directly from the interface.</span>
+              <span data-lang="fr">Visualisez votre CLAUDE.md parse et mis en forme, avec toutes ses sections structurees (Project Overview, Language, Agent Team Configuration, etc.). Chaque section est copiable individuellement. Gerez les profils et skills de votre agent directement depuis l'interface.</span>
+              <span data-lang="en">View your CLAUDE.md parsed and formatted, with all its structured sections (Project Overview, Language, Agent Team Configuration, etc.). Each section is individually copyable. Manage your agent profiles and skills directly from the interface.</span>
             </p>
           </div>
           <div class="docs-screenshot">
-            <div class="docs-legacy-badge">
-              <span data-lang="fr">Capture d'une version precedente</span>
-              <span data-lang="en">Screenshot from an earlier version</span>
-            </div>
             <img src="screenshots/screenshot-claude-profil.png" alt="Claude AI — Profil et Skills" loading="lazy">
             <p class="docs-screenshot-caption">
-              <span data-lang="fr">Vue Profil &amp; Skills : votre CLAUDE.md parse et affiche proprement, avec les sections du profil, les instructions d'equipe, et les configurations d'agents.</span>
-              <span data-lang="en">Profile &amp; Skills view: your CLAUDE.md parsed and displayed cleanly, with profile sections, team instructions, and agent configurations.</span>
+              <span data-lang="fr">Vue Profil &amp; Skills : votre CLAUDE.md parse et affiche avec ses sections (Project Overview, Language, Agent Team Configuration). Chaque section est copiable individuellement. Les configurations d'agents et les instructions d'equipe sont structurees et lisibles.</span>
+              <span data-lang="en">Profile &amp; Skills view: your CLAUDE.md parsed and displayed with its sections (Project Overview, Language, Agent Team Configuration). Each section is individually copyable. Agent configurations and team instructions are structured and readable.</span>
             </p>
           </div>
 
@@ -332,10 +324,6 @@
             </p>
           </div>
           <div class="docs-screenshot">
-            <div class="docs-legacy-badge">
-              <span data-lang="fr">Capture d'une version precedente</span>
-              <span data-lang="en">Screenshot from an earlier version</span>
-            </div>
             <img src="screenshots/screenshot-claude-md.png" alt="Claude AI — Editeur CLAUDE.md" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Editeur CLAUDE.md integre : modifiez les instructions de votre agent sans quitter Mirehub. Bouton Enregistrer en haut a droite.</span>
@@ -354,14 +342,87 @@
             </p>
           </div>
           <div class="docs-screenshot">
-            <div class="docs-legacy-badge">
-              <span data-lang="fr">Capture d'une version precedente</span>
-              <span data-lang="en">Screenshot from an earlier version</span>
-            </div>
             <img src="screenshots/screenshot-claude-history.png" alt="Claude AI — Historique des sessions" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Historique des sessions Claude : retrouvez n'importe quelle conversation passee et reprenez exactement la ou vous vous etiez arrete.</span>
               <span data-lang="en">Claude session history: find any past conversation and resume exactly where you left off.</span>
+            </p>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Onglet Bibliotheque</span>
+              <span data-lang="en">Library tab</span>
+            </h3>
+            <p>
+              <span data-lang="fr">La Bibliotheque centralise des profils et skills pre-configures que vous pouvez deployer en un clic sur n'importe quel workspace.</span>
+              <span data-lang="en">The Library centralizes pre-configured profiles and skills that you can deploy in one click to any workspace.</span>
+            </p>
+            <h4>
+              <span data-lang="fr">Profils</span>
+              <span data-lang="en">Profiles</span>
+            </h4>
+            <p>
+              <span data-lang="fr">Des profils Claude pre-construits pour des cas d'usage specifiques :</span>
+              <span data-lang="en">Pre-built Claude profiles for specific use cases:</span>
+            </p>
+            <ul>
+              <li>
+                <span data-lang="fr"><strong>Revue de code</strong> — Audit qualite et bonnes pratiques</span>
+                <span data-lang="en"><strong>Code Review</strong> — Quality audit and best practices</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Debugger</strong> — Diagnostic et resolution de bugs</span>
+                <span data-lang="en"><strong>Debugger</strong> — Bug diagnosis and resolution</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Refactoring</strong> — Restructuration et amelioration du code</span>
+                <span data-lang="en"><strong>Refactoring</strong> — Code restructuring and improvement</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Auditeur Securite</strong> — Detection de vulnerabilites</span>
+                <span data-lang="en"><strong>Security Auditor</strong> — Vulnerability detection</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Designer Frontend</strong> — UI/UX et composants visuels</span>
+                <span data-lang="en"><strong>Frontend Designer</strong> — UI/UX and visual components</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Planificateur de Projet</strong> — Organisation et planification</span>
+                <span data-lang="en"><strong>Project Planner</strong> — Organization and planning</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Redacteur Doc</strong> — Generation de documentation</span>
+                <span data-lang="en"><strong>Doc Writer</strong> — Documentation generation</span>
+              </li>
+            </ul>
+            <h4>Skills</h4>
+            <p>
+              <span data-lang="fr">Des slash commands pre-configurees que Claude peut utiliser :</span>
+              <span data-lang="en">Pre-configured slash commands that Claude can use:</span>
+            </p>
+            <ul>
+              <li><code>/commit</code> — <span data-lang="fr">Generer un commit structure</span><span data-lang="en">Generate a structured commit</span></li>
+              <li><code>/fix-issue</code> — <span data-lang="fr">Corriger un bug a partir d'une issue</span><span data-lang="en">Fix a bug from an issue</span></li>
+              <li><code>/pr-review</code> — <span data-lang="fr">Revue de pull request</span><span data-lang="en">Pull request review</span></li>
+              <li><code>/refactor</code> — <span data-lang="fr">Refactoring guide</span><span data-lang="en">Refactoring guide</span></li>
+              <li><code>/test</code> — <span data-lang="fr">Generer des tests</span><span data-lang="en">Generate tests</span></li>
+              <li><code>/explain-code</code> — <span data-lang="fr">Expliquer un morceau de code</span><span data-lang="en">Explain a piece of code</span></li>
+              <li><code>/debug</code> — <span data-lang="fr">Diagnostiquer un probleme</span><span data-lang="en">Diagnose a problem</span></li>
+              <li><code>/doc-generate</code> — <span data-lang="fr">Generer de la documentation</span><span data-lang="en">Generate documentation</span></li>
+              <li><code>/security-scan</code> — <span data-lang="fr">Scan de securite</span><span data-lang="en">Security scan</span></li>
+              <li><code>/deploy-checklist</code> — <span data-lang="fr">Checklist de deploiement</span><span data-lang="en">Deployment checklist</span></li>
+            </ul>
+            <p>
+              <span data-lang="fr">Filtrez par categorie (Design, DevOps, Development, Documentation, Git, Planning, Quality, Security) et deployez en un clic vers n'importe quel workspace.</span>
+              <span data-lang="en">Filter by category (Design, DevOps, Development, Documentation, Git, Planning, Quality, Security) and deploy in one click to any workspace.</span>
+            </p>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-claude-bibliotheque.png" alt="Claude AI — Bibliotheque de profils et skills" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Bibliotheque Claude : profils pre-configures (Revue de code, Debugger, Refactoring, etc.) et skills (slash commands) deployables en un clic. Filtrage par categorie.</span>
+              <span data-lang="en">Claude Library: pre-configured profiles (Code Review, Debugger, Refactoring, etc.) and skills (slash commands) deployable in one click. Filter by category.</span>
             </p>
           </div>
 
@@ -379,8 +440,34 @@
               <span data-lang="en">Workflow tab</span>
             </h3>
             <p>
-              <span data-lang="fr">Configurez un workflow d'orchestration pour Claude : plan mode, strategie de sous-agents, boucle d'amelioration continue, verification avant completion, et gestion autonome des bugs. Deployez le workflow sur un ou tous vos projets en un clic.</span>
-              <span data-lang="en">Configure an orchestration workflow for Claude: plan mode, subagent strategy, continuous improvement loop, pre-completion verification, and autonomous bug fixing. Deploy the workflow to one or all your projects in one click.</span>
+              <span data-lang="fr">Configurez un workflow d'orchestration complet pour Claude. Cinq axes configurables :</span>
+              <span data-lang="en">Configure a comprehensive orchestration workflow for Claude. Five configurable axes:</span>
+            </p>
+            <ul>
+              <li>
+                <span data-lang="fr"><strong>Mode Plan</strong> — Entrer en mode plan pour toute tache non triviale, re-planifier si quelque chose deraille</span>
+                <span data-lang="en"><strong>Plan Mode</strong> — Enter plan mode for any non-trivial task, re-plan if something goes off track</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Strategie sous-agents</strong> — Utiliser les sous-agents pour garder le contexte propre, deleguer recherche et analyse en parallele</span>
+                <span data-lang="en"><strong>Subagent strategy</strong> — Use subagents to keep context clean, delegate research and analysis in parallel</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Boucle d'amelioration</strong> — Apres toute correction, mettre a jour les lecons apprises et ecrire des regles preventives</span>
+                <span data-lang="en"><strong>Improvement loop</strong> — After any correction, update lessons learned and write preventive rules</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Verification avant completion</strong> — Ne jamais marquer une tache terminee sans preuve de fonctionnement (tests, logs, demonstration)</span>
+                <span data-lang="en"><strong>Pre-completion verification</strong> — Never mark a task as done without proof it works (tests, logs, demonstration)</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Correction autonome de bugs</strong> — Corriger directement les bugs et les tests CI en echec sans intervention humaine</span>
+                <span data-lang="en"><strong>Autonomous bug fixing</strong> — Fix bugs and failing CI tests directly without human intervention</span>
+              </li>
+            </ul>
+            <p>
+              <span data-lang="fr">Deployez le workflow sur un ou tous vos projets en un clic.</span>
+              <span data-lang="en">Deploy the workflow to one or all your projects in one click.</span>
             </p>
           </div>
         </section>
@@ -507,11 +594,126 @@
               </li>
             </ul>
           </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Integration Claude AI</span>
+              <span data-lang="en">Claude AI integration</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Le Kanban de Mirehub est propulse par l'IA. Chaque ticket peut etre envoye directement a Claude Code qui le resout automatiquement. Voici le fonctionnement complet :</span>
+              <span data-lang="en">Mirehub's Kanban is AI-powered. Every ticket can be sent directly to Claude Code which resolves it automatically. Here is the complete workflow:</span>
+            </p>
+            <ol>
+              <li>
+                <span data-lang="fr">L'utilisateur cree un ticket (T-01, T-02...) avec titre, description, priorite et labels</span>
+                <span data-lang="en">The user creates a ticket (T-01, T-02...) with title, description, priority and labels</span>
+              </li>
+              <li>
+                <span data-lang="fr">Cliquez sur le bouton "Envoyer a Claude" sur n'importe quel ticket</span>
+                <span data-lang="en">Click the "Send to Claude" button on any ticket</span>
+              </li>
+              <li>
+                <span data-lang="fr">Mirehub ouvre automatiquement un onglet terminal avec Claude Code</span>
+                <span data-lang="en">Mirehub automatically opens a terminal tab with Claude Code</span>
+              </li>
+              <li>
+                <span data-lang="fr">Claude recoit un fichier prompt (<code>.mirehub/.kanban-prompt-{id}.md</code>) avec les details du ticket</span>
+                <span data-lang="en">Claude receives a prompt file (<code>.mirehub/.kanban-prompt-{id}.md</code>) with the ticket details</span>
+              </li>
+              <li>
+                <span data-lang="fr">Des variables d'environnement sont definies : <code>MIREHUB_KANBAN_TASK_ID</code>, <code>MIREHUB_KANBAN_FILE</code></span>
+                <span data-lang="en">Environment variables are set: <code>MIREHUB_KANBAN_TASK_ID</code>, <code>MIREHUB_KANBAN_FILE</code></span>
+              </li>
+              <li>
+                <span data-lang="fr">Claude travaille sur la tache de maniere autonome</span>
+                <span data-lang="en">Claude works on the task autonomously</span>
+              </li>
+              <li>
+                <span data-lang="fr">A la fin, Claude met a jour le fichier JSON du kanban</span>
+                <span data-lang="en">When done, Claude updates the kanban JSON file</span>
+              </li>
+              <li>
+                <span data-lang="fr">Un hook (<code>kanban-done.sh</code>) detecte la completion et deplace le statut du ticket</span>
+                <span data-lang="en">A hook (<code>kanban-done.sh</code>) detects completion and moves the ticket status</span>
+              </li>
+              <li>
+                <span data-lang="fr">Le tableau Kanban se met a jour en temps reel via file watching (<code>fs.watch</code>)</span>
+                <span data-lang="en">The Kanban board updates in real-time via file watching (<code>fs.watch</code>)</span>
+              </li>
+            </ol>
+            <p>
+              <span data-lang="fr">Si Claude a une question, il passe le ticket en statut PENDING avec un champ question. Si Claude echoue, il passe le ticket en FAILED avec un champ erreur.</span>
+              <span data-lang="en">If Claude has a question, it sets the ticket to PENDING status with a question field. If Claude fails, it sets the ticket to FAILED with an error field.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Planification automatique</span>
+              <span data-lang="en">Automatic scheduling</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Quand une session Claude termine un ticket, elle cherche automatiquement la tache suivante. L'ordre de priorite est le suivant :</span>
+              <span data-lang="en">When a Claude session finishes a ticket, it automatically looks for the next task. The priority order is:</span>
+            </p>
+            <ol>
+              <li>
+                <span data-lang="fr">Reprendre les taches WORKING en cours d'abord</span>
+                <span data-lang="en">Resume WORKING tasks first</span>
+              </li>
+              <li>
+                <span data-lang="fr">Puis prendre la prochaine tache TODO par ordre de priorite</span>
+                <span data-lang="en">Then pick the next TODO task by priority order</span>
+              </li>
+            </ol>
+            <p>
+              <span data-lang="fr">Pipeline entierement autonome : creez vos tickets, Claude les traite un par un sans intervention.</span>
+              <span data-lang="en">Fully autonomous pipeline: create your tickets, Claude handles them one by one without intervention.</span>
+            </p>
+
+            <h3>
+              <span data-lang="fr">Synchronisation temps reel</span>
+              <span data-lang="en">Real-time sync</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">File watching (<code>fs.watch</code>) detecte les changements de Claude ou d'autres editeurs</span>
+                <span data-lang="en">File watching (<code>fs.watch</code>) detects changes from Claude or other editors</span>
+              </li>
+              <li>
+                <span data-lang="fr">Polling de secours toutes les 30 secondes pour la fiabilite</span>
+                <span data-lang="en">Fallback polling every 30 seconds for reliability</span>
+              </li>
+              <li>
+                <span data-lang="fr">Plusieurs instances Claude peuvent travailler sur differents tickets simultanement</span>
+                <span data-lang="en">Multiple Claude instances can work on different tickets simultaneously</span>
+              </li>
+            </ul>
+
+            <h3>
+              <span data-lang="fr">Pieces jointes</span>
+              <span data-lang="en">File attachments</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr">Upload de fichiers directement sur les tickets</span>
+                <span data-lang="en">Upload files directly to tickets</span>
+              </li>
+              <li>
+                <span data-lang="fr">Collage d'images depuis le presse-papier pendant l'edition d'un ticket</span>
+                <span data-lang="en">Paste images from clipboard while editing a ticket</span>
+              </li>
+              <li>
+                <span data-lang="fr">Pieces jointes stockees dans <code>.mirehub/attachments/{taskId}/</code></span>
+                <span data-lang="en">Attachments stored in <code>.mirehub/attachments/{taskId}/</code></span>
+              </li>
+            </ul>
+          </div>
+
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-kanban.png" alt="Kanban — Tableau de taches" loading="lazy">
+            <img src="screenshots/screenshot-kanban.png" alt="Kanban — Tableau de taches propulse par l'IA" loading="lazy">
             <p class="docs-screenshot-caption">
-              <span data-lang="fr">Vue Kanban : 5 colonnes (A faire, En cours, En attente, Echoue, Termine), filtres par tags et priorite, recherche et scopes.</span>
-              <span data-lang="en">Kanban view: 5 columns (To do, In progress, Waiting, Failed, Done), tag and priority filters, search and scopes.</span>
+              <span data-lang="fr">Kanban propulse par l'IA : 5 colonnes (A faire, En cours, En attente, Echoue, Termine), envoi direct de tickets a Claude AI, mise a jour en temps reel, filtres par tags et scopes. Le premier Kanban qui resout vos tickets tout seul.</span>
+              <span data-lang="en">AI-powered Kanban: 5 columns (To Do, In Progress, Waiting, Failed, Done), direct ticket dispatch to Claude AI, real-time updates, tag and scope filters. The first Kanban that solves your tickets by itself.</span>
             </p>
           </div>
         </section>
@@ -746,6 +948,13 @@
                 <span data-lang="en">Per-workspace connections — each project has its own databases</span>
               </li>
             </ul>
+          </div>
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-database.png" alt="Database Explorer — Panneau de connexion" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Panneau Base de donnees : creez vos connexions vers PostgreSQL, MySQL, MongoDB, SQLite ou MSSQL. Chaque workspace gere ses propres connexions de maniere isolee.</span>
+              <span data-lang="en">Database panel: create your connections to PostgreSQL, MySQL, MongoDB, SQLite or MSSQL. Each workspace manages its own connections in isolation.</span>
+            </p>
           </div>
         </section>
 
