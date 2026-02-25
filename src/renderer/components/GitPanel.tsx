@@ -46,10 +46,16 @@ function computeGraph(entries: GitLogEntry[]): GraphCommitInfo[] {
   const result: GraphCommitInfo[] = []
   let activeLanes: (string | null)[] = []
 
+  // Pre-build a set of all hashes for quick lookup (detect orphaned parents)
+  const allHashes = new Set(entries.map((e) => e.hash))
+
   for (const entry of entries) {
     const connections: GraphCommitInfo['connections'] = []
+
+    // Find which lane this commit occupies
     let dotLane = activeLanes.indexOf(entry.hash)
     if (dotLane === -1) {
+      // New branch head — prefer the first empty slot, closest to lane 0
       dotLane = activeLanes.indexOf(null)
       if (dotLane === -1) {
         dotLane = activeLanes.length
@@ -60,42 +66,64 @@ function computeGraph(entries: GitLogEntry[]): GraphCommitInfo[] {
     }
 
     const dotColor = GRAPH_COLORS[dotLane % GRAPH_COLORS.length]!
+
+    // Snapshot lanes for rendering (before we modify them)
     const lanesSnapshot: (GraphLane | null)[] = activeLanes.map((hash, i) =>
       hash === null ? null : { color: GRAPH_COLORS[i % GRAPH_COLORS.length]! },
     )
 
+    // Free the current lane
     const parents = entry.parents
     activeLanes[dotLane] = null
 
     if (parents.length === 0) {
-      // Root commit
+      // Root commit — no connections downward
     } else if (parents.length === 1) {
       const parentHash = parents[0]!
       const existingLane = activeLanes.indexOf(parentHash)
       if (existingLane !== -1) {
+        // Parent already tracked in another lane — merge into it
         connections.push({
           fromLane: dotLane, toLane: existingLane, color: dotColor,
           type: existingLane < dotLane ? 'merge-left' : existingLane > dotLane ? 'merge-right' : 'straight',
         })
-      } else {
+      } else if (allHashes.has(parentHash)) {
+        // Parent exists in this log — continue in the same lane
         activeLanes[dotLane] = parentHash
         connections.push({ fromLane: dotLane, toLane: dotLane, color: dotColor, type: 'straight' })
       }
+      // else: parent is outside the visible log window — don't reserve a lane
     } else {
+      // Merge commit — multiple parents
       for (let pi = 0; pi < parents.length; pi++) {
         const parentHash = parents[pi]!
         const existingLane = activeLanes.indexOf(parentHash)
         if (existingLane !== -1) {
+          // Parent already tracked in another lane
           connections.push({
             fromLane: dotLane, toLane: existingLane,
             color: GRAPH_COLORS[existingLane % GRAPH_COLORS.length]!,
             type: existingLane < dotLane ? 'merge-left' : existingLane > dotLane ? 'merge-right' : 'straight',
           })
+        } else if (!allHashes.has(parentHash)) {
+          // Parent outside the visible log — skip
+          continue
         } else if (pi === 0) {
+          // First parent continues in the same lane
           activeLanes[dotLane] = parentHash
           connections.push({ fromLane: dotLane, toLane: dotLane, color: dotColor, type: 'straight' })
         } else {
-          let newLane = activeLanes.indexOf(null)
+          // Additional parents fork to new lanes — find nearest available slot
+          let newLane = -1
+          // Search outward from dotLane: right first, then left
+          for (let s = dotLane + 1; s < activeLanes.length; s++) {
+            if (activeLanes[s] === null) { newLane = s; break }
+          }
+          if (newLane === -1) {
+            for (let s = dotLane - 1; s >= 0; s--) {
+              if (activeLanes[s] === null) { newLane = s; break }
+            }
+          }
           if (newLane === -1) {
             newLane = activeLanes.length
             activeLanes.push(parentHash)
@@ -111,6 +139,7 @@ function computeGraph(entries: GitLogEntry[]): GraphCommitInfo[] {
       }
     }
 
+    // Draw pass-through lines for lanes that are still active
     for (let i = 0; i < activeLanes.length; i++) {
       if (activeLanes[i] !== null && i !== dotLane && !connections.some((c) => c.toLane === i)) {
         connections.push({
@@ -121,6 +150,11 @@ function computeGraph(entries: GitLogEntry[]): GraphCommitInfo[] {
       }
     }
 
+    // Trim trailing empty lanes to prevent the graph from growing infinitely wide
+    while (activeLanes.length > 0 && activeLanes[activeLanes.length - 1] === null) {
+      activeLanes.pop()
+    }
+
     result.push({ entry, lanes: lanesSnapshot, dotLane, connections })
   }
   return result
@@ -128,36 +162,73 @@ function computeGraph(entries: GitLogEntry[]): GraphCommitInfo[] {
 
 // --- Graph SVG Row ---
 
-const LANE_WIDTH = 16
-const ROW_HEIGHT = 28
-const DOT_RADIUS = 4
+const LANE_WIDTH = 26
+const ROW_HEIGHT = 30
+const DOT_RADIUS = 4.5
+const MERGE_DOT_RADIUS = 5.5
+const LINE_EXTEND = 2
 
-function GraphRow({ info }: { info: GraphCommitInfo }) {
-  const maxLane = Math.max(
+function GraphRow({ info, maxLane: globalMaxLane }: { info: GraphCommitInfo; maxLane: number }) {
+  const localMaxLane = Math.max(
     info.dotLane,
     ...info.connections.map((c) => Math.max(c.fromLane, c.toLane)),
     ...info.lanes.map((_, i) => (info.lanes[i] ? i : 0)),
   )
+  const maxLane = Math.max(localMaxLane, globalMaxLane)
   const svgWidth = (maxLane + 1) * LANE_WIDTH + 8
+  const isMerge = info.connections.filter((c) => c.fromLane === info.dotLane && c.toLane !== info.dotLane).length > 0
+    || info.entry.parents.length > 1
+  const radius = isMerge ? MERGE_DOT_RADIUS : DOT_RADIUS
+  const dotColor = GRAPH_COLORS[info.dotLane % GRAPH_COLORS.length]!
+
+  // Render straight lines first, then curves on top
+  const straights = info.connections.filter((c) => c.type === 'straight')
+  const curves = info.connections.filter((c) => c.type !== 'straight')
 
   return (
-    <svg width={svgWidth} height={ROW_HEIGHT} className="git-graph-svg">
-      {info.connections.map((conn, i) => {
+    <svg width={svgWidth} height={ROW_HEIGHT} className="git-graph-svg" style={{ overflow: 'visible' }}>
+      {/* All straight lines — uniform rendering for visual continuity */}
+      {straights.map((conn, i) => {
+        const x = conn.fromLane * LANE_WIDTH + LANE_WIDTH / 2
+        return (
+          <line
+            key={`s-${i}`}
+            x1={x} y1={-LINE_EXTEND}
+            x2={x} y2={ROW_HEIGHT + LINE_EXTEND}
+            stroke={conn.color}
+            strokeWidth={2}
+            strokeLinecap="round"
+            opacity={0.75}
+          />
+        )
+      })}
+      {/* Fork/merge curves rendered on top for clarity */}
+      {curves.map((conn, i) => {
         const x1 = conn.fromLane * LANE_WIDTH + LANE_WIDTH / 2
         const x2 = conn.toLane * LANE_WIDTH + LANE_WIDTH / 2
-        if (conn.type === 'straight') {
-          return <line key={i} x1={x1} y1={0} x2={x2} y2={ROW_HEIGHT} stroke={conn.color} strokeWidth={2} opacity={0.7} />
-        }
-        const midY = ROW_HEIGHT / 2
-        return <path key={i} d={`M ${x1} 0 C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${ROW_HEIGHT}`} stroke={conn.color} strokeWidth={2} fill="none" opacity={0.7} />
+        // Smooth S-curve with wide control points for fluid branch transitions
+        const cy1 = ROW_HEIGHT * 0.25
+        const cy2 = ROW_HEIGHT * 0.75
+        return (
+          <path
+            key={`c-${i}`}
+            d={`M ${x1} ${-LINE_EXTEND} C ${x1} ${cy1}, ${x2} ${cy2}, ${x2} ${ROW_HEIGHT + LINE_EXTEND}`}
+            stroke={conn.color}
+            strokeWidth={2}
+            strokeLinecap="round"
+            fill="none"
+            opacity={0.85}
+          />
+        )
       })}
+      {/* Commit dot */}
       <circle
         cx={info.dotLane * LANE_WIDTH + LANE_WIDTH / 2}
         cy={ROW_HEIGHT / 2}
-        r={DOT_RADIUS}
-        fill={GRAPH_COLORS[info.dotLane % GRAPH_COLORS.length]}
+        r={radius}
+        fill={dotColor}
         stroke="#1e1e2e"
-        strokeWidth={1.5}
+        strokeWidth={2}
       />
     </svg>
   )
@@ -215,6 +286,20 @@ function relativeDate(dateStr: string): string {
   const months = Math.floor(days / 30)
   if (months < 12) return `${months}mois`
   return `${Math.floor(months / 12)}a`
+}
+
+// --- Extract per-file diff from full diff ---
+
+function extractFileDiff(fullDiff: string, fileName: string): string {
+  const sections = fullDiff.split(/(?=^diff --git )/m)
+  for (const section of sections) {
+    // Match the file name in the diff header: diff --git a/path b/path
+    // Also handle renames where the file may appear as b/path
+    if (section.includes(`a/${fileName}`) || section.includes(`b/${fileName}`)) {
+      return section
+    }
+  }
+  return ''
 }
 
 // --- File status icon ---
@@ -277,6 +362,7 @@ export function GitPanel() {
   // UI state
   const [selectedCommit, setSelectedCommit] = useState<GitLogEntry | null>(null)
   const [commitDetail, setCommitDetail] = useState<{ files: CommitFileInfo[]; diff: string } | null>(null)
+  const [selectedCommitFile, setSelectedCommitFile] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [diffContent, setDiffContent] = useState('')
   const [commitMessage, setCommitMessage] = useState('')
@@ -351,6 +437,13 @@ export function GitPanel() {
   }, [refresh])
 
   const graphData = useMemo(() => computeGraph(log), [log])
+  const graphMaxLane = useMemo(() => {
+    let max = 0
+    for (const info of graphData) {
+      max = Math.max(max, info.dotLane, ...info.connections.map((c) => Math.max(c.fromLane, c.toLane)))
+    }
+    return max
+  }, [graphData])
 
   // --- Commit selection ---
 
@@ -358,13 +451,19 @@ export function GitPanel() {
     if (selectedCommit?.hash === entry.hash) {
       setSelectedCommit(null)
       setCommitDetail(null)
+      setSelectedCommitFile(null)
       return
     }
     setSelectedCommit(entry)
+    setSelectedCommitFile(null)
     if (!activeProject) return
     try {
       const detail = await window.mirehub.git.show(activeProject.path, entry.hash)
       setCommitDetail(detail)
+      // Auto-select the first file
+      if (detail.files.length > 0) {
+        setSelectedCommitFile(detail.files[0]!.file)
+      }
     } catch {
       setCommitDetail(null)
     }
@@ -1143,7 +1242,11 @@ export function GitPanel() {
                   {commitDetail.files.map((f) => {
                     const st = fileStatusLabel(f.status)
                     return (
-                      <div key={f.file} className="git-commit-file">
+                      <div
+                        key={f.file}
+                        className={`git-commit-file git-commit-file--clickable${selectedCommitFile === f.file ? ' git-commit-file--selected' : ''}`}
+                        onClick={() => setSelectedCommitFile(f.file)}
+                      >
                         <span className={`git-fstatus ${st.className}`}>{st.label}</span>
                         <span className="git-commit-file-name">{f.file}</span>
                       </div>
@@ -1151,7 +1254,7 @@ export function GitPanel() {
                   })}
                 </div>
                 <div className="git-commit-diff-area">
-                  <DiffViewer diff={commitDetail.diff} />
+                  <DiffViewer diff={selectedCommitFile ? extractFileDiff(commitDetail.diff, selectedCommitFile) : commitDetail.diff} />
                 </div>
               </div>
             </div>
@@ -1173,7 +1276,7 @@ export function GitPanel() {
                     }}
                   >
                     <div className="git-graph-cell">
-                      <GraphRow info={info} />
+                      <GraphRow info={info} maxLane={graphMaxLane} />
                     </div>
                     <div className="git-graph-info">
                       <span className="git-graph-message">{info.entry.message}</span>
@@ -1183,7 +1286,7 @@ export function GitPanel() {
                         </span>
                       )}
                     </div>
-                    <span className="git-graph-author">{info.entry.author}</span>
+                    <span className="git-graph-author" title={info.entry.authorEmail}>{info.entry.author}</span>
                     <span className="git-graph-date">{relativeDate(info.entry.date)}</span>
                     <span className="git-graph-hash">{info.entry.shortHash}</span>
                   </div>

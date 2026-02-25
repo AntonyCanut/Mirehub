@@ -249,6 +249,10 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_WATCH, { workspaceId }),
     unwatch: (): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_UNWATCH),
+    watchAdd: (workspaceId: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_WATCH_ADD, { workspaceId }),
+    watchRemove: (workspaceId: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_WATCH_REMOVE, { workspaceId }),
     linkConversation: (cwd: string, taskId: string, workspaceId: string): Promise<string | null> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_LINK_CONVERSATION, { cwd, taskId, workspaceId }),
     onFileChanged: (callback: (data: { workspaceId: string }) => void) => {
@@ -287,6 +291,16 @@ const api = {
       ipcRenderer.on(IPC_CHANNELS.UPDATE_STATUS, listener)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.UPDATE_STATUS, listener)
     },
+  },
+
+  // Git Config (per-namespace profiles)
+  gitConfig: {
+    get: (namespaceId: string): Promise<{ userName: string; userEmail: string; isCustom: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_CONFIG_GET, { namespaceId }),
+    set: (namespaceId: string, userName: string, userEmail: string): Promise<{ success: boolean; isCustom: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_CONFIG_SET, { namespaceId, userName, userEmail }),
+    delete: (namespaceId: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_CONFIG_DELETE, { namespaceId }),
   },
 
   // Settings

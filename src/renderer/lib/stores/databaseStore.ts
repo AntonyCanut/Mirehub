@@ -28,6 +28,7 @@ interface DatabaseActions {
   setConnectionStatus: (id: string, status: DbConnectionStatus) => void
   connectDb: (id: string) => Promise<void>
   disconnectDb: (id: string) => Promise<void>
+  reorderConnections: (workspaceId: string, fromIndex: number, toIndex: number) => void
   appendBackupLog: (entry: DbBackupLogEntry) => void
   clearBackupLogs: () => void
 }
@@ -187,6 +188,23 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
       // Ignore disconnect errors
     }
     get().setConnectionStatus(id, 'disconnected')
+  },
+
+  reorderConnections: (workspaceId: string, fromIndex: number, toIndex: number) => {
+    set((state) => {
+      const existing = [...(state.connectionsByWorkspace[workspaceId] ?? [])]
+      if (fromIndex < 0 || toIndex < 0 || fromIndex >= existing.length || toIndex >= existing.length) return state
+      const moved = existing.splice(fromIndex, 1)[0]
+      if (!moved) return state
+      existing.splice(toIndex, 0, moved)
+      return {
+        connectionsByWorkspace: {
+          ...state.connectionsByWorkspace,
+          [workspaceId]: existing,
+        },
+      }
+    })
+    get().saveConnections(workspaceId)
   },
 
   appendBackupLog: (entry: DbBackupLogEntry) => {

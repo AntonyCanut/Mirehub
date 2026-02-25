@@ -20,6 +20,7 @@ import { registerMcpHandlers } from './ipc/mcp'
 import { registerSshHandlers } from './ipc/ssh'
 import { registerAnalysisHandlers } from './ipc/analysis'
 import { registerNamespaceHandlers } from './ipc/namespace'
+import { registerGitConfigHandlers } from './ipc/gitConfig'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
 import { clearDockBadge } from './services/notificationService'
@@ -294,6 +295,7 @@ app.whenReady().then(() => {
   registerMcpHandlers(ipcMain)
   registerSshHandlers(ipcMain)
   registerNamespaceHandlers(ipcMain)
+  registerGitConfigHandlers(ipcMain)
   registerAnalysisHandlers(ipcMain, () => mainWindow)
 
   // Ensure a Default namespace exists (first launch or migration)

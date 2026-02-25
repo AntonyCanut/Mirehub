@@ -138,66 +138,44 @@
   color: var(--text-secondary, #a6adc8);
 }
 
-/* Create Form (legacy inline - kept for reference) */
-.kanban-create-form {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Create Modal */
+/* ========= Create / Edit Modal ========= */
 .kanban-create-modal {
+  position: relative;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  width: 560px;
-  max-width: 90vw;
+  border-radius: 12px;
+  width: 480px;
+  max-width: 92vw;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.05);
-  animation: kanban-modal-enter 0.2s ease-out;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  animation: kanban-modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-@keyframes kanban-modal-enter {
-  from { opacity: 0; transform: scale(0.96) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.kanban-create-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.kanban-create-modal-header h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: -0.2px;
+@keyframes kanban-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .kanban-create-modal-close {
-  width: 28px;
-  height: 28px;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 15px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
+  z-index: 1;
 }
 
 .kanban-create-modal-close:hover {
@@ -206,44 +184,195 @@
 }
 
 .kanban-create-modal-body {
-  padding: 20px 24px;
+  padding: 20px 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
   overflow-y: auto;
 }
 
-.kanban-create-modal-textarea {
-  min-height: 120px;
-  resize: vertical;
+.kanban-create-modal-title-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 32px 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  outline: none;
+  letter-spacing: -0.2px;
+  transition: border-color 0.2s ease;
 }
 
-.kanban-create-modal-actions {
+.kanban-create-modal-title-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.kanban-create-modal-title-input:focus {
+  border-bottom-color: var(--accent);
+}
+
+.kanban-create-modal-desc {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+  padding: 10px 0;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  line-height: 1.6;
+  min-height: 80px;
+}
+
+.kanban-create-modal-desc::placeholder {
+  color: var(--text-muted);
+}
+
+.kanban-create-modal-template {
+  margin-top: 4px;
+}
+
+.kanban-create-modal-options {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.kanban-create-modal-labels {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.kanban-create-modal-extras {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.kanban-create-modal-attach {
+  height: 28px;
+  padding: 0 10px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kanban-create-modal-attach:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+  background: var(--bg-surface);
+}
+
+.kanban-create-modal-cto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.kanban-create-modal-cto input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
+}
+
+.kanban-create-modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 16px 24px 20px;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
   border-top: 1px solid var(--border);
 }
 
 .kanban-create-modal-cancel {
-  height: 34px;
-  padding: 0 18px;
+  height: 30px;
+  padding: 0 14px;
   background: transparent;
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: none;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .kanban-create-modal-cancel:hover {
   color: var(--text-primary);
-  border-color: var(--text-muted);
   background: var(--bg-surface);
+}
+
+.kanban-create-modal-submit {
+  height: 30px;
+  padding: 0 16px;
+  background: var(--accent);
+  color: var(--bg-tertiary);
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kanban-create-modal-submit:hover {
+  filter: brightness(1.1);
+}
+
+.kanban-create-modal-submit--cto {
+  background: linear-gradient(135deg, #cba6f7, #f5c2e7);
+  color: #1e1e2e;
+}
+
+/* Legacy edit modal header (reused by edit modal) */
+.kanban-create-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+}
+
+.kanban-create-modal-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Legacy edit modal actions (reused by edit modal) */
+.kanban-create-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
 }
 
 .kanban-input {
@@ -287,6 +416,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .kanban-select {
@@ -306,13 +436,13 @@
 .kanban-select:focus { border-color: var(--accent); }
 
 .kanban-submit-btn {
-  height: 34px;
-  padding: 0 20px;
+  height: 32px;
+  padding: 0 18px;
   background: var(--accent);
   color: var(--bg-tertiary);
   border: none;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -321,8 +451,8 @@
 }
 
 .kanban-submit-btn:hover {
-  transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.1);
 }
 
 .kanban-submit-btn--cto {
@@ -1042,55 +1172,13 @@
   letter-spacing: 0.3px;
 }
 
-/* ========= Due Date ========= */
-.kanban-date-input {
-  width: 130px;
-  flex: none;
-}
-
-.kanban-card-due-badge {
+/* ========= Created Date Badge ========= */
+.kanban-card-created-badge {
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-muted);
-  background: var(--bg-surface);
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-
-.kanban-card-due-badge--overdue {
-  color: #f38ba8;
-  background: rgba(243, 139, 168, 0.15);
-}
-
-/* Overdue card */
-.kanban-card--overdue {
-  border-color: #f38ba8 !important;
-  box-shadow: 0 0 0 1px rgba(243, 139, 168, 0.3);
-}
-
-/* Detail panel date input */
-.kanban-detail-date-input {
-  height: 28px;
-  padding: 0 8px;
-  font-size: 12px;
-  font-family: inherit;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  outline: none;
-}
-
-.kanban-detail-date-input:focus { border-color: var(--accent); }
-
-.kanban-detail-overdue-warning {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #f38ba8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  opacity: 0.7;
+  letter-spacing: 0.2px;
 }
 
 /* ========= Archive Button on DONE Cards ========= */

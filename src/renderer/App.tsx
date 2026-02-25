@@ -27,6 +27,7 @@ import { useViewStore } from './lib/stores/viewStore'
 import { useAppUpdateStore } from './lib/stores/appUpdateStore'
 import { useClaudeStore } from './lib/stores/claudeStore'
 import { useI18n } from './lib/i18n'
+import { useBackgroundKanbanSync } from './hooks/useBackgroundKanbanSync'
 import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 
 export function App() {
@@ -137,6 +138,9 @@ export function App() {
   useEffect(() => {
     return initUpdateListener()
   }, [initUpdateListener])
+
+  // Background kanban sync for non-active workspaces
+  useBackgroundKanbanSync()
 
   // Initialize Claude activity listeners (workspace "Working" / "Done" tags)
   const initClaudeListeners = useClaudeStore((s) => s.initListeners)

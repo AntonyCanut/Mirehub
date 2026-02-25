@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { AppSettings, SshKeyInfo, SshKeyType } from '../../shared/types'
+import type { AppSettings, SshKeyInfo, SshKeyType, Namespace } from '../../shared/types'
 import { useI18n } from '../lib/i18n'
 import { useAppUpdateStore } from '../lib/stores/appUpdateStore'
 
@@ -34,12 +34,13 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoCloseCtoTerminals: true,
 }
 
-type SettingsSection = 'general' | 'appearance' | 'terminal' | 'ssh' | 'claude' | 'kanban' | 'notifications' | 'about'
+type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'kanban' | 'notifications' | 'about'
 
 const SECTIONS: { id: SettingsSection; icon: string }[] = [
   { id: 'general', icon: '⚙' },
   { id: 'appearance', icon: '🎨' },
   { id: 'terminal', icon: '▸' },
+  { id: 'git', icon: '⎇' },
   { id: 'ssh', icon: '🔑' },
   { id: 'claude', icon: '✦' },
   { id: 'kanban', icon: '☰' },
@@ -55,6 +56,15 @@ export function SettingsPanel() {
   const [appVersion, setAppVersion] = useState<{ version: string; name: string } | null>(null)
   const [activeSection, setActiveSection] = useState<SettingsSection>('general')
 
+  // Git config state
+  const [namespaces, setNamespaces] = useState<Namespace[]>([])
+  const [selectedNamespaceId, setSelectedNamespaceId] = useState<string>('')
+  const [gitUserName, setGitUserName] = useState('')
+  const [gitUserEmail, setGitUserEmail] = useState('')
+  const [gitIsCustom, setGitIsCustom] = useState(false)
+  const [gitLoading, setGitLoading] = useState(false)
+  const [gitSaved, setGitSaved] = useState(false)
+
   // SSH state
   const [sshKeys, setSshKeys] = useState<SshKeyInfo[]>([])
   const [sshLoading, setSshLoading] = useState(false)
@@ -69,6 +79,57 @@ export function SettingsPanel() {
   const [importPublicKey, setImportPublicKey] = useState('')
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null)
   const [sshError, setSshError] = useState<string | null>(null)
+
+  const loadGitConfig = useCallback(async (nsId: string) => {
+    if (!nsId) return
+    setGitLoading(true)
+    try {
+      const config = await window.mirehub.gitConfig.get(nsId)
+      setGitUserName(config.userName)
+      setGitUserEmail(config.userEmail)
+      setGitIsCustom(config.isCustom)
+    } catch {
+      setGitUserName('')
+      setGitUserEmail('')
+      setGitIsCustom(false)
+    } finally {
+      setGitLoading(false)
+    }
+  }, [])
+
+  const handleGitNamespaceChange = useCallback((nsId: string) => {
+    setSelectedNamespaceId(nsId)
+    setGitSaved(false)
+    loadGitConfig(nsId)
+  }, [loadGitConfig])
+
+  const handleGitSave = useCallback(async () => {
+    if (!selectedNamespaceId) return
+    setGitLoading(true)
+    try {
+      const result = await window.mirehub.gitConfig.set(selectedNamespaceId, gitUserName, gitUserEmail)
+      setGitIsCustom(result.isCustom)
+      setGitSaved(true)
+      setTimeout(() => setGitSaved(false), 2000)
+    } catch {
+      // silently fail
+    } finally {
+      setGitLoading(false)
+    }
+  }, [selectedNamespaceId, gitUserName, gitUserEmail])
+
+  const handleGitReset = useCallback(async () => {
+    if (!selectedNamespaceId || !confirm(t('settings.gitResetConfirm'))) return
+    setGitLoading(true)
+    try {
+      await window.mirehub.gitConfig.delete(selectedNamespaceId)
+      await loadGitConfig(selectedNamespaceId)
+    } catch {
+      // silently fail
+    } finally {
+      setGitLoading(false)
+    }
+  }, [selectedNamespaceId, loadGitConfig, t])
 
   const loadSshKeys = useCallback(async () => {
     setSshLoading(true)
@@ -98,7 +159,16 @@ export function SettingsPanel() {
     })
     window.mirehub.app.version().then(setAppVersion)
     loadSshKeys()
-  }, [setLocale, loadSshKeys])
+    // Load namespaces for git config section
+    window.mirehub.namespace.list().then((nsList) => {
+      setNamespaces(nsList)
+      const defaultNs = nsList.find((ns) => ns.isDefault)
+      if (defaultNs) {
+        setSelectedNamespaceId(defaultNs.id)
+        loadGitConfig(defaultNs.id)
+      }
+    })
+  }, [setLocale, loadSshKeys, loadGitConfig])
 
   const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
@@ -221,6 +291,7 @@ export function SettingsPanel() {
       general: t('settings.general'),
       appearance: t('settings.appearance'),
       terminal: t('settings.terminal'),
+      git: t('settings.git'),
       ssh: t('settings.ssh'),
       claude: t('settings.claude'),
       kanban: t('settings.kanban'),
@@ -375,6 +446,90 @@ export function SettingsPanel() {
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Git */}
+          {activeSection === 'git' && (
+            <div className="settings-section">
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.gitNamespace')}</label>
+                  </div>
+                  <select
+                    className="settings-select"
+                    value={selectedNamespaceId}
+                    onChange={(e) => handleGitNamespaceChange(e.target.value)}
+                  >
+                    {namespaces.map((ns) => (
+                      <option key={ns.id} value={ns.id}>
+                        {ns.name}{ns.isDefault ? ` (${t('settings.sshDefault')})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="settings-card">
+                {gitLoading ? (
+                  <div className="ssh-loading">{t('common.loading')}</div>
+                ) : (
+                  <>
+                    <div className="settings-row" style={{ marginBottom: 4 }}>
+                      <span className="settings-hint" style={{ fontSize: 11 }}>
+                        {namespaces.find((ns) => ns.id === selectedNamespaceId)?.isDefault
+                          ? t('settings.gitGlobalConfig')
+                          : gitIsCustom
+                            ? t('settings.gitCustomProfile')
+                            : t('settings.gitInheritedFromGlobal')}
+                      </span>
+                    </div>
+                    <div className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{t('settings.gitUserName')}</label>
+                      </div>
+                      <input
+                        type="text"
+                        className="ssh-input"
+                        value={gitUserName}
+                        onChange={(e) => { setGitUserName(e.target.value); setGitSaved(false) }}
+                        placeholder={t('settings.gitNamePlaceholder')}
+                      />
+                    </div>
+                    <div className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{t('settings.gitUserEmail')}</label>
+                      </div>
+                      <input
+                        type="text"
+                        className="ssh-input"
+                        value={gitUserEmail}
+                        onChange={(e) => { setGitUserEmail(e.target.value); setGitSaved(false) }}
+                        placeholder={t('settings.gitEmailPlaceholder')}
+                      />
+                    </div>
+                    <div className="ssh-form-actions" style={{ marginTop: 8 }}>
+                      <button
+                        className="ssh-btn ssh-btn--primary"
+                        onClick={handleGitSave}
+                        disabled={gitLoading}
+                      >
+                        {gitSaved ? t('settings.gitSaved') : t('common.save')}
+                      </button>
+                      {gitIsCustom && !namespaces.find((ns) => ns.id === selectedNamespaceId)?.isDefault && (
+                        <button
+                          className="ssh-btn"
+                          onClick={handleGitReset}
+                          disabled={gitLoading}
+                        >
+                          {t('settings.gitResetToGlobal')}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}

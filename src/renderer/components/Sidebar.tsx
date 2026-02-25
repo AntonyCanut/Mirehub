@@ -338,7 +338,7 @@ export function Sidebar() {
                   className="namespace-dropdown-item"
                   onClick={() => setShowNamespaceCreate(true)}
                 >
-                  + {t('namespace.create')}
+                  {t('namespace.create')}
                 </button>
               )}
             </div>

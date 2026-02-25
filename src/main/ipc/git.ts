@@ -1,6 +1,7 @@
 import { IpcMain } from 'electron'
 import { execFileSync } from 'child_process'
 import { IPC_CHANNELS, GitLogEntry, GitStatus, GitTag, GitBlameLine, GitRemote } from '../../shared/types'
+import { StorageService } from '../services/storage'
 
 // ---------------------------------------------------------------------------
 // Input validation helpers (CWE-78 defense-in-depth)
@@ -41,6 +42,39 @@ function hasCommits(cwd: string): boolean {
   } catch {
     return false
   }
+}
+
+/**
+ * Resolve git config overrides (-c flags) for a project path based on its namespace profile.
+ * Returns an array like ['-c', 'user.name=X', '-c', 'user.email=Y'] or empty.
+ */
+function getGitConfigOverrides(cwd: string): string[] {
+  const storage = new StorageService()
+  // Find the project by path
+  const projects = storage.getProjects()
+  const project = projects.find((p) => cwd.startsWith(p.path))
+  if (!project) return []
+
+  // Find the workspace
+  const workspace = storage.getWorkspace(project.workspaceId)
+  if (!workspace?.namespaceId) return []
+
+  // Find the namespace
+  const namespace = storage.getNamespace(workspace.namespaceId)
+  if (!namespace || namespace.isDefault) return [] // Default namespace uses global git config
+
+  // Find the git profile
+  const profile = storage.getGitProfile(workspace.namespaceId)
+  if (!profile) return [] // No custom profile, use global
+
+  const overrides: string[] = []
+  if (profile.userName) {
+    overrides.push('-c', `user.name=${profile.userName}`)
+  }
+  if (profile.userEmail) {
+    overrides.push('-c', `user.email=${profile.userEmail}`)
+  }
+  return overrides
 }
 
 export function registerGitHandlers(ipcMain: IpcMain): void {
@@ -117,7 +151,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
         const n = Math.max(1, Math.floor(Number(limit) || 50))
         const SEP = '\x1f' // Unit separator - won't appear in normal git output
         const output = execGit(
-          ['log', `-${n}`, `--pretty=format:%H${SEP}%h${SEP}%an${SEP}%ai${SEP}%s${SEP}%P${SEP}%D`],
+          ['log', '--all', '--topo-order', `-${n}`, `--pretty=format:%H${SEP}%h${SEP}%an${SEP}%ae${SEP}%ai${SEP}%s${SEP}%P${SEP}%D`],
           cwd,
         )
         const entries: GitLogEntry[] = output.split('\n').filter(Boolean).map((line) => {
@@ -126,10 +160,11 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
             hash: parts[0] || '',
             shortHash: parts[1] || '',
             author: parts[2] || '',
-            date: parts[3] || '',
-            message: parts[4] || '',
-            parents: (parts[5] || '').split(' ').filter(Boolean),
-            refs: (parts[6] || '').split(',').map((r) => r.trim()).filter(Boolean),
+            authorEmail: parts[3] || '',
+            date: parts[4] || '',
+            message: parts[5] || '',
+            parents: (parts[6] || '').split(' ').filter(Boolean),
+            refs: (parts[7] || '').split(',').map((r) => r.trim()).filter(Boolean),
           }
         })
         return entries
@@ -195,7 +230,9 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
         for (const file of files) {
           execGit(['add', file], cwd)
         }
-        execGit(['commit', '-m', message], cwd)
+        // Apply namespace git profile overrides if configured
+        const overrides = getGitConfigOverrides(cwd)
+        execGit([...overrides, 'commit', '-m', message], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }

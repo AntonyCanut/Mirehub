@@ -167,6 +167,21 @@ export const fr = {
   'settings.sshImportBtn': 'Importer',
   'settings.sshGenerating': 'Generation...',
 
+  // Git config
+  'settings.git': 'Git',
+  'settings.gitProfile': 'Profil Git',
+  'settings.gitNamespace': 'Namespace',
+  'settings.gitUserName': 'Nom (user.name)',
+  'settings.gitUserEmail': 'Email (user.email)',
+  'settings.gitGlobalConfig': 'Configuration globale Git',
+  'settings.gitCustomProfile': 'Profil personnalise',
+  'settings.gitInheritedFromGlobal': 'Herite de la config globale',
+  'settings.gitResetToGlobal': 'Reinitialiser (utiliser la config globale)',
+  'settings.gitResetConfirm': 'Reinitialiser le profil Git de ce namespace ? Il utilisera la configuration globale.',
+  'settings.gitSaved': 'Enregistre !',
+  'settings.gitNamePlaceholder': 'John Doe',
+  'settings.gitEmailPlaceholder': 'john@example.com',
+
   // Claude rules
   'claude.noConfirmation': 'Aucune confirmation demandee',
   'claude.confirmEditsOnly': 'Confirme uniquement les edits',
@@ -277,7 +292,7 @@ export const fr = {
   'kanban.selectWorkspace': 'Selectionnez un workspace pour voir le Kanban.',
   'kanban.title': 'Kanban',
   'kanban.taskCount': '{count} taches',
-  'kanban.newTask': '+ Nouvelle tache',
+  'kanban.newTask': 'Nouvelle tache',
   'kanban.allPriorities': 'Toutes priorites',
   'kanban.low': 'Basse',
   'kanban.medium': 'Moyenne',

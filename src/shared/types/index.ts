@@ -183,6 +183,7 @@ export interface GitLogEntry {
   hash: string
   shortHash: string
   author: string
+  authorEmail: string
   date: string
   message: string
   parents: string[]
@@ -218,6 +219,15 @@ export interface GitRemote {
   name: string
   fetchUrl: string
   pushUrl: string
+}
+
+export interface GitProfile {
+  id: string
+  namespaceId: string
+  userName: string
+  userEmail: string
+  createdAt: number
+  updatedAt: number
 }
 
 export interface TodoEntry {
@@ -647,6 +657,8 @@ export const IPC_CHANNELS = {
   KANBAN_GET_WORKING_TICKET: 'kanban:getWorkingTicket',
   KANBAN_WATCH: 'kanban:watch',
   KANBAN_UNWATCH: 'kanban:unwatch',
+  KANBAN_WATCH_ADD: 'kanban:watchAdd',
+  KANBAN_WATCH_REMOVE: 'kanban:watchRemove',
   KANBAN_FILE_CHANGED: 'kanban:fileChanged',
   KANBAN_LINK_CONVERSATION: 'kanban:linkConversation',
 
@@ -746,6 +758,11 @@ export const IPC_CHANNELS = {
   NAMESPACE_UPDATE: 'namespace:update',
   NAMESPACE_DELETE: 'namespace:delete',
   NAMESPACE_ENSURE_DEFAULT: 'namespace:ensureDefault',
+
+  // Git Config (per-namespace profiles)
+  GIT_CONFIG_GET: 'gitConfig:get',
+  GIT_CONFIG_SET: 'gitConfig:set',
+  GIT_CONFIG_DELETE: 'gitConfig:delete',
 
   // Workspace export/import
   WORKSPACE_EXPORT: 'workspace:export',

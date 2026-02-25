@@ -25,6 +25,7 @@ export function DatabaseExplorer() {
     setActiveConnection,
     connectDb,
     disconnectDb,
+    reorderConnections,
   } = useDatabaseStore()
 
   // Get connections for the active workspace
@@ -130,6 +131,14 @@ export function DatabaseExplorer() {
     [connections, t],
   )
 
+  const handleReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (!activeWorkspaceId) return
+      reorderConnections(activeWorkspaceId, fromIndex, toIndex)
+    },
+    [activeWorkspaceId, reorderConnections],
+  )
+
   const handleDeleteBackup = useCallback(
     async (connectionId: string, backupId: string) => {
       try {
@@ -200,6 +209,7 @@ export function DatabaseExplorer() {
           onBackup={handleBackup}
           onDeleteBackup={handleDeleteBackup}
           onRestoreBackup={handleRestoreBackup}
+          onReorder={handleReorder}
         />
 
         <DatabaseQueryArea

@@ -97,7 +97,6 @@ export function KanbanBoard() {
   const [newPriority, setNewPriority] = useState<(typeof PRIORITIES)[number]>('medium')
   const [newTargetProjectId, setNewTargetProjectId] = useState('')
   const [newLabels, setNewLabels] = useState<string[]>([])
-  const [newDueDate, setNewDueDate] = useState('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
   const [pendingClipboardImages, setPendingClipboardImages] = useState<PendingClipboardImage[]>([])
   const [newIsCtoMode, setNewIsCtoMode] = useState(false)
@@ -111,7 +110,6 @@ export function KanbanBoard() {
   const [editPriority, setEditPriority] = useState<(typeof PRIORITIES)[number]>('medium')
   const [editTargetProjectId, setEditTargetProjectId] = useState('')
   const [editLabels, setEditLabels] = useState<string[]>([])
-  const [editDueDate, setEditDueDate] = useState('')
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; task: KanbanTask } | null>(null)
@@ -149,7 +147,7 @@ export function KanbanBoard() {
     return () => {
       unsubscribe()
       clearInterval(fallback)
-      window.mirehub.kanban.unwatch()
+      window.mirehub.kanban.watchRemove(activeWorkspaceId)
     }
   }, [activeWorkspaceId, hasWorkingTasks, syncTasksFromFile])
 
@@ -228,17 +226,21 @@ export function KanbanBoard() {
   )
 
   // Sort tasks within a column: overdue first, then by due date, then by creation
-  const sortTasks = useCallback((taskList: KanbanTask[]): KanbanTask[] => {
-    return [...taskList].sort((a, b) => {
-      const aOverdue = a.dueDate && a.dueDate < Date.now() ? 1 : 0
-      const bOverdue = b.dueDate && b.dueDate < Date.now() ? 1 : 0
-      if (aOverdue !== bOverdue) return bOverdue - aOverdue // overdue first
-      if (a.dueDate && b.dueDate) return a.dueDate - b.dueDate
-      if (a.dueDate) return -1
-      if (b.dueDate) return 1
-      return a.createdAt - b.createdAt
-    })
-  }, [])
+  // newestFirst: reverses creation date order (used for DONE column)
+  const sortTasks = useCallback(
+    (taskList: KanbanTask[], newestFirst = false): KanbanTask[] => {
+      return [...taskList].sort((a, b) => {
+        const aOverdue = a.dueDate && a.dueDate < Date.now() ? 1 : 0
+        const bOverdue = b.dueDate && b.dueDate < Date.now() ? 1 : 0
+        if (aOverdue !== bOverdue) return bOverdue - aOverdue // overdue first
+        if (a.dueDate && b.dueDate) return a.dueDate - b.dueDate
+        if (a.dueDate) return -1
+        if (b.dueDate) return 1
+        return newestFirst ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+      })
+    },
+    [],
+  )
 
   const handleSelectPendingFiles = useCallback(async () => {
     const files = await window.mirehub.kanban.selectFiles()
@@ -279,15 +281,9 @@ export function KanbanBoard() {
       newIsCtoMode || undefined,
       finalLabels.length > 0 ? finalLabels : undefined,
     )
-    // Update due date on the newly created task (labels already passed via createTask)
+    // Attach pending files
     const createdTasks = useKanbanStore.getState().tasks
     const newest = createdTasks[createdTasks.length - 1]
-    if (newest && newDueDate) {
-      const extra: Partial<KanbanTask> = {}
-      if (newDueDate) extra.dueDate = new Date(newDueDate).getTime()
-      await updateTask(newest.id, extra)
-    }
-    // Attach pending files
     if (newest && pendingAttachments.length > 0) {
       for (const filePath of pendingAttachments) {
         try {
@@ -312,12 +308,11 @@ export function KanbanBoard() {
     setNewPriority('medium')
     setNewTargetProjectId('')
     setNewLabels([])
-    setNewDueDate('')
     setNewIsCtoMode(false)
     setPendingAttachments([])
     setPendingClipboardImages([])
     setShowCreateForm(false)
-  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newDueDate, newIsCtoMode, pendingAttachments, pendingClipboardImages, createTask, updateTask, loadTasks])
+  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newIsCtoMode, pendingAttachments, pendingClipboardImages, createTask, loadTasks])
 
   const handleDragStart = useCallback(
     (taskId: string) => {
@@ -399,7 +394,6 @@ export function KanbanBoard() {
     setEditPriority(task.priority)
     setEditTargetProjectId(task.targetProjectId || '')
     setEditLabels(task.labels || [])
-    setEditDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0]! : '')
   }, [])
 
   const handleCloseEditModal = useCallback(() => {
@@ -416,13 +410,11 @@ export function KanbanBoard() {
     if (newTargetProject !== editingTask.targetProjectId) updates.targetProjectId = newTargetProject
     const currentLabels = editingTask.labels || []
     if (JSON.stringify([...editLabels].sort()) !== JSON.stringify([...currentLabels].sort())) updates.labels = editLabels
-    const currentDueDate = editingTask.dueDate ? new Date(editingTask.dueDate).toISOString().split('T')[0]! : ''
-    if (editDueDate !== currentDueDate) updates.dueDate = editDueDate ? new Date(editDueDate).getTime() : undefined
     if (Object.keys(updates).length > 0) {
       await updateTask(editingTask.id, updates)
     }
     setEditingTask(null)
-  }, [editingTask, editTitle, editDesc, editPriority, editTargetProjectId, editLabels, editDueDate, updateTask])
+  }, [editingTask, editTitle, editDesc, editPriority, editTargetProjectId, editLabels, updateTask])
 
   const hasActiveFilters = filterPriority !== 'all' || filterLabels.length > 0 || filterScope !== 'all' || searchQuery !== ''
 
@@ -435,7 +427,7 @@ export function KanbanBoard() {
   }
 
   const getTasksByStatus = (status: KanbanStatus): KanbanTask[] => {
-    if (status === 'DONE') return sortTasks(activeDoneTasks)
+    if (status === 'DONE') return sortTasks(activeDoneTasks, true)
     return sortTasks(filteredTasks.filter((t) => t.status === status))
   }
 
@@ -454,7 +446,7 @@ export function KanbanBoard() {
           />
           <span className="kanban-task-count">{t('kanban.taskCount', { count: String(filteredTasks.length) })}</span>
           <button className="kanban-add-btn" onClick={() => setShowCreateForm(!showCreateForm)}>
-            + {t('kanban.newTask')}
+            {t('kanban.newTask')}
           </button>
         </div>
       </div>
@@ -515,41 +507,10 @@ export function KanbanBoard() {
       {showCreateForm && (
         <div className="modal-overlay" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>
           <div className={`kanban-create-modal${newIsCtoMode ? ' kanban-create-modal--cto' : ''}`} onClick={(e) => e.stopPropagation()} onPaste={handleCreateModalPaste}>
-            <div className="kanban-create-modal-header">
-              <h3>{newIsCtoMode ? t('kanban.ctoModeToggle') : t('kanban.newTaskTitle')}</h3>
-              <button className="kanban-create-modal-close" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>&times;</button>
-            </div>
+            <button className="kanban-create-modal-close" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>&times;</button>
             <div className="kanban-create-modal-body">
-              {/* CTO Mode toggle */}
-              <label className="kanban-cto-toggle">
-                <input
-                  type="checkbox"
-                  checked={newIsCtoMode}
-                  onChange={(e) => {
-                    const checked = e.target.checked
-                    setNewIsCtoMode(checked)
-                    if (checked) setNewPriority('low')
-                  }}
-                  disabled={hasActiveCtoTicket && !newIsCtoMode}
-                />
-                <span className="kanban-cto-toggle-label">{t('kanban.ctoModeToggle')}</span>
-              </label>
-              {hasActiveCtoTicket && !newIsCtoMode && (
-                <div className="kanban-cto-already-active">
-                  {t('kanban.ctoModeAlreadyActive')}
-                </div>
-              )}
-              {newIsCtoMode && (
-                <div className="kanban-cto-warning">
-                  <div className="kanban-cto-warning-icon">&#9888;</div>
-                  <div className="kanban-cto-warning-content">
-                    <strong>{t('kanban.ctoModeWarningTitle')}</strong>
-                    <p>{t('kanban.ctoModeWarning')}</p>
-                  </div>
-                </div>
-              )}
               <input
-                className="kanban-input"
+                className="kanban-create-modal-title-input"
                 placeholder={t('kanban.taskTitlePlaceholder')}
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
@@ -557,13 +518,29 @@ export function KanbanBoard() {
                 autoFocus
               />
               <textarea
-                className="kanban-textarea kanban-create-modal-textarea"
+                className="kanban-create-modal-desc"
                 placeholder={t('kanban.descriptionPlaceholder')}
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
-                rows={6}
+                rows={4}
               />
-              <div className="kanban-create-row">
+              {promptTemplates.length > 0 && (
+                <select
+                  className="kanban-select kanban-create-modal-template"
+                  value=""
+                  onChange={(e) => {
+                    const tpl = promptTemplates.find((t) => t.id === e.target.value)
+                    if (tpl) setNewDesc(tpl.content)
+                  }}
+                  title={t('kanban.useTemplate')}
+                >
+                  <option value="">{t('kanban.applyTemplate')}</option>
+                  {promptTemplates.map((tpl) => (
+                    <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
+                  ))}
+                </select>
+              )}
+              <div className="kanban-create-modal-options">
                 <select
                   className="kanban-select"
                   value={newPriority}
@@ -584,32 +561,8 @@ export function KanbanBoard() {
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
-                <input
-                  className="kanban-input kanban-date-input"
-                  type="date"
-                  value={newDueDate}
-                  onChange={(e) => setNewDueDate(e.target.value)}
-                  title={t('kanban.dueDate')}
-                />
               </div>
-              {promptTemplates.length > 0 && (
-                <select
-                  className="kanban-select"
-                  value=""
-                  onChange={(e) => {
-                    const tpl = promptTemplates.find((t) => t.id === e.target.value)
-                    if (tpl) setNewDesc(tpl.content)
-                  }}
-                  title={t('kanban.useTemplate')}
-                >
-                  <option value="">{t('kanban.applyTemplate')}</option>
-                  {promptTemplates.map((tpl) => (
-                    <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
-                  ))}
-                </select>
-              )}
-              <div className="kanban-create-labels">
-                <span className="kanban-create-labels-title">{t('kanban.labels')} :</span>
+              <div className="kanban-create-modal-labels">
                 {USER_LABELS.map((label) => (
                   <button
                     key={label}
@@ -624,13 +577,42 @@ export function KanbanBoard() {
                   </button>
                 ))}
               </div>
-              <button
-                className="kanban-attach-btn"
-                onClick={handleSelectPendingFiles}
-                title={t('kanban.attachFiles')}
-              >
-                + {t('kanban.attachFiles')}{pendingAttachments.length > 0 ? ` (${pendingAttachments.length})` : ''}
-              </button>
+              <div className="kanban-create-modal-extras">
+                <button
+                  className="kanban-create-modal-attach"
+                  onClick={handleSelectPendingFiles}
+                  title={t('kanban.attachFiles')}
+                >
+                  {t('kanban.attachFiles')}{pendingAttachments.length > 0 ? ` (${pendingAttachments.length})` : ''}
+                </button>
+                <label className="kanban-create-modal-cto">
+                  <input
+                    type="checkbox"
+                    checked={newIsCtoMode}
+                    onChange={(e) => {
+                      const checked = e.target.checked
+                      setNewIsCtoMode(checked)
+                      if (checked) setNewPriority('low')
+                    }}
+                    disabled={hasActiveCtoTicket && !newIsCtoMode}
+                  />
+                  <span>{t('kanban.ctoModeToggle')}</span>
+                </label>
+              </div>
+              {hasActiveCtoTicket && !newIsCtoMode && (
+                <div className="kanban-cto-already-active">
+                  {t('kanban.ctoModeAlreadyActive')}
+                </div>
+              )}
+              {newIsCtoMode && (
+                <div className="kanban-cto-warning">
+                  <div className="kanban-cto-warning-icon">&#9888;</div>
+                  <div className="kanban-cto-warning-content">
+                    <strong>{t('kanban.ctoModeWarningTitle')}</strong>
+                    <p>{t('kanban.ctoModeWarning')}</p>
+                  </div>
+                </div>
+              )}
               {(pendingAttachments.length > 0 || pendingClipboardImages.length > 0) && (
                 <div className="kanban-create-attachments">
                   {pendingAttachments.map((fp, i) => (
@@ -663,11 +645,11 @@ export function KanbanBoard() {
                 </div>
               )}
             </div>
-            <div className="kanban-create-modal-actions">
+            <div className="kanban-create-modal-footer">
               <button className="kanban-create-modal-cancel" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>
                 {t('common.cancel')}
               </button>
-              <button className={`kanban-submit-btn${newIsCtoMode ? ' kanban-submit-btn--cto' : ''}`} onClick={handleCreate}>
+              <button className={`kanban-create-modal-submit${newIsCtoMode ? ' kanban-create-modal-submit--cto' : ''}`} onClick={handleCreate}>
                 {t('common.create')}
               </button>
             </div>
@@ -719,13 +701,6 @@ export function KanbanBoard() {
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
-                <input
-                  className="kanban-input kanban-date-input"
-                  type="date"
-                  value={editDueDate}
-                  onChange={(e) => setEditDueDate(e.target.value)}
-                  title={t('kanban.dueDate')}
-                />
               </div>
               <div className="kanban-create-labels">
                 <span className="kanban-create-labels-title">{t('kanban.labels')} :</span>
@@ -800,7 +775,7 @@ export function KanbanBoard() {
               <span className="kanban-column-count">{doneTasks.length}</span>
             </div>
             <div className="kanban-column-body">
-              {activeDoneTasks.map((task) => (
+              {sortTasks(activeDoneTasks, true).map((task) => (
                 <div key={task.id} className="kanban-done-card-wrapper">
                   <KanbanCard
                     task={task}
@@ -834,7 +809,7 @@ export function KanbanBoard() {
                   </button>
                   {archiveExpanded && (
                     <div className="kanban-archive-list">
-                      {archivedTasks.map((task) => (
+                      {sortTasks(archivedTasks, true).map((task) => (
                         <div key={task.id} className="kanban-archive-item">
                           <span className="kanban-archive-item-title">
                             {task.ticketNumber != null && <span className="kanban-card-ticket-number">{formatTicketNumber(task.ticketNumber)}</span>}
@@ -936,12 +911,11 @@ function KanbanCard({
   }
 
   const isWorking = task.status === 'WORKING'
-  const isOverdue = task.dueDate != null && task.dueDate < Date.now() && task.status !== 'DONE'
   const targetProject = task.targetProjectId ? projects.find((p) => p.id === task.targetProjectId) : null
 
   return (
     <div
-      className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${isOverdue ? ' kanban-card--overdue' : ''}${task.disabled ? ' kanban-card--disabled' : ''}${task.isCtoTicket ? ' kanban-card--cto' : ''}`}
+      className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${task.disabled ? ' kanban-card--disabled' : ''}${task.isCtoTicket ? ' kanban-card--cto' : ''}`}
       draggable={!task.disabled}
       onDragStart={onDragStart}
       onClick={handleCardClick}
@@ -994,11 +968,9 @@ function KanbanCard({
         {task.question && (
           <span className="kanban-card-question-badge">{t('kanban.questionPending')}</span>
         )}
-        {task.dueDate != null && (
-          <span className={`kanban-card-due-badge${isOverdue ? ' kanban-card-due-badge--overdue' : ''}`}>
-            {new Date(task.dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-          </span>
-        )}
+        <span className="kanban-card-created-badge">
+          {new Date(task.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+        </span>
         {task.attachments && task.attachments.length > 0 && (
           <span className="kanban-card-attachment-badge">
             {t('kanban.filesCount', { count: String(task.attachments.length) })}
@@ -1120,15 +1092,6 @@ function TaskDetailPanel({
     }
   }, [onAttachFromClipboard])
 
-  const handleDueDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    onUpdate({ dueDate: value ? new Date(value).getTime() : undefined })
-  }, [onUpdate])
-
-  const dueDateValue = task.dueDate
-    ? new Date(task.dueDate).toISOString().split('T')[0]
-    : ''
-
   return (
     <div className="kanban-detail" onPaste={handlePaste} tabIndex={-1}>
       <div className="kanban-detail-header">
@@ -1200,19 +1163,6 @@ function TaskDetailPanel({
         </div>
       </div>
 
-      {/* Due date */}
-      <div className="kanban-detail-section">
-        <span className="kanban-detail-section-title">{t('kanban.dueDate')}</span>
-        <input
-          className="kanban-detail-date-input"
-          type="date"
-          value={dueDateValue}
-          onChange={handleDueDateChange}
-        />
-        {task.dueDate != null && task.dueDate < Date.now() && task.status !== 'DONE' && (
-          <span className="kanban-detail-overdue-warning">{t('kanban.overdue')}</span>
-        )}
-      </div>
 
       {/* Labels */}
       <div className="kanban-detail-section">

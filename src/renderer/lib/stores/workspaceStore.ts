@@ -130,7 +130,19 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   },
 
   setActiveNamespace: (id: string | null) => {
+    const { activeWorkspaceId, workspaces } = get()
     set({ activeNamespaceId: id })
+
+    // Check if the current workspace belongs to the new namespace
+    const currentWsBelongs = id === null || workspaces.some(
+      (w) => w.id === activeWorkspaceId && w.namespaceId === id,
+    )
+
+    if (!currentWsBelongs) {
+      // Focus the first workspace of the new namespace
+      const firstWs = workspaces.find((w) => w.namespaceId === id)
+      get().setActiveWorkspace(firstWs?.id ?? null)
+    }
   },
 
   createWorkspace: async (name: string, color?: string) => {

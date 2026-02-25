@@ -25,100 +25,54 @@ function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
 }
 
 function buildCtoPrompt(task: KanbanTask, ticketLabel: string, kanbanFilePath: string): string {
-  // Build child tickets summary if any exist
   const childInfo = task.childTicketIds?.length
-    ? `\n### Sous-tickets existants\nCe ticket CTO a deja cree les sous-tickets suivants: ${task.childTicketIds.map((id) => `\`${id}\``).join(', ')}.\nUtilise \`kanban_list\` pour voir leur statut actuel avant de continuer.`
+    ? `\n### Sous-tickets existants\nSous-tickets deja crees: ${task.childTicketIds.map((id) => `\`${id}\``).join(', ')}. Utilise \`kanban_list\` pour voir leur statut.`
     : ''
 
-  // Build previous result context if any
-  const previousContext = task.result
-    ? `\n### Contexte des sessions precedentes\n${task.result}`
+  const MAX_RESULT_CHARS = 2000
+  const trimmedResult = task.result
+    ? task.result.length > MAX_RESULT_CHARS
+      ? `…${task.result.slice(-MAX_RESULT_CHARS)}`
+      : task.result
+    : null
+  const previousContext = trimmedResult
+    ? `\n### Contexte des sessions precedentes\n${trimmedResult}`
     : ''
 
-  // Build conversation history reference for context recovery
   const conversationHistory = task.conversationHistoryPath
-    ? `\n### Historique de la derniere session\nLe fichier suivant contient l'historique complet de la derniere conversation :\n\`${task.conversationHistoryPath}\`\nLis ce fichier avec le tool Read pour recuperer le contexte detaille de ce qui a ete fait.`
+    ? `\n### Historique de la derniere session\nLis \`${task.conversationHistoryPath}\` avec Read pour recuperer le contexte.`
     : ''
 
   return [
-    `> **IMPORTANT — REGLE CTO : NE JAMAIS MARQUER CE TICKET COMME DONE**`,
-    `> Ce ticket CTO est un ticket d'amelioration continue. Tu ne peux PAS le passer en \`DONE\`.`,
-    `> A la place, tu DOIS :`,
-    `> 1. Creer des sous-tickets dans "A faire" (TODO) via \`kanban_create\` avec \`parentTicketId: "${task.id}"\``,
-    `> 2. Mettre a jour la description de ce ticket CTO avec un resume de ton analyse et tes recommandations`,
-    `> 3. Mettre a jour le champ \`result\` de ce ticket avec un bilan de cette session`,
-    `> 4. Remettre le status a \`TODO\` pour que la prochaine session CTO reprenne le travail`,
+    `> **REGLES CTO — IMPERATIVES**`,
+    `> - **JAMAIS** passer ce ticket en \`DONE\` — c'est un ticket d'amelioration continue`,
+    `> - **JAMAIS** coder, modifier des fichiers source, ou faire des commits — tu es CTO, pas developpeur`,
+    `> - **TOUJOURS** creer des sous-tickets via \`kanban_create\` avec \`parentTicketId: "${task.id}"\``,
+    `> - **EN FIN DE SESSION** : editer \`${kanbanFilePath}\` (ticket \`${task.id}\`) → status \`TODO\`, \`result\` avec bilan, \`updatedAt\` = \`Date.now()\``,
+    `> - Si besoin de precisions : status \`PENDING\` + \`question\` | Si erreur bloquante : status \`FAILED\` + \`error\``,
+    `> - **NE JAMAIS terminer sans avoir mis a jour le ticket**`,
     ``,
-    `> **OBLIGATION DE MISE A JOUR DU TICKET**`,
-    `> Tu DOIS mettre a jour le fichier kanban \`${kanbanFilePath}\` (ticket id \`${task.id}\`) a la FIN de ton travail.`,
-    `> Change \`status\` a \`TODO\` (pour que le CTO revienne), ajoute/mets a jour \`result\` avec un bilan de session, et mets a jour \`updatedAt\` avec \`Date.now()\`.`,
-    `> Si tu as besoin de precisions : change status a \`PENDING\` et ajoute \`question\`.`,
-    `> Si erreur bloquante : change status a \`FAILED\` et ajoute \`error\`.`,
-    `> NE JAMAIS terminer sans avoir mis a jour le ticket.`,
-    ``,
-    `Tu es le **CTO** de ce projet. Ton role est l'amelioration continue et la vision strategique.`,
+    `Tu es le **CTO** de ce projet. Tu analyses, evalues et crees des tickets — tu ne codes jamais.`,
     ``,
     `## Contexte`,
-    `- Ticket: ${ticketLabel} (CTO Mode)`,
-    `- ID: \`${task.id}\``,
-    `- Fichier Kanban: \`${kanbanFilePath}\``,
-    task.description ? `- Description du ticket: ${task.description}` : '',
+    `- Ticket: ${ticketLabel} (CTO) — ID: \`${task.id}\` — Kanban: \`${kanbanFilePath}\``,
+    task.description ? `- Description: ${task.description}` : '',
     previousContext,
     conversationHistory,
     childInfo,
     ``,
-    `## Tes capacites avec Mirehub`,
-    `Tu as acces a l'application Mirehub via les outils MCP. Voici ce que tu peux faire :`,
-    ``,
-    `### Gestion de tickets (Kanban)`,
-    `- **kanban_list** : Lister les tickets (filtrer par status, priorite) — pour voir l'etat du projet`,
-    `- **kanban_get** : Obtenir le detail d'un ticket par ID ou numero`,
-    `- **kanban_create** : Creer un sous-ticket (status force a TODO). **Utilise \`parentTicketId: "${task.id}"\`** pour lier les sous-tickets a ce ticket CTO`,
-    `- **kanban_update** : Mettre a jour un ticket (titre, description, priorite, labels, result, error)`,
-    `- **kanban_delete** : Supprimer un ticket`,
-    ``,
-    `### Analyse de projet`,
-    `- **project_list** : Lister les projets du workspace`,
-    `- **project_scan_info** : Scanner un projet (git info, packages, structure, Makefile, etc.)`,
-    `- **workspace_info** : Obtenir les metadonnees du workspace`,
-    `- **project_setup_claude_rules** : Deployer/mettre a jour le CLAUDE.md d'un projet`,
-    ``,
-    `### Analyse de code`,
-    `- **analysis_detect_tools** : Detecter les outils d'analyse installes (semgrep, trivy, etc.)`,
-    `- **analysis_run** : Lancer une analyse sur un projet`,
-    `- **analysis_list_reports** : Lister les rapports d'analyse existants`,
-    `- **analysis_create_tickets** : Creer des tickets kanban a partir des resultats d'analyse`,
-    ``,
-    `## Ton role de CTO`,
-    `1. **Analyser** le projet (structure, code, tests, docs, CI/CD, securite)`,
-    `2. **Evaluer** l'etat actuel des sous-tickets existants via \`kanban_list\``,
-    `3. **Identifier** les axes d'amelioration les plus impactants`,
-    `4. **Creer des sous-tickets** via \`kanban_create\` avec \`parentTicketId: "${task.id}"\` — chaque sous-ticket est une tache actionnable`,
-    `5. **Prioriser** les sous-tickets (critical > high > medium > low)`,
-    `6. **Documenter** ton analyse et tes recommandations dans ce ticket CTO`,
+    `## Outils MCP`,
+    `- **Kanban** : \`kanban_list\`, \`kanban_get\`, \`kanban_create\` (avec \`parentTicketId: "${task.id}"\`), \`kanban_update\`, \`kanban_delete\``,
+    `- **Projet** : \`project_list\`, \`project_scan_info\`, \`workspace_info\`, \`project_setup_claude_rules\``,
+    `- **Analyse** : \`analysis_detect_tools\`, \`analysis_run\`, \`analysis_list_reports\`, \`analysis_create_tickets\``,
     ``,
     `## Workflow`,
-    `1. Consulter les sous-tickets existants : \`kanban_list\` pour voir ce qui a deja ete fait ou est en cours`,
-    `2. Scanner le(s) projet(s) avec \`project_scan_info\``,
-    `3. Lire les fichiers importants (README, package.json, CLAUDE.md, etc.)`,
-    `4. Identifier 3-5 axes d'amelioration (en tenant compte de ce qui a deja ete traite)`,
-    `5. Creer un sous-ticket pour chaque axe via \`kanban_create\` avec \`parentTicketId: "${task.id}"\``,
-    `6. Si possible, implementer des ameliorations rapides directement et commiter`,
-    `7. **Terminer la session** : edite le fichier \`${kanbanFilePath}\`, trouve le ticket id \`${task.id}\` :`,
-    `   - Change \`status\` a \`TODO\` (pour permettre la prochaine session CTO)`,
-    `   - Mets a jour \`result\` avec un bilan de cette session (ce que tu as analyse, cree, recommande)`,
-    `   - Mets a jour \`updatedAt\` avec \`Date.now()\``,
-    ``,
-    `## Regles strictes`,
-    `- **INTERDIT** de passer ce ticket CTO en \`DONE\` — c'est un ticket d'amelioration continue`,
-    `- **OBLIGATOIRE** de creer des sous-tickets avec \`parentTicketId: "${task.id}"\` pour la liaison`,
-    `- **OBLIGATOIRE** de remettre le status a \`TODO\` en fin de session`,
-    `- **OBLIGATOIRE** de mettre a jour \`result\` avec un bilan de session pour la prochaine iteration`,
-    `- Si tu as besoin de precisions : change status a \`PENDING\` et ajoute \`question\``,
-    `- Si erreur bloquante : change status a \`FAILED\` et ajoute \`error\``,
-    ``,
-    `---`,
-    `**RAPPEL FINAL** : Ta DERNIERE action doit TOUJOURS etre la mise a jour du fichier kanban \`${kanbanFilePath}\` pour le ticket \`${task.id}\`. Remets le status a \`TODO\`, ajoute un \`result\` avec ton bilan, et mets a jour \`updatedAt\`. Sans cette mise a jour, ton travail ne sera pas comptabilise.`,
+    `1. \`kanban_list\` — voir l'etat des sous-tickets existants`,
+    `2. \`project_scan_info\` — scanner le(s) projet(s)`,
+    `3. Lire les fichiers cles (README, package.json, CLAUDE.md)`,
+    `4. Identifier 3-5 axes d'amelioration`,
+    `5. Creer un sous-ticket par axe via \`kanban_create\` avec \`parentTicketId: "${task.id}"\``,
+    `6. Mettre a jour ce ticket CTO : status \`TODO\`, \`result\` avec bilan, \`updatedAt\``,
   ].filter(Boolean).join('\n')
 }
 
@@ -128,6 +82,7 @@ interface KanbanState {
   draggedTaskId: string | null
   currentWorkspaceId: string | null
   kanbanTabIds: Record<string, string>
+  backgroundTasks: Record<string, KanbanTask[]>
 }
 
 interface KanbanActions {
@@ -148,7 +103,8 @@ interface KanbanActions {
   duplicateTask: (task: KanbanTask) => Promise<void>
   setDragged: (taskId: string | null) => void
   getTasksByStatus: (status: KanbanStatus) => KanbanTask[]
-  sendToClaude: (task: KanbanTask) => Promise<void>
+  sendToClaude: (task: KanbanTask, explicitWorkspaceId?: string) => Promise<void>
+  syncBackgroundWorkspace: (workspaceId: string) => Promise<void>
   attachFiles: (taskId: string) => Promise<void>
   attachFromClipboard: (taskId: string, dataBase64: string, filename: string, mimeType: string) => Promise<void>
   removeAttachment: (taskId: string, attachmentId: string) => Promise<void>
@@ -163,9 +119,20 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
   draggedTaskId: null,
   currentWorkspaceId: null,
   kanbanTabIds: {},
+  backgroundTasks: {},
 
   loadTasks: async (workspaceId: string) => {
-    set({ isLoading: true, currentWorkspaceId: workspaceId })
+    // Save current tasks to backgroundTasks before switching
+    const { currentWorkspaceId: oldWsId, tasks: oldTasks } = get()
+    if (oldWsId && oldWsId !== workspaceId && oldTasks.length > 0) {
+      set((state) => ({
+        backgroundTasks: { ...state.backgroundTasks, [oldWsId]: oldTasks },
+      }))
+    }
+
+    // Load from backgroundTasks cache if available
+    const cached = get().backgroundTasks[workspaceId]
+    set({ isLoading: true, currentWorkspaceId: workspaceId, ...(cached ? { tasks: cached } : {}) })
     try {
       const tasks: KanbanTask[] = await window.mirehub.kanban.list(workspaceId)
       set({ tasks })
@@ -404,12 +371,13 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     return get().tasks.filter((t) => t.status === status)
   },
 
-  sendToClaude: async (task: KanbanTask) => {
+  sendToClaude: async (task: KanbanTask, explicitWorkspaceId?: string) => {
     if (task.disabled) return
-    const { currentWorkspaceId, kanbanTabIds } = get()
-    if (!currentWorkspaceId) return
+    const workspaceId = explicitWorkspaceId ?? get().currentWorkspaceId
+    if (!workspaceId) return
 
     // If a tab already exists for this task, activate it and return
+    const { kanbanTabIds } = get()
     const existingTabId = kanbanTabIds[task.id]
     if (existingTabId) {
       try {
@@ -432,14 +400,14 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     }
     if (!cwd) {
       // Use workspace env path or fallback to first project
-      const workspace = workspaces.find((w) => w.id === currentWorkspaceId)
-      const workspaceProjects = projects.filter((p) => p.workspaceId === currentWorkspaceId)
+      const workspace = workspaces.find((w) => w.id === workspaceId)
+      const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
       if (workspace && workspaceProjects.length > 0) {
         try {
           const envResult = await window.mirehub.workspaceEnv.setup(
             workspace.name,
             workspaceProjects.map((p) => p.path),
-            currentWorkspaceId,
+            workspaceId,
           )
           if (envResult?.success && envResult.envPath) {
             cwd = envResult.envPath
@@ -455,9 +423,9 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     // Get kanban file path via IPC
     let kanbanFilePath: string
     try {
-      kanbanFilePath = await window.mirehub.kanban.getPath(currentWorkspaceId)
+      kanbanFilePath = await window.mirehub.kanban.getPath(workspaceId)
     } catch {
-      kanbanFilePath = `~/.mirehub/kanban/${currentWorkspaceId}.json`
+      kanbanFilePath = `~/.mirehub/kanban/${workspaceId}.json`
     }
 
     const ticketLabel = task.ticketNumber != null ? `T-${String(task.ticketNumber).padStart(2, '0')}` : task.id.slice(0, 8)
@@ -557,10 +525,9 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     let tabId: string | null = null
     try {
       const termStore = useTerminalTabStore.getState()
-      const { activeWorkspaceId } = useWorkspaceStore.getState()
-      if (activeWorkspaceId) {
+      if (workspaceId) {
         const tabLabel = task.isCtoTicket ? 'CTO' : task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[IA] ${task.title}`
-        tabId = termStore.createTab(activeWorkspaceId, cwd, tabLabel, initialCommand)
+        tabId = termStore.createTab(workspaceId, cwd, tabLabel, initialCommand)
         if (tabId) {
           termStore.setTabColor(tabId, '#fab387')
           set((state) => ({
@@ -582,7 +549,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       await window.mirehub.kanban.update({
         id: task.id,
         status: 'WORKING',
-        workspaceId: currentWorkspaceId,
+        workspaceId,
       })
     } catch { /* file update is best-effort */ }
 
@@ -622,13 +589,130 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             // Link the conversation JSONL file to the ticket for context recovery
             setTimeout(async () => {
               try {
-                await window.mirehub.kanban.linkConversation(cwd!, task.id, currentWorkspaceId!)
+                await window.mirehub.kanban.linkConversation(cwd!, task.id, workspaceId!)
               } catch { /* best-effort */ }
             }, 10000)
           }, 3000)
         }
       }, 200)
     }
+  },
+
+  syncBackgroundWorkspace: async (wsId: string) => {
+    try {
+      const newTasks: KanbanTask[] = await window.mirehub.kanban.list(wsId)
+      const oldTasks = get().backgroundTasks[wsId] ?? []
+      const { kanbanTabIds } = get()
+
+      let taskFinished = false
+      const tabsToClose: string[] = []
+
+      // Check auto-close settings
+      let autoCloseEnabled = false
+      let autoCloseCtoEnabled = true
+      try {
+        const settings = await window.mirehub.settings.get()
+        autoCloseEnabled = settings.autoCloseCompletedTerminals ?? false
+        autoCloseCtoEnabled = settings.autoCloseCtoTerminals ?? true
+      } catch { /* defaults */ }
+
+      const tasksToRelaunch: KanbanTask[] = []
+      for (const newTask of newTasks) {
+        const oldTask = oldTasks.find((t) => t.id === newTask.id)
+        if (!oldTask) continue
+        if (oldTask.status === newTask.status) continue
+
+        const tabId = kanbanTabIds[newTask.id]
+
+        // CTO auto-approve: PENDING → TODO
+        if (newTask.status === 'PENDING' && newTask.isCtoTicket) {
+          window.mirehub.kanban.update({
+            id: newTask.id,
+            status: 'TODO',
+            workspaceId: wsId,
+          }).catch(() => { /* best-effort */ })
+          newTask.status = 'TODO'
+          if (tabId && autoCloseCtoEnabled) tabsToClose.push(tabId)
+          taskFinished = true
+          continue
+        }
+
+        // Re-launch: WORKING → TODO (hook interrupted)
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && !newTask.isCtoTicket) {
+          if (!relaunchedTaskIds.has(newTask.id)) {
+            relaunchedTaskIds.add(newTask.id)
+            if (tabId) tabsToClose.push(tabId)
+            tasksToRelaunch.push(newTask)
+            continue
+          }
+        }
+
+        if (!tabId) continue
+
+        const termStore = useTerminalTabStore.getState()
+        if (newTask.status === 'DONE') {
+          termStore.setTabColor(tabId, '#a6e3a1')
+          taskFinished = true
+          relaunchedTaskIds.delete(newTask.id)
+          if (autoCloseEnabled) tabsToClose.push(tabId)
+        }
+        if (newTask.status === 'FAILED') {
+          termStore.setTabColor(tabId, '#f38ba8')
+          taskFinished = true
+          relaunchedTaskIds.delete(newTask.id)
+          if (autoCloseEnabled) tabsToClose.push(tabId)
+        }
+        if (newTask.status === 'PENDING') {
+          termStore.setTabColor(tabId, '#f9e2af')
+          termStore.setTabActivity(tabId, true)
+        }
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && newTask.isCtoTicket && autoCloseCtoEnabled) {
+          tabsToClose.push(tabId)
+        }
+      }
+
+      // Update background cache
+      set((state) => ({
+        backgroundTasks: { ...state.backgroundTasks, [wsId]: newTasks },
+      }))
+
+      // Auto-close tabs
+      if (tabsToClose.length > 0) {
+        const termStore = useTerminalTabStore.getState()
+        const newKanbanTabIds = { ...get().kanbanTabIds }
+        for (const tabId of tabsToClose) {
+          const taskId = Object.keys(newKanbanTabIds).find((id) => newKanbanTabIds[id] === tabId)
+          if (taskId) delete newKanbanTabIds[taskId]
+        }
+        set({ kanbanTabIds: newKanbanTabIds })
+        setTimeout(() => {
+          for (const tabId of tabsToClose) {
+            termStore.closeTab(tabId)
+          }
+        }, 2000)
+      }
+
+      // Re-launch interrupted tasks
+      if (tasksToRelaunch.length > 0) {
+        setTimeout(() => {
+          for (const task of tasksToRelaunch) {
+            get().sendToClaude(task, wsId)
+          }
+        }, 3000)
+      }
+
+      // Pick next TODO after a task finishes
+      if (taskFinished) {
+        const hasWorking = newTasks.some((t) => t.status === 'WORKING')
+        if (!hasWorking) {
+          setTimeout(() => {
+            const bgTasks = get().backgroundTasks[wsId] ?? []
+            const next = pickNextTask(bgTasks)
+            if (next) get().sendToClaude(next, wsId)
+          }, 1000)
+        }
+      }
+    } catch { /* ignore sync errors */ }
   },
 
   handleTabClosed: (tabId: string) => {

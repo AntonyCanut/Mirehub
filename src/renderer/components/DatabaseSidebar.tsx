@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useI18n } from '../lib/i18n'
 import { ContextMenu, type ContextMenuItem } from './ContextMenu'
 import type {
@@ -23,6 +23,7 @@ interface DatabaseSidebarProps {
   onBackup: (id: string) => Promise<void>
   onDeleteBackup: (connectionId: string, backupId: string) => void
   onRestoreBackup: (entry: DbBackupEntry, targetConnection: DbConnection) => Promise<void>
+  onReorder: (fromIndex: number, toIndex: number) => void
 }
 
 interface TreeNode {
@@ -81,8 +82,50 @@ export function DatabaseSidebar({
   onBackup,
   onDeleteBackup,
   onRestoreBackup,
+  onReorder,
 }: DatabaseSidebarProps) {
   const { t } = useI18n()
+
+  // Drag & drop state
+  const dragIndexRef = useRef<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+
+  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
+    dragIndexRef.current = index
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(index))
+    const target = e.currentTarget as HTMLElement
+    target.classList.add('db-connection-item--dragging')
+  }, [])
+
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLElement
+    target.classList.remove('db-connection-item--dragging')
+    dragIndexRef.current = null
+    setDragOverIndex(null)
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragIndexRef.current !== null && dragIndexRef.current !== index) {
+      setDragOverIndex(index)
+    }
+  }, [])
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverIndex(null)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent, toIndex: number) => {
+    e.preventDefault()
+    const fromIndex = dragIndexRef.current
+    if (fromIndex !== null && fromIndex !== toIndex) {
+      onReorder(fromIndex, toIndex)
+    }
+    dragIndexRef.current = null
+    setDragOverIndex(null)
+  }, [onReorder])
 
   // Tree state per connection
   const [expandedConnections, setExpandedConnections] = useState<Set<string>>(new Set())
@@ -444,7 +487,7 @@ export function DatabaseSidebar({
           </div>
         )}
 
-        {connections.map((conn) => {
+        {connections.map((conn, index) => {
           const status = connectionStatuses[conn.id] ?? 'disconnected'
           const isExpanded = expandedConnections.has(conn.id)
           const isActive = activeConnectionId === conn.id
@@ -457,9 +500,19 @@ export function DatabaseSidebar({
             conn.environmentTag === 'custom'
               ? conn.customTagName ?? 'custom'
               : conn.environmentTag
+          const isDragOver = dragOverIndex === index
 
           return (
-            <div key={conn.id} className="db-connection-item">
+            <div
+              key={conn.id}
+              className={`db-connection-item${isDragOver ? ' db-connection-item--dragover' : ''}`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+            >
               {/* Connection header */}
               <div
                 className={`db-connection-header${isActive ? ' db-connection-header--active' : ''}`}
@@ -474,6 +527,7 @@ export function DatabaseSidebar({
                   }
                 }}
               >
+                <span className="db-drag-handle" title="Drag to reorder">&#8942;&#8942;</span>
                 <span
                   className={`db-tree-toggle${isExpanded ? ' db-tree-toggle--open' : ''}`}
                 >

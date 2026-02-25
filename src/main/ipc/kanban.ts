@@ -233,10 +233,8 @@ function findNewestClaudeConversation(cwd: string): string | null {
   }
 }
 
-// File watcher state for kanban files
-let activeWatcher: fs.FSWatcher | null = null
-let watchedWorkspaceId: string | null = null
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
+// Multi-workspace file watcher state for kanban files
+const watchers = new Map<string, { watcher: fs.FSWatcher; debounceTimer: ReturnType<typeof setTimeout> | null }>()
 
 function broadcastFileChanged(workspaceId: string): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -244,41 +242,46 @@ function broadcastFileChanged(workspaceId: string): void {
   }
 }
 
-function stopWatcher(): void {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer)
-    debounceTimer = null
-  }
-  if (activeWatcher) {
-    activeWatcher.close()
-    activeWatcher = null
-  }
-  watchedWorkspaceId = null
-}
-
-function startWatcher(workspaceId: string): void {
-  stopWatcher()
+function addWatcher(workspaceId: string): void {
+  // Idempotent: skip if already watching
+  if (watchers.has(workspaceId)) return
   const filePath = getKanbanPath(workspaceId)
   if (!fs.existsSync(filePath)) return
 
-  watchedWorkspaceId = workspaceId
   try {
-    activeWatcher = fs.watch(filePath, { persistent: false }, () => {
-      // Debounce: coalesce rapid writes into one notification
-      if (debounceTimer) clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(() => {
-        debounceTimer = null
-        if (watchedWorkspaceId === workspaceId) {
+    const entry: { watcher: fs.FSWatcher; debounceTimer: ReturnType<typeof setTimeout> | null } = {
+      watcher: null!,
+      debounceTimer: null,
+    }
+    entry.watcher = fs.watch(filePath, { persistent: false }, () => {
+      if (entry.debounceTimer) clearTimeout(entry.debounceTimer)
+      entry.debounceTimer = setTimeout(() => {
+        entry.debounceTimer = null
+        if (watchers.has(workspaceId)) {
           broadcastFileChanged(workspaceId)
         }
       }, 150)
     })
-    activeWatcher.on('error', () => {
-      // File might be deleted/recreated — restart watcher
-      stopWatcher()
+    entry.watcher.on('error', () => {
+      removeWatcher(workspaceId)
     })
+    watchers.set(workspaceId, entry)
   } catch {
     // fs.watch can fail on some edge cases — silently ignore
+  }
+}
+
+function removeWatcher(workspaceId: string): void {
+  const entry = watchers.get(workspaceId)
+  if (!entry) return
+  if (entry.debounceTimer) clearTimeout(entry.debounceTimer)
+  try { entry.watcher.close() } catch { /* ignore */ }
+  watchers.delete(workspaceId)
+}
+
+function removeAllWatchers(): void {
+  for (const wsId of watchers.keys()) {
+    removeWatcher(wsId)
   }
 }
 
@@ -578,14 +581,28 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.KANBAN_WATCH,
     async (_event, { workspaceId }: { workspaceId: string }) => {
-      startWatcher(workspaceId)
+      addWatcher(workspaceId)
     },
   )
 
   ipcMain.handle(
     IPC_CHANNELS.KANBAN_UNWATCH,
     async () => {
-      stopWatcher()
+      removeAllWatchers()
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_WATCH_ADD,
+    async (_event, { workspaceId }: { workspaceId: string }) => {
+      addWatcher(workspaceId)
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_WATCH_REMOVE,
+    async (_event, { workspaceId }: { workspaceId: string }) => {
+      removeWatcher(workspaceId)
     },
   )
 

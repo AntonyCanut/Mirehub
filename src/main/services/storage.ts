@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 import { v4 as uuid } from 'uuid'
-import { Workspace, Project, AppSettings, KanbanTask, AutoClauderTemplate, SessionData, Namespace } from '../../shared/types'
+import { Workspace, Project, AppSettings, KanbanTask, AutoClauderTemplate, SessionData, Namespace, GitProfile } from '../../shared/types'
 import { DEFAULT_SETTINGS } from '../../shared/constants/defaults'
 
 const DATA_DIR = path.join(os.homedir(), '.mirehub')
@@ -11,6 +11,7 @@ interface AppData {
   workspaces: Workspace[]
   projects: Project[]
   namespaces: Namespace[]
+  gitProfiles: GitProfile[]
   settings: AppSettings
   kanbanTasks: KanbanTask[]
   autoClauderTemplates: AutoClauderTemplate[]
@@ -54,6 +55,10 @@ export class StorageService {
     if (fs.existsSync(this.dataPath)) {
       const raw = fs.readFileSync(this.dataPath, 'utf-8')
       const data = JSON.parse(raw) as AppData
+      // Migration: ensure gitProfiles array exists
+      if (!data.gitProfiles) {
+        data.gitProfiles = []
+      }
       // Migration: ensure namespaces array exists and assign Default namespace
       if (!data.namespaces || data.namespaces.length === 0) {
         const defaultNs: Namespace = {
@@ -85,6 +90,7 @@ export class StorageService {
       workspaces: [],
       projects: [],
       namespaces: [defaultNs],
+      gitProfiles: [],
       settings: { ...DEFAULT_SETTINGS },
       kanbanTasks: [],
       autoClauderTemplates: [],
@@ -283,6 +289,28 @@ export class StorageService {
     const ns = this.data.namespaces.find((n) => n.id === id)
     if (!ns || ns.isDefault) return // Cannot delete default namespace
     this.data.namespaces = this.data.namespaces.filter((n) => n.id !== id)
+    // Also remove the git profile associated with this namespace
+    this.data.gitProfiles = this.data.gitProfiles.filter((p) => p.namespaceId !== id)
+    this.save()
+  }
+
+  // Git Profiles
+  getGitProfile(namespaceId: string): GitProfile | undefined {
+    return this.data.gitProfiles.find((p) => p.namespaceId === namespaceId)
+  }
+
+  setGitProfile(profile: GitProfile): void {
+    const idx = this.data.gitProfiles.findIndex((p) => p.namespaceId === profile.namespaceId)
+    if (idx >= 0) {
+      this.data.gitProfiles[idx] = profile
+    } else {
+      this.data.gitProfiles.push(profile)
+    }
+    this.save()
+  }
+
+  deleteGitProfile(namespaceId: string): void {
+    this.data.gitProfiles = this.data.gitProfiles.filter((p) => p.namespaceId !== namespaceId)
     this.save()
   }
 

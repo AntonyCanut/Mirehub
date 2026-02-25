@@ -384,9 +384,9 @@
 .git-graph-row {
   display: flex;
   align-items: center;
-  height: 28px;
+  height: 30px;
   padding-right: 12px;
-  border-bottom: 1px solid rgba(69, 71, 90, 0.2);
+  border-bottom: 1px solid rgba(69, 71, 90, 0.15);
   cursor: pointer;
   transition: background 0.1s ease;
 }
@@ -400,7 +400,10 @@
   align-items: center;
 }
 
-.git-graph-svg { display: block; }
+.git-graph-svg {
+  display: block;
+  shape-rendering: geometricPrecision;
+}
 
 .git-graph-info {
   flex: 1;
@@ -428,9 +431,12 @@
 .git-ref-badge {
   font-size: 9px;
   font-weight: 600;
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 3px;
   white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .git-ref-badge--head {
@@ -584,6 +590,14 @@
   padding: 3px 8px;
   font-size: 11px;
 }
+
+.git-commit-file--clickable {
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.git-commit-file--clickable:hover { background: var(--bg-surface); }
+.git-commit-file--selected { background: rgba(137, 180, 250, 0.15) !important; }
 
 .git-commit-file-name {
   font-family: 'Menlo', monospace;
