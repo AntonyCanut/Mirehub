@@ -200,12 +200,12 @@ export function NotificationCenter() {
                         {installingTool === update.tool ? '...' : t('updates.update')}
                       </button>
                     )}
-                    {!update.installed && (update.tool === 'rtk' || update.tool === 'peon-ping') && (
+                    {!update.installed && update.tool === 'rtk' && (
                       <button className="notification-item-btn notification-item-btn--install" onClick={() => handleInstall(update.tool, update.scope)} disabled={installingTool === update.tool}>
                         {installingTool === update.tool ? '...' : t('updates.install')}
                       </button>
                     )}
-                    {update.installed && (update.tool === 'rtk' || update.tool === 'peon-ping') && (
+                    {update.installed && update.tool === 'rtk' && (
                       <button className="notification-item-btn notification-item-btn--uninstall" onClick={() => handleUninstall(update.tool)} disabled={installingTool === update.tool}>
                         {installingTool === update.tool ? '...' : t('updates.uninstall')}
                       </button>

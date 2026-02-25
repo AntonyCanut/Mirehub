@@ -123,9 +123,10 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
         expect.stringContaining('claude --dangerously-skip-permissions'),
       )
 
-      // Verify NO -p flag in the initial command (note: -p appears in skip-permissions, check for standalone flag)
+      // Verify the command includes Claude with the prompt as a CLI argument (not -p flag)
       const initialCommand = mockCreateTab.mock.calls[0]![3] as string
-      expect(initialCommand).toMatch(/claude --dangerously-skip-permissions$/)
+      expect(initialCommand).toContain('claude --dangerously-skip-permissions')
+      expect(initialCommand).toContain('.kanban-prompt-task-1.md')
       expect(initialCommand).not.toMatch(/\s-p\s/)
 
       // Tab color set to orange
@@ -189,8 +190,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       )
     })
 
-    it('envoie le texte du prompt puis Enter separement (frappe physique)', async () => {
-      vi.useFakeTimers()
+    it('passe le prompt comme initialCommand au terminal (delegation au composant Terminal)', async () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
@@ -206,55 +206,15 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
 
       await useKanbanStore.getState().sendToClaude(task)
 
-      // Simulate the Terminal component mounting and creating a PTY session
-      useTerminalTabStore.setState({
-        tabs: [{
-          id: 'tab-new-1',
-          label: '[IA] Fix bug in auth',
-          color: '#fab387',
-          hasActivity: false,
-          paneTree: { type: 'leaf' as const, id: 'pane-1', sessionId: 'pty-session-1', initialCommand: null, externalSessionId: null },
-          activePaneId: 'pane-1',
-          zoomedPaneId: null,
-          workspaceId: 'ws-1',
-          cwd: '/tmp/workspace-env',
-          initialCommand: null,
-        }],
-        createTab: mockCreateTab as ReturnType<typeof useTerminalTabStore.getState>['createTab'],
-        setTabColor: mockSetTabColor,
-        setActiveTab: mockSetActiveTab as ReturnType<typeof useTerminalTabStore.getState>['setActiveTab'],
-        setTabActivity: mockSetTabActivity,
-      })
-
-      // Advance past poll interval (200ms) — poll finds the sessionId
-      await vi.advanceTimersByTimeAsync(300)
-
-      // Advance past Claude init delay (3000ms)
-      await vi.advanceTimersByTimeAsync(3100)
-
-      // First write: prompt text WITHOUT Enter
-      const textCall = mockTerminalWrite.mock.calls.find(
-        (c) => c[0] === 'pty-session-1' && typeof c[1] === 'string' && c[1].includes('.kanban-prompt-task-1.md'),
-      )
-      expect(textCall).toBeDefined()
-      const promptText = textCall![1] as string
-      expect(promptText).not.toContain('\r')
-      expect(promptText).not.toContain('\n')
-
-      // Advance past the 100ms delay for Enter keypress
-      await vi.advanceTimersByTimeAsync(150)
-
-      // Second write: Enter key only (\r)
-      const enterCall = mockTerminalWrite.mock.calls.find(
-        (c) => c[0] === 'pty-session-1' && c[1] === '\r',
-      )
-      expect(enterCall).toBeDefined()
-
-      vi.useRealTimers()
+      // The initialCommand is passed to createTab — Terminal component handles PTY writing
+      const initialCommand = mockCreateTab.mock.calls[0]![3] as string
+      expect(initialCommand).toContain('.kanban-prompt-task-1.md')
+      expect(initialCommand).toContain('claude --dangerously-skip-permissions')
+      // The store does NOT write directly to the PTY — Terminal handles that
+      expect(mockTerminalWrite).not.toHaveBeenCalled()
     })
 
-    it('envoie texte et Enter dans le bon ordre (texte d\'abord, Enter ensuite)', async () => {
-      vi.useFakeTimers()
+    it('initialCommand contient la commande complete avec env vars et prompt path', async () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
@@ -270,43 +230,21 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
 
       await useKanbanStore.getState().sendToClaude(task)
 
-      // Simulate PTY session ready
-      useTerminalTabStore.setState({
-        tabs: [{
-          id: 'tab-new-1',
-          label: '[IA] Fix bug in auth',
-          color: '#fab387',
-          hasActivity: false,
-          paneTree: { type: 'leaf' as const, id: 'pane-1', sessionId: 'pty-session-1', initialCommand: null, externalSessionId: null },
-          activePaneId: 'pane-1',
-          zoomedPaneId: null,
-          workspaceId: 'ws-1',
-          cwd: '/tmp/workspace-env',
-          initialCommand: null,
-        }],
-        createTab: mockCreateTab as ReturnType<typeof useTerminalTabStore.getState>['createTab'],
-        setTabColor: mockSetTabColor,
-        setActiveTab: mockSetActiveTab as ReturnType<typeof useTerminalTabStore.getState>['setActiveTab'],
-        setTabActivity: mockSetTabActivity,
-      })
+      const initialCommand = mockCreateTab.mock.calls[0]![3] as string
 
-      // Advance past poll (200ms) + Claude init delay (3000ms) + Enter delay (100ms)
-      await vi.advanceTimersByTimeAsync(3500)
+      // Command must unset Claude env vars to avoid nested session errors
+      expect(initialCommand).toContain('unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT')
 
-      // Verify exactly 2 writes to pty-session-1: text then Enter
-      const ptyCalls = mockTerminalWrite.mock.calls.filter(
-        (c) => c[0] === 'pty-session-1',
-      )
-      expect(ptyCalls.length).toBe(2)
+      // Command must set kanban env vars for the hook
+      expect(initialCommand).toContain('MIREHUB_KANBAN_TASK_ID="task-1"')
+      expect(initialCommand).toContain('MIREHUB_KANBAN_FILE=')
 
-      // First call: prompt text WITHOUT any newline/carriage return
-      expect(ptyCalls[0]![1]).toContain('.kanban-prompt-task-1.md')
-      expect(ptyCalls[0]![1]).not.toMatch(/[\r\n]/)
+      // Command must launch Claude with the prompt file reference
+      expect(initialCommand).toContain('claude --dangerously-skip-permissions')
+      expect(initialCommand).toContain('.kanban-prompt-task-1.md')
 
-      // Second call: Enter key only (\r) — simulates physical keypress
-      expect(ptyCalls[1]![1]).toBe('\r')
-
-      vi.useRealTimers()
+      // The prompt is passed as a CLI argument, not via -p
+      expect(initialCommand).not.toMatch(/\s-p\s/)
     })
 
     it('met la tache en WORKING', async () => {

@@ -518,8 +518,10 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       return
     }
 
-    // Launch Claude interactively (profiles loaded, conversation visible)
-    const initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && claude --dangerously-skip-permissions`
+    // Launch Claude interactively with prompt as initial message (no timing dependency)
+    const relativePromptPath = `.mirehub/.kanban-prompt-${task.id}.md`
+    const escapedPrompt = `Lis et execute les instructions du fichier ${relativePromptPath}`
+    const initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && claude --dangerously-skip-permissions "${escapedPrompt}"`
 
     // Create an interactive terminal tab for this task
     let tabId: string | null = null
@@ -553,48 +555,22 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       })
     } catch { /* file update is best-effort */ }
 
-    // Poll for the PTY session to be ready, then send the prompt to Claude
+    // Cleanup prompt file after Claude has had time to read it
     if (tabId) {
-      const capturedTabId = tabId
-      const relativePromptPath = `.mirehub/.kanban-prompt-${task.id}.md`
-      let pollAttempts = 0
-      const pollInterval = setInterval(() => {
-        pollAttempts++
-        if (pollAttempts > 50) { // 10s max
-          clearInterval(pollInterval)
-          return
-        }
-        const tab = useTerminalTabStore.getState().tabs.find((t) => t.id === capturedTabId)
-        if (!tab) {
-          clearInterval(pollInterval)
-          return
-        }
-        if (tab.paneTree.type === 'leaf' && tab.paneTree.sessionId) {
-          clearInterval(pollInterval)
-          const sessionId = tab.paneTree.sessionId
-          // Wait for Claude to fully initialize before sending the prompt
-          setTimeout(() => {
-            // Send text first, then Enter separately (like a physical keypress)
-            window.mirehub.terminal.write(sessionId, `Lis et execute les instructions du fichier ${relativePromptPath}`)
-            setTimeout(() => {
-              window.mirehub.terminal.write(sessionId, '\r')
-            }, 100)
-            // Cleanup prompt file after Claude has had time to read it
-            setTimeout(() => {
-              try {
-                window.mirehub.kanban.cleanupPrompt(cwd!, task.id)
-              } catch { /* best-effort */ }
-            }, 30000)
+      const capturedCwd = cwd
+      const capturedWorkspaceId = workspaceId
+      setTimeout(() => {
+        try {
+          window.mirehub.kanban.cleanupPrompt(capturedCwd!, task.id)
+        } catch { /* best-effort */ }
+      }, 30000)
 
-            // Link the conversation JSONL file to the ticket for context recovery
-            setTimeout(async () => {
-              try {
-                await window.mirehub.kanban.linkConversation(cwd!, task.id, workspaceId!)
-              } catch { /* best-effort */ }
-            }, 10000)
-          }, 3000)
-        }
-      }, 200)
+      // Link the conversation JSONL file to the ticket for context recovery
+      setTimeout(async () => {
+        try {
+          await window.mirehub.kanban.linkConversation(capturedCwd!, task.id, capturedWorkspaceId!)
+        } catch { /* best-effort */ }
+      }, 10000)
     }
   },
 

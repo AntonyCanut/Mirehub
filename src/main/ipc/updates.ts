@@ -39,11 +39,6 @@ const TOOLS_TO_CHECK: ToolCheck[] = [
     checkCommand: 'rtk',
     checkArgs: ['--version'],
   },
-  {
-    name: 'peon-ping',
-    checkCommand: 'peon-ping',
-    checkArgs: ['--version'],
-  },
 ]
 
 async function getVersion(command: string, args: string[]): Promise<string | null> {
@@ -146,8 +141,6 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
     } else if (tool.name === 'rtk') {
       // rtk is a cargo crate — no easy remote version check, skip
       latestVersion = null
-    } else if (tool.name === 'peon-ping') {
-      latestVersion = await getLatestNpmVersion('peon-ping')
     }
 
     results.push({
@@ -216,10 +209,6 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
             command = 'cargo'
             args = ['install', 'rtk-token-killer']
             break
-          case 'peon-ping':
-            command = 'npm'
-            args = ['install', '-g', 'peon-ping']
-            break
           default:
             throw new Error(`Unknown tool: ${tool}`)
         }
@@ -262,10 +251,6 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
           case 'rtk':
             command = 'cargo'
             args = ['uninstall', 'rtk-token-killer']
-            break
-          case 'peon-ping':
-            command = 'npm'
-            args = ['uninstall', '-g', 'peon-ping']
             break
           default:
             throw new Error(`Cannot uninstall core tool: ${tool}`)
