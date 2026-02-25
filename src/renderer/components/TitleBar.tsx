@@ -1,4 +1,5 @@
 import { NotificationCenter } from './NotificationCenter'
+import { UpdateCenter } from './UpdateCenter'
 import { useI18n } from '../lib/i18n'
 
 export function TitleBar() {
@@ -9,6 +10,7 @@ export function TitleBar() {
       <span className="titlebar-title">{t('titlebar.title')}</span>
       <div className="titlebar-actions">
         <NotificationCenter />
+        <UpdateCenter />
       </div>
     </div>
   )

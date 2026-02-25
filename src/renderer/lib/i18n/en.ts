@@ -572,6 +572,7 @@ export const en = {
   'updates.update': 'Update',
   'updates.lastCheck': 'Last check: {time}',
   'updates.notificationTooltip': 'Notification center',
+  'updates.updateCenterTooltip': 'Update center',
   'updates.installed': 'Installed',
   'updates.notInstalled': 'Not installed',
   'updates.install': 'Install',
@@ -853,6 +854,15 @@ export const en = {
   'namespace.rename': 'Rename',
   'namespace.deleteConfirm': 'Delete namespace "{name}"? Associated workspaces will no longer be displayed.',
   'namespace.all': 'All namespaces',
+
+  // Notifications
+  'notifications.title': 'Notifications',
+  'notifications.tooltip': 'Notifications',
+  'notifications.empty': 'No notifications',
+  'notifications.clearAll': 'Clear all',
+  'notifications.ticketsRemaining': 'Ticket {ticket}: done. {count} ticket(s) remaining',
+  'notifications.noMoreTickets': 'Ticket {ticket}: done. No more pending tickets',
+  'notifications.taskFailed': 'Ticket {ticket} failed',
 
   // Title bar
   'titlebar.title': 'Mirehub',

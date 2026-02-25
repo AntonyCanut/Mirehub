@@ -1,78 +1,60 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useUpdateStore } from '../lib/stores/updateStore'
-import { useAppUpdateStore } from '../lib/stores/appUpdateStore'
+import { useState, useCallback } from 'react'
+import { useNotificationStore } from '../lib/stores/notificationStore'
 import { useI18n } from '../lib/i18n'
+
+function formatRelativeTime(ts: number, t: (key: string, params?: Record<string, string | number>) => string): string {
+  const diff = Date.now() - ts
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return t('time.justNow')
+  if (minutes < 60) return t('time.minutesAgo', { minutes })
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return t('time.hoursAgo', { hours })
+  const days = Math.floor(hours / 24)
+  if (days === 1) return t('time.yesterday')
+  return t('time.daysAgo', { days })
+}
+
+const typeIcons: Record<string, string> = {
+  success: '\u2713',
+  error: '\u2717',
+  warning: '\u26A0',
+  info: '\u2139',
+}
+
+const typeColors: Record<string, string> = {
+  success: 'var(--success)',
+  error: 'var(--danger)',
+  warning: 'var(--warning)',
+  info: 'var(--accent)',
+}
 
 export function NotificationCenter() {
   const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
-  const { updates, isChecking, lastChecked, installingTool, installStatus, checkUpdates, installUpdate, uninstallUpdate, clearInstallStatus } =
-    useUpdateStore()
-  const { status: appUpdateStatus, version: appNewVersion, downloadPercent, checkForUpdate, downloadUpdate, installUpdate: installAppUpdate } =
-    useAppUpdateStore()
+  const notifications = useNotificationStore((s) => s.notifications)
+  const markAllRead = useNotificationStore((s) => s.markAllRead)
+  const clearAll = useNotificationStore((s) => s.clearAll)
 
-  const [currentAppVersion, setCurrentAppVersion] = useState<string | null>(null)
-
-  const availableUpdates = updates.filter((u) => u.updateAvailable)
-  const notInstalled = updates.filter((u) => !u.installed)
-  const appUpdateAvailable = appUpdateStatus === 'available' || appUpdateStatus === 'downloading' || appUpdateStatus === 'downloaded'
-  const badgeCount = availableUpdates.length + notInstalled.length + (appUpdateAvailable ? 1 : 0)
-
-  useEffect(() => {
-    checkUpdates()
-    window.mirehub.app.version().then((info) => {
-      setCurrentAppVersion(info.version)
-    })
-  }, [checkUpdates])
-
-  // Auto-dismiss install status after 5 seconds
-  useEffect(() => {
-    if (!installStatus) return
-    const timer = setTimeout(() => clearInstallStatus(), 5000)
-    return () => clearTimeout(timer)
-  }, [installStatus, clearInstallStatus])
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   const handleToggle = useCallback(() => {
-    setIsOpen((prev) => !prev)
-  }, [])
+    setIsOpen((prev) => {
+      if (!prev) markAllRead()
+      return !prev
+    })
+  }, [markAllRead])
 
-  const handleInstall = useCallback(
-    (tool: string, scope: string) => {
-      installUpdate(tool, scope)
-    },
-    [installUpdate],
-  )
-
-  const handleUninstall = useCallback(
-    (tool: string) => {
-      uninstallUpdate(tool)
-    },
-    [uninstallUpdate],
-  )
-
-  const handleInstallAll = useCallback(() => {
-    for (const update of availableUpdates) {
-      installUpdate(update.tool, update.scope, update.projectId)
-    }
-  }, [availableUpdates, installUpdate])
-
-  const handleCheckAll = useCallback(() => {
-    checkUpdates()
-    checkForUpdate()
-  }, [checkUpdates, checkForUpdate])
-
-  const formatTime = (ts: number | null) => {
-    if (!ts) return t('time.never')
-    const date = new Date(ts)
-    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-  }
+  const handleClearAll = useCallback(() => {
+    clearAll()
+    setIsOpen(false)
+  }, [clearAll])
 
   return (
     <div className="notification-center">
       <button
         className="notification-bell"
         onClick={handleToggle}
-        title={t('updates.notificationTooltip')}
+        title={t('notifications.tooltip')}
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path
@@ -83,143 +65,38 @@ export function NotificationCenter() {
           />
           <path d="M6 11V12C6 13.1 6.9 14 8 14C9.1 14 10 13.1 10 12V11" stroke="currentColor" strokeWidth="1.2" />
         </svg>
-        {badgeCount > 0 && <span className="notification-badge">{badgeCount}</span>}
+        {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
       </button>
 
       {isOpen && (
-        <div className="notification-panel">
+        <div className="notification-panel" style={{ width: 340 }}>
           <div className="notification-panel-header">
-            <h3>{t('updates.title')}</h3>
-            <div className="notification-panel-actions">
-              <button
-                className="notification-refresh"
-                onClick={handleCheckAll}
-                disabled={isChecking || appUpdateStatus === 'checking'}
-                title={t('updates.checkTooltip')}
-              >
-                {isChecking || appUpdateStatus === 'checking' ? '...' : '\u21BB'}
+            <h3>{t('notifications.title')}</h3>
+            {notifications.length > 0 && (
+              <button className="notif-clear-btn" onClick={handleClearAll}>
+                {t('notifications.clearAll')}
               </button>
-              {availableUpdates.length > 1 && (
-                <button className="notification-update-all" onClick={handleInstallAll}>
-                  {t('updates.updateAll')}
-                </button>
-              )}
-            </div>
+            )}
           </div>
-
-          {installStatus && (
-            <div
-              className={`notification-status ${installStatus.success ? 'notification-status--success' : 'notification-status--error'}`}
-              onClick={clearInstallStatus}
-            >
-              {installStatus.success
-                ? `\u2713 ${t('updates.updated', { tool: installStatus.tool })}`
-                : `\u2717 ${t('updates.failedUpdate', { tool: installStatus.tool, error: installStatus.error || '' })}`}
-            </div>
-          )}
-
           <div className="notification-panel-content">
-            {/* App update entry */}
-            <div
-              className={`notification-item${appUpdateAvailable ? ' notification-item--update' : ''}`}
-            >
-              <div className="notification-item-info">
-                <span className="notification-item-name">Mirehub</span>
-                <span className="notification-item-version">
-                  {currentAppVersion ?? '...'}
-                  {appUpdateStatus === 'available' && appNewVersion && (
-                    <>{' \u2192 '}<span className="notification-item-latest">{appNewVersion}</span></>
-                  )}
-                  {appUpdateStatus === 'downloading' && (
-                    <>{' \u2192 '}<span className="notification-item-latest">{appNewVersion} ({downloadPercent}%)</span></>
-                  )}
-                  {appUpdateStatus === 'downloaded' && appNewVersion && (
-                    <>{' \u2192 '}<span className="notification-item-latest">{appNewVersion}</span></>
-                  )}
-                  {appUpdateStatus === 'checking' && (
-                    <> &mdash; {t('appUpdate.checking')}</>
-                  )}
-                  {(appUpdateStatus === 'idle' || appUpdateStatus === 'not-available') && (
-                    <> &mdash; {t('appUpdate.upToDate')}</>
-                  )}
-                </span>
-                <span className="notification-item-scope">{t('appUpdate.appScope')}</span>
-              </div>
-              <div className="notification-item-actions">
-                {appUpdateStatus === 'available' && (
-                  <button className="notification-item-btn" onClick={downloadUpdate}>
-                    {t('appUpdate.download')}
-                  </button>
-                )}
-                {appUpdateStatus === 'downloading' && (
-                  <button className="notification-item-btn" disabled>
-                    {downloadPercent}%
-                  </button>
-                )}
-                {appUpdateStatus === 'downloaded' && (
-                  <button className="notification-item-btn notification-item-btn--install" onClick={installAppUpdate}>
-                    {t('appUpdate.installAndRestart')}
-                  </button>
-                )}
-                {appUpdateStatus === 'error' && (
-                  <button className="notification-item-btn" onClick={checkForUpdate}>
-                    {t('appUpdate.checkNow')}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Tool updates */}
-            {updates.length === 0 && !isChecking ? (
-              !appUpdateAvailable && <p className="notification-empty">{t('updates.noInfo')}</p>
+            {notifications.length === 0 ? (
+              <p className="notification-empty">{t('notifications.empty')}</p>
             ) : (
-              updates.map((update) => (
-                <div
-                  key={`${update.tool}-${update.scope}`}
-                  className={`notification-item${update.updateAvailable ? ' notification-item--update' : ''}${!update.installed ? ' notification-item--missing' : ''}`}
-                >
-                  <div className="notification-item-info">
-                    <span className="notification-item-name">{update.tool}</span>
-                    {update.installed ? (
-                      <span className="notification-item-version">
-                        {update.currentVersion}
-                        {update.updateAvailable && (
-                          <> {' \u2192 '} <span className="notification-item-latest">{update.latestVersion}</span> </>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="notification-item-version notification-item-version--missing">
-                        {t('updates.notInstalled')}
-                      </span>
-                    )}
-                    <span className="notification-item-scope">{update.scope}</span>
+              notifications.map((notif) => (
+                <div key={notif.id} className="notif-item">
+                  <span className="notif-item-icon" style={{ color: typeColors[notif.type] }}>
+                    {typeIcons[notif.type]}
+                  </span>
+                  <div className="notif-item-content">
+                    <span className="notif-item-title">{notif.title}</span>
+                    <span className="notif-item-body">{notif.body}</span>
                   </div>
-                  <div className="notification-item-actions">
-                    {update.installed && update.updateAvailable && (
-                      <button className="notification-item-btn" onClick={() => handleInstall(update.tool, update.scope)} disabled={installingTool === update.tool}>
-                        {installingTool === update.tool ? '...' : t('updates.update')}
-                      </button>
-                    )}
-                    {!update.installed && update.tool === 'rtk' && (
-                      <button className="notification-item-btn notification-item-btn--install" onClick={() => handleInstall(update.tool, update.scope)} disabled={installingTool === update.tool}>
-                        {installingTool === update.tool ? '...' : t('updates.install')}
-                      </button>
-                    )}
-                    {update.installed && update.tool === 'rtk' && (
-                      <button className="notification-item-btn notification-item-btn--uninstall" onClick={() => handleUninstall(update.tool)} disabled={installingTool === update.tool}>
-                        {installingTool === update.tool ? '...' : t('updates.uninstall')}
-                      </button>
-                    )}
-                  </div>
+                  <span className="notif-item-time">
+                    {formatRelativeTime(notif.createdAt, t)}
+                  </span>
                 </div>
               ))
             )}
-          </div>
-
-          <div className="notification-panel-footer">
-            <span className="notification-last-check">
-              {t('updates.lastCheck', { time: formatTime(lastChecked) })}
-            </span>
           </div>
         </div>
       )}

@@ -21,6 +21,7 @@ import { ApiTesterPanel } from './components/ApiTesterPanel'
 import { DatabaseExplorer } from './components/DatabaseExplorer'
 import { CodeAnalysisPanel } from './components/CodeAnalysisPanel'
 import { AppUpdateModal } from './components/AppUpdateModal'
+import { ToastContainer } from './components/ToastContainer'
 import { useWorkspaceStore } from './lib/stores/workspaceStore'
 import { useTerminalTabStore } from './lib/stores/terminalTabStore'
 import { useViewStore } from './lib/stores/viewStore'
@@ -504,6 +505,7 @@ export function App() {
         onClose={() => { setCommandPaletteOpen(false); setQuickSwitchOpen(false) }}
       />
       <AppUpdateModal />
+      <ToastContainer />
     </div>
     </ErrorBoundary>
   )

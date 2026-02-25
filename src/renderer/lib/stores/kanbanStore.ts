@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import type { KanbanTask, KanbanStatus } from '../../../shared/types/index'
 import { useTerminalTabStore } from './terminalTabStore'
 import { useWorkspaceStore } from './workspaceStore'
+import { pushNotification } from './notificationStore'
+import { useI18n } from '../i18n'
 
 const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
 
@@ -233,12 +235,30 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id) // allow future re-launch
           if (autoCloseEnabled) tabsToClose.push(tabId)
+
+          // Push notification
+          const t = useI18n.getState().t
+          const ticketLabel = newTask.ticketNumber != null ? `T-${String(newTask.ticketNumber).padStart(2, '0')}` : newTask.title
+          const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
+          const body = todoCount > 0
+            ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
+            : t('notifications.noMoreTickets', { ticket: ticketLabel })
+          pushNotification('success', newTask.title, body)
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id) // allow future re-launch
           if (autoCloseEnabled) tabsToClose.push(tabId)
+
+          // Push notification
+          const t = useI18n.getState().t
+          const ticketLabel = newTask.ticketNumber != null ? `T-${String(newTask.ticketNumber).padStart(2, '0')}` : newTask.title
+          const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
+          pushNotification('error', t('notifications.taskFailed', { ticket: ticketLabel }),
+            todoCount > 0
+              ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
+              : t('notifications.noMoreTickets', { ticket: ticketLabel }))
         }
         if (newTask.status === 'PENDING') {
           termStore.setTabColor(tabId, '#f9e2af')
@@ -631,12 +651,28 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id)
           if (autoCloseEnabled) tabsToClose.push(tabId)
+
+          const t = useI18n.getState().t
+          const ticketLabel = newTask.ticketNumber != null ? `T-${String(newTask.ticketNumber).padStart(2, '0')}` : newTask.title
+          const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
+          const body = todoCount > 0
+            ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
+            : t('notifications.noMoreTickets', { ticket: ticketLabel })
+          pushNotification('success', newTask.title, body)
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id)
           if (autoCloseEnabled) tabsToClose.push(tabId)
+
+          const t = useI18n.getState().t
+          const ticketLabel = newTask.ticketNumber != null ? `T-${String(newTask.ticketNumber).padStart(2, '0')}` : newTask.title
+          const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
+          pushNotification('error', t('notifications.taskFailed', { ticket: ticketLabel }),
+            todoCount > 0
+              ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
+              : t('notifications.noMoreTickets', { ticket: ticketLabel }))
         }
         if (newTask.status === 'PENDING') {
           termStore.setTabColor(tabId, '#f9e2af')
