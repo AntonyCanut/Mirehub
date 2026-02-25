@@ -453,6 +453,14 @@ export const en = {
   'todos.typeCount': '{type} ({count})',
   'todos.scanning': 'Scanning project files...',
   'todos.noComments': 'No {type} comments found',
+  'todos.selectedCount': '{count} selected',
+  'todos.createTickets': 'Create ticket(s)',
+  'todos.ignoreSelected': 'Ignore',
+  'todos.deselectAll': 'Deselect',
+  'todos.selectAll': 'Select all',
+  'todos.ignoredCount': '{count} ignored',
+  'todos.toggleIgnored': 'Show/hide ignored',
+  'todos.unignore': 'Restore',
 
   // Command palette
   'command.placeholder': 'Type a command...',

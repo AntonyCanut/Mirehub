@@ -356,6 +356,7 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
                     line: i + 1,
                     type: match[1] as TodoEntry['type'],
                     text: match[2]?.trim() || '',
+                    codeLine: line.trimEnd(),
                   })
                 }
               }
@@ -368,6 +369,33 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
 
       scanDir(projectPath)
       return results
+    },
+  )
+
+  // Load ignored TODOs list from .mirehub/ignored-todos.json
+  ipcMain.handle(
+    IPC_CHANNELS.PROJECT_LOAD_IGNORED_TODOS,
+    async (_event, { path: projectPath }: { path: string }) => {
+      const filePath = path.join(projectPath, '.mirehub', 'ignored-todos.json')
+      if (!fs.existsSync(filePath)) return []
+      try {
+        return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+      } catch {
+        return []
+      }
+    },
+  )
+
+  // Save ignored TODOs list to .mirehub/ignored-todos.json
+  ipcMain.handle(
+    IPC_CHANNELS.PROJECT_SAVE_IGNORED_TODOS,
+    async (_event, { path: projectPath, ignoredKeys }: { path: string; ignoredKeys: string[] }) => {
+      const dir = path.join(projectPath, '.mirehub')
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
+      }
+      fs.writeFileSync(path.join(dir, 'ignored-todos.json'), JSON.stringify(ignoredKeys, null, 2), 'utf-8')
+      return { success: true }
     },
   )
 

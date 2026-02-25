@@ -92,29 +92,29 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
     it('ne appelle pas quitAndInstall immediatement', async () => {
       await mockIpcMain._invoke('appUpdate:install')
 
-      // quitAndInstall should NOT be called yet (setTimeout 500ms not elapsed)
+      // quitAndInstall should NOT be called yet (500ms cleanup + 300ms PTY teardown not elapsed)
       expect(mockQuitAndInstall).not.toHaveBeenCalled()
     })
 
-    it('appelle quitAndInstall(false, true) apres 500ms', async () => {
+    it('appelle quitAndInstall(false, true) apres 800ms', async () => {
       await mockIpcMain._invoke('appUpdate:install')
 
-      // Advance past the 500ms delay
-      vi.advanceTimersByTime(500)
+      // Advance past the 500ms cleanup + 300ms PTY teardown delay
+      vi.advanceTimersByTime(800)
 
       expect(mockQuitAndInstall).toHaveBeenCalledTimes(1)
       expect(mockQuitAndInstall).toHaveBeenCalledWith(false, true)
     })
 
-    it('ne appelle pas quitAndInstall avant 500ms', async () => {
+    it('ne appelle pas quitAndInstall avant 800ms', async () => {
       await mockIpcMain._invoke('appUpdate:install')
 
-      // Advance just under 500ms
-      vi.advanceTimersByTime(499)
+      // Advance just under 800ms (500ms cleanup + 300ms PTY teardown)
+      vi.advanceTimersByTime(799)
 
       expect(mockQuitAndInstall).not.toHaveBeenCalled()
 
-      // Now tick to exactly 500ms
+      // Now tick to exactly 800ms
       vi.advanceTimersByTime(1)
 
       expect(mockQuitAndInstall).toHaveBeenCalledTimes(1)
@@ -130,7 +130,7 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
       await mockIpcMain._invoke('appUpdate:install')
 
       // Should not throw - the error is caught internally
-      expect(() => vi.advanceTimersByTime(500)).not.toThrow()
+      expect(() => vi.advanceTimersByTime(800)).not.toThrow()
 
       // quitAndInstall was called (and threw)
       expect(mockQuitAndInstall).toHaveBeenCalledTimes(1)
@@ -145,7 +145,7 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
       })
 
       await mockIpcMain._invoke('appUpdate:install')
-      vi.advanceTimersByTime(500)
+      vi.advanceTimersByTime(800)
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         '[appUpdate] quitAndInstall failed:',
@@ -157,7 +157,7 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
   })
 
   describe('install - filet de securite (safety net)', () => {
-    it('declenche app.relaunch + app.quit apres 3500ms total si le process n a pas quitte', async () => {
+    it('declenche app.relaunch + app.quit apres 3800ms total si le process n a pas quitte', async () => {
       // quitAndInstall succeeds but does not actually terminate the process
       mockQuitAndInstall.mockImplementation(() => {
         // No-op: simulates quitAndInstall returning without killing the process
@@ -165,8 +165,8 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
 
       await mockIpcMain._invoke('appUpdate:install')
 
-      // Advance past the first 500ms delay -> triggers quitAndInstall
-      vi.advanceTimersByTime(500)
+      // Advance past the 500ms cleanup + 300ms PTY teardown -> triggers quitAndInstall
+      vi.advanceTimersByTime(800)
       expect(mockQuitAndInstall).toHaveBeenCalledTimes(1)
 
       // Safety net should NOT have fired yet
@@ -190,8 +190,8 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
 
       await mockIpcMain._invoke('appUpdate:install')
 
-      // Advance past 500ms -> quitAndInstall (throws, caught)
-      vi.advanceTimersByTime(500)
+      // Advance past 800ms (500ms cleanup + 300ms PTY teardown) -> quitAndInstall (throws, caught)
+      vi.advanceTimersByTime(800)
       expect(mockQuitAndInstall).toHaveBeenCalledTimes(1)
 
       // Safety net not yet
@@ -212,8 +212,8 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
 
       await mockIpcMain._invoke('appUpdate:install')
 
-      // Advance past 500ms initial delay
-      vi.advanceTimersByTime(500)
+      // Advance past 800ms (500ms cleanup + 300ms PTY teardown)
+      vi.advanceTimersByTime(800)
 
       // Advance 2999ms (just under the safety net threshold)
       vi.advanceTimersByTime(2999)
@@ -234,7 +234,7 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
 
       await mockIpcMain._invoke('appUpdate:install')
 
-      vi.advanceTimersByTime(500) // quitAndInstall
+      vi.advanceTimersByTime(800) // quitAndInstall (500ms cleanup + 300ms teardown)
       vi.advanceTimersByTime(3000) // safety net
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -252,7 +252,7 @@ describe('AppUpdate IPC Handlers - APP_UPDATE_INSTALL', () => {
 
       await mockIpcMain._invoke('appUpdate:install')
 
-      vi.advanceTimersByTime(500) // quitAndInstall
+      vi.advanceTimersByTime(800) // quitAndInstall (500ms cleanup + 300ms teardown)
       vi.advanceTimersByTime(3000) // safety net
 
       expect(callOrder).toEqual(['relaunch', 'quit'])

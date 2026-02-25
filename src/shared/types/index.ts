@@ -206,6 +206,7 @@ export interface TodoEntry {
   line: number
   type: 'TODO' | 'FIXME' | 'HACK' | 'NOTE' | 'XXX'
   text: string
+  codeLine: string
 }
 
 export interface ProjectStatsData {
@@ -708,6 +709,8 @@ export const IPC_CHANNELS = {
 
   // Project scanning (TODO scanner, stats)
   PROJECT_SCAN_TODOS: 'project:scanTodos',
+  PROJECT_LOAD_IGNORED_TODOS: 'project:loadIgnoredTodos',
+  PROJECT_SAVE_IGNORED_TODOS: 'project:saveIgnoredTodos',
   PROJECT_STATS: 'project:stats',
 
   // Project notes

@@ -4366,7 +4366,7 @@ body {
 
 .todo-scanner-entry {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   width: 100%;
   padding: 3px 8px;
@@ -4407,6 +4407,164 @@ body {
   white-space: nowrap;
   flex: 1;
   min-width: 0;
+}
+
+/* TODO Scanner - Actions bar */
+.todo-scanner-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.todo-scanner-actions-count {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.todo-scanner-action-btn {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.todo-scanner-action-btn:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.todo-scanner-action-btn--ignore {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.todo-scanner-action-btn--ignore:hover {
+  background: var(--warning);
+  color: var(--bg-primary);
+}
+
+.todo-scanner-action-btn--deselect {
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+}
+
+.todo-scanner-action-btn--deselect:hover {
+  background: var(--text-muted);
+  color: var(--bg-primary);
+}
+
+/* TODO Scanner - Toggle ignored */
+.todo-scanner-toggle-ignored {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--text-muted);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 4px;
+}
+
+.todo-scanner-toggle-ignored:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+.todo-scanner-toggle-ignored--active {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+/* TODO Scanner - Select all button */
+.todo-filter-btn--select-all {
+  margin-left: auto;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+/* TODO Scanner - Entry with checkbox and code line */
+.todo-scanner-entry--selected {
+  background: rgba(137, 180, 250, 0.08);
+}
+
+.todo-scanner-entry--ignored {
+  opacity: 0.5;
+}
+
+.todo-scanner-checkbox {
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.todo-scanner-checkbox input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.todo-scanner-entry-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+}
+
+.todo-scanner-entry-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.todo-scanner-codeline {
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 2px;
+}
+
+.todo-scanner-codeline code {
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 10px;
+}
+
+.todo-scanner-unignore-btn {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--success);
+  background: transparent;
+  color: var(--success);
+  cursor: pointer;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.todo-scanner-unignore-btn:hover {
+  background: var(--success);
+  color: var(--bg-primary);
 }
 
 /* ========= Shortcuts Panel ========= */

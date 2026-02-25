@@ -74,6 +74,10 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_WRITE_CLAUDE_MD, { projectPath, content }),
     scanTodos: (projectPath: string): Promise<TodoEntry[]> =>
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_SCAN_TODOS, { path: projectPath }),
+    loadIgnoredTodos: (projectPath: string): Promise<string[]> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PROJECT_LOAD_IGNORED_TODOS, { path: projectPath }),
+    saveIgnoredTodos: (projectPath: string, ignoredKeys: string[]): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PROJECT_SAVE_IGNORED_TODOS, { path: projectPath, ignoredKeys }),
     stats: (projectPath: string): Promise<ProjectStatsData> =>
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_STATS, { path: projectPath }),
     getNotes: (projectId: string): Promise<string> =>

@@ -132,11 +132,12 @@ describe('Terminal IPC Handlers', () => {
   })
 
   it('ferme un terminal', async () => {
+    const processKillSpy = vi.spyOn(process, 'kill').mockImplementation(() => true)
     const { id } = await mockIpcMain._invoke('terminal:create', {})
 
     await mockIpcMain._invoke('terminal:close', { id })
 
-    expect(mockPtyInstance.kill).toHaveBeenCalled()
+    expect(processKillSpy).toHaveBeenCalledWith(mockPtyInstance.pid, 'SIGKILL')
   })
 
   it('ne fait rien si on ferme un terminal inexistant', async () => {
@@ -172,6 +173,7 @@ describe('Terminal IPC Handlers', () => {
 
 describe('cleanupTerminals', () => {
   it('tue et supprime tous les terminaux actifs', async () => {
+    const processKillSpy = vi.spyOn(process, 'kill').mockImplementation(() => true)
     vi.resetModules()
     const { registerTerminalHandlers, cleanupTerminals } = await import('../../src/main/ipc/terminal')
 
@@ -180,13 +182,11 @@ describe('cleanupTerminals', () => {
 
     // Create two terminals
     await mockIpc._invoke('terminal:create', {})
-    const pty1 = mockPtyInstance
     await mockIpc._invoke('terminal:create', {})
-    const pty2 = mockPtyInstance
 
     cleanupTerminals()
 
-    expect(pty1.kill).toHaveBeenCalled()
-    expect(pty2.kill).toHaveBeenCalled()
+    expect(processKillSpy).toHaveBeenCalledTimes(2)
+    expect(processKillSpy).toHaveBeenCalledWith(12345, 'SIGKILL')
   })
 })

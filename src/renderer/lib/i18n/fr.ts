@@ -453,6 +453,14 @@ export const fr = {
   'todos.typeCount': '{type} ({count})',
   'todos.scanning': 'Scan des fichiers en cours...',
   'todos.noComments': 'Aucun commentaire {type} trouve',
+  'todos.selectedCount': '{count} selectionne(s)',
+  'todos.createTickets': 'Creer ticket(s)',
+  'todos.ignoreSelected': 'Ignorer',
+  'todos.deselectAll': 'Deselectionner',
+  'todos.selectAll': 'Tout selectionner',
+  'todos.ignoredCount': '{count} ignore(s)',
+  'todos.toggleIgnored': 'Afficher/masquer ignores',
+  'todos.unignore': 'Restaurer',
 
   // Command palette
   'command.placeholder': 'Tapez une commande...',

@@ -1200,7 +1200,7 @@ export function registerAnalysisHandlers(
   ipcMain.handle(
     IPC_CHANNELS.ANALYSIS_CREATE_TICKETS,
     async (_event, request: AnalysisTicketRequest) => {
-      const { findingIds, reportId, workspaceId, targetProjectId, priority, groupBy } = request
+      const { findingIds, reportId, workspaceId, targetProjectId, groupBy } = request
 
       const report = reportStore.get(reportId)
       if (!report) {
@@ -1228,8 +1228,8 @@ export function registerAnalysisHandlers(
           title: buildTicketTitle(key, groupBy, findings, report.toolName),
           description: buildTicketDescription(findings),
           status: 'TODO',
-          priority,
-          labels: ['vulnerability', report.toolName.toLowerCase()],
+          priority: 'high',
+          labels: ['refactor', 'bug', report.toolName.toLowerCase()],
           createdAt: Date.now(),
           updatedAt: Date.now(),
         }
