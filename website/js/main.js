@@ -192,29 +192,37 @@
     var downloadVersion = document.getElementById('download-version');
     if (downloadVersion) downloadVersion.textContent = 'v' + displayVersion;
 
-    // Find the best .zip asset for download
-    var zipAsset = null;
+    // Find the .dmg asset for download (prefer DMG over ZIP for macOS users)
+    var dmgAsset = null;
     var assets = release.assets || [];
     for (var i = 0; i < assets.length; i++) {
       var name = assets[i].name.toLowerCase();
-      if (name.indexOf('.zip') !== -1 && name.indexOf('blockmap') === -1) {
-        zipAsset = assets[i];
+      if (name.indexOf('.dmg') !== -1 && name.indexOf('blockmap') === -1) {
+        dmgAsset = assets[i];
         break;
       }
     }
 
-    if (zipAsset) {
-      // Update hero download link
+    if (dmgAsset) {
+      var url = dmgAsset.browser_download_url;
+
+      // Update hero download link — direct file download, not a webpage
       var heroDownload = document.getElementById('hero-download');
-      if (heroDownload) heroDownload.href = zipAsset.browser_download_url;
+      if (heroDownload) {
+        heroDownload.href = url;
+        heroDownload.removeAttribute('target');
+      }
 
       // Update main download link
-      var downloadZip = document.getElementById('download-zip');
-      if (downloadZip) downloadZip.href = zipAsset.browser_download_url;
+      var downloadBtn = document.getElementById('download-dmg');
+      if (downloadBtn) {
+        downloadBtn.href = url;
+        downloadBtn.removeAttribute('target');
+      }
 
       // Update size
       var downloadSize = document.getElementById('download-size');
-      if (downloadSize) downloadSize.textContent = '~' + formatBytes(zipAsset.size);
+      if (downloadSize) downloadSize.textContent = '~' + formatBytes(dmgAsset.size);
     }
   }
 
