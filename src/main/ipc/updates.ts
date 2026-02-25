@@ -78,6 +78,16 @@ function compareVersions(current: string, latest: string): boolean {
   return false
 }
 
+async function isBrewManaged(command: string): Promise<boolean> {
+  try {
+    const { stdout } = await execFileAsync('which', [command], { timeout: 5000 })
+    const binPath = stdout.trim()
+    return binPath.startsWith('/opt/homebrew/') || binPath.startsWith('/usr/local/Cellar/')
+  } catch {
+    return false
+  }
+}
+
 async function getLatestNpmVersion(pkg: string): Promise<string | null> {
   try {
     const { stdout } = await execFileAsync('npm', ['view', pkg, 'version'], { timeout: 15000 })
@@ -124,7 +134,13 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
     if (tool.name === 'node') {
       latestVersion = await getLatestBrewVersion('node')
     } else if (tool.name === 'npm') {
-      latestVersion = await getLatestNpmVersion('npm')
+      if (await isBrewManaged('npm')) {
+        // npm is bundled with Homebrew's node — don't check npm registry
+        // The 'node' entry already handles brew updates; upgrading node updates npm too
+        latestVersion = currentVersion
+      } else {
+        latestVersion = await getLatestNpmVersion('npm')
+      }
     } else if (tool.name === 'claude') {
       latestVersion = await getLatestNpmVersion('@anthropic-ai/claude-code')
     } else if (tool.name === 'rtk') {
@@ -176,14 +192,21 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
         let command: string
         let args: string[]
 
+        const npmIsBrewManaged = tool === 'npm' && (await isBrewManaged('npm'))
+
         switch (tool) {
           case 'node':
             command = 'brew'
             args = ['upgrade', 'node']
             break
           case 'npm':
-            command = 'npm'
-            args = ['install', '-g', 'npm@latest']
+            if (npmIsBrewManaged) {
+              command = 'brew'
+              args = ['upgrade', 'node']
+            } else {
+              command = 'npm'
+              args = ['install', '-g', 'npm@latest']
+            }
             break
           case 'claude':
             command = 'npm'
