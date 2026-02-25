@@ -18,13 +18,21 @@ const terminals = new Map<string, ManagedTerminal>()
 /**
  * Dispose listeners BEFORE killing the pty process.
  * This prevents native callbacks from firing into a dying JS context (SIGABRT).
+ *
+ * We use process.kill(pid, 'SIGKILL') instead of pty.kill() (SIGHUP) so the
+ * child exits immediately — minimising the window where node-pty's native read
+ * thread can queue a ThreadSafeFunction callback into a shutting-down V8 isolate.
  */
 function disposeTerminal(terminal: ManagedTerminal): void {
   for (const d of terminal.disposables) {
     d.dispose()
   }
   terminal.disposables.length = 0
-  terminal.pty.kill()
+  try {
+    process.kill(terminal.pty.pid, 'SIGKILL')
+  } catch {
+    // Process already exited — nothing to do.
+  }
 }
 
 /**

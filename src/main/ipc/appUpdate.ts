@@ -2,6 +2,8 @@ import { IpcMain, BrowserWindow, app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHANNELS } from '../../shared/types'
 import { StorageService } from '../services/storage'
+import { cleanupTerminals } from './terminal'
+import { cleanupClaudeSessions } from './claude'
 
 const storage = new StorageService()
 
@@ -86,22 +88,36 @@ export function registerAppUpdateHandlers(ipcMain: IpcMain): void {
     // transmitted to the renderer before the quit sequence starts.
     // setImmediate was unreliable in Electron's hybrid event loop on macOS.
     setTimeout(() => {
-      try {
-        autoUpdater.quitAndInstall(false, true)
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('[appUpdate] quitAndInstall failed:', err)
-      }
+      // Kill all PTY processes and Claude sessions BEFORE the quit sequence.
+      // node-pty uses a native ThreadSafeFunction (TSFN) on a background read
+      // thread. If the app quits while a TSFN callback is still pending, the
+      // callback fires during FreeEnvironment → uv_run and tries to throw a JS
+      // exception into a dying V8 isolate → SIGABRT (T-39 crash).
+      // By cleaning up here (not just in before-quit), we give the native
+      // threads time to notice their fds are closed before the quit sequence.
+      cleanupTerminals()
+      cleanupClaudeSessions()
 
-      // Safety net: if quitAndInstall did not terminate the process
-      // (e.g. install() returned false), force a relaunch + quit so
-      // autoInstallOnAppQuit can apply the update on exit.
+      // Allow native PTY read threads to detect closed fds and stop before
+      // the quit sequence triggers FreeEnvironment.
       setTimeout(() => {
-        // eslint-disable-next-line no-console
-        console.warn('[appUpdate] quitAndInstall did not exit — forcing relaunch')
-        app.relaunch()
-        app.quit()
-      }, 3000)
+        try {
+          autoUpdater.quitAndInstall(false, true)
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error('[appUpdate] quitAndInstall failed:', err)
+        }
+
+        // Safety net: if quitAndInstall did not terminate the process
+        // (e.g. install() returned false), force a relaunch + quit so
+        // autoInstallOnAppQuit can apply the update on exit.
+        setTimeout(() => {
+          // eslint-disable-next-line no-console
+          console.warn('[appUpdate] quitAndInstall did not exit — forcing relaunch')
+          app.relaunch()
+          app.quit()
+        }, 3000)
+      }, 300)
     }, 500)
   })
 
