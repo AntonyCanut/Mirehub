@@ -149,13 +149,16 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
         if (!hasCommits(cwd)) return []
 
         const n = Math.max(1, Math.floor(Number(limit) || 50))
-        const SEP = '\x1f' // Unit separator - won't appear in normal git output
+        const RS = '\x1e' // Record separator between entries
+        const SEP = '\x1f' // Unit separator within entry
         const output = execGit(
-          ['log', '--all', '--topo-order', `-${n}`, `--pretty=format:%H${SEP}%h${SEP}%an${SEP}%ae${SEP}%ai${SEP}%s${SEP}%P${SEP}%D`],
+          ['log', '--all', '--topo-order', `-${n}`, `--pretty=format:%H${SEP}%h${SEP}%an${SEP}%ae${SEP}%ai${SEP}%s${SEP}%P${SEP}%D${SEP}%b${RS}`],
           cwd,
         )
-        const entries: GitLogEntry[] = output.split('\n').filter(Boolean).map((line) => {
-          const parts = line.split(SEP)
+        const entries: GitLogEntry[] = output.split(RS).filter(Boolean).map((record) => {
+          const parts = record.trim().split(SEP)
+          const body = parts[8] || ''
+          const cherryMatch = body.match(/\(cherry picked from commit ([a-f0-9]+)\)/)
           return {
             hash: parts[0] || '',
             shortHash: parts[1] || '',
@@ -165,6 +168,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
             message: parts[5] || '',
             parents: (parts[6] || '').split(' ').filter(Boolean),
             refs: (parts[7] || '').split(',').map((r) => r.trim()).filter(Boolean),
+            cherryPickOf: cherryMatch?.[1] || undefined,
           }
         })
         return entries
@@ -486,7 +490,7 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.GIT_CHERRY_PICK,
     async (_event, { cwd, hash }: { cwd: string; hash: string }) => {
       try {
-        execGit(['cherry-pick', validateHash(hash)], cwd)
+        execGit(['cherry-pick', '-x', validateHash(hash)], cwd)
         return { success: true }
       } catch (err) {
         return { success: false, error: String(err) }

@@ -160,76 +160,206 @@ function computeGraph(entries: GitLogEntry[]): GraphCommitInfo[] {
   return result
 }
 
-// --- Graph SVG Row ---
+// --- Continuous Git Graph ---
 
-const LANE_WIDTH = 26
-const ROW_HEIGHT = 30
-const DOT_RADIUS = 4.5
-const MERGE_DOT_RADIUS = 5.5
-const LINE_EXTEND = 2
+const LANE_WIDTH = 20
+const ROW_HEIGHT = 28
+const DOT_RADIUS = 5
+const MERGE_DOT_RADIUS = 6
 
-function GraphRow({ info, maxLane: globalMaxLane }: { info: GraphCommitInfo; maxLane: number }) {
-  const localMaxLane = Math.max(
-    info.dotLane,
-    ...info.connections.map((c) => Math.max(c.fromLane, c.toLane)),
-    ...info.lanes.map((_, i) => (info.lanes[i] ? i : 0)),
+interface BranchSegment {
+  lane: number
+  startRow: number
+  endRow: number
+  color: string
+}
+
+interface CurveConnection {
+  fromLane: number
+  toLane: number
+  row: number
+  color: string
+}
+
+interface CherryPickConnection {
+  fromRow: number
+  fromLane: number
+  toRow: number
+  toLane: number
+  color: string
+}
+
+interface CommitDot {
+  row: number
+  lane: number
+  color: string
+  isMerge: boolean
+}
+
+interface GraphPaths {
+  segments: BranchSegment[]
+  curves: CurveConnection[]
+  cherryPicks: CherryPickConnection[]
+  dots: CommitDot[]
+}
+
+function buildGraphPaths(data: GraphCommitInfo[]): GraphPaths {
+  const segments: BranchSegment[] = []
+  const curves: CurveConnection[] = []
+  const cherryPicks: CherryPickConnection[] = []
+  const dots: CommitDot[] = []
+
+  // Track active lane spans: lane -> startRow
+  const laneSpans = new Map<number, { startRow: number; color: string }>()
+
+  // Build hash -> row index for cherry-pick lookup
+  const hashToRow = new Map<string, number>()
+  for (let i = 0; i < data.length; i++) {
+    hashToRow.set(data[i]!.entry.hash, i)
+  }
+
+  for (let row = 0; row < data.length; row++) {
+    const info = data[row]!
+    const isMerge = info.entry.parents.length > 1
+
+    // Collect which lanes are active in this row (from connections)
+    const activeLanesThisRow = new Set<number>()
+
+    for (const conn of info.connections) {
+      if (conn.type === 'straight') {
+        activeLanesThisRow.add(conn.fromLane)
+      } else {
+        // Curve: from dotLane to another lane
+        curves.push({
+          fromLane: conn.fromLane,
+          toLane: conn.toLane,
+          row,
+          color: conn.color,
+        })
+        // The source lane is active up to this row
+        activeLanesThisRow.add(conn.fromLane)
+        // The target lane starts from this row
+        activeLanesThisRow.add(conn.toLane)
+      }
+    }
+
+    // Finalize lane spans that are no longer active
+    for (const [lane, span] of laneSpans) {
+      if (!activeLanesThisRow.has(lane)) {
+        segments.push({ lane, startRow: span.startRow, endRow: row - 1, color: span.color })
+        laneSpans.delete(lane)
+      }
+    }
+
+    // Start or extend lane spans
+    for (const lane of activeLanesThisRow) {
+      if (!laneSpans.has(lane)) {
+        const color = GRAPH_COLORS[lane % GRAPH_COLORS.length]!
+        laneSpans.set(lane, { startRow: row, color })
+      }
+    }
+
+    // Commit dot
+    dots.push({
+      row,
+      lane: info.dotLane,
+      color: GRAPH_COLORS[info.dotLane % GRAPH_COLORS.length]!,
+      isMerge,
+    })
+
+    // Cherry-pick connection
+    if (info.entry.cherryPickOf) {
+      const targetRow = hashToRow.get(info.entry.cherryPickOf)
+      if (targetRow !== undefined) {
+        const targetInfo = data[targetRow]!
+        cherryPicks.push({
+          fromRow: row,
+          fromLane: info.dotLane,
+          toRow: targetRow,
+          toLane: targetInfo.dotLane,
+          color: GRAPH_COLORS[info.dotLane % GRAPH_COLORS.length]!,
+        })
+      }
+    }
+  }
+
+  // Finalize remaining open spans
+  for (const [lane, span] of laneSpans) {
+    segments.push({ lane, startRow: span.startRow, endRow: data.length - 1, color: span.color })
+  }
+
+  return { segments, curves, cherryPicks, dots }
+}
+
+function GitGraph({ data, maxLane, rowHeight, laneWidth }: {
+  data: GraphCommitInfo[]
+  maxLane: number
+  rowHeight: number
+  laneWidth: number
+}) {
+  const { segments, curves, cherryPicks, dots } = useMemo(
+    () => buildGraphPaths(data), [data],
   )
-  const maxLane = Math.max(localMaxLane, globalMaxLane)
-  const svgWidth = (maxLane + 1) * LANE_WIDTH + 8
-  const isMerge = info.connections.filter((c) => c.fromLane === info.dotLane && c.toLane !== info.dotLane).length > 0
-    || info.entry.parents.length > 1
-  const radius = isMerge ? MERGE_DOT_RADIUS : DOT_RADIUS
-  const dotColor = GRAPH_COLORS[info.dotLane % GRAPH_COLORS.length]!
+  const svgHeight = data.length * rowHeight
+  const svgWidth = (maxLane + 1) * laneWidth + 12
 
-  // Render straight lines first, then curves on top
-  const straights = info.connections.filter((c) => c.type === 'straight')
-  const curves = info.connections.filter((c) => c.type !== 'straight')
+  const laneX = (lane: number) => lane * laneWidth + laneWidth / 2
+  const rowY = (row: number) => row * rowHeight + rowHeight / 2
 
   return (
-    <svg width={svgWidth} height={ROW_HEIGHT} className="git-graph-svg" style={{ overflow: 'visible' }}>
-      {/* All straight lines — uniform rendering for visual continuity */}
-      {straights.map((conn, i) => {
-        const x = conn.fromLane * LANE_WIDTH + LANE_WIDTH / 2
-        return (
-          <line
-            key={`s-${i}`}
-            x1={x} y1={-LINE_EXTEND}
-            x2={x} y2={ROW_HEIGHT + LINE_EXTEND}
-            stroke={conn.color}
-            strokeWidth={2}
-            strokeLinecap="round"
-            opacity={0.75}
-          />
-        )
-      })}
-      {/* Fork/merge curves rendered on top for clarity */}
-      {curves.map((conn, i) => {
-        const x1 = conn.fromLane * LANE_WIDTH + LANE_WIDTH / 2
-        const x2 = conn.toLane * LANE_WIDTH + LANE_WIDTH / 2
-        // Smooth S-curve with wide control points for fluid branch transitions
-        const cy1 = ROW_HEIGHT * 0.25
-        const cy2 = ROW_HEIGHT * 0.75
+    <svg width={svgWidth} height={svgHeight} className="git-graph-svg">
+      {/* 1. Branch segments (continuous vertical lines) */}
+      {segments.map((seg, i) => (
+        <line
+          key={`seg-${i}`}
+          x1={laneX(seg.lane)} y1={seg.startRow * rowHeight}
+          x2={laneX(seg.lane)} y2={(seg.endRow + 1) * rowHeight}
+          stroke={seg.color} strokeWidth={2} strokeLinecap="round"
+        />
+      ))}
+
+      {/* 2. Fork/merge curves */}
+      {curves.map((c, i) => {
+        const x1 = laneX(c.fromLane)
+        const x2 = laneX(c.toLane)
+        const y1 = c.row * rowHeight
+        const y2 = (c.row + 1) * rowHeight
+        const mid = (y1 + y2) / 2
         return (
           <path
-            key={`c-${i}`}
-            d={`M ${x1} ${-LINE_EXTEND} C ${x1} ${cy1}, ${x2} ${cy2}, ${x2} ${ROW_HEIGHT + LINE_EXTEND}`}
-            stroke={conn.color}
-            strokeWidth={2}
-            strokeLinecap="round"
-            fill="none"
-            opacity={0.85}
+            key={`curve-${i}`}
+            d={`M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}`}
+            stroke={c.color} strokeWidth={2} fill="none" strokeLinecap="round"
           />
         )
       })}
-      {/* Commit dot */}
-      <circle
-        cx={info.dotLane * LANE_WIDTH + LANE_WIDTH / 2}
-        cy={ROW_HEIGHT / 2}
-        r={radius}
-        fill={dotColor}
-        stroke="#1e1e2e"
-        strokeWidth={2}
-      />
+
+      {/* 3. Cherry-pick connections (dashed) */}
+      {cherryPicks.map((cp, i) => {
+        const x1 = laneX(cp.fromLane)
+        const y1 = rowY(cp.fromRow)
+        const x2 = laneX(cp.toLane)
+        const y2 = rowY(cp.toRow)
+        const midY = (y1 + y2) / 2
+        return (
+          <path
+            key={`cp-${i}`}
+            d={`M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`}
+            stroke={cp.color} strokeWidth={1.5} fill="none"
+            strokeDasharray="4 3" opacity={0.7}
+          />
+        )
+      })}
+
+      {/* 4. Commit dots (on top of everything) */}
+      {dots.map((d, i) => (
+        <circle
+          key={`dot-${i}`}
+          cx={laneX(d.lane)} cy={rowY(d.row)}
+          r={d.isMerge ? MERGE_DOT_RADIUS : DOT_RADIUS}
+          fill={d.color} stroke="var(--bg-primary)" strokeWidth={2.5}
+        />
+      ))}
     </svg>
   )
 }
@@ -1259,38 +1389,42 @@ export function GitPanel() {
               </div>
             </div>
           ) : (
-            /* Commit Graph (default view) */
+            /* Commit Graph (default view) — continuous SVG */
             <div className="git-graph-area">
               <div className="git-graph-scroll">
-                {graphData.length === 0 && (
+                {graphData.length === 0 ? (
                   <div className="git-graph-empty">{t('git.noCommits')}</div>
-                )}
-                {graphData.map((info) => (
-                  <div
-                    key={info.entry.hash}
-                    className={`git-graph-row${selectedCommit?.hash === info.entry.hash ? ' git-graph-row--selected' : ''}`}
-                    onClick={() => handleSelectCommit(info.entry)}
-                    onContextMenu={(e) => {
-                      e.preventDefault()
-                      setCommitCtx({ x: e.clientX, y: e.clientY, entry: info.entry })
-                    }}
-                  >
-                    <div className="git-graph-cell">
-                      <GraphRow info={info} maxLane={graphMaxLane} />
+                ) : (
+                  <div className="git-graph-canvas" style={{ position: 'relative', height: graphData.length * ROW_HEIGHT }}>
+                    <GitGraph data={graphData} maxLane={graphMaxLane} rowHeight={ROW_HEIGHT} laneWidth={LANE_WIDTH} />
+                    <div className="git-graph-rows" style={{ marginLeft: (graphMaxLane + 1) * LANE_WIDTH + 12 }}>
+                      {graphData.map((info, idx) => (
+                        <div
+                          key={info.entry.hash}
+                          className={`git-graph-row${selectedCommit?.hash === info.entry.hash ? ' git-graph-row--selected' : ''}`}
+                          style={{ height: ROW_HEIGHT, top: idx * ROW_HEIGHT, position: 'absolute', left: 0, right: 0 }}
+                          onClick={() => handleSelectCommit(info.entry)}
+                          onContextMenu={(e) => {
+                            e.preventDefault()
+                            setCommitCtx({ x: e.clientX, y: e.clientY, entry: info.entry })
+                          }}
+                        >
+                          <div className="git-graph-info">
+                            <span className="git-graph-message">{info.entry.message}</span>
+                            {info.entry.refs.length > 0 && (
+                              <span className="git-graph-refs">
+                                {info.entry.refs.map((ref) => <RefBadge key={ref} refName={ref} />)}
+                              </span>
+                            )}
+                          </div>
+                          <span className="git-graph-author" title={info.entry.authorEmail}>{info.entry.author}</span>
+                          <span className="git-graph-date">{relativeDate(info.entry.date)}</span>
+                          <span className="git-graph-hash">{info.entry.shortHash}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="git-graph-info">
-                      <span className="git-graph-message">{info.entry.message}</span>
-                      {info.entry.refs.length > 0 && (
-                        <span className="git-graph-refs">
-                          {info.entry.refs.map((ref) => <RefBadge key={ref} refName={ref} />)}
-                        </span>
-                      )}
-                    </div>
-                    <span className="git-graph-author" title={info.entry.authorEmail}>{info.entry.author}</span>
-                    <span className="git-graph-date">{relativeDate(info.entry.date)}</span>
-                    <span className="git-graph-hash">{info.entry.shortHash}</span>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}

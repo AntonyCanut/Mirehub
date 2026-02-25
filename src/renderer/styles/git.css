@@ -381,29 +381,30 @@
   font-size: 13px;
 }
 
+.git-graph-canvas {
+  position: relative;
+}
+
+.git-graph-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.git-graph-rows {
+  position: relative;
+}
+
 .git-graph-row {
   display: flex;
   align-items: center;
-  height: 30px;
   padding-right: 12px;
-  border-bottom: 1px solid rgba(69, 71, 90, 0.15);
   cursor: pointer;
   transition: background 0.1s ease;
 }
 
-.git-graph-row:hover { background: var(--bg-surface); }
+.git-graph-row:hover { background: rgba(69, 71, 90, 0.15); }
 .git-graph-row--selected { background: rgba(137, 180, 250, 0.1); }
-
-.git-graph-cell {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-}
-
-.git-graph-svg {
-  display: block;
-  shape-rendering: geometricPrecision;
-}
 
 .git-graph-info {
   flex: 1;
@@ -431,10 +432,10 @@
 .git-ref-badge {
   font-size: 9px;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: 3px;
   white-space: nowrap;
-  max-width: 140px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
 }

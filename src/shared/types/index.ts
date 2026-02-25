@@ -188,6 +188,7 @@ export interface GitLogEntry {
   message: string
   parents: string[]
   refs: string[]
+  cherryPickOf?: string
 }
 
 export interface GitStatus {
