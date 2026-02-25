@@ -201,8 +201,8 @@ describe('useWorkspaceStore', () => {
 
       await useWorkspaceStore.getState().addProject('ws-1')
 
-      // Env should be set up with workspace name, not ID
-      expect(mockMirehub.workspaceEnv.setup).toHaveBeenCalledWith('Test Workspace', ['/tmp/test'])
+      // Env should be set up with workspace name, not ID (+ workspaceId for MCP registration)
+      expect(mockMirehub.workspaceEnv.setup).toHaveBeenCalledWith('Test Workspace', ['/tmp/test'], 'ws-1')
     })
 
     it('retourne null si l utilisateur annule la selection', async () => {
@@ -250,7 +250,7 @@ describe('useWorkspaceStore', () => {
 
       const result = await useWorkspaceStore.getState().setupWorkspaceEnv('ws-1')
 
-      expect(mockMirehub.workspaceEnv.setup).toHaveBeenCalledWith('Mon Workspace', ['/tmp/test'])
+      expect(mockMirehub.workspaceEnv.setup).toHaveBeenCalledWith('Mon Workspace', ['/tmp/test'], 'ws-1')
       expect(result).toBe('/home/user/.workspaces/Mon Workspace')
     })
 

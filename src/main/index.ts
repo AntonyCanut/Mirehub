@@ -21,6 +21,7 @@ import { registerSshHandlers } from './ipc/ssh'
 import { registerAnalysisHandlers } from './ipc/analysis'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
+import { clearDockBadge } from './services/notificationService'
 import { databaseService } from './services/database'
 import { StorageService } from './services/storage'
 import { IPC_CHANNELS } from '../shared/types'
@@ -92,6 +93,10 @@ function createMainWindow(): BrowserWindow {
   } else {
     win.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
+
+  win.on('focus', () => {
+    clearDockBadge()
+  })
 
   win.on('closed', () => {
     mainWindow = null
@@ -299,6 +304,7 @@ app.whenReady().then(() => {
   })
 
   app.on('activate', () => {
+    clearDockBadge()
     if (BrowserWindow.getAllWindows().length === 0) {
       mainWindow = createMainWindow()
     }

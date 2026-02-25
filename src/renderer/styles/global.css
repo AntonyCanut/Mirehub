@@ -702,6 +702,13 @@ body {
   font-family: 'Menlo', monospace;
 }
 
+.workspace-ia-tag--cto {
+  background: linear-gradient(135deg, #cba6f7, #f5c2e7);
+  color: #1e1e2e;
+  border: none;
+  font-weight: 700;
+}
+
 @keyframes ia-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }

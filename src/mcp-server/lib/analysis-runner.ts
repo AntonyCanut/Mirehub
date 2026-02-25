@@ -1,26 +1,17 @@
-import { IpcMain, BrowserWindow } from 'electron'
 import { v4 as uuid } from 'uuid'
 import { execFile, spawn, ChildProcess } from 'child_process'
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import {
-  IPC_CHANNELS,
+import type {
   AnalysisToolDef,
   AnalysisToolCategory,
   AnalysisFinding,
   AnalysisReport,
   AnalysisRunOptions,
-  AnalysisTicketRequest,
-  AnalysisProgress,
   AnalysisSeverity,
-  KanbanTask,
 } from '../../shared/types'
-import {
-  readKanbanTasks as readKanbanTasksShared,
-  writeKanbanTasks as writeKanbanTasksShared,
-} from '../../mcp-server/lib/kanban-store'
 
 // ---------------------------------------------------------------------------
 // Tool-specific JSON output types (used by parsers)
@@ -154,20 +145,8 @@ interface MegaLinterLinter {
 }
 
 // ---------------------------------------------------------------------------
-// Tool catalog
+// Severity mappers
 // ---------------------------------------------------------------------------
-
-interface ToolCatalogEntry {
-  id: string
-  name: string
-  command: string
-  category: AnalysisToolCategory
-  description: string
-  languages: string[]
-  jsonFlag: string
-  buildArgs: (projectPath: string, extraArgs?: string[]) => string[]
-  parse: (stdout: string, projectPath: string) => AnalysisFinding[]
-}
 
 function mapSemgrepSeverity(sev: string): AnalysisSeverity {
   const lower = sev.toLowerCase()
@@ -217,8 +196,11 @@ function mapPylintSeverity(type: string): AnalysisSeverity {
   return 'info'
 }
 
-/** Build an enriched env with common macOS tool paths (Homebrew, pip, etc.) */
-function enrichedEnv(): NodeJS.ProcessEnv {
+// ---------------------------------------------------------------------------
+// Env & helpers
+// ---------------------------------------------------------------------------
+
+export function enrichedEnv(): NodeJS.ProcessEnv {
   const home = os.homedir()
   const extraPaths = [
     '/usr/local/bin',
@@ -244,8 +226,23 @@ function relativize(filePath: string, projectPath: string): string {
   return filePath
 }
 
-const TOOL_CATALOG: ToolCatalogEntry[] = [
-  // 1. Semgrep
+// ---------------------------------------------------------------------------
+// Tool catalog
+// ---------------------------------------------------------------------------
+
+export interface ToolCatalogEntry {
+  id: string
+  name: string
+  command: string
+  category: AnalysisToolCategory
+  description: string
+  languages: string[]
+  jsonFlag: string
+  buildArgs: (projectPath: string, extraArgs?: string[]) => string[]
+  parse: (stdout: string, projectPath: string) => AnalysisFinding[]
+}
+
+export const TOOL_CATALOG: ToolCatalogEntry[] = [
   {
     id: 'semgrep',
     name: 'Semgrep',
@@ -254,9 +251,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Static analysis for security vulnerabilities (multi-language)',
     languages: ['python', 'javascript', 'typescript', 'go', 'java', 'ruby', 'c', 'cpp'],
     jsonFlag: '--json',
-    buildArgs: (projectPath, extraArgs) => [
-      'scan', '--json', ...(extraArgs || []), projectPath,
-    ],
+    buildArgs: (projectPath, extraArgs) => ['scan', '--json', ...(extraArgs || []), projectPath],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const results = (data.results || []) as SemgrepResult[]
@@ -273,14 +268,10 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
         rule: r.check_id,
         ruleUrl: r.extra?.metadata?.source,
         snippet: r.extra?.lines,
-        cwe: Array.isArray(r.extra?.metadata?.cwe)
-          ? r.extra.metadata.cwe[0]
-          : r.extra?.metadata?.cwe,
+        cwe: Array.isArray(r.extra?.metadata?.cwe) ? r.extra.metadata.cwe[0] : r.extra?.metadata?.cwe,
       }))
     },
   },
-
-  // 2. Bandit
   {
     id: 'bandit',
     name: 'Bandit',
@@ -289,9 +280,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Security linter for Python code',
     languages: ['python'],
     jsonFlag: '-f json',
-    buildArgs: (projectPath, extraArgs) => [
-      '-r', projectPath, '-f', 'json', ...(extraArgs || []),
-    ],
+    buildArgs: (projectPath, extraArgs) => ['-r', projectPath, '-f', 'json', ...(extraArgs || [])],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const results = (data.results || []) as BanditResult[]
@@ -308,8 +297,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       }))
     },
   },
-
-  // 3. Bearer
   {
     id: 'bearer',
     name: 'Bearer',
@@ -318,13 +305,10 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Security and privacy analysis (multi-language)',
     languages: ['javascript', 'typescript', 'ruby', 'java', 'python', 'go', 'php'],
     jsonFlag: '--format json',
-    buildArgs: (projectPath, extraArgs) => [
-      'scan', projectPath, '--format', 'json', ...(extraArgs || []),
-    ],
+    buildArgs: (projectPath, extraArgs) => ['scan', projectPath, '--format', 'json', ...(extraArgs || [])],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
-      // Bearer may use different output shapes; handle common ones
       const warnings: unknown[] = data.warnings || data.findings || []
       for (const w of warnings as BearerWarning[]) {
         findings.push({
@@ -342,8 +326,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       return findings
     },
   },
-
-  // 4. Trivy
   {
     id: 'trivy',
     name: 'Trivy',
@@ -352,9 +334,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Vulnerability scanner for dependencies and containers',
     languages: ['*'],
     jsonFlag: '-f json',
-    buildArgs: (projectPath, extraArgs) => [
-      'fs', '--scanners', 'vuln', '-f', 'json', ...(extraArgs || []), projectPath,
-    ],
+    buildArgs: (projectPath, extraArgs) => ['fs', '--scanners', 'vuln', '-f', 'json', ...(extraArgs || []), projectPath],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
@@ -379,8 +359,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       return findings
     },
   },
-
-  // 5. OSV-Scanner
   {
     id: 'osv-scanner',
     name: 'OSV-Scanner',
@@ -389,9 +367,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Open Source Vulnerability scanner (Google)',
     languages: ['*'],
     jsonFlag: '--format json',
-    buildArgs: (projectPath, extraArgs) => [
-      'scan', '--format', 'json', ...(extraArgs || []), projectPath,
-    ],
+    buildArgs: (projectPath, extraArgs) => ['scan', '--format', 'json', ...(extraArgs || []), projectPath],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
@@ -418,8 +394,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       return findings
     },
   },
-
-  // 6. ESLint
   {
     id: 'eslint',
     name: 'ESLint',
@@ -428,9 +402,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Linter for JavaScript and TypeScript',
     languages: ['javascript', 'typescript'],
     jsonFlag: '-f json',
-    buildArgs: (projectPath, extraArgs) => [
-      '-f', 'json', ...(extraArgs || []), projectPath,
-    ],
+    buildArgs: (projectPath, extraArgs) => ['-f', 'json', ...(extraArgs || []), projectPath],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
@@ -448,17 +420,13 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
             severity: mapEslintSeverity(msg.severity ?? 1),
             message: msg.message || '',
             rule: msg.ruleId,
-            ruleUrl: msg.ruleId
-              ? `https://eslint.org/docs/latest/rules/${msg.ruleId}`
-              : undefined,
+            ruleUrl: msg.ruleId ? `https://eslint.org/docs/latest/rules/${msg.ruleId}` : undefined,
           })
         }
       }
       return findings
     },
   },
-
-  // 7. Graudit
   {
     id: 'graudit',
     name: 'Graudit',
@@ -467,11 +435,8 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Grep-based source code auditing tool',
     languages: ['*'],
     jsonFlag: '',
-    buildArgs: (projectPath, extraArgs) => [
-      '-d', 'all', ...(extraArgs || []), projectPath,
-    ],
+    buildArgs: (projectPath, extraArgs) => ['-d', 'all', ...(extraArgs || []), projectPath],
     parse: (stdout, projectPath) => {
-      // Graudit outputs grep-style: file:line:content
       const findings: AnalysisFinding[] = []
       const lines = stdout.split('\n').filter((l) => l.trim())
       for (const line of lines) {
@@ -490,8 +455,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       return findings
     },
   },
-
-  // 8. Checkov
   {
     id: 'checkov',
     name: 'Checkov',
@@ -500,13 +463,10 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Infrastructure-as-Code security scanner',
     languages: ['terraform', 'cloudformation', 'kubernetes', 'docker'],
     jsonFlag: '--output json',
-    buildArgs: (projectPath, extraArgs) => [
-      '-d', projectPath, '--output', 'json', ...(extraArgs || []),
-    ],
+    buildArgs: (projectPath, extraArgs) => ['-d', projectPath, '--output', 'json', ...(extraArgs || [])],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       const findings: AnalysisFinding[] = []
-      // Checkov may return an array or single object
       const checks = Array.isArray(data) ? data : [data]
       for (const group of checks) {
         const failed: unknown[] = group.results?.failed_checks || []
@@ -527,8 +487,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       return findings
     },
   },
-
-  // 9. Pylint
   {
     id: 'pylint',
     name: 'Pylint',
@@ -537,9 +495,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Python code quality checker',
     languages: ['python'],
     jsonFlag: '--output-format=json',
-    buildArgs: (projectPath, extraArgs) => [
-      '--output-format=json', '--recursive=y', ...(extraArgs || []), projectPath,
-    ],
+    buildArgs: (projectPath, extraArgs) => ['--output-format=json', '--recursive=y', ...(extraArgs || []), projectPath],
     parse: (stdout, projectPath) => {
       const data = JSON.parse(stdout)
       return (data as PylintResult[]).map((r: PylintResult) => ({
@@ -556,8 +512,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
       }))
     },
   },
-
-  // 10. Cppcheck
   {
     id: 'cppcheck',
     name: 'Cppcheck',
@@ -566,45 +520,11 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Static analysis for C/C++',
     languages: ['c', 'cpp'],
     jsonFlag: '--template=json',
-    buildArgs: (projectPath, extraArgs) => [
-      '--xml', '--enable=all', ...(extraArgs || []), projectPath,
-    ],
+    buildArgs: (projectPath, extraArgs) => ['--xml', '--enable=all', ...(extraArgs || []), projectPath],
     parse: (stdout, projectPath) => {
-      // Cppcheck with --xml outputs to stderr typically, but we capture both.
-      // Parse XML-like output line by line for <error> elements.
       const findings: AnalysisFinding[] = []
-      // Simple regex-based XML parsing for cppcheck output
-      const errorRegex = /<error\s+id="([^"]*)"[^>]*severity="([^"]*)"[^>]*msg="([^"]*)"[^>]*>/g
-      const locationRegex = /<location\s+file="([^"]*)"[^>]*line="(\d+)"[^>]*(?:column="(\d+)")?/g
-
-      let errorMatch: RegExpExecArray | null
-      const errors: { id: string; severity: string; msg: string; locations: { file: string; line: number; column?: number }[] }[] = []
-
-      while ((errorMatch = errorRegex.exec(stdout)) !== null) {
-        errors.push({
-          id: errorMatch[1]!,
-          severity: errorMatch[2]!,
-          msg: errorMatch[3]!,
-          locations: [],
-        })
-      }
-
-      let locMatch: RegExpExecArray | null
-      let currentErrorIdx = 0
-      while ((locMatch = locationRegex.exec(stdout)) !== null) {
-        // Associate locations with nearest preceding error
-        if (errors[currentErrorIdx]) {
-          errors[currentErrorIdx]!.locations.push({
-            file: locMatch[1]!,
-            line: parseInt(locMatch[2]!, 10),
-            column: locMatch[3] ? parseInt(locMatch[3], 10) : undefined,
-          })
-        }
-      }
-
-      // Also try a second pass correlating by position
       const xmlLines = stdout.split('\n')
-      let curErr: typeof errors[0] | null = null
+      let curErr: { id: string; severity: string; msg: string; locations: { file: string; line: number; column?: number }[] } | null = null
       for (const line of xmlLines) {
         const eMatch = line.match(/<error\s+id="([^"]*)"[^>]*severity="([^"]*)"[^>]*msg="([^"]*)"/)
         if (eMatch) {
@@ -635,12 +555,9 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
           curErr = null
         }
       }
-
       return findings
     },
   },
-
-  // 11. MegaLinter
   {
     id: 'megalinter',
     name: 'MegaLinter',
@@ -649,9 +566,7 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
     description: 'Aggregated linter runner for 50+ languages',
     languages: ['*'],
     jsonFlag: '',
-    buildArgs: (projectPath, extraArgs) => [
-      '--path', projectPath, '--json', ...(extraArgs || []),
-    ],
+    buildArgs: (projectPath, extraArgs) => ['--path', projectPath, '--json', ...(extraArgs || [])],
     parse: (stdout, projectPath) => {
       const findings: AnalysisFinding[] = []
       try {
@@ -676,7 +591,6 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
           }
         }
       } catch {
-        // MegaLinter output may not be JSON; parse text lines
         const lines = stdout.split('\n').filter((l) => l.includes('ERROR') || l.includes('WARNING'))
         for (const line of lines) {
           findings.push({
@@ -695,10 +609,10 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Tool detection helpers
 // ---------------------------------------------------------------------------
 
-function getToolDef(entry: ToolCatalogEntry, installed: boolean): AnalysisToolDef {
+export function getToolDef(entry: ToolCatalogEntry, installed: boolean): AnalysisToolDef {
   return {
     id: entry.id,
     name: entry.name,
@@ -711,7 +625,7 @@ function getToolDef(entry: ToolCatalogEntry, installed: boolean): AnalysisToolDe
   }
 }
 
-async function isCommandAvailable(command: string): Promise<boolean> {
+export async function isCommandAvailable(command: string): Promise<boolean> {
   return new Promise((resolve) => {
     execFile('which', [command], { env: enrichedEnv() }, (err, stdout) => {
       resolve(!err && stdout.trim().length > 0)
@@ -719,11 +633,9 @@ async function isCommandAvailable(command: string): Promise<boolean> {
   })
 }
 
-async function isGrauditAvailable(): Promise<boolean> {
-  // Check via which (enriched PATH includes ~/.graudit)
+export async function isGrauditAvailable(): Promise<boolean> {
   const viaPath = await isCommandAvailable('graudit')
   if (viaPath) return true
-  // Also check the clone location directly
   const clonedPath = path.join(os.homedir(), '.graudit', 'graudit')
   try {
     await fs.promises.access(clonedPath, fs.constants.X_OK)
@@ -733,12 +645,9 @@ async function isGrauditAvailable(): Promise<boolean> {
   }
 }
 
-async function isEslintAvailable(projectPath: string): Promise<boolean> {
-  // Check global first
+export async function isEslintAvailable(projectPath: string): Promise<boolean> {
   const globalAvailable = await isCommandAvailable('eslint')
   if (globalAvailable) return true
-
-  // Check in project node_modules
   const localEslint = path.join(projectPath, 'node_modules', '.bin', 'eslint')
   try {
     await fs.promises.access(localEslint, fs.constants.X_OK)
@@ -748,7 +657,7 @@ async function isEslintAvailable(projectPath: string): Promise<boolean> {
   }
 }
 
-function resolveCommand(toolId: string, projectPath: string): string {
+export function resolveCommand(toolId: string, projectPath: string): string {
   if (toolId === 'eslint') {
     const localEslint = path.join(projectPath, 'node_modules', '.bin', 'eslint')
     if (fs.existsSync(localEslint)) return localEslint
@@ -760,18 +669,11 @@ function resolveCommand(toolId: string, projectPath: string): string {
   return TOOL_CATALOG.find((t) => t.id === toolId)?.command ?? toolId
 }
 
-function sendProgress(
-  getMainWindow: (() => BrowserWindow | null) | undefined,
-  progress: AnalysisProgress,
-): void {
-  if (!getMainWindow) return
-  const win = getMainWindow()
-  if (win && !win.isDestroyed()) {
-    win.webContents.send(IPC_CHANNELS.ANALYSIS_PROGRESS, progress)
-  }
-}
+// ---------------------------------------------------------------------------
+// Summary computation
+// ---------------------------------------------------------------------------
 
-function computeSummary(findings: AnalysisFinding[]): AnalysisReport['summary'] {
+export function computeSummary(findings: AnalysisFinding[]): AnalysisReport['summary'] {
   const summary = { critical: 0, high: 0, medium: 0, low: 0, info: 0, total: 0 }
   for (const f of findings) {
     summary[f.severity]++
@@ -780,16 +682,20 @@ function computeSummary(findings: AnalysisFinding[]): AnalysisReport['summary'] 
   return summary
 }
 
-// Per-tool timeout (ms) — Docker-based tools get a shorter default to avoid runaway processes
+// ---------------------------------------------------------------------------
+// Run tool
+// ---------------------------------------------------------------------------
+
 const TOOL_TIMEOUT: Record<string, number> = {
-  megalinter: 10 * 60 * 1000, // 10 min (Docker-based, inherently slow)
+  megalinter: 10 * 60 * 1000,
 }
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000
 
-async function runTool(
+const runningProcesses = new Map<string, ChildProcess>()
+
+export async function runTool(
   toolEntry: ToolCatalogEntry,
   options: AnalysisRunOptions,
-  getMainWindow?: () => BrowserWindow | null,
 ): Promise<AnalysisReport> {
   const startTime = Date.now()
   const reportId = uuid()
@@ -797,62 +703,41 @@ async function runTool(
   const resolvedCommand = resolveCommand(toolEntry.id, projectPath)
   const args = toolEntry.buildArgs(projectPath, extraArgs)
 
-  sendProgress(getMainWindow, {
-    toolId: toolEntry.id,
-    status: 'running',
-    message: `Running ${toolEntry.name}...`,
-  })
-
   return new Promise((resolve) => {
     const timeoutMs = TOOL_TIMEOUT[toolEntry.id] ?? DEFAULT_TIMEOUT_MS
 
-    // Use spawn to capture both stdout and stderr
     const child = spawn(resolvedCommand, args, {
       cwd: projectPath,
       env: enrichedEnv(),
     })
 
-    // Manual timeout: SIGTERM first, SIGKILL 5s later as fallback
     let timedOut = false
     const timer = setTimeout(() => {
       timedOut = true
       child.kill('SIGTERM')
-      // SIGKILL fallback for Docker/stubborn processes
       setTimeout(() => {
         try { child.kill('SIGKILL') } catch { /* already dead */ }
       }, 5000)
     }, timeoutMs)
 
-    // Track process for cancellation
     runningProcesses.set(toolEntry.id, child)
 
     let stdout = ''
     let stderr = ''
 
-    child.stdout.on('data', (chunk: Buffer) => {
-      stdout += chunk.toString()
-    })
-
-    child.stderr.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString()
-    })
+    child.stdout.on('data', (chunk: Buffer) => { stdout += chunk.toString() })
+    child.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString() })
 
     child.on('error', (err) => {
       clearTimeout(timer)
       runningProcesses.delete(toolEntry.id)
-      const duration = Date.now() - startTime
-      sendProgress(getMainWindow, {
-        toolId: toolEntry.id,
-        status: 'error',
-        message: `${toolEntry.name} failed: ${err.message}`,
-      })
       resolve({
         id: reportId,
         projectPath,
         toolId: toolEntry.id,
         toolName: toolEntry.name,
         timestamp: startTime,
-        duration,
+        duration: Date.now() - startTime,
         findings: [],
         summary: { critical: 0, high: 0, medium: 0, low: 0, info: 0, total: 0 },
         error: err.message,
@@ -865,13 +750,6 @@ async function runTool(
       const duration = Date.now() - startTime
 
       if (timedOut) {
-        const timeoutSec = Math.round(timeoutMs / 1000)
-        const error = `${toolEntry.name} timed out after ${timeoutSec}s and was killed.`
-        sendProgress(getMainWindow, {
-          toolId: toolEntry.id,
-          status: 'error',
-          message: error,
-        })
         resolve({
           id: reportId,
           projectPath,
@@ -881,35 +759,24 @@ async function runTool(
           duration,
           findings: [],
           summary: { critical: 0, high: 0, medium: 0, low: 0, info: 0, total: 0 },
-          error,
+          error: `${toolEntry.name} timed out after ${Math.round(timeoutMs / 1000)}s and was killed.`,
         })
         return
       }
 
-      // Many analysis tools use non-zero exit codes to indicate findings found (not errors).
-      // For example, eslint exits 1 when it finds issues, semgrep exits 1 for findings.
-      // Only treat as error when there is no parseable output.
       const output = stdout || stderr
-
       let findings: AnalysisFinding[] = []
       let error: string | undefined
 
       try {
         findings = toolEntry.parse(output, projectPath)
       } catch (parseErr) {
-        // If parsing fails AND exit code is non-zero, report error
         if (code !== 0) {
           error = `${toolEntry.name} exited with code ${code}. ${stderr.slice(0, 500)}`
         } else {
           error = `Failed to parse ${toolEntry.name} output: ${String(parseErr)}`
         }
       }
-
-      sendProgress(getMainWindow, {
-        toolId: toolEntry.id,
-        status: error ? 'error' : 'done',
-        message: error || `${toolEntry.name} found ${findings.length} issue(s)`,
-      })
 
       resolve({
         id: reportId,
@@ -927,55 +794,15 @@ async function runTool(
 }
 
 // ---------------------------------------------------------------------------
-// Kanban integration (delegated to shared kanban-store)
-// ---------------------------------------------------------------------------
-
-const readKanbanTasks = readKanbanTasksShared
-const writeKanbanTasks = writeKanbanTasksShared
-
-// Install commands per tool
-const INSTALL_COMMANDS: Record<string, string> = {
-  semgrep: 'brew install semgrep',
-  bandit: '(command -v pipx >/dev/null 2>&1 || brew install pipx) && pipx install bandit',
-  bearer: 'brew install bearer/tap/bearer',
-  trivy: 'brew install trivy',
-  'osv-scanner': 'brew install osv-scanner',
-  eslint: 'npm install -g eslint',
-  graudit: 'git clone https://github.com/wireghoul/graudit.git "$HOME/.graudit" 2>/dev/null || git -C "$HOME/.graudit" pull && chmod +x "$HOME/.graudit/graudit"',
-  checkov: '(command -v pipx >/dev/null 2>&1 || brew install pipx) && pipx install checkov',
-  pylint: '(command -v pipx >/dev/null 2>&1 || brew install pipx) && pipx install pylint',
-  cppcheck: 'brew install cppcheck',
-  megalinter: 'npm install -g mega-linter-runner',
-}
-
-// Track running child processes for cancellation
-const runningProcesses = new Map<string, ChildProcess>()
-
-// Track installing processes
-const installingProcesses = new Map<string, ChildProcess>()
-
-// In-memory report store so ticket creation can look up findings
-const reportStore = new Map<string, AnalysisReport>()
-
-function storeReport(report: AnalysisReport): void {
-  reportStore.set(report.id, report)
-  // Keep at most 50 reports in memory
-  if (reportStore.size > 50) {
-    const oldest = reportStore.keys().next().value
-    if (oldest) reportStore.delete(oldest)
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Report persistence
 // ---------------------------------------------------------------------------
 
-function getReportDir(projectPath: string): string {
+export function getReportDir(projectPath: string): string {
   const hash = crypto.createHash('md5').update(projectPath).digest('hex').slice(0, 12)
   return path.join(os.homedir(), '.mirehub', 'analysis', hash)
 }
 
-function persistReport(report: AnalysisReport): void {
+export function persistReport(report: AnalysisReport): void {
   const dir = getReportDir(report.projectPath)
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
@@ -984,7 +811,7 @@ function persistReport(report: AnalysisReport): void {
   fs.writeFileSync(filePath, JSON.stringify(report, null, 2), 'utf-8')
 }
 
-function loadPersistedReports(projectPath: string): AnalysisReport[] {
+export function loadPersistedReports(projectPath: string): AnalysisReport[] {
   const dir = getReportDir(projectPath)
   if (!fs.existsSync(dir)) return []
   const reports: AnalysisReport[] = []
@@ -1000,64 +827,41 @@ function loadPersistedReports(projectPath: string): AnalysisReport[] {
   return reports.sort((a, b) => b.timestamp - a.timestamp)
 }
 
-function deletePersistedReport(projectPath: string, reportId: string): boolean {
-  const dir = getReportDir(projectPath)
-  const filePath = path.join(dir, `report-${reportId}.json`)
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath)
-    return true
-  }
-  return false
-}
-
 // ---------------------------------------------------------------------------
 // Ticket creation helpers
 // ---------------------------------------------------------------------------
 
-function groupFindings(
+export function groupFindings(
   findings: AnalysisFinding[],
-  groupBy: AnalysisTicketRequest['groupBy'],
+  groupBy: 'individual' | 'file' | 'rule' | 'severity',
 ): Map<string, AnalysisFinding[]> {
   const groups = new Map<string, AnalysisFinding[]>()
-
   for (const f of findings) {
     let key: string
     switch (groupBy) {
-      case 'file':
-        key = f.file
-        break
-      case 'rule':
-        key = f.rule || 'no-rule'
-        break
-      case 'severity':
-        key = f.severity
-        break
+      case 'file': key = f.file; break
+      case 'rule': key = f.rule || 'no-rule'; break
+      case 'severity': key = f.severity; break
       case 'individual':
-      default:
-        key = f.id
-        break
+      default: key = f.id; break
     }
     if (!groups.has(key)) groups.set(key, [])
     groups.get(key)!.push(f)
   }
-
   return groups
 }
 
-function buildTicketTitle(
+export function buildTicketTitle(
   groupKey: string,
-  groupBy: AnalysisTicketRequest['groupBy'],
+  groupBy: 'individual' | 'file' | 'rule' | 'severity',
   findings: AnalysisFinding[],
   toolName: string,
 ): string {
   const count = findings.length
   switch (groupBy) {
-    case 'file':
-      return `[${toolName}] ${count} issue(s) in ${groupKey}`
-    case 'rule':
-      return `[${toolName}] Rule ${groupKey} (${count} occurrence(s))`
-    case 'severity':
-      return `[${toolName}] ${count} ${groupKey.toUpperCase()} issue(s)`
+    case 'file': return `[${toolName}] ${count} issue(s) in ${groupKey}`
+    case 'rule': return `[${toolName}] Rule ${groupKey} (${count} occurrence(s))`
+    case 'severity': return `[${toolName}] ${count} ${groupKey.toUpperCase()} issue(s)`
     case 'individual':
     default: {
       const f = findings[0]!
@@ -1066,7 +870,7 @@ function buildTicketTitle(
   }
 }
 
-function buildTicketDescription(findings: AnalysisFinding[]): string {
+export function buildTicketDescription(findings: AnalysisFinding[]): string {
   const lines: string[] = []
   for (const f of findings) {
     lines.push(`### ${f.file}:${f.line}`)
@@ -1079,215 +883,4 @@ function buildTicketDescription(findings: AnalysisFinding[]): string {
     lines.push('')
   }
   return lines.join('\n')
-}
-
-// ---------------------------------------------------------------------------
-// Register IPC handlers
-// ---------------------------------------------------------------------------
-
-export function registerAnalysisHandlers(
-  ipcMain: IpcMain,
-  getMainWindow?: () => BrowserWindow | null,
-): void {
-  // Detect installed tools
-  ipcMain.handle(
-    IPC_CHANNELS.ANALYSIS_DETECT_TOOLS,
-    async (_event, args?: { projectPath?: string }) => {
-      const projectPath = args?.projectPath || ''
-      const results: AnalysisToolDef[] = []
-
-      for (const entry of TOOL_CATALOG) {
-        let installed = false
-        if (entry.id === 'eslint') {
-          installed = await isEslintAvailable(projectPath)
-        } else if (entry.id === 'graudit') {
-          installed = await isGrauditAvailable()
-        } else {
-          installed = await isCommandAvailable(entry.command)
-        }
-        results.push(getToolDef(entry, installed))
-      }
-
-      return results
-    },
-  )
-
-  // Run analysis
-  ipcMain.handle(
-    IPC_CHANNELS.ANALYSIS_RUN,
-    async (_event, options: AnalysisRunOptions) => {
-      const entry = TOOL_CATALOG.find((t) => t.id === options.toolId)
-      if (!entry) {
-        return {
-          id: uuid(),
-          projectPath: options.projectPath,
-          toolId: options.toolId,
-          toolName: options.toolId,
-          timestamp: Date.now(),
-          duration: 0,
-          findings: [],
-          summary: { critical: 0, high: 0, medium: 0, low: 0, info: 0, total: 0 },
-          error: `Unknown tool: ${options.toolId}`,
-        } satisfies AnalysisReport
-      }
-
-      const report = await runTool(entry, options, getMainWindow)
-      storeReport(report)
-      persistReport(report)
-      return report
-    },
-  )
-
-  // Cancel running analysis
-  ipcMain.handle(
-    IPC_CHANNELS.ANALYSIS_CANCEL,
-    async (_event, args: { toolId: string }) => {
-      const child = runningProcesses.get(args.toolId)
-      if (child) {
-        child.kill('SIGTERM')
-        // SIGKILL fallback for stubborn/Docker processes
-        setTimeout(() => {
-          try { child.kill('SIGKILL') } catch { /* already dead */ }
-        }, 3000)
-        runningProcesses.delete(args.toolId)
-        return { success: true }
-      }
-      return { success: false, error: 'No running process for this tool' }
-    },
-  )
-
-  // Load persisted reports
-  ipcMain.handle(
-    IPC_CHANNELS.ANALYSIS_LOAD_REPORTS,
-    async (_event, args: { projectPath: string }) => {
-      const reports = loadPersistedReports(args.projectPath)
-      // Re-populate in-memory store for ticket creation
-      for (const report of reports) {
-        storeReport(report)
-      }
-      return reports
-    },
-  )
-
-  // Delete a persisted report
-  ipcMain.handle(
-    IPC_CHANNELS.ANALYSIS_DELETE_REPORT,
-    async (_event, args: { projectPath: string; reportId: string }) => {
-      const deleted = deletePersistedReport(args.projectPath, args.reportId)
-      if (deleted) {
-        reportStore.delete(args.reportId)
-      }
-      return { success: deleted, error: deleted ? undefined : 'Report not found' }
-    },
-  )
-
-  // Create kanban tickets from findings
-  ipcMain.handle(
-    IPC_CHANNELS.ANALYSIS_CREATE_TICKETS,
-    async (_event, request: AnalysisTicketRequest) => {
-      const { findingIds, reportId, workspaceId, targetProjectId, groupBy } = request
-
-      const report = reportStore.get(reportId)
-      if (!report) {
-        return { success: false, ticketCount: 0, error: 'Report not found. Run the analysis again.' }
-      }
-
-      // Filter findings by requested IDs
-      const selectedFindings = report.findings.filter((f) => findingIds.includes(f.id))
-      if (selectedFindings.length === 0) {
-        return { success: false, ticketCount: 0, error: 'No matching findings found.' }
-      }
-
-      const groups = groupFindings(selectedFindings, groupBy)
-      const tasks = readKanbanTasks(workspaceId)
-      const maxTicketNumber = tasks.reduce((max, t) => Math.max(max, t.ticketNumber ?? 0), 0)
-
-      let ticketIdx = 0
-      groups.forEach((findings, key) => {
-        ticketIdx++
-        const task: KanbanTask = {
-          id: uuid(),
-          workspaceId,
-          targetProjectId,
-          ticketNumber: maxTicketNumber + ticketIdx,
-          title: buildTicketTitle(key, groupBy, findings, report.toolName),
-          description: buildTicketDescription(findings),
-          status: 'TODO',
-          priority: 'high',
-          labels: ['refactor', 'bug', report.toolName.toLowerCase()],
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        }
-        tasks.push(task)
-      })
-
-      writeKanbanTasks(workspaceId, tasks)
-
-      return { success: true, ticketCount: ticketIdx }
-    },
-  )
-
-  // Install a tool in background with streaming output
-  ipcMain.handle(
-    IPC_CHANNELS.ANALYSIS_INSTALL_TOOL,
-    async (_event, args: { toolId: string }) => {
-      const { toolId } = args
-      const installCmd = INSTALL_COMMANDS[toolId]
-      if (!installCmd) {
-        return { success: false, installed: false, error: `Unknown tool: ${toolId}` }
-      }
-
-      const sendInstallProgress = (data: { toolId: string; output: string; status: 'running' | 'done' | 'error' }) => {
-        if (!getMainWindow) return
-        const win = getMainWindow()
-        if (win && !win.isDestroyed()) {
-          win.webContents.send(IPC_CHANNELS.ANALYSIS_INSTALL_PROGRESS, data)
-        }
-      }
-
-      return new Promise((resolve) => {
-        // Use sh -c to execute the hardcoded install command safely.
-        // installCmd is from a fixed dictionary (INSTALL_COMMANDS), never from user input.
-        const child = spawn('sh', ['-c', installCmd], {
-          env: enrichedEnv(),
-        })
-
-        installingProcesses.set(toolId, child)
-
-        child.stdout.on('data', (chunk: Buffer) => {
-          sendInstallProgress({ toolId, output: chunk.toString(), status: 'running' })
-        })
-
-        child.stderr.on('data', (chunk: Buffer) => {
-          sendInstallProgress({ toolId, output: chunk.toString(), status: 'running' })
-        })
-
-        child.on('error', (err) => {
-          installingProcesses.delete(toolId)
-          sendInstallProgress({ toolId, output: err.message, status: 'error' })
-          resolve({ success: false, installed: false, error: err.message })
-        })
-
-        child.on('close', async (code) => {
-          installingProcesses.delete(toolId)
-
-          if (code !== 0) {
-            sendInstallProgress({ toolId, output: `\nProcess exited with code ${code}`, status: 'error' })
-            resolve({ success: false, installed: false, error: `Exit code ${code}` })
-            return
-          }
-
-          // Re-detect if the tool is now available
-          const toolEntry = TOOL_CATALOG.find((t) => t.id === toolId)
-          let installed = false
-          if (toolEntry) {
-            installed = await isCommandAvailable(toolEntry.command)
-          }
-
-          sendInstallProgress({ toolId, output: '\nInstallation complete.', status: 'done' })
-          resolve({ success: true, installed })
-        })
-      })
-    },
-  )
 }

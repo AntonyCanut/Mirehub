@@ -65,9 +65,12 @@ const LABEL_DEFS: Record<string, string> = {
   docs: '#a6e3a1',
   urgent: '#fab387',
   test: '#94e2d5',
+  cto: '#f5c2e7',
 }
 
+const CTO_LABEL = 'cto'
 const ALL_LABELS = Object.keys(LABEL_DEFS)
+const USER_LABELS = ALL_LABELS.filter((l) => l !== CTO_LABEL)
 
 export function KanbanBoard() {
   const { t } = useI18n()
@@ -334,6 +337,14 @@ export function KanbanBoard() {
     sendToClaude(task)
   }, [sendToClaude])
 
+  const handleCreateCtoTicket = useCallback(async () => {
+    if (!activeWorkspaceId) return
+    const existingCto = tasks.find((t) => t.isCtoTicket && !t.archived && (t.status === 'WORKING' || t.status === 'TODO'))
+    if (existingCto) return
+    await createTask(activeWorkspaceId, 'CTO Mode - Amelioration continue',
+      'Mode CTO actif. Claude agit en tant que CTO.', 'high', undefined, true, ['cto'])
+  }, [activeWorkspaceId, tasks, createTask])
+
   const handleContextMenu = useCallback((e: React.MouseEvent, task: KanbanTask) => {
     e.preventDefault()
     e.stopPropagation()
@@ -348,12 +359,13 @@ export function KanbanBoard() {
 
     return [
       { label: t('kanban.duplicateTask'), action: () => duplicateTask(task), separator: false },
+      { label: task.disabled ? t('kanban.enableTask') : t('kanban.disableTask'), action: () => updateTask(task.id, { disabled: !task.disabled }) },
       { label: '', action: () => {}, separator: true },
       ...statusItems,
       { label: '', action: () => {}, separator: true },
       { label: t('kanban.sendToClaude'), action: () => handleSendToClaude(task) },
     ]
-  }, [t, updateTaskStatus, duplicateTask, handleSendToClaude])
+  }, [t, updateTaskStatus, updateTask, duplicateTask, handleSendToClaude])
 
   const handleRestoreFromArchive = useCallback((task: KanbanTask) => {
     updateTask(task.id, { archived: false })
@@ -432,6 +444,9 @@ export function KanbanBoard() {
           <span className="kanban-task-count">{t('kanban.taskCount', { count: String(filteredTasks.length) })}</span>
           <button className="kanban-add-btn" onClick={() => setShowCreateForm(!showCreateForm)}>
             {t('kanban.newTask')}
+          </button>
+          <button className="kanban-add-btn kanban-add-btn--cto" onClick={handleCreateCtoTicket}>
+            {t('kanban.newCtoTicket')}
           </button>
         </div>
       </div>
@@ -559,7 +574,7 @@ export function KanbanBoard() {
               )}
               <div className="kanban-create-labels">
                 <span className="kanban-create-labels-title">{t('kanban.labels')} :</span>
-                {ALL_LABELS.map((label) => (
+                {USER_LABELS.map((label) => (
                   <button
                     key={label}
                     className={`kanban-label-chip kanban-label-chip--${label}${newLabels.includes(label) ? ' kanban-label-chip--active' : ''}`}
@@ -678,7 +693,7 @@ export function KanbanBoard() {
               </div>
               <div className="kanban-create-labels">
                 <span className="kanban-create-labels-title">{t('kanban.labels')} :</span>
-                {ALL_LABELS.map((label) => (
+                {USER_LABELS.map((label) => (
                   <button
                     key={label}
                     className={`kanban-label-chip kanban-label-chip--${label}${editLabels.includes(label) ? ' kanban-label-chip--active' : ''}`}
@@ -890,8 +905,8 @@ function KanbanCard({
 
   return (
     <div
-      className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${isOverdue ? ' kanban-card--overdue' : ''}`}
-      draggable
+      className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${isOverdue ? ' kanban-card--overdue' : ''}${task.disabled ? ' kanban-card--disabled' : ''}${task.isCtoTicket ? ' kanban-card--cto' : ''}`}
+      draggable={!task.disabled}
       onDragStart={onDragStart}
       onClick={handleCardClick}
       onDoubleClick={handleCardDoubleClick}
@@ -1045,6 +1060,7 @@ function TaskDetailPanel({
   const taskLabels = useMemo(() => task.labels || [], [task.labels])
 
   const toggleLabel = useCallback((label: string) => {
+    if (label === CTO_LABEL) return
     const updated = taskLabels.includes(label)
       ? taskLabels.filter((l) => l !== label)
       : [...taskLabels, label]
@@ -1166,7 +1182,7 @@ function TaskDetailPanel({
       <div className="kanban-detail-section">
         <span className="kanban-detail-section-title">{t('kanban.labels')}</span>
         <div className="kanban-detail-labels">
-          {ALL_LABELS.map((label) => (
+          {USER_LABELS.map((label) => (
             <button
               key={label}
               className={`kanban-label-chip kanban-label-chip--${label}${taskLabels.includes(label) ? ' kanban-label-chip--active' : ''}`}

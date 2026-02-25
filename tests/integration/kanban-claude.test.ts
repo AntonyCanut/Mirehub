@@ -180,7 +180,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       await useKanbanStore.getState().sendToClaude(task)
 
       // Should call workspaceEnv.setup for workspace-level cwd
-      expect(mockWorkspaceEnvSetup).toHaveBeenCalledWith('Test WS', ['/tmp/project'])
+      expect(mockWorkspaceEnvSetup).toHaveBeenCalledWith('Test WS', ['/tmp/project'], 'ws-1')
       expect(mockCreateTab).toHaveBeenCalledWith(
         'ws-1',
         '/tmp/workspace-env',

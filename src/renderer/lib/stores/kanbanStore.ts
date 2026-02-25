@@ -6,7 +6,7 @@ import { useWorkspaceStore } from './workspaceStore'
 const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
 
 function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
-  const todo = tasks.filter((t) => t.status === 'TODO')
+  const todo = tasks.filter((t) => t.status === 'TODO' && !t.disabled)
   if (!todo.length) return null
   todo.sort((a, b) => {
     const pa = PRIORITY_ORDER[a.priority] ?? 99
@@ -15,6 +15,51 @@ function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
     return a.createdAt - b.createdAt
   })
   return todo[0]!
+}
+
+function buildCtoPrompt(task: KanbanTask, ticketLabel: string, kanbanFilePath: string): string {
+  return [
+    `> **IMPORTANT — OBLIGATION DE MISE A JOUR DU TICKET**`,
+    `> Tu DOIS mettre a jour le fichier kanban \`${kanbanFilePath}\` (ticket id \`${task.id}\`) a la FIN de ton travail.`,
+    `> Change \`status\` a \`DONE\` (ou \`FAILED\`/\`PENDING\` selon le cas), ajoute \`result\`/\`error\`/\`question\`, et mets a jour \`updatedAt\` avec \`Date.now()\`.`,
+    `> NE JAMAIS terminer sans avoir mis a jour le ticket.`,
+    ``,
+    `Tu es le CTO de ce projet. Ton role est l'amelioration continue.`,
+    ``,
+    `## Contexte`,
+    `- Ticket: ${ticketLabel} (CTO Mode)`,
+    `- ID: ${task.id}`,
+    `- Fichier Kanban: ${kanbanFilePath}`,
+    ``,
+    `## Ton role`,
+    `1. Analyser le projet (structure, code, tests, docs, CI/CD)`,
+    `2. Identifier les axes d'amelioration les plus impactants`,
+    `3. Creer des sous-tickets via l'outil MCP kanban_create`,
+    `4. Prioriser les sous-tickets`,
+    `5. Initialiser git si necessaire`,
+    `6. Commiter apres chaque amelioration`,
+    ``,
+    `## Outils MCP disponibles`,
+    `- kanban_create / kanban_list / kanban_update`,
+    `- project_list / project_scan_info / workspace_info`,
+    `- project_setup_claude_rules`,
+    ``,
+    `## Workflow`,
+    `1. Scanner le(s) projet(s) avec project_scan_info`,
+    `2. Lire fichiers importants (README, package.json, CLAUDE.md)`,
+    `3. Identifier 3-5 axes d'amelioration`,
+    `4. Creer un sous-ticket pour chaque axe via kanban_create`,
+    `5. Implementer une par une`,
+    `6. Commiter apres chaque amelioration`,
+    `7. Terminer : edite le fichier \`${kanbanFilePath}\`, trouve le ticket id \`${task.id}\`, change status a \`DONE\`, ajoute un champ \`result\` avec un resume, mets a jour \`updatedAt\` avec \`Date.now()\``,
+    ``,
+    `## Regles`,
+    `- Si tu as besoin de precisions : change status a \`PENDING\` et ajoute \`question\``,
+    `- Si tu ne peux pas realiser la tache : change status a \`FAILED\` et ajoute \`error\``,
+    ``,
+    `---`,
+    `**RAPPEL FINAL** : Ta DERNIERE action avant de terminer doit TOUJOURS etre la mise a jour du fichier kanban \`${kanbanFilePath}\` pour le ticket \`${task.id}\`. Sans cette mise a jour, ton travail ne sera pas comptabilise.`,
+  ].join('\n')
 }
 
 interface KanbanState {
@@ -34,6 +79,8 @@ interface KanbanActions {
     description: string,
     priority: 'low' | 'medium' | 'high' | 'critical',
     targetProjectId?: string,
+    isCtoTicket?: boolean,
+    labels?: string[],
   ) => Promise<void>
   updateTaskStatus: (taskId: string, status: KanbanStatus) => Promise<void>
   updateTask: (taskId: string, data: Partial<KanbanTask>) => Promise<void>
@@ -167,7 +214,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     } catch { /* ignore sync errors */ }
   },
 
-  createTask: async (workspaceId, title, description, priority, targetProjectId?) => {
+  createTask: async (workspaceId, title, description, priority, targetProjectId?, isCtoTicket?, labels?) => {
     const task: KanbanTask = await window.mirehub.kanban.create({
       workspaceId,
       targetProjectId,
@@ -175,6 +222,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       description,
       status: 'TODO',
       priority,
+      isCtoTicket,
+      labels,
     })
     set((state) => ({ tasks: [...state.tasks, task] }))
 
@@ -237,6 +286,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
   },
 
   sendToClaude: async (task: KanbanTask) => {
+    if (task.disabled) return
     const { currentWorkspaceId, kanbanTabIds } = get()
     if (!currentWorkspaceId) return
 
@@ -270,6 +320,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           const envResult = await window.mirehub.workspaceEnv.setup(
             workspace.name,
             workspaceProjects.map((p) => p.path),
+            currentWorkspaceId,
           )
           if (envResult?.success && envResult.envPath) {
             cwd = envResult.envPath
@@ -292,57 +343,70 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
     const ticketLabel = task.ticketNumber != null ? `T-${String(task.ticketNumber).padStart(2, '0')}` : task.id.slice(0, 8)
 
-    const promptParts = [
-      `Tu travailles sur un ticket Kanban.`,
-      ``,
-      `## Ticket ${ticketLabel}`,
-      `- **ID**: ${task.id}`,
-      `- **Numero**: ${ticketLabel}`,
-      `- **Titre**: ${task.title}`,
-      task.description ? `- **Description**: ${task.description}` : null,
-      `- **Priorite**: ${task.priority}`,
-      task.targetProjectId ? `- **Scope**: Projet ${task.targetProjectId}` : `- **Scope**: Workspace entier`,
-    ]
+    let prompt: string
+    if (task.isCtoTicket) {
+      prompt = buildCtoPrompt(task, ticketLabel, kanbanFilePath)
+    } else {
+      const promptParts = [
+        `> **IMPORTANT — OBLIGATION DE MISE A JOUR DU TICKET**`,
+        `> Tu DOIS mettre a jour le fichier kanban \`${kanbanFilePath}\` (ticket id \`${task.id}\`) a la FIN de ton travail.`,
+        `> Change \`status\` a \`DONE\` (ou \`FAILED\`/\`PENDING\` selon le cas), ajoute \`result\`/\`error\`/\`question\`, et mets a jour \`updatedAt\` avec \`Date.now()\`.`,
+        `> NE JAMAIS terminer sans avoir mis a jour le ticket.`,
+        ``,
+        `Tu travailles sur un ticket Kanban.`,
+        ``,
+        `## Ticket ${ticketLabel}`,
+        `- **ID**: ${task.id}`,
+        `- **Numero**: ${ticketLabel}`,
+        `- **Titre**: ${task.title}`,
+        task.description ? `- **Description**: ${task.description}` : null,
+        `- **Priorite**: ${task.priority}`,
+        task.targetProjectId ? `- **Scope**: Projet ${task.targetProjectId}` : `- **Scope**: Workspace entier`,
+      ]
 
-    // Add attachments section if any
-    if (task.attachments && task.attachments.length > 0) {
-      const imageAtts = task.attachments.filter((a) => a.mimeType.startsWith('image/'))
-      const otherAtts = task.attachments.filter((a) => !a.mimeType.startsWith('image/'))
+      // Add attachments section if any
+      if (task.attachments && task.attachments.length > 0) {
+        const imageAtts = task.attachments.filter((a) => a.mimeType.startsWith('image/'))
+        const otherAtts = task.attachments.filter((a) => !a.mimeType.startsWith('image/'))
 
-      if (otherAtts.length > 0) {
-        promptParts.push(``, `## Fichiers joints`, `Les fichiers suivants sont attaches a ce ticket. Lis-les pour du contexte.`)
-        for (const att of otherAtts) {
-          promptParts.push(`- **${att.filename}** (${att.mimeType}): \`${att.storedPath}\``)
+        if (otherAtts.length > 0) {
+          promptParts.push(``, `## Fichiers joints`, `Les fichiers suivants sont attaches a ce ticket. Lis-les pour du contexte.`)
+          for (const att of otherAtts) {
+            promptParts.push(`- **${att.filename}** (${att.mimeType}): \`${att.storedPath}\``)
+          }
+        }
+
+        if (imageAtts.length > 0) {
+          promptParts.push(``, `## Images jointes`, `Les images suivantes sont jointes a ce ticket. Utilise le tool Read sur le chemin pour les visualiser.`)
+          for (const att of imageAtts) {
+            promptParts.push(`- **${att.filename}**: \`${att.storedPath}\``)
+          }
         }
       }
 
-      if (imageAtts.length > 0) {
-        promptParts.push(``, `## Images jointes`, `Les images suivantes sont jointes a ce ticket. Utilise le tool Read sur le chemin pour les visualiser.`)
-        for (const att of imageAtts) {
-          promptParts.push(`- **${att.filename}**: \`${att.storedPath}\``)
-        }
-      }
+      promptParts.push(
+        ``,
+        `## Fichier Kanban`,
+        `Le fichier kanban se trouve a: ${kanbanFilePath}`,
+        ``,
+        `## Instructions`,
+        `1. Realise la tache decrite ci-dessus dans le projet.`,
+        `2. Quand tu as termine avec succes, edite le fichier \`${kanbanFilePath}\`:`,
+        `   - Trouve le ticket avec l'id \`${task.id}\``,
+        `   - Change son champ \`status\` de \`WORKING\` a \`DONE\``,
+        `   - Ajoute un champ \`result\` avec un resume court de ce que tu as fait`,
+        `   - Mets a jour \`updatedAt\` avec \`Date.now()\``,
+        `3. Si tu as besoin de precisions de l'utilisateur:`,
+        `   - Change le status a \`PENDING\``,
+        `   - Ajoute un champ \`question\` expliquant ce que tu as besoin de savoir`,
+        `4. Si tu ne peux pas realiser la tache, change le status a \`FAILED\` et ajoute un champ \`error\` expliquant pourquoi.`,
+        ``,
+        `---`,
+        `**RAPPEL FINAL** : Ta DERNIERE action avant de terminer doit TOUJOURS etre la mise a jour du fichier kanban \`${kanbanFilePath}\` pour le ticket \`${task.id}\`. Sans cette mise a jour, ton travail ne sera pas comptabilise.`,
+      )
+
+      prompt = promptParts.filter(Boolean).join('\n')
     }
-
-    promptParts.push(
-      ``,
-      `## Fichier Kanban`,
-      `Le fichier kanban se trouve a: ${kanbanFilePath}`,
-      ``,
-      `## Instructions`,
-      `1. Realise la tache decrite ci-dessus dans le projet.`,
-      `2. Quand tu as termine avec succes, edite le fichier \`${kanbanFilePath}\`:`,
-      `   - Trouve le ticket avec l'id \`${task.id}\``,
-      `   - Change son champ \`status\` de \`WORKING\` a \`DONE\``,
-      `   - Ajoute un champ \`result\` avec un resume court de ce que tu as fait`,
-      `   - Mets a jour \`updatedAt\` avec \`Date.now()\``,
-      `3. Si tu as besoin de precisions de l'utilisateur:`,
-      `   - Change le status a \`PENDING\``,
-      `   - Ajoute un champ \`question\` expliquant ce que tu as besoin de savoir`,
-      `4. Si tu ne peux pas realiser la tache, change le status a \`FAILED\` et ajoute un champ \`error\` expliquant pourquoi.`,
-    )
-
-    const prompt = promptParts.filter(Boolean).join('\n')
 
     // Write prompt to file — Claude will read it via a one-liner once initialized
     try {

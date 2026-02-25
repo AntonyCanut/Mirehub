@@ -223,7 +223,7 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_ATTACH_FROM_CLIPBOARD, { taskId, workspaceId, dataBase64, filename, mimeType }),
     removeAttachment: (taskId: string, workspaceId: string, attachmentId: string): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_REMOVE_ATTACHMENT, { taskId, workspaceId, attachmentId }),
-    getWorkingTicket: (workspaceId: string): Promise<{ ticketNumber: number | null } | null> =>
+    getWorkingTicket: (workspaceId: string): Promise<{ ticketNumber: number | null; isCtoTicket: boolean } | null> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_GET_WORKING_TICKET, { workspaceId }),
     watch: (workspaceId: string): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_WATCH, { workspaceId }),
@@ -245,8 +245,8 @@ const api = {
 
   // Workspace env (virtual env with symlinks)
   workspaceEnv: {
-    setup: (workspaceName: string, projectPaths: string[]) =>
-      ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_ENV_SETUP, { workspaceName, projectPaths }),
+    setup: (workspaceName: string, projectPaths: string[], workspaceId?: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_ENV_SETUP, { workspaceName, workspaceId, projectPaths }),
     getPath: (workspaceName: string): Promise<string | null> =>
       ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_ENV_PATH, { workspaceName }),
     delete: (workspaceName: string) =>

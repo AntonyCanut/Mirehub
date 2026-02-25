@@ -288,12 +288,6 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
         }
       }
 
-      // Send macOS notification
-      window.mirehub.notify(
-        'Session Claude terminée',
-        `Session ${data.status === 'completed' ? 'terminée avec succès' : 'échouée'}`,
-      )
-
       // Stop flashing after 5 seconds
       setTimeout(() => {
         set((state) => ({

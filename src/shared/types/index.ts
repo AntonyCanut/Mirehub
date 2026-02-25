@@ -84,6 +84,8 @@ export interface KanbanTask {
   attachments?: KanbanAttachment[]
   dueDate?: number
   archived?: boolean
+  disabled?: boolean
+  isCtoTicket?: boolean
   createdAt: number
   updatedAt: number
 }
@@ -140,6 +142,7 @@ export interface AppSettings {
   autoClauderEnabled: boolean
   defaultAutoClauderTemplateId?: string
   notificationSound: boolean
+  notificationBadge: boolean
   checkUpdatesOnLaunch: boolean
   autoCloseCompletedTerminals: boolean
 }

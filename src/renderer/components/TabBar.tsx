@@ -170,7 +170,7 @@ export function TabBar() {
           const wsProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
           if (wsProjects.length > 0) {
             try {
-              const result = await window.mirehub.workspaceEnv.setup(workspace.name, wsProjects.map((p) => p.path))
+              const result = await window.mirehub.workspaceEnv.setup(workspace.name, wsProjects.map((p) => p.path), activeWorkspaceId)
               if (result?.success && result.envPath) cwd = result.envPath
             } catch { /* fallback to project path */ }
           }

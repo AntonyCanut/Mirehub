@@ -67,6 +67,7 @@ export const en = {
   'workspace.noIcon': 'No icon',
   'workspace.folderExists': 'This folder already exists.',
   'workspace.aiWorking': 'WORKING',
+  'workspace.ctoMode': 'CTO MODE',
   'workspace.aiFinish': 'DONE',
   'workspace.addExisting': '+ Add existing project',
   'workspace.createNewShort': '+ Create new project',
@@ -123,6 +124,7 @@ export const en = {
   'settings.autoClaude': 'Auto-Clauder enabled',
   'settings.notifications': 'Notifications',
   'settings.sound': 'Notification sound',
+  'settings.badge': 'Dock badge',
   'settings.checkUpdates': 'Check updates on launch',
   'settings.language': 'Language',
   'settings.french': 'Francais',
@@ -312,6 +314,9 @@ export const en = {
   'kanban.created': 'Created:',
   'kanban.modified': 'Modified:',
   'kanban.deleteTask': 'Delete this task',
+  'kanban.newCtoTicket': 'CTO Mode',
+  'kanban.disableTask': 'Disable',
+  'kanban.enableTask': 'Enable',
 
   // Git
   'git.noChanges': 'No changes',

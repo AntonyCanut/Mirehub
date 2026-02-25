@@ -28,6 +28,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   claudeDetectionColor: '#7c3aed',
   autoClauderEnabled: false,
   notificationSound: true,
+  notificationBadge: true,
   checkUpdatesOnLaunch: true,
   autoCloseCompletedTerminals: false,
 }
@@ -597,6 +598,20 @@ export function SettingsPanel() {
                   <button
                     className={`settings-toggle${settings.notificationSound ? ' settings-toggle--active' : ''}`}
                     onClick={() => updateSetting('notificationSound', !settings.notificationSound)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.badge')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Afficher une pastille sur l\'icone du dock' : 'Show a badge on the dock icon'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.notificationBadge ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('notificationBadge', !settings.notificationBadge)}
                   >
                     <span className="settings-toggle-knob" />
                   </button>

@@ -38,10 +38,10 @@ type WorkspaceStore = WorkspaceState & WorkspaceActions
  * Get the working directory for a workspace.
  * Always creates a virtual env directory (~/.workspaces/{name}) with symlinks.
  */
-async function getWorkspaceCwd(workspaceName: string, workspaceProjects: Project[]): Promise<string> {
+async function getWorkspaceCwd(workspaceName: string, workspaceProjects: Project[], workspaceId?: string): Promise<string> {
   if (workspaceProjects.length === 0) return '~'
   const paths = workspaceProjects.map((p) => p.path)
-  const result = await window.mirehub.workspaceEnv.setup(workspaceName, paths)
+  const result = await window.mirehub.workspaceEnv.setup(workspaceName, paths, workspaceId)
   if (result?.success && result.envPath) {
     return result.envPath
   }
@@ -403,7 +403,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
     if (workspaceProjects.length === 0) return null
     const paths = workspaceProjects.map((p) => p.path)
-    const result = await window.mirehub.workspaceEnv.setup(workspace.name, paths)
+    const result = await window.mirehub.workspaceEnv.setup(workspace.name, paths, workspaceId)
     return result?.envPath ?? null
   },
 
@@ -423,7 +423,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         const workspaceTabs = termStore.tabs.filter((t) => t.workspaceId === id)
         if (workspaceTabs.length === 0) {
           // Auto-create split tab (Claude + Terminal) if none exist for this workspace
-          getWorkspaceCwd(workspace.name, workspaceProjects)
+          getWorkspaceCwd(workspace.name, workspaceProjects, id)
             .then((cwd) => {
               termStore.createSplitTab(id, cwd, 'Claude + Terminal', 'claude', null)
             })

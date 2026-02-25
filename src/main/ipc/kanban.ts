@@ -4,6 +4,11 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 import { IPC_CHANNELS, KanbanTask, KanbanStatus, KanbanAttachment } from '../../shared/types'
+import {
+  getKanbanPath,
+  readKanbanTasks,
+  writeKanbanTasks,
+} from '../../mcp-server/lib/kanban-store'
 
 /**
  * Ensures a Claude Stop hook exists to auto-update kanban task status.
@@ -111,41 +116,12 @@ function getMimeType(filePath: string): string {
   return MIME_TYPES[ext] || 'application/octet-stream'
 }
 
-function getKanbanDir(): string {
-  const dir = path.join(os.homedir(), '.mirehub', 'kanban')
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
-  }
-  return dir
-}
-
-function getKanbanPath(workspaceId: string): string {
-  return path.join(getKanbanDir(), `${workspaceId}.json`)
-}
-
 function ensureWorkspacesDir(projectPath: string): string {
   const dir = path.join(projectPath, '.mirehub')
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
   }
   return dir
-}
-
-function readKanbanTasks(workspaceId: string): KanbanTask[] {
-  const filePath = getKanbanPath(workspaceId)
-  if (!fs.existsSync(filePath)) return []
-  try {
-    const raw = fs.readFileSync(filePath, 'utf-8')
-    return JSON.parse(raw)
-  } catch {
-    return []
-  }
-}
-
-function writeKanbanTasks(workspaceId: string, tasks: KanbanTask[]): void {
-  const filePath = getKanbanPath(workspaceId)
-  getKanbanDir()
-  fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), 'utf-8')
 }
 
 // File watcher state for kanban files
@@ -245,6 +221,9 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
         description: string
         priority: 'low' | 'medium' | 'high' | 'critical'
         status?: KanbanStatus
+        isCtoTicket?: boolean
+        disabled?: boolean
+        labels?: string[]
       },
     ) => {
       const tasks = readKanbanTasks(data.workspaceId)
@@ -261,6 +240,9 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
         description: data.description,
         status: data.status || 'TODO',
         priority: data.priority,
+        isCtoTicket: data.isCtoTicket,
+        disabled: data.disabled,
+        labels: data.labels,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       }
@@ -449,7 +431,10 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
       const tasks = readKanbanTasks(workspaceId)
       const working = tasks.find((t) => t.status === 'WORKING')
       if (!working) return null
-      return { ticketNumber: working.ticketNumber ?? null }
+      return {
+        ticketNumber: working.ticketNumber ?? null,
+        isCtoTicket: working.isCtoTicket ?? false,
+      }
     },
   )
 

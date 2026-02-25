@@ -101,15 +101,17 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
   const isFlashing = workspace.id === flashingWorkspaceId
   const workspaceClaudeStatus = useClaudeStore((s) => s.workspaceClaudeStatus[workspace.id])
 
-  const [workingTicketNumber, setWorkingTicketNumber] = useState<number | null>(null)
+  const [workingTicketInfo, setWorkingTicketInfo] = useState<{
+    ticketNumber: number | null; isCtoTicket: boolean
+  } | null>(null)
 
   useEffect(() => {
     if (workspaceClaudeStatus === 'working') {
       window.mirehub.kanban.getWorkingTicket(workspace.id).then((result) => {
-        setWorkingTicketNumber(result?.ticketNumber ?? null)
-      }).catch(() => setWorkingTicketNumber(null))
+        setWorkingTicketInfo(result ? { ticketNumber: result.ticketNumber, isCtoTicket: result.isCtoTicket } : null)
+      }).catch(() => setWorkingTicketInfo(null))
     } else {
-      setWorkingTicketNumber(null)
+      setWorkingTicketInfo(null)
     }
   }, [workspace.id, workspaceClaudeStatus])
 
@@ -357,9 +359,11 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
 
         {workspaceClaudeStatus === 'working' && (
           <>
-            <span className="workspace-ia-tag workspace-ia-tag--working">{t('workspace.aiWorking')}</span>
-            {workingTicketNumber != null && (
-              <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketNumber).padStart(2, '0')}</span>
+            <span className={`workspace-ia-tag workspace-ia-tag--working${workingTicketInfo?.isCtoTicket ? ' workspace-ia-tag--cto' : ''}`}>
+              {workingTicketInfo?.isCtoTicket ? t('workspace.ctoMode') : t('workspace.aiWorking')}
+            </span>
+            {workingTicketInfo?.ticketNumber != null && (
+              <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketInfo.ticketNumber).padStart(2, '0')}</span>
             )}
           </>
         )}

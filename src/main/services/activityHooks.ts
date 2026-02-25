@@ -3,6 +3,7 @@ import path from 'path'
 import os from 'os'
 import { BrowserWindow } from 'electron'
 import { IPC_CHANNELS } from '../../shared/types'
+import { sendNotification } from './notificationService'
 
 const ACTIVITY_DIR = path.join(os.homedir(), '.mirehub', 'activity')
 const HOOKS_DIR = path.join(os.homedir(), '.mirehub', 'hooks')
@@ -183,6 +184,11 @@ function broadcastActivityFromFile(filePath: string): void {
       path: data.path,
       status: data.status,
       timestamp: data.timestamp || Math.floor(Date.now() / 1000),
+    }
+
+    // Notify when Claude is done
+    if (data.status === 'done') {
+      sendNotification('Claude terminé', `Session terminée sur ${path.basename(data.path)}`)
     }
 
     // Send to all renderer windows

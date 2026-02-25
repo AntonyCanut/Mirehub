@@ -1,6 +1,7 @@
-import { IpcMain, Notification, app } from 'electron'
+import { IpcMain, app } from 'electron'
 import { IPC_CHANNELS, AppSettings } from '../../shared/types'
 import { StorageService } from '../services/storage'
+import { sendNotification } from '../services/notificationService'
 
 const storage = new StorageService()
 
@@ -20,12 +21,7 @@ export function registerAppHandlers(ipcMain: IpcMain): void {
   ipcMain.on(
     IPC_CHANNELS.APP_NOTIFICATION,
     (_event, data: { title: string; body: string }) => {
-      const notification = new Notification({
-        title: data.title,
-        body: data.body,
-        silent: false,
-      })
-      notification.show()
+      sendNotification(data.title, data.body)
     },
   )
 

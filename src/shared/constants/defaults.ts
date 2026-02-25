@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   claudeDetectionColor: '#7c3aed',
   autoClauderEnabled: false,
   notificationSound: true,
+  notificationBadge: true,
   checkUpdatesOnLaunch: true,
   autoCloseCompletedTerminals: false,
 }

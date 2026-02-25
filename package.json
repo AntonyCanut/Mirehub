@@ -16,9 +16,11 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:mcp": "tsc -p tsconfig.mcp.json"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@monaco-editor/react": "^4.7.0",
     "better-sqlite3": "^12.6.2",
     "electron-store": "^10.0.0",
@@ -128,7 +130,8 @@
     ],
     "asarUnpack": [
       "node_modules/node-pty/**",
-      "node_modules/better-sqlite3/**"
+      "node_modules/better-sqlite3/**",
+      "dist/mcp-server/**"
     ],
     "npmRebuild": true,
     "publish": {

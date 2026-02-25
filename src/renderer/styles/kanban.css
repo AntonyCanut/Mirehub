@@ -56,6 +56,11 @@
 
 .kanban-add-btn:hover { opacity: 0.85; }
 
+.kanban-add-btn--cto {
+  background: linear-gradient(135deg, #cba6f7, #f5c2e7);
+  color: #1e1e2e;
+}
+
 /* Create Form (legacy inline - kept for reference) */
 .kanban-create-form {
   background: var(--bg-secondary);
@@ -319,6 +324,28 @@
     border-color: #f9c57a;
   }
 }
+
+/* CTO card shimmer */
+.kanban-card--cto {
+  background: linear-gradient(135deg,
+    rgba(245,194,231,0.08) 0%, rgba(203,166,247,0.12) 25%,
+    rgba(137,180,250,0.08) 50%, rgba(148,226,213,0.12) 75%,
+    rgba(245,194,231,0.08) 100%);
+  background-size: 200% 200%;
+  animation: kanban-cto-shimmer 4s ease-in-out infinite;
+  border-color: rgba(203,166,247,0.5);
+}
+.kanban-card--cto.kanban-card--working {
+  animation: kanban-cto-shimmer 4s ease-in-out infinite, kanban-cto-halo 2s ease-in-out infinite;
+  border-color: #cba6f7;
+  box-shadow: 0 0 8px rgba(203,166,247,0.4), 0 0 20px rgba(203,166,247,0.15);
+}
+@keyframes kanban-cto-shimmer { 0%,100% { background-position: 0% 50% } 50% { background-position: 100% 50% } }
+@keyframes kanban-cto-halo { 0%,100% { box-shadow: 0 0 8px rgba(203,166,247,0.4) } 50% { box-shadow: 0 0 14px rgba(203,166,247,0.6) } }
+
+/* Disabled card */
+.kanban-card--disabled { opacity: 0.45; filter: grayscale(40%); }
+.kanban-card--disabled:hover { box-shadow: none; border-color: var(--border); }
 
 .kanban-card-header {
   display: flex;
@@ -852,6 +879,7 @@
 .kanban-label-chip--docs { color: #a6e3a1; background: rgba(166, 227, 161, 0.15); }
 .kanban-label-chip--urgent { color: #fab387; background: rgba(250, 179, 135, 0.15); }
 .kanban-label-chip--test { color: #94e2d5; background: rgba(148, 226, 213, 0.15); }
+.kanban-label-chip--cto { color: #f5c2e7; background: rgba(245, 194, 231, 0.15); }
 
 /* Card labels row */
 .kanban-card-labels {
