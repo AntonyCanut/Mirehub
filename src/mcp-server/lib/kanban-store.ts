@@ -48,6 +48,7 @@ export function createKanbanTask(
     labels?: string[]
     isCtoTicket?: boolean
     disabled?: boolean
+    parentTicketId?: string
   },
 ): KanbanTask {
   const tasks = readKanbanTasks(workspaceId)
@@ -63,10 +64,28 @@ export function createKanbanTask(
     labels: data.labels,
     isCtoTicket: data.isCtoTicket,
     disabled: data.disabled,
+    parentTicketId: data.parentTicketId,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   }
   tasks.push(task)
+
+  // If parentTicketId is set, update the parent's childTicketIds
+  if (data.parentTicketId) {
+    const parentIdx = tasks.findIndex((t) => t.id === data.parentTicketId)
+    if (parentIdx !== -1) {
+      const parent = tasks[parentIdx]!
+      const children = parent.childTicketIds ?? []
+      if (!children.includes(task.id)) {
+        tasks[parentIdx] = {
+          ...parent,
+          childTicketIds: [...children, task.id],
+          updatedAt: Date.now(),
+        }
+      }
+    }
+  }
+
   writeKanbanTasks(workspaceId, tasks)
   return task
 }
@@ -87,6 +106,28 @@ export function updateKanbanTask(
 
 export function deleteKanbanTask(workspaceId: string, taskId: string): void {
   const tasks = readKanbanTasks(workspaceId)
+  const taskToDelete = tasks.find((t) => t.id === taskId)
+
+  // Clean up parent's childTicketIds if this task has a parent
+  if (taskToDelete?.parentTicketId) {
+    const parent = tasks.find((t) => t.id === taskToDelete.parentTicketId)
+    if (parent?.childTicketIds) {
+      parent.childTicketIds = parent.childTicketIds.filter((id) => id !== taskId)
+      parent.updatedAt = Date.now()
+    }
+  }
+
+  // Clean up children's parentTicketId if this task is a parent
+  if (taskToDelete?.childTicketIds) {
+    for (const childId of taskToDelete.childTicketIds) {
+      const child = tasks.find((t) => t.id === childId)
+      if (child) {
+        child.parentTicketId = undefined
+        child.updatedAt = Date.now()
+      }
+    }
+  }
+
   const filtered = tasks.filter((t) => t.id !== taskId)
   writeKanbanTasks(workspaceId, filtered)
 }

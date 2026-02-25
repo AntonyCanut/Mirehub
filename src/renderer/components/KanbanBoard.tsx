@@ -100,6 +100,7 @@ export function KanbanBoard() {
   const [newDueDate, setNewDueDate] = useState('')
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
   const [pendingClipboardImages, setPendingClipboardImages] = useState<PendingClipboardImage[]>([])
+  const [newIsCtoMode, setNewIsCtoMode] = useState(false)
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([])
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null)
 
@@ -265,19 +266,24 @@ export function KanbanBoard() {
 
   const handleCreate = useCallback(async () => {
     if (!activeWorkspaceId || !newTitle.trim()) return
+    // Build final labels: include 'cto' if CTO mode is on
+    const finalLabels = newIsCtoMode
+      ? [...new Set([...newLabels, CTO_LABEL])]
+      : newLabels
     await createTask(
       activeWorkspaceId,
       newTitle.trim(),
       newDesc.trim(),
       newPriority,
       newTargetProjectId || undefined,
+      newIsCtoMode || undefined,
+      finalLabels.length > 0 ? finalLabels : undefined,
     )
-    // Update labels and due date on the newly created task
+    // Update due date on the newly created task (labels already passed via createTask)
     const createdTasks = useKanbanStore.getState().tasks
     const newest = createdTasks[createdTasks.length - 1]
-    if (newest && (newLabels.length > 0 || newDueDate)) {
+    if (newest && newDueDate) {
       const extra: Partial<KanbanTask> = {}
-      if (newLabels.length > 0) extra.labels = newLabels
       if (newDueDate) extra.dueDate = new Date(newDueDate).getTime()
       await updateTask(newest.id, extra)
     }
@@ -307,10 +313,11 @@ export function KanbanBoard() {
     setNewTargetProjectId('')
     setNewLabels([])
     setNewDueDate('')
+    setNewIsCtoMode(false)
     setPendingAttachments([])
     setPendingClipboardImages([])
     setShowCreateForm(false)
-  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newDueDate, pendingAttachments, pendingClipboardImages, createTask, updateTask, loadTasks])
+  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newDueDate, newIsCtoMode, pendingAttachments, pendingClipboardImages, createTask, updateTask, loadTasks])
 
   const handleDragStart = useCallback(
     (taskId: string) => {
@@ -326,24 +333,35 @@ export function KanbanBoard() {
   const handleDrop = useCallback(
     (status: KanbanStatus) => {
       if (draggedTaskId) {
-        updateTaskStatus(draggedTaskId, status)
+        if (status === 'WORKING') {
+          // When dropping into "En cours", launch a Claude terminal (sendToClaude also sets WORKING status)
+          const task = tasks.find((t) => t.id === draggedTaskId)
+          if (task) {
+            sendToClaude(task)
+          }
+        } else {
+          updateTaskStatus(draggedTaskId, status)
+        }
         setDragged(null)
       }
     },
-    [draggedTaskId, updateTaskStatus, setDragged],
+    [draggedTaskId, tasks, updateTaskStatus, sendToClaude, setDragged],
   )
 
   const handleSendToClaude = useCallback((task: KanbanTask) => {
     sendToClaude(task)
   }, [sendToClaude])
 
-  const handleCreateCtoTicket = useCallback(async () => {
-    if (!activeWorkspaceId) return
-    const existingCto = tasks.find((t) => t.isCtoTicket && !t.archived && (t.status === 'WORKING' || t.status === 'TODO'))
-    if (existingCto) return
-    await createTask(activeWorkspaceId, 'CTO Mode - Amelioration continue',
-      'Mode CTO actif. Claude agit en tant que CTO.', 'high', undefined, true, ['cto'])
-  }, [activeWorkspaceId, tasks, createTask])
+  const hasActiveCtoTicket = useMemo(() => {
+    return tasks.some((t) => t.isCtoTicket && !t.archived && (t.status === 'WORKING' || t.status === 'TODO'))
+  }, [tasks])
+
+  const handleCreateCtoTicket = useCallback(() => {
+    if (!activeWorkspaceId || hasActiveCtoTicket) return
+    setNewIsCtoMode(true)
+    setNewPriority('high')
+    setShowCreateForm(true)
+  }, [activeWorkspaceId, hasActiveCtoTicket])
 
   const handleContextMenu = useCallback((e: React.MouseEvent, task: KanbanTask) => {
     e.preventDefault()
@@ -505,13 +523,41 @@ export function KanbanBoard() {
       </div>
 
       {showCreateForm && (
-        <div className="modal-overlay" onClick={() => setShowCreateForm(false)}>
-          <div className="kanban-create-modal" onClick={(e) => e.stopPropagation()} onPaste={handleCreateModalPaste}>
+        <div className="modal-overlay" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>
+          <div className={`kanban-create-modal${newIsCtoMode ? ' kanban-create-modal--cto' : ''}`} onClick={(e) => e.stopPropagation()} onPaste={handleCreateModalPaste}>
             <div className="kanban-create-modal-header">
-              <h3>{t('kanban.newTaskTitle')}</h3>
-              <button className="kanban-create-modal-close" onClick={() => setShowCreateForm(false)}>&times;</button>
+              <h3>{newIsCtoMode ? t('kanban.ctoModeToggle') : t('kanban.newTaskTitle')}</h3>
+              <button className="kanban-create-modal-close" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>&times;</button>
             </div>
             <div className="kanban-create-modal-body">
+              {/* CTO Mode toggle */}
+              <label className="kanban-cto-toggle">
+                <input
+                  type="checkbox"
+                  checked={newIsCtoMode}
+                  onChange={(e) => {
+                    const checked = e.target.checked
+                    setNewIsCtoMode(checked)
+                    if (checked) setNewPriority('high')
+                  }}
+                  disabled={hasActiveCtoTicket && !newIsCtoMode}
+                />
+                <span className="kanban-cto-toggle-label">{t('kanban.ctoModeToggle')}</span>
+              </label>
+              {hasActiveCtoTicket && !newIsCtoMode && (
+                <div className="kanban-cto-already-active">
+                  {t('kanban.ctoModeAlreadyActive')}
+                </div>
+              )}
+              {newIsCtoMode && (
+                <div className="kanban-cto-warning">
+                  <div className="kanban-cto-warning-icon">&#9888;</div>
+                  <div className="kanban-cto-warning-content">
+                    <strong>{t('kanban.ctoModeWarningTitle')}</strong>
+                    <p>{t('kanban.ctoModeWarning')}</p>
+                  </div>
+                </div>
+              )}
               <input
                 className="kanban-input"
                 placeholder={t('kanban.taskTitlePlaceholder')}
@@ -628,10 +674,10 @@ export function KanbanBoard() {
               )}
             </div>
             <div className="kanban-create-modal-actions">
-              <button className="kanban-create-modal-cancel" onClick={() => setShowCreateForm(false)}>
+              <button className="kanban-create-modal-cancel" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>
                 {t('common.cancel')}
               </button>
-              <button className="kanban-submit-btn" onClick={handleCreate}>
+              <button className={`kanban-submit-btn${newIsCtoMode ? ' kanban-submit-btn--cto' : ''}`} onClick={handleCreate}>
                 {t('common.create')}
               </button>
             </div>

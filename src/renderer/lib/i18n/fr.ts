@@ -315,6 +315,10 @@ export const fr = {
   'kanban.modified': 'Modifie :',
   'kanban.deleteTask': 'Supprimer cette tache',
   'kanban.newCtoTicket': 'CTO Mode',
+  'kanban.ctoModeToggle': 'Mode CTO',
+  'kanban.ctoModeWarningTitle': 'Mode CTO actif',
+  'kanban.ctoModeWarning': 'Ce ticket sera traite en mode CTO : Claude agira en tant que directeur technique. Il analysera le projet en profondeur, proposera des ameliorations architecturales et creera des sous-tickets. Ajoutez documents, captures d\'ecran et contexte pour un brief complet.',
+  'kanban.ctoModeAlreadyActive': 'Un ticket CTO est deja actif ou en attente. Terminez-le avant d\'en creer un nouveau.',
   'kanban.disableTask': 'Desactiver',
   'kanban.enableTask': 'Reactiver',
 

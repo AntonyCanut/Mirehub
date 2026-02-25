@@ -271,6 +271,28 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.KANBAN_DELETE,
     async (_event, { id, workspaceId }: { id: string; workspaceId: string }) => {
       const tasks = readKanbanTasks(workspaceId)
+      const taskToDelete = tasks.find((t) => t.id === id)
+
+      // Clean up parent's childTicketIds if this task has a parent
+      if (taskToDelete?.parentTicketId) {
+        const parent = tasks.find((t) => t.id === taskToDelete.parentTicketId)
+        if (parent?.childTicketIds) {
+          parent.childTicketIds = parent.childTicketIds.filter((cid) => cid !== id)
+          parent.updatedAt = Date.now()
+        }
+      }
+
+      // Clean up children's parentTicketId if this task is a parent
+      if (taskToDelete?.childTicketIds) {
+        for (const childId of taskToDelete.childTicketIds) {
+          const child = tasks.find((t) => t.id === childId)
+          if (child) {
+            child.parentTicketId = undefined
+            child.updatedAt = Date.now()
+          }
+        }
+      }
+
       const filtered = tasks.filter((t) => t.id !== id)
       writeKanbanTasks(workspaceId, filtered)
     },

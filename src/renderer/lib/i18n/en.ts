@@ -315,6 +315,10 @@ export const en = {
   'kanban.modified': 'Modified:',
   'kanban.deleteTask': 'Delete this task',
   'kanban.newCtoTicket': 'CTO Mode',
+  'kanban.ctoModeToggle': 'CTO Mode',
+  'kanban.ctoModeWarningTitle': 'CTO Mode enabled',
+  'kanban.ctoModeWarning': 'This ticket will be processed in CTO mode: Claude will act as your Chief Technology Officer. It will deeply analyze the project, propose architectural improvements and create sub-tickets. Add documents, screenshots and context for a complete brief.',
+  'kanban.ctoModeAlreadyActive': 'A CTO ticket is already active or pending. Complete it before creating a new one.',
   'kanban.disableTask': 'Disable',
   'kanban.enableTask': 'Enable',
 

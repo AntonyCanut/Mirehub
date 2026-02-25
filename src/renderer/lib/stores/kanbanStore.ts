@@ -18,48 +18,95 @@ function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
 }
 
 function buildCtoPrompt(task: KanbanTask, ticketLabel: string, kanbanFilePath: string): string {
+  // Build child tickets summary if any exist
+  const childInfo = task.childTicketIds?.length
+    ? `\n### Sous-tickets existants\nCe ticket CTO a deja cree les sous-tickets suivants: ${task.childTicketIds.map((id) => `\`${id}\``).join(', ')}.\nUtilise \`kanban_list\` pour voir leur statut actuel avant de continuer.`
+    : ''
+
+  // Build previous result context if any
+  const previousContext = task.result
+    ? `\n### Contexte des sessions precedentes\n${task.result}`
+    : ''
+
   return [
-    `> **IMPORTANT — OBLIGATION DE MISE A JOUR DU TICKET**`,
+    `> **IMPORTANT — REGLE CTO : NE JAMAIS MARQUER CE TICKET COMME DONE**`,
+    `> Ce ticket CTO est un ticket d'amelioration continue. Tu ne peux PAS le passer en \`DONE\`.`,
+    `> A la place, tu DOIS :`,
+    `> 1. Creer des sous-tickets dans "A faire" (TODO) via \`kanban_create\` avec \`parentTicketId: "${task.id}"\``,
+    `> 2. Mettre a jour la description de ce ticket CTO avec un resume de ton analyse et tes recommandations`,
+    `> 3. Mettre a jour le champ \`result\` de ce ticket avec un bilan de cette session`,
+    `> 4. Remettre le status a \`TODO\` pour que la prochaine session CTO reprenne le travail`,
+    ``,
+    `> **OBLIGATION DE MISE A JOUR DU TICKET**`,
     `> Tu DOIS mettre a jour le fichier kanban \`${kanbanFilePath}\` (ticket id \`${task.id}\`) a la FIN de ton travail.`,
-    `> Change \`status\` a \`DONE\` (ou \`FAILED\`/\`PENDING\` selon le cas), ajoute \`result\`/\`error\`/\`question\`, et mets a jour \`updatedAt\` avec \`Date.now()\`.`,
+    `> Change \`status\` a \`TODO\` (pour que le CTO revienne), ajoute/mets a jour \`result\` avec un bilan de session, et mets a jour \`updatedAt\` avec \`Date.now()\`.`,
+    `> Si tu as besoin de precisions : change status a \`PENDING\` et ajoute \`question\`.`,
+    `> Si erreur bloquante : change status a \`FAILED\` et ajoute \`error\`.`,
     `> NE JAMAIS terminer sans avoir mis a jour le ticket.`,
     ``,
-    `Tu es le CTO de ce projet. Ton role est l'amelioration continue.`,
+    `Tu es le **CTO** de ce projet. Ton role est l'amelioration continue et la vision strategique.`,
     ``,
     `## Contexte`,
     `- Ticket: ${ticketLabel} (CTO Mode)`,
-    `- ID: ${task.id}`,
-    `- Fichier Kanban: ${kanbanFilePath}`,
+    `- ID: \`${task.id}\``,
+    `- Fichier Kanban: \`${kanbanFilePath}\``,
+    task.description ? `- Description du ticket: ${task.description}` : '',
+    previousContext,
+    childInfo,
     ``,
-    `## Ton role`,
-    `1. Analyser le projet (structure, code, tests, docs, CI/CD)`,
-    `2. Identifier les axes d'amelioration les plus impactants`,
-    `3. Creer des sous-tickets via l'outil MCP kanban_create`,
-    `4. Prioriser les sous-tickets`,
-    `5. Initialiser git si necessaire`,
-    `6. Commiter apres chaque amelioration`,
+    `## Tes capacites avec Mirehub`,
+    `Tu as acces a l'application Mirehub via les outils MCP. Voici ce que tu peux faire :`,
     ``,
-    `## Outils MCP disponibles`,
-    `- kanban_create / kanban_list / kanban_update`,
-    `- project_list / project_scan_info / workspace_info`,
-    `- project_setup_claude_rules`,
+    `### Gestion de tickets (Kanban)`,
+    `- **kanban_list** : Lister les tickets (filtrer par status, priorite) — pour voir l'etat du projet`,
+    `- **kanban_get** : Obtenir le detail d'un ticket par ID ou numero`,
+    `- **kanban_create** : Creer un sous-ticket (status force a TODO). **Utilise \`parentTicketId: "${task.id}"\`** pour lier les sous-tickets a ce ticket CTO`,
+    `- **kanban_update** : Mettre a jour un ticket (titre, description, priorite, labels, result, error)`,
+    `- **kanban_delete** : Supprimer un ticket`,
+    ``,
+    `### Analyse de projet`,
+    `- **project_list** : Lister les projets du workspace`,
+    `- **project_scan_info** : Scanner un projet (git info, packages, structure, Makefile, etc.)`,
+    `- **workspace_info** : Obtenir les metadonnees du workspace`,
+    `- **project_setup_claude_rules** : Deployer/mettre a jour le CLAUDE.md d'un projet`,
+    ``,
+    `### Analyse de code`,
+    `- **analysis_detect_tools** : Detecter les outils d'analyse installes (semgrep, trivy, etc.)`,
+    `- **analysis_run** : Lancer une analyse sur un projet`,
+    `- **analysis_list_reports** : Lister les rapports d'analyse existants`,
+    `- **analysis_create_tickets** : Creer des tickets kanban a partir des resultats d'analyse`,
+    ``,
+    `## Ton role de CTO`,
+    `1. **Analyser** le projet (structure, code, tests, docs, CI/CD, securite)`,
+    `2. **Evaluer** l'etat actuel des sous-tickets existants via \`kanban_list\``,
+    `3. **Identifier** les axes d'amelioration les plus impactants`,
+    `4. **Creer des sous-tickets** via \`kanban_create\` avec \`parentTicketId: "${task.id}"\` — chaque sous-ticket est une tache actionnable`,
+    `5. **Prioriser** les sous-tickets (critical > high > medium > low)`,
+    `6. **Documenter** ton analyse et tes recommandations dans ce ticket CTO`,
     ``,
     `## Workflow`,
-    `1. Scanner le(s) projet(s) avec project_scan_info`,
-    `2. Lire fichiers importants (README, package.json, CLAUDE.md)`,
-    `3. Identifier 3-5 axes d'amelioration`,
-    `4. Creer un sous-ticket pour chaque axe via kanban_create`,
-    `5. Implementer une par une`,
-    `6. Commiter apres chaque amelioration`,
-    `7. Terminer : edite le fichier \`${kanbanFilePath}\`, trouve le ticket id \`${task.id}\`, change status a \`DONE\`, ajoute un champ \`result\` avec un resume, mets a jour \`updatedAt\` avec \`Date.now()\``,
+    `1. Consulter les sous-tickets existants : \`kanban_list\` pour voir ce qui a deja ete fait ou est en cours`,
+    `2. Scanner le(s) projet(s) avec \`project_scan_info\``,
+    `3. Lire les fichiers importants (README, package.json, CLAUDE.md, etc.)`,
+    `4. Identifier 3-5 axes d'amelioration (en tenant compte de ce qui a deja ete traite)`,
+    `5. Creer un sous-ticket pour chaque axe via \`kanban_create\` avec \`parentTicketId: "${task.id}"\``,
+    `6. Si possible, implementer des ameliorations rapides directement et commiter`,
+    `7. **Terminer la session** : edite le fichier \`${kanbanFilePath}\`, trouve le ticket id \`${task.id}\` :`,
+    `   - Change \`status\` a \`TODO\` (pour permettre la prochaine session CTO)`,
+    `   - Mets a jour \`result\` avec un bilan de cette session (ce que tu as analyse, cree, recommande)`,
+    `   - Mets a jour \`updatedAt\` avec \`Date.now()\``,
     ``,
-    `## Regles`,
+    `## Regles strictes`,
+    `- **INTERDIT** de passer ce ticket CTO en \`DONE\` — c'est un ticket d'amelioration continue`,
+    `- **OBLIGATOIRE** de creer des sous-tickets avec \`parentTicketId: "${task.id}"\` pour la liaison`,
+    `- **OBLIGATOIRE** de remettre le status a \`TODO\` en fin de session`,
+    `- **OBLIGATOIRE** de mettre a jour \`result\` avec un bilan de session pour la prochaine iteration`,
     `- Si tu as besoin de precisions : change status a \`PENDING\` et ajoute \`question\``,
-    `- Si tu ne peux pas realiser la tache : change status a \`FAILED\` et ajoute \`error\``,
+    `- Si erreur bloquante : change status a \`FAILED\` et ajoute \`error\``,
     ``,
     `---`,
-    `**RAPPEL FINAL** : Ta DERNIERE action avant de terminer doit TOUJOURS etre la mise a jour du fichier kanban \`${kanbanFilePath}\` pour le ticket \`${task.id}\`. Sans cette mise a jour, ton travail ne sera pas comptabilise.`,
-  ].join('\n')
+    `**RAPPEL FINAL** : Ta DERNIERE action doit TOUJOURS etre la mise a jour du fichier kanban \`${kanbanFilePath}\` pour le ticket \`${task.id}\`. Remets le status a \`TODO\`, ajoute un \`result\` avec ton bilan, et mets a jour \`updatedAt\`. Sans cette mise a jour, ton travail ne sera pas comptabilise.`,
+  ].filter(Boolean).join('\n')
 }
 
 interface KanbanState {
@@ -155,12 +202,22 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         autoCloseEnabled = settings.autoCloseCompletedTerminals ?? false
       } catch { /* default to false */ }
 
-      // Detect status transitions for tasks with a terminal tab
+      // Detect status transitions for all tasks
+      const tasksToLaunch: KanbanTask[] = []
       for (const newTask of newTasks) {
         const oldTask = oldTasks.find((t) => t.id === newTask.id)
-        const tabId = kanbanTabIds[newTask.id]
-        if (!oldTask || !tabId) continue
+        if (!oldTask) continue
         if (oldTask.status === newTask.status) continue
+
+        const tabId = kanbanTabIds[newTask.id]
+
+        // Detect manual transition to WORKING without an existing terminal
+        if (newTask.status === 'WORKING' && !tabId) {
+          tasksToLaunch.push(newTask)
+          continue
+        }
+
+        if (!tabId) continue
 
         const termStore = useTerminalTabStore.getState()
         if (newTask.status === 'DONE') {
@@ -181,6 +238,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       }
 
       set({ tasks: newTasks })
+
+      // Launch Claude terminals for tasks manually moved to WORKING
+      for (const task of tasksToLaunch) {
+        get().sendToClaude(task)
+      }
 
       // Auto-close terminal tabs for completed tasks if setting is enabled
       if (tabsToClose.length > 0) {

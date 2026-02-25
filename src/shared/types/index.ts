@@ -86,6 +86,8 @@ export interface KanbanTask {
   archived?: boolean
   disabled?: boolean
   isCtoTicket?: boolean
+  parentTicketId?: string
+  childTicketIds?: string[]
   createdAt: number
   updatedAt: number
 }

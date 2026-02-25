@@ -31,6 +31,9 @@ export function registerKanbanTools(server: McpServer, ctx: WorkspaceContext): v
         priority: t.priority,
         labels: t.labels,
         targetProjectId: t.targetProjectId,
+        isCtoTicket: t.isCtoTicket,
+        parentTicketId: t.parentTicketId,
+        childTicketIds: t.childTicketIds,
       }))
 
       return {
@@ -72,15 +75,28 @@ export function registerKanbanTools(server: McpServer, ctx: WorkspaceContext): v
   // kanban_create — status forced to TODO
   server.tool(
     'kanban_create',
-    'Create a new kanban ticket (status is always TODO)',
+    'Create a new kanban ticket (status is always TODO). Use parentTicketId to link sub-tickets to a parent (e.g. CTO ticket).',
     {
       title: z.string().describe('Ticket title'),
       description: z.string().describe('Ticket description (markdown)'),
       priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium').describe('Priority level'),
       targetProjectId: z.string().optional().describe('Target project UUID'),
       labels: z.array(z.string()).optional().describe('Labels/tags'),
+      parentTicketId: z.string().optional().describe('Parent ticket UUID for linking (e.g. CTO ticket ID)'),
     },
-    async ({ title, description, priority, targetProjectId, labels }) => {
+    async ({ title, description, priority, targetProjectId, labels, parentTicketId }) => {
+      // Validate parentTicketId exists if provided
+      if (parentTicketId) {
+        const tasks = readKanbanTasks(ctx.workspaceId)
+        const parent = tasks.find((t) => t.id === parentTicketId)
+        if (!parent) {
+          return {
+            content: [{ type: 'text' as const, text: `Parent ticket ${parentTicketId} not found.` }],
+            isError: true,
+          }
+        }
+      }
+
       const task = createKanbanTask(ctx.workspaceId, {
         title,
         description,
@@ -88,12 +104,14 @@ export function registerKanbanTools(server: McpServer, ctx: WorkspaceContext): v
         status: 'TODO', // FORCED — AI tickets always start as TODO
         targetProjectId,
         labels,
+        parentTicketId,
       })
 
+      const parentInfo = parentTicketId ? `\nLinked to parent ticket: ${parentTicketId}` : ''
       return {
         content: [{
           type: 'text' as const,
-          text: `Created ticket T-${task.ticketNumber}: ${task.title}\n${JSON.stringify(task, null, 2)}`,
+          text: `Created ticket T-${task.ticketNumber}: ${task.title}${parentInfo}\n${JSON.stringify(task, null, 2)}`,
         }],
       }
     },
@@ -119,6 +137,21 @@ export function registerKanbanTools(server: McpServer, ctx: WorkspaceContext): v
         return {
           content: [{ type: 'text' as const, text: 'PENDING status is not allowed via MCP.' }],
           isError: true,
+        }
+      }
+
+      // CTO tickets cannot be set to DONE by Claude — create sub-tickets instead
+      if (status === 'DONE') {
+        const tasks = readKanbanTasks(ctx.workspaceId)
+        const task = tasks.find((t) => t.id === id)
+        if (task?.isCtoTicket) {
+          return {
+            content: [{
+              type: 'text' as const,
+              text: 'Un ticket CTO ne peut pas etre marque DONE. En tant que CTO, tu dois creer des sous-tickets (kanban_create avec parentTicketId) pour faire avancer le projet. Mets a jour la description du ticket CTO avec un resume de ton analyse et tes recommandations.',
+            }],
+            isError: true,
+          }
         }
       }
 
