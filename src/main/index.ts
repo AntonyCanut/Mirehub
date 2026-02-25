@@ -19,6 +19,7 @@ import { registerAppUpdateHandlers } from './ipc/appUpdate'
 import { registerMcpHandlers } from './ipc/mcp'
 import { registerSshHandlers } from './ipc/ssh'
 import { registerAnalysisHandlers } from './ipc/analysis'
+import { registerNamespaceHandlers } from './ipc/namespace'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
 import { clearDockBadge } from './services/notificationService'
@@ -292,7 +293,11 @@ app.whenReady().then(() => {
   registerAppUpdateHandlers(ipcMain)
   registerMcpHandlers(ipcMain)
   registerSshHandlers(ipcMain)
+  registerNamespaceHandlers(ipcMain)
   registerAnalysisHandlers(ipcMain, () => mainWindow)
+
+  // Ensure a Default namespace exists (first launch or migration)
+  new StorageService().ensureDefaultNamespace()
 
   // Ensure activity hook script exists and start watching
   ensureActivityHookScript()

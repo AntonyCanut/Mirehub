@@ -1,7 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { Workspace, Project, AppSettings, KanbanTask, AutoClauderTemplate, SessionData } from '../../shared/types'
+import { v4 as uuid } from 'uuid'
+import { Workspace, Project, AppSettings, KanbanTask, AutoClauderTemplate, SessionData, Namespace } from '../../shared/types'
 import { DEFAULT_SETTINGS } from '../../shared/constants/defaults'
 
 const DATA_DIR = path.join(os.homedir(), '.mirehub')
@@ -9,6 +10,7 @@ const DATA_DIR = path.join(os.homedir(), '.mirehub')
 interface AppData {
   workspaces: Workspace[]
   projects: Project[]
+  namespaces: Namespace[]
   settings: AppSettings
   kanbanTasks: KanbanTask[]
   autoClauderTemplates: AutoClauderTemplate[]
@@ -51,15 +53,45 @@ export class StorageService {
   private load(): AppData {
     if (fs.existsSync(this.dataPath)) {
       const raw = fs.readFileSync(this.dataPath, 'utf-8')
-      return JSON.parse(raw)
+      const data = JSON.parse(raw) as AppData
+      // Migration: ensure namespaces array exists and assign Default namespace
+      if (!data.namespaces || data.namespaces.length === 0) {
+        const defaultNs: Namespace = {
+          id: uuid(),
+          name: 'Default',
+          isDefault: true,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        }
+        data.namespaces = [defaultNs]
+        // Assign all existing workspaces to the default namespace
+        for (const ws of data.workspaces) {
+          if (!ws.namespaceId) {
+            ws.namespaceId = defaultNs.id
+          }
+        }
+        fs.writeFileSync(this.dataPath, JSON.stringify(data, null, 2), 'utf-8')
+      }
+      return data
     }
-    return {
+    const defaultNs: Namespace = {
+      id: uuid(),
+      name: 'Default',
+      isDefault: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+    const freshData: AppData = {
       workspaces: [],
       projects: [],
+      namespaces: [defaultNs],
       settings: { ...DEFAULT_SETTINGS },
       kanbanTasks: [],
       autoClauderTemplates: [],
     }
+    // Persist immediately so the Default namespace survives restarts
+    fs.writeFileSync(this.dataPath, JSON.stringify(freshData, null, 2), 'utf-8')
+    return freshData
   }
 
   private save(): void {
@@ -68,11 +100,17 @@ export class StorageService {
 
   // Workspaces
   getWorkspaces(): Workspace[] {
-    return this.data.workspaces
+    return this.data.workspaces.filter((w) => !w.deletedAt)
   }
 
   getWorkspace(id: string): Workspace | undefined {
     return this.data.workspaces.find((w) => w.id === id)
+  }
+
+  getDeletedWorkspaceByName(name: string): Workspace | undefined {
+    return this.data.workspaces.find(
+      (w) => w.deletedAt && w.name.toLowerCase() === name.toLowerCase(),
+    )
   }
 
   addWorkspace(workspace: Workspace): void {
@@ -88,6 +126,32 @@ export class StorageService {
     }
   }
 
+  softDeleteWorkspace(id: string): void {
+    const idx = this.data.workspaces.findIndex((w) => w.id === id)
+    if (idx >= 0) {
+      this.data.workspaces[idx]!.deletedAt = Date.now()
+      this.data.workspaces[idx]!.updatedAt = Date.now()
+      this.save()
+    }
+  }
+
+  restoreWorkspace(id: string): Workspace | undefined {
+    const idx = this.data.workspaces.findIndex((w) => w.id === id)
+    if (idx >= 0) {
+      delete this.data.workspaces[idx]!.deletedAt
+      this.data.workspaces[idx]!.updatedAt = Date.now()
+      this.save()
+      return this.data.workspaces[idx]
+    }
+    return undefined
+  }
+
+  permanentDeleteWorkspace(id: string): void {
+    this.data.workspaces = this.data.workspaces.filter((w) => w.id !== id)
+    this.data.projects = this.data.projects.filter((p) => p.workspaceId !== id)
+    this.save()
+  }
+
   deleteWorkspace(id: string): void {
     this.data.workspaces = this.data.workspaces.filter((w) => w.id !== id)
     this.data.projects = this.data.projects.filter((p) => p.workspaceId !== id)
@@ -99,7 +163,11 @@ export class StorageService {
     if (workspaceId) {
       return this.data.projects.filter((p) => p.workspaceId === workspaceId)
     }
-    return this.data.projects
+    // Exclude projects from soft-deleted workspaces
+    const deletedIds = new Set(
+      this.data.workspaces.filter((w) => w.deletedAt).map((w) => w.id),
+    )
+    return this.data.projects.filter((p) => !deletedIds.has(p.workspaceId))
   }
 
   addProject(project: Project): void {
@@ -160,6 +228,61 @@ export class StorageService {
 
   deleteTemplate(id: string): void {
     this.data.autoClauderTemplates = this.data.autoClauderTemplates.filter((t) => t.id !== id)
+    this.save()
+  }
+
+  // Namespaces
+  getNamespaces(): Namespace[] {
+    return this.data.namespaces
+  }
+
+  getNamespace(id: string): Namespace | undefined {
+    return this.data.namespaces.find((n) => n.id === id)
+  }
+
+  getDefaultNamespace(): Namespace {
+    return this.data.namespaces.find((n) => n.isDefault)!
+  }
+
+  ensureDefaultNamespace(): Namespace {
+    let defaultNs = this.data.namespaces.find((n) => n.isDefault)
+    if (defaultNs) return defaultNs
+    // No default namespace — create one
+    defaultNs = {
+      id: uuid(),
+      name: 'Default',
+      isDefault: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+    this.data.namespaces.push(defaultNs)
+    // Assign orphaned workspaces to the new default namespace
+    for (const ws of this.data.workspaces) {
+      if (!ws.namespaceId) {
+        ws.namespaceId = defaultNs.id
+      }
+    }
+    this.save()
+    return defaultNs
+  }
+
+  addNamespace(namespace: Namespace): void {
+    this.data.namespaces.push(namespace)
+    this.save()
+  }
+
+  updateNamespace(namespace: Namespace): void {
+    const idx = this.data.namespaces.findIndex((n) => n.id === namespace.id)
+    if (idx >= 0) {
+      this.data.namespaces[idx] = namespace
+      this.save()
+    }
+  }
+
+  deleteNamespace(id: string): void {
+    const ns = this.data.namespaces.find((n) => n.id === id)
+    if (!ns || ns.isDefault) return // Cannot delete default namespace
+    this.data.namespaces = this.data.namespaces.filter((n) => n.id !== id)
     this.save()
   }
 

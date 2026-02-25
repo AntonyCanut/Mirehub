@@ -41,24 +41,24 @@
 }
 
 .kanban-add-btn {
-  height: 28px;
-  padding: 0 12px;
+  height: 30px;
+  padding: 0 14px;
   background: var(--accent);
   color: var(--bg-tertiary);
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
 }
 
-.kanban-add-btn:hover { opacity: 0.85; }
-
-.kanban-add-btn--cto {
-  background: linear-gradient(135deg, #cba6f7, #f5c2e7);
-  color: #1e1e2e;
+.kanban-add-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* CTO Mode - Create modal variant */
@@ -154,42 +154,50 @@
 .kanban-create-modal {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  width: 600px;
+  border-radius: 16px;
+  width: 560px;
   max-width: 90vw;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.05);
+  animation: kanban-modal-enter 0.2s ease-out;
+}
+
+@keyframes kanban-modal-enter {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .kanban-create-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px 12px;
+  padding: 20px 24px 16px;
   border-bottom: 1px solid var(--border);
 }
 
 .kanban-create-modal-header h3 {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  letter-spacing: -0.2px;
 }
 
 .kanban-create-modal-close {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background: transparent;
   border: none;
   color: var(--text-muted);
   font-size: 18px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
 }
 
 .kanban-create-modal-close:hover {
@@ -198,71 +206,82 @@
 }
 
 .kanban-create-modal-body {
-  padding: 16px 20px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   overflow-y: auto;
 }
 
 .kanban-create-modal-textarea {
-  min-height: 150px;
+  min-height: 120px;
   resize: vertical;
 }
 
 .kanban-create-modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 20px 16px;
+  gap: 10px;
+  padding: 16px 24px 20px;
   border-top: 1px solid var(--border);
 }
 
 .kanban-create-modal-cancel {
-  height: 32px;
-  padding: 0 16px;
+  height: 34px;
+  padding: 0 18px;
   background: transparent;
   color: var(--text-muted);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
+  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .kanban-create-modal-cancel:hover {
   color: var(--text-primary);
   border-color: var(--text-muted);
+  background: var(--bg-surface);
 }
 
 .kanban-input {
-  height: 32px;
-  padding: 0 10px;
+  height: 36px;
+  padding: 0 12px;
   font-size: 13px;
   font-family: inherit;
   background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.kanban-input:focus { border-color: var(--accent); }
+.kanban-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(203, 166, 247, 0.1);
+}
 
 .kanban-textarea {
-  padding: 8px 10px;
-  font-size: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
   font-family: inherit;
   background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   resize: vertical;
   outline: none;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.kanban-textarea:focus { border-color: var(--accent); }
+.kanban-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(203, 166, 247, 0.1);
+}
 
 .kanban-create-row {
   display: flex;
@@ -272,27 +291,38 @@
 
 .kanban-select {
   flex: 1;
-  height: 28px;
-  padding: 0 8px;
+  height: 32px;
+  padding: 0 10px;
   font-size: 12px;
   font-family: inherit;
   background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease;
 }
 
+.kanban-select:focus { border-color: var(--accent); }
+
 .kanban-submit-btn {
-  height: 28px;
-  padding: 0 16px;
+  height: 34px;
+  padding: 0 20px;
   background: var(--accent);
   color: var(--bg-tertiary);
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.kanban-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .kanban-submit-btn--cto {
@@ -780,6 +810,25 @@
   font-size: 11px;
 }
 
+.kanban-detail-conversation {
+  padding: 8px 10px;
+  background: rgba(137, 180, 250, 0.08);
+  border: 1px solid rgba(137, 180, 250, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kanban-detail-conversation-path {
+  font-family: 'Menlo', monospace;
+  font-size: 11px;
+  color: #89b4fa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .kanban-detail-output {
   padding: 8px 10px;
   background: rgba(250, 179, 135, 0.06);
@@ -983,12 +1032,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .kanban-create-labels-title {
   font-size: 11px;
   color: var(--text-muted);
   font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 /* ========= Due Date ========= */
@@ -1163,17 +1214,17 @@
 
 /* Attach button (dashed border) */
 .kanban-attach-btn {
-  height: 28px;
-  padding: 0 12px;
+  height: 32px;
+  padding: 0 14px;
   background: transparent;
   color: var(--text-muted);
   border: 1px dashed var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .kanban-attach-btn:hover {

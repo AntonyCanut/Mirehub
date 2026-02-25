@@ -1,13 +1,24 @@
 // Types partagés entre main et renderer
 
+export interface Namespace {
+  id: string
+  name: string
+  color?: string
+  isDefault: boolean
+  createdAt: number
+  updatedAt: number
+}
+
 export interface Workspace {
   id: string
   name: string
   icon?: string
   color: string
+  namespaceId?: string
   projectIds: string[]
   createdAt: number
   updatedAt: number
+  deletedAt?: number
 }
 
 export interface Project {
@@ -88,6 +99,7 @@ export interface KanbanTask {
   isCtoTicket?: boolean
   parentTicketId?: string
   childTicketIds?: string[]
+  conversationHistoryPath?: string
   createdAt: number
   updatedAt: number
 }
@@ -125,6 +137,7 @@ export interface SessionTab {
 export interface SessionData {
   activeWorkspaceId: string | null
   activeProjectId: string | null
+  activeNamespaceId: string | null
   tabs: SessionTab[]
   savedAt: number
 }
@@ -147,6 +160,7 @@ export interface AppSettings {
   notificationBadge: boolean
   checkUpdatesOnLaunch: boolean
   autoCloseCompletedTerminals: boolean
+  autoCloseCtoTerminals: boolean
 }
 
 export interface ProjectInfo {
@@ -601,6 +615,9 @@ export const IPC_CHANNELS = {
   WORKSPACE_CREATE: 'workspace:create',
   WORKSPACE_UPDATE: 'workspace:update',
   WORKSPACE_DELETE: 'workspace:delete',
+  WORKSPACE_PERMANENT_DELETE: 'workspace:permanentDelete',
+  WORKSPACE_CHECK_DELETED: 'workspace:checkDeleted',
+  WORKSPACE_RESTORE: 'workspace:restore',
 
   // Project
   PROJECT_LIST: 'project:list',
@@ -631,6 +648,7 @@ export const IPC_CHANNELS = {
   KANBAN_WATCH: 'kanban:watch',
   KANBAN_UNWATCH: 'kanban:unwatch',
   KANBAN_FILE_CHANGED: 'kanban:fileChanged',
+  KANBAN_LINK_CONVERSATION: 'kanban:linkConversation',
 
   // Updates
   UPDATE_CHECK: 'update:check',
@@ -721,6 +739,13 @@ export const IPC_CHANNELS = {
   // Project notes
   PROJECT_GET_NOTES: 'project:getNotes',
   PROJECT_SAVE_NOTES: 'project:saveNotes',
+
+  // Namespace
+  NAMESPACE_LIST: 'namespace:list',
+  NAMESPACE_CREATE: 'namespace:create',
+  NAMESPACE_UPDATE: 'namespace:update',
+  NAMESPACE_DELETE: 'namespace:delete',
+  NAMESPACE_ENSURE_DEFAULT: 'namespace:ensureDefault',
 
   // Workspace export/import
   WORKSPACE_EXPORT: 'workspace:export',

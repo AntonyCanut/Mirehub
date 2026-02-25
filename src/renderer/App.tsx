@@ -99,7 +99,7 @@ export function App() {
   // Save session on before unload
   useEffect(() => {
     const handleBeforeUnload = () => {
-      const { activeWorkspaceId, activeProjectId } = useWorkspaceStore.getState()
+      const { activeWorkspaceId, activeProjectId, activeNamespaceId } = useWorkspaceStore.getState()
       const { tabs } = useTerminalTabStore.getState()
 
       const sessionTabs: SessionTab[] = tabs.map((tab) => ({
@@ -119,6 +119,7 @@ export function App() {
         const session: SessionData = {
           activeWorkspaceId,
           activeProjectId,
+          activeNamespaceId,
           tabs: sessionTabs,
           savedAt: Date.now(),
         }

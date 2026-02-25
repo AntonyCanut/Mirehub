@@ -60,6 +60,7 @@ export const fr = {
   'workspace.addExistingProject': 'Ajouter un projet existant',
   'workspace.createNewProject': 'Creer un nouveau projet',
   'workspace.addDbConnection': 'Ajouter une connexion BDD',
+  'workspace.moveToNamespace': 'Deplacer vers...',
   'workspace.export': 'Exporter le workspace',
   'workspace.import': 'Importer un workspace',
   'workspace.delete': 'Supprimer',
@@ -67,12 +68,18 @@ export const fr = {
   'workspace.noIcon': 'Aucune icone',
   'workspace.folderExists': 'Ce dossier existe deja.',
   'workspace.aiWorking': 'WORKING',
+  'workspace.aiWaiting': 'WAITING',
+  'workspace.aiFailed': 'FAILED',
   'workspace.ctoMode': 'CTO MODE',
   'workspace.aiFinish': 'DONE',
   'workspace.addExisting': '+ Ajouter un projet existant',
   'workspace.createNewShort': '+ Creer un nouveau projet',
   'workspace.createProjectTitle': 'Creer un nouveau projet',
   'workspace.chooseNameSelectParent': 'Choisissez un nom, puis selectionnez le dossier parent.',
+  'workspace.restoreTitle': 'Workspace existant',
+  'workspace.restoreMessage': 'Un workspace "{name}" a ete precedemment supprime. Ses tickets, sa configuration Claude et son historique sont encore disponibles.',
+  'workspace.restoreBtn': 'Reprendre l\'historique',
+  'workspace.startFresh': 'Repartir de zero',
 
   // Icons
   'icon.circle': 'Cercle',
@@ -131,6 +138,7 @@ export const fr = {
   'settings.english': 'English',
   'settings.kanban': 'Kanban',
   'settings.autoCloseCompletedTerminals': 'Fermer auto. les terminaux des tickets traites',
+  'settings.autoCloseCtoTerminals': 'Fermer auto. les terminaux en mode CTO',
   'settings.about': 'A propos',
   'settings.appName': 'Nom',
   'settings.version': 'Version',
@@ -311,6 +319,7 @@ export const fr = {
   'kanban.aiQuestion': 'Question de l\'IA',
   'kanban.result': 'Resultat',
   'kanban.error': 'Erreur',
+  'kanban.conversationHistory': 'Historique de conversation',
   'kanban.created': 'Cree :',
   'kanban.modified': 'Modifie :',
   'kanban.deleteTask': 'Supprimer cette tache',
@@ -821,6 +830,14 @@ export const fr = {
   'analysis.emptyHint': 'Lancez une analyse pour detecter les problemes de votre projet',
   'analysis.launchAnalysis': 'Lancer l\'analyse',
   'view.analysis': 'Analyse',
+
+  // Namespace
+  'namespace.create': 'Nouveau namespace',
+  'namespace.namePlaceholder': 'Nom du namespace...',
+  'namespace.default': 'Default',
+  'namespace.rename': 'Renommer',
+  'namespace.deleteConfirm': 'Supprimer le namespace "{name}" ? Les workspaces associes ne seront plus affiches.',
+  'namespace.all': 'Tous les namespaces',
 
   // Title bar
   'titlebar.title': 'Mirehub',

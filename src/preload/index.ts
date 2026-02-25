@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -36,16 +36,36 @@ const api = {
   // Workspace
   workspace: {
     list: () => ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_LIST),
-    create: (data: { name: string; color?: string }) =>
+    create: (data: { name: string; color?: string; namespaceId?: string }) =>
       ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_CREATE, data),
     update: (data: { id: string } & Partial<Workspace>) =>
       ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_UPDATE, data),
     delete: (id: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_DELETE, { id }),
+    permanentDelete: (id: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_PERMANENT_DELETE, { id }),
+    checkDeleted: (name: string): Promise<Workspace | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_CHECK_DELETED, { name }),
+    restore: (id: string): Promise<Workspace | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_RESTORE, { id }),
     export: (workspaceId: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_EXPORT, { workspaceId }),
     import: (): Promise<{ success: boolean; error?: string; workspace?: Workspace }> =>
       ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_IMPORT),
+  },
+
+  // Namespace
+  namespace: {
+    list: (): Promise<Namespace[]> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NAMESPACE_LIST),
+    create: (data: { name: string; color?: string }): Promise<Namespace> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NAMESPACE_CREATE, data),
+    update: (data: { id: string } & Partial<Namespace>): Promise<Namespace> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NAMESPACE_UPDATE, data),
+    delete: (id: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NAMESPACE_DELETE, { id }),
+    ensureDefault: (): Promise<Namespace> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NAMESPACE_ENSURE_DEFAULT),
   },
 
   // Project
@@ -229,6 +249,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_WATCH, { workspaceId }),
     unwatch: (): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_UNWATCH),
+    linkConversation: (cwd: string, taskId: string, workspaceId: string): Promise<string | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_LINK_CONVERSATION, { cwd, taskId, workspaceId }),
     onFileChanged: (callback: (data: { workspaceId: string }) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, payload: { workspaceId: string }) =>
         callback(payload)

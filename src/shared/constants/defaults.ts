@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   notificationBadge: true,
   checkUpdatesOnLaunch: true,
   autoCloseCompletedTerminals: false,
+  autoCloseCtoTerminals: true,
 }
 
 export const MAX_PANES_PER_TAB = 4

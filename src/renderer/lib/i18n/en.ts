@@ -60,6 +60,7 @@ export const en = {
   'workspace.addExistingProject': 'Add existing project',
   'workspace.createNewProject': 'Create new project',
   'workspace.addDbConnection': 'Add database connection',
+  'workspace.moveToNamespace': 'Move to...',
   'workspace.export': 'Export workspace',
   'workspace.import': 'Import workspace',
   'workspace.delete': 'Delete',
@@ -67,12 +68,18 @@ export const en = {
   'workspace.noIcon': 'No icon',
   'workspace.folderExists': 'This folder already exists.',
   'workspace.aiWorking': 'WORKING',
+  'workspace.aiWaiting': 'WAITING',
+  'workspace.aiFailed': 'FAILED',
   'workspace.ctoMode': 'CTO MODE',
   'workspace.aiFinish': 'DONE',
   'workspace.addExisting': '+ Add existing project',
   'workspace.createNewShort': '+ Create new project',
   'workspace.createProjectTitle': 'Create a new project',
   'workspace.chooseNameSelectParent': 'Choose a name, then select the parent folder.',
+  'workspace.restoreTitle': 'Existing workspace',
+  'workspace.restoreMessage': 'A workspace "{name}" was previously deleted. Its tickets, Claude configuration and history are still available.',
+  'workspace.restoreBtn': 'Resume history',
+  'workspace.startFresh': 'Start fresh',
 
   // Icons
   'icon.circle': 'Circle',
@@ -131,6 +138,7 @@ export const en = {
   'settings.english': 'English',
   'settings.kanban': 'Kanban',
   'settings.autoCloseCompletedTerminals': 'Auto-close terminals of completed tickets',
+  'settings.autoCloseCtoTerminals': 'Auto-close CTO mode terminals',
   'settings.about': 'About',
   'settings.appName': 'Name',
   'settings.version': 'Version',
@@ -311,6 +319,7 @@ export const en = {
   'kanban.aiQuestion': 'AI Question',
   'kanban.result': 'Result',
   'kanban.error': 'Error',
+  'kanban.conversationHistory': 'Conversation History',
   'kanban.created': 'Created:',
   'kanban.modified': 'Modified:',
   'kanban.deleteTask': 'Delete this task',
@@ -821,6 +830,14 @@ export const en = {
   'analysis.emptyHint': 'Run an analysis to detect issues in your project',
   'analysis.launchAnalysis': 'Launch analysis',
   'view.analysis': 'Analysis',
+
+  // Namespace
+  'namespace.create': 'New namespace',
+  'namespace.namePlaceholder': 'Namespace name...',
+  'namespace.default': 'Default',
+  'namespace.rename': 'Rename',
+  'namespace.deleteConfirm': 'Delete namespace "{name}"? Associated workspaces will no longer be displayed.',
+  'namespace.all': 'All namespaces',
 
   // Title bar
   'titlebar.title': 'Mirehub',

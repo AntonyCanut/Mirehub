@@ -24,13 +24,57 @@ function ensureKanbanHook(projectPath: string): void {
   const hookScriptPath = path.join(hooksDir, 'kanban-done.sh')
   const hookScript = `#!/bin/bash
 # Mirehub - Kanban task completion hook (auto-generated)
-# If the task is still WORKING when Claude stops, it means Claude did NOT
-# finish (interrupted). Revert to TODO so it can be re-scheduled.
-# When Claude succeeds, it writes DONE itself before exiting.
+# Checks the kanban ticket status and writes the appropriate activity status.
+# PENDING + CTO → auto-approve: revert to TODO (unblock CTO cycle)
+# PENDING + regular → activity "waiting" (double bell in Electron)
+# FAILED  → activity "failed"  (quad bell in Electron)
+# WORKING → interrupted, revert to TODO (renderer handles re-launch)
+# DONE    → activity "done" (already written by mirehub-activity.sh)
+ACTIVITY_SCRIPT="$HOME/.mirehub/hooks/mirehub-activity.sh"
+
 [ -z "$MIREHUB_KANBAN_TASK_ID" ] && exit 0
 [ -z "$MIREHUB_KANBAN_FILE" ] && exit 0
 
-node -e "
+# Read ticket status and isCtoTicket flag
+read -r TICKET_STATUS IS_CTO <<< $(node -e "
+const fs = require('fs');
+const file = process.env.MIREHUB_KANBAN_FILE;
+const taskId = process.env.MIREHUB_KANBAN_TASK_ID;
+try {
+  const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
+  const task = tasks.find(t => t.id === taskId);
+  if (task) process.stdout.write(task.status + ' ' + (task.isCtoTicket ? 'true' : 'false'));
+} catch(e) { /* ignore */ }
+")
+
+case "$TICKET_STATUS" in
+  PENDING)
+    if [ "$IS_CTO" = "true" ]; then
+      # CTO auto-approve: set back to TODO to unblock the CTO cycle
+      node -e "
+const fs = require('fs');
+const file = process.env.MIREHUB_KANBAN_FILE;
+const taskId = process.env.MIREHUB_KANBAN_TASK_ID;
+try {
+  const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
+  const task = tasks.find(t => t.id === taskId);
+  if (task && task.status === 'PENDING') {
+    task.status = 'TODO';
+    task.updatedAt = Date.now();
+    fs.writeFileSync(file, JSON.stringify(tasks, null, 2), 'utf-8');
+  }
+} catch(e) { /* ignore */ }
+"
+    else
+      bash "$ACTIVITY_SCRIPT" waiting
+    fi
+    ;;
+  FAILED)
+    bash "$ACTIVITY_SCRIPT" failed
+    ;;
+  WORKING)
+    # Claude was interrupted — revert to TODO
+    node -e "
 const fs = require('fs');
 const file = process.env.MIREHUB_KANBAN_FILE;
 const taskId = process.env.MIREHUB_KANBAN_TASK_ID;
@@ -44,6 +88,8 @@ try {
   }
 } catch(e) { /* ignore */ }
 "
+    ;;
+esac
 `
   fs.writeFileSync(hookScriptPath, hookScript, { mode: 0o755 })
 
@@ -69,16 +115,26 @@ try {
   }
 
   const stopHooks = hooks.Stop as Array<{ matcher: string; hooks: Array<{ type: string; command: string }> }>
-  const alreadyConfigured = stopHooks.some((h) =>
+  const expectedCommand = `bash "${hookScriptPath}"`
+  const existingIdx = stopHooks.findIndex((h) =>
     h.hooks?.some((hk) => hk.command?.includes('kanban-done.sh')),
   )
 
-  if (!alreadyConfigured) {
+  if (existingIdx === -1) {
+    // No kanban hook at all — add it
     stopHooks.push({
       matcher: '',
-      hooks: [{ type: 'command', command: `bash "${hookScriptPath}"` }],
+      hooks: [{ type: 'command', command: expectedCommand }],
     })
     fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
+  } else {
+    // Kanban hook exists — check if path is correct, update if stale
+    const entry = stopHooks[existingIdx]!
+    const hookCmd = entry.hooks?.find((hk) => hk.command?.includes('kanban-done.sh'))
+    if (hookCmd && hookCmd.command !== expectedCommand) {
+      hookCmd.command = expectedCommand
+      fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
+    }
   }
 }
 
@@ -122,6 +178,59 @@ function ensureWorkspacesDir(projectPath: string): string {
     fs.mkdirSync(dir, { recursive: true })
   }
   return dir
+}
+
+/**
+ * Finds the newest Claude Code conversation JSONL file for a given working directory.
+ * Claude Code stores conversations at ~/.claude/projects/{path-hash}/{sessionId}.jsonl
+ * where the path-hash replaces both '/' and '.' with '-'.
+ */
+function findNewestClaudeConversation(cwd: string): string | null {
+  const projectsDir = path.join(os.homedir(), '.claude', 'projects')
+  if (!fs.existsSync(projectsDir)) return null
+
+  // Resolve symlinks to get canonical path
+  let resolvedCwd = cwd
+  try { resolvedCwd = fs.realpathSync(cwd) } catch { /* use original */ }
+
+  // Claude Code replaces both '/' and '.' with '-' in the directory name
+  const candidates = [
+    resolvedCwd.replace(/[/.]/g, '-'),
+    cwd.replace(/[/.]/g, '-'),
+    resolvedCwd.replace(/\//g, '-'),
+    cwd.replace(/\//g, '-'),
+  ]
+
+  let claudeProjectDir: string | null = null
+  const existingDirs = fs.readdirSync(projectsDir)
+  for (const candidate of candidates) {
+    if (existingDirs.includes(candidate)) {
+      claudeProjectDir = path.join(projectsDir, candidate)
+      break
+    }
+  }
+
+  if (!claudeProjectDir) return null
+
+  // Find the newest JSONL file in the directory
+  try {
+    const entries = fs.readdirSync(claudeProjectDir)
+      .filter((f) => f.endsWith('.jsonl'))
+      .map((f) => {
+        const fullPath = path.join(claudeProjectDir!, f)
+        try {
+          return { name: f, mtime: fs.statSync(fullPath).mtimeMs, path: fullPath }
+        } catch {
+          return null
+        }
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      .sort((a, b) => b.mtime - a.mtime)
+
+    return entries.length > 0 ? entries[0]!.path : null
+  } catch {
+    return null
+  }
 }
 
 // File watcher state for kanban files
@@ -451,11 +560,17 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.KANBAN_GET_WORKING_TICKET,
     async (_event, { workspaceId }: { workspaceId: string }) => {
       const tasks = readKanbanTasks(workspaceId)
-      const working = tasks.find((t) => t.status === 'WORKING')
-      if (!working) return null
+      const active = tasks.find((t) => t.status === 'WORKING' || t.status === 'PENDING' || t.status === 'FAILED')
+      if (!active) return null
+      // Check if active ticket is a CTO ticket OR a child of a CTO ticket
+      let isCto = active.isCtoTicket ?? false
+      if (!isCto && active.parentTicketId) {
+        const parent = tasks.find((t) => t.id === active.parentTicketId)
+        if (parent?.isCtoTicket) isCto = true
+      }
       return {
-        ticketNumber: working.ticketNumber ?? null,
-        isCtoTicket: working.isCtoTicket ?? false,
+        ticketNumber: active.ticketNumber ?? null,
+        isCtoTicket: isCto,
       }
     },
   )
@@ -471,6 +586,28 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.KANBAN_UNWATCH,
     async () => {
       stopWatcher()
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_LINK_CONVERSATION,
+    async (
+      _event,
+      { cwd, taskId, workspaceId }: { cwd: string; taskId: string; workspaceId: string },
+    ) => {
+      const conversationPath = findNewestClaudeConversation(cwd)
+      if (!conversationPath) return null
+
+      // Store the conversation path in the ticket
+      const tasks = readKanbanTasks(workspaceId)
+      const task = tasks.find((t) => t.id === taskId)
+      if (task) {
+        task.conversationHistoryPath = conversationPath
+        task.updatedAt = Date.now()
+        writeKanbanTasks(workspaceId, tasks)
+      }
+
+      return conversationPath
     },
   )
 }

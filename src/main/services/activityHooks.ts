@@ -3,7 +3,7 @@ import path from 'path'
 import os from 'os'
 import { BrowserWindow } from 'electron'
 import { IPC_CHANNELS } from '../../shared/types'
-import { sendNotification } from './notificationService'
+import { sendNotification, sendSilentNotification, playBellRepeat } from './notificationService'
 
 const ACTIVITY_DIR = path.join(os.homedir(), '.mirehub', 'activity')
 const HOOKS_DIR = path.join(os.homedir(), '.mirehub', 'hooks')
@@ -155,7 +155,8 @@ export function startActivityWatcher(): () => void {
         const filePath = path.join(ACTIVITY_DIR, file)
         try {
           const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-          if (data.status === 'done' && now - data.timestamp > 300) {
+          const isTerminal = data.status === 'done' || data.status === 'waiting' || data.status === 'failed'
+          if (isTerminal && now - data.timestamp > 300) {
             fs.unlinkSync(filePath)
           }
         } catch {
@@ -186,9 +187,15 @@ function broadcastActivityFromFile(filePath: string): void {
       timestamp: data.timestamp || Math.floor(Date.now() / 1000),
     }
 
-    // Notify when Claude is done
+    // Notify based on activity status
     if (data.status === 'done') {
       sendNotification('Claude terminé', `Session terminée sur ${path.basename(data.path)}`)
+    } else if (data.status === 'waiting') {
+      sendSilentNotification('Claude en attente', `En attente d'information sur ${path.basename(data.path)}`)
+      playBellRepeat(2, 300)
+    } else if (data.status === 'failed') {
+      sendSilentNotification('Claude échoué', `Échec sur ${path.basename(data.path)}`)
+      playBellRepeat(4, 250)
     }
 
     // Send to all renderer windows

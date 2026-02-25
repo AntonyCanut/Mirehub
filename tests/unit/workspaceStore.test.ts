@@ -28,10 +28,19 @@ const mockProjectApi = {
   scanClaude: vi.fn(),
 }
 
+const mockNamespaceApi = {
+  list: vi.fn().mockResolvedValue([]),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  ensureDefault: vi.fn().mockResolvedValue(undefined),
+}
+
 // Set up global window mock before importing the store
 const mockMirehub = {
   workspace: mockWorkspaceApi,
   project: mockProjectApi,
+  namespace: mockNamespaceApi,
   workspaceEnv: { setup: vi.fn(), getPath: vi.fn(), delete: vi.fn() },
 }
 
@@ -69,11 +78,17 @@ describe('useWorkspaceStore', () => {
     useWorkspaceStore.setState({
       workspaces: [],
       projects: [],
+      namespaces: [],
+      activeNamespaceId: null,
       activeWorkspaceId: null,
       activeProjectId: null,
       initialized: false,
     })
     vi.clearAllMocks()
+    // Restore default mock return values cleared by clearAllMocks
+    mockNamespaceApi.list.mockResolvedValue([])
+    mockNamespaceApi.ensureDefault.mockResolvedValue(undefined)
+    mockProjectApi.list.mockResolvedValue([])
   })
 
   describe('etat initial', () => {

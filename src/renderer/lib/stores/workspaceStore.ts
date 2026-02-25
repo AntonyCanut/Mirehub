@@ -1,10 +1,13 @@
 import { create } from 'zustand'
-import type { Workspace, Project } from '../../../shared/types/index'
+import { useShallow } from 'zustand/shallow'
+import type { Workspace, Project, Namespace } from '../../../shared/types/index'
 import { useTerminalTabStore } from './terminalTabStore'
 
 interface WorkspaceState {
   workspaces: Workspace[]
   projects: Project[]
+  namespaces: Namespace[]
+  activeNamespaceId: string | null
   activeWorkspaceId: string | null
   activeProjectId: string | null
   initialized: boolean
@@ -14,11 +17,20 @@ interface WorkspaceState {
 interface WorkspaceActions {
   init: () => Promise<void>
   loadWorkspaces: () => Promise<void>
+  loadNamespaces: () => Promise<void>
+  createNamespace: (name: string, color?: string) => Promise<Namespace | null>
+  updateNamespace: (id: string, data: Partial<Namespace>) => Promise<void>
+  deleteNamespace: (id: string) => Promise<void>
+  setActiveNamespace: (id: string | null) => void
   createWorkspace: (name: string, color?: string) => Promise<Workspace | null>
   createWorkspaceFromFolder: () => Promise<Workspace | null>
+  createWorkspaceFromPath: (dirPath: string) => Promise<Workspace | null>
   createWorkspaceFromNew: (projectName: string) => Promise<Workspace | null>
+  createWorkspaceFromNewInDir: (projectName: string, parentDir: string) => Promise<Workspace | null>
   deleteWorkspace: (id: string) => Promise<void>
   updateWorkspace: (id: string, data: Partial<Workspace>) => Promise<void>
+  checkDeletedWorkspace: (name: string) => Promise<Workspace | null>
+  restoreWorkspace: (id: string) => Promise<Workspace | null>
   addProject: (workspaceId: string) => Promise<Project | null>
   removeProject: (id: string) => Promise<void>
   moveProject: (projectId: string, targetWorkspaceId: string) => Promise<void>
@@ -52,6 +64,8 @@ async function getWorkspaceCwd(workspaceName: string, workspaceProjects: Project
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   workspaces: [],
   projects: [],
+  namespaces: [],
+  activeNamespaceId: null,
   activeWorkspaceId: null,
   activeProjectId: null,
   initialized: false,
@@ -59,7 +73,14 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
   init: async () => {
     if (get().initialized) return
+    await get().loadNamespaces()
     await get().loadWorkspaces()
+    // Select default namespace
+    const { namespaces, activeNamespaceId } = get()
+    if (!activeNamespaceId && namespaces.length > 0) {
+      const defaultNs = namespaces.find((n) => n.isDefault) || namespaces[0]!
+      set({ activeNamespaceId: defaultNs.id })
+    }
     // Select first workspace by default if none is active
     const { workspaces, activeWorkspaceId } = get()
     if (!activeWorkspaceId && workspaces.length > 0) {
@@ -76,10 +97,48 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     set({ workspaces, projects })
   },
 
+  loadNamespaces: async () => {
+    const namespaces: Namespace[] = await window.mirehub.namespace.list()
+    set({ namespaces })
+  },
+
+  createNamespace: async (name: string, color?: string) => {
+    const namespace = await window.mirehub.namespace.create({ name, color })
+    if (namespace) {
+      set((state) => ({ namespaces: [...state.namespaces, namespace] }))
+    }
+    return namespace
+  },
+
+  updateNamespace: async (id: string, data: Partial<Namespace>) => {
+    await window.mirehub.namespace.update({ id, ...data })
+    set((state) => ({
+      namespaces: state.namespaces.map((n) => (n.id === id ? { ...n, ...data } : n)),
+    }))
+  },
+
+  deleteNamespace: async (id: string) => {
+    const { namespaces, activeNamespaceId } = get()
+    const ns = namespaces.find((n) => n.id === id)
+    if (!ns || ns.isDefault) return
+    await window.mirehub.namespace.delete(id)
+    const defaultNs = namespaces.find((n) => n.isDefault)!
+    set((state) => ({
+      namespaces: state.namespaces.filter((n) => n.id !== id),
+      activeNamespaceId: activeNamespaceId === id ? defaultNs.id : activeNamespaceId,
+    }))
+  },
+
+  setActiveNamespace: (id: string | null) => {
+    set({ activeNamespaceId: id })
+  },
+
   createWorkspace: async (name: string, color?: string) => {
+    const { activeNamespaceId } = get()
     const workspace = await window.mirehub.workspace.create({
       name,
       color: color ?? '#89b4fa',
+      namespaceId: activeNamespaceId ?? undefined,
     })
     if (workspace) {
       set((state) => ({
@@ -90,10 +149,13 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   },
 
   createWorkspaceFromFolder: async () => {
-    try {
-      const dirPath = await window.mirehub.project.selectDir()
-      if (!dirPath) return null
+    const dirPath = await window.mirehub.project.selectDir()
+    if (!dirPath) return null
+    return get().createWorkspaceFromPath(dirPath)
+  },
 
+  createWorkspaceFromPath: async (dirPath: string) => {
+    try {
       const folderName = dirPath.split('/').pop() || dirPath
       const workspace = await window.mirehub.workspace.create({
         name: folderName,
@@ -157,11 +219,13 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   },
 
   createWorkspaceFromNew: async (projectName: string) => {
-    try {
-      // Pick parent directory
-      const parentDir = await window.mirehub.project.selectDir()
-      if (!parentDir) return null
+    const parentDir = await window.mirehub.project.selectDir()
+    if (!parentDir) return null
+    return get().createWorkspaceFromNewInDir(projectName, parentDir)
+  },
 
+  createWorkspaceFromNewInDir: async (projectName: string, parentDir: string) => {
+    try {
       const projectPath = parentDir + '/' + projectName
       const exists = await window.mirehub.fs.exists(projectPath)
       if (exists) return null
@@ -220,6 +284,20 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       projects: state.projects.filter((p) => p.workspaceId !== id),
       activeWorkspaceId: state.activeWorkspaceId === id ? null : state.activeWorkspaceId,
     }))
+  },
+
+  checkDeletedWorkspace: async (name: string) => {
+    return window.mirehub.workspace.checkDeleted(name)
+  },
+
+  restoreWorkspace: async (id: string) => {
+    const workspace = await window.mirehub.workspace.restore(id)
+    if (workspace) {
+      // Reload everything to get the restored workspace and its projects
+      await get().loadWorkspaces()
+      get().setActiveWorkspace(workspace.id)
+    }
+    return workspace
   },
 
   updateWorkspace: async (id: string, data: Partial<Workspace>) => {
@@ -454,23 +532,36 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   clearPendingClaudeImport: () => set({ pendingClaudeImport: null }),
 
   navigateWorkspace: (direction: 'next' | 'prev') => {
-    const { workspaces, activeWorkspaceId } = get()
-    if (workspaces.length === 0) return
+    const { workspaces, activeWorkspaceId, activeNamespaceId } = get()
+    const filtered = activeNamespaceId
+      ? workspaces.filter((w) => w.namespaceId === activeNamespaceId)
+      : workspaces
+    if (filtered.length === 0) return
 
     const currentIndex = activeWorkspaceId
-      ? workspaces.findIndex((w) => w.id === activeWorkspaceId)
+      ? filtered.findIndex((w) => w.id === activeWorkspaceId)
       : -1
 
     let nextIndex: number
     if (direction === 'next') {
-      nextIndex = currentIndex + 1 >= workspaces.length ? 0 : currentIndex + 1
+      nextIndex = currentIndex + 1 >= filtered.length ? 0 : currentIndex + 1
     } else {
-      nextIndex = currentIndex - 1 < 0 ? workspaces.length - 1 : currentIndex - 1
+      nextIndex = currentIndex - 1 < 0 ? filtered.length - 1 : currentIndex - 1
     }
 
-    const nextWorkspace = workspaces[nextIndex]
+    const nextWorkspace = filtered[nextIndex]
     if (nextWorkspace) {
       set({ activeWorkspaceId: nextWorkspace.id })
     }
   },
 }))
+
+/** Selector: workspaces filtered by the active namespace */
+export function useFilteredWorkspaces(): Workspace[] {
+  return useWorkspaceStore(
+    useShallow((state) => {
+      if (!state.activeNamespaceId) return state.workspaces
+      return state.workspaces.filter((w) => w.namespaceId === state.activeNamespaceId)
+    }),
+  )
+}

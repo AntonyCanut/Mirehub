@@ -15,11 +15,12 @@ export function registerWorkspaceHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(
     IPC_CHANNELS.WORKSPACE_CREATE,
-    async (_event, data: { name: string; color?: string }) => {
+    async (_event, data: { name: string; color?: string; namespaceId?: string }) => {
       const workspace: Workspace = {
         id: uuid(),
         name: data.name,
         color: data.color || '#3b82f6',
+        namespaceId: data.namespaceId || storage.getDefaultNamespace().id,
         projectIds: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -48,14 +49,37 @@ export function registerWorkspaceHandlers(ipcMain: IpcMain): void {
   )
 
   ipcMain.handle(IPC_CHANNELS.WORKSPACE_DELETE, async (_event, { id }: { id: string }) => {
-    const workspace = storage.getWorkspace(id)
-    storage.deleteWorkspace(id)
-
-    // Clean up workspace env directory on disk
-    if (workspace) {
-      deleteWorkspaceEnv(workspace.name)
-    }
+    // Soft-delete: mark workspace as deleted but keep data (env dir, kanban, projects)
+    storage.softDeleteWorkspace(id)
   })
+
+  // Permanently delete a workspace and its env directory (used for "start fresh")
+  ipcMain.handle(
+    IPC_CHANNELS.WORKSPACE_PERMANENT_DELETE,
+    async (_event, { id }: { id: string }) => {
+      const workspace = storage.getWorkspace(id)
+      storage.permanentDeleteWorkspace(id)
+      if (workspace) {
+        deleteWorkspaceEnv(workspace.name)
+      }
+    },
+  )
+
+  // Check if a soft-deleted workspace exists with the given name
+  ipcMain.handle(
+    IPC_CHANNELS.WORKSPACE_CHECK_DELETED,
+    async (_event, { name }: { name: string }) => {
+      return storage.getDeletedWorkspaceByName(name) ?? null
+    },
+  )
+
+  // Restore a soft-deleted workspace
+  ipcMain.handle(
+    IPC_CHANNELS.WORKSPACE_RESTORE,
+    async (_event, { id }: { id: string }) => {
+      return storage.restoreWorkspace(id) ?? null
+    },
+  )
 
   // Workspace export
   ipcMain.handle(
@@ -108,6 +132,7 @@ export function registerWorkspaceHandlers(ipcMain: IpcMain): void {
         name: data.name,
         color: data.color,
         icon: data.icon,
+        namespaceId: storage.getDefaultNamespace().id,
         projectIds: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),

@@ -86,6 +86,22 @@ function playBellSound(): void {
 }
 
 /**
+ * Plays the bell sound multiple times with a delay between each.
+ * Used for waiting (2x) and failed (4x) notifications.
+ */
+export function playBellRepeat(count: number, delayMs = 300): void {
+  const settings = storage.getSettings()
+  if (!settings.notificationSound) return
+
+  ensureBellSound()
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      exec(`afplay "${BELL_WAV_PATH}"`, () => { /* fire and forget */ })
+    }, i * delayMs)
+  }
+}
+
+/**
  * Sets "!" badge on dock icon if the window is not focused.
  * Respects notificationBadge setting.
  */
@@ -107,17 +123,23 @@ export function clearDockBadge(): void {
 }
 
 /**
- * Unified notification entry point.
- * Sends a silent native notification + plays bell sound + sets dock badge.
+ * Sends a silent native notification + sets dock badge (no sound).
  */
-export function sendNotification(title: string, body: string): void {
+export function sendSilentNotification(title: string, body: string): void {
   const notification = new Notification({
     title,
     body,
     silent: true,
   })
   notification.show()
-
-  playBellSound()
   setDockBadge()
+}
+
+/**
+ * Unified notification entry point.
+ * Sends a silent native notification + plays bell sound + sets dock badge.
+ */
+export function sendNotification(title: string, body: string): void {
+  sendSilentNotification(title, body)
+  playBellSound()
 }

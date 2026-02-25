@@ -5,10 +5,17 @@ import { useWorkspaceStore } from './workspaceStore'
 
 const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
 
+// Track tasks that have been re-launched once to avoid infinite loops
+const relaunchedTaskIds = new Set<string>()
+
 function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
   const todo = tasks.filter((t) => t.status === 'TODO' && !t.disabled)
   if (!todo.length) return null
   todo.sort((a, b) => {
+    // CTO tickets always go last — they should never block regular tickets
+    const aCto = a.isCtoTicket ? 1 : 0
+    const bCto = b.isCtoTicket ? 1 : 0
+    if (aCto !== bCto) return aCto - bCto
     const pa = PRIORITY_ORDER[a.priority] ?? 99
     const pb = PRIORITY_ORDER[b.priority] ?? 99
     if (pa !== pb) return pa - pb
@@ -26,6 +33,11 @@ function buildCtoPrompt(task: KanbanTask, ticketLabel: string, kanbanFilePath: s
   // Build previous result context if any
   const previousContext = task.result
     ? `\n### Contexte des sessions precedentes\n${task.result}`
+    : ''
+
+  // Build conversation history reference for context recovery
+  const conversationHistory = task.conversationHistoryPath
+    ? `\n### Historique de la derniere session\nLe fichier suivant contient l'historique complet de la derniere conversation :\n\`${task.conversationHistoryPath}\`\nLis ce fichier avec le tool Read pour recuperer le contexte detaille de ce qui a ete fait.`
     : ''
 
   return [
@@ -52,6 +64,7 @@ function buildCtoPrompt(task: KanbanTask, ticketLabel: string, kanbanFilePath: s
     `- Fichier Kanban: \`${kanbanFilePath}\``,
     task.description ? `- Description du ticket: ${task.description}` : '',
     previousContext,
+    conversationHistory,
     childInfo,
     ``,
     `## Tes capacites avec Mirehub`,
@@ -195,15 +208,18 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       let taskFinished = false
       const tabsToClose: string[] = []
 
-      // Check if auto-close setting is enabled
+      // Check auto-close settings
       let autoCloseEnabled = false
+      let autoCloseCtoEnabled = true
       try {
         const settings = await window.mirehub.settings.get()
         autoCloseEnabled = settings.autoCloseCompletedTerminals ?? false
-      } catch { /* default to false */ }
+        autoCloseCtoEnabled = settings.autoCloseCtoTerminals ?? true
+      } catch { /* default to false / true */ }
 
       // Detect status transitions for all tasks
       const tasksToLaunch: KanbanTask[] = []
+      const tasksToRelaunch: KanbanTask[] = []
       for (const newTask of newTasks) {
         const oldTask = oldTasks.find((t) => t.id === newTask.id)
         if (!oldTask) continue
@@ -217,23 +233,54 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           continue
         }
 
+        // CTO auto-approve: when a CTO ticket transitions to PENDING, auto-set to TODO
+        if (newTask.status === 'PENDING' && newTask.isCtoTicket) {
+          // Auto-approve by setting to TODO — unblocks the CTO cycle
+          window.mirehub.kanban.update({
+            id: newTask.id,
+            status: 'TODO',
+            workspaceId: currentWorkspaceId!,
+          }).catch(() => { /* best-effort */ })
+          newTask.status = 'TODO'
+          if (tabId && autoCloseCtoEnabled) tabsToClose.push(tabId)
+          taskFinished = true
+          continue
+        }
+
+        // Re-launch: when a ticket was WORKING and reverted to TODO (hook detected interruption),
+        // re-launch once to remind Claude to update the ticket status
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && !newTask.isCtoTicket) {
+          if (!relaunchedTaskIds.has(newTask.id)) {
+            relaunchedTaskIds.add(newTask.id)
+            if (tabId) tabsToClose.push(tabId)
+            tasksToRelaunch.push(newTask)
+            continue
+          }
+        }
+
         if (!tabId) continue
 
         const termStore = useTerminalTabStore.getState()
         if (newTask.status === 'DONE') {
           termStore.setTabColor(tabId, '#a6e3a1')
           taskFinished = true
+          relaunchedTaskIds.delete(newTask.id) // allow future re-launch
           if (autoCloseEnabled) tabsToClose.push(tabId)
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
           taskFinished = true
+          relaunchedTaskIds.delete(newTask.id) // allow future re-launch
           if (autoCloseEnabled) tabsToClose.push(tabId)
         }
         if (newTask.status === 'PENDING') {
           termStore.setTabColor(tabId, '#f9e2af')
           termStore.setTabActivity(tabId, true)
           // PENDING does NOT trigger next task — the task is still "in progress"
+        }
+        // CTO tickets return to TODO when their session ends — auto-close their terminal
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && newTask.isCtoTicket && autoCloseCtoEnabled) {
+          tabsToClose.push(tabId)
         }
       }
 
@@ -242,6 +289,16 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       // Launch Claude terminals for tasks manually moved to WORKING
       for (const task of tasksToLaunch) {
         get().sendToClaude(task)
+      }
+
+      // Re-launch tasks that were WORKING but reverted to TODO by the hook
+      // This reminds Claude to properly update the ticket status
+      if (tasksToRelaunch.length > 0) {
+        setTimeout(() => {
+          for (const task of tasksToRelaunch) {
+            get().sendToClaude(task)
+          }
+        }, 3000) // delay to let tabs close first
       }
 
       // Auto-close terminal tabs for completed tasks if setting is enabled
@@ -446,6 +503,20 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         }
       }
 
+      // Add previous conversation history for context recovery
+      if (task.conversationHistoryPath) {
+        promptParts.push(
+          ``,
+          `## Historique de la session precedente`,
+          `Ce ticket a deja ete travaille dans une session precedente qui a ete interrompue.`,
+          `Le fichier suivant contient l'historique complet de cette conversation :`,
+          `\`${task.conversationHistoryPath}\``,
+          ``,
+          `**IMPORTANT** : Lis ce fichier avec le tool Read pour recuperer le contexte de ce qui a deja ete fait.`,
+          `Reprends le travail la ou il s'est arrete, sans refaire ce qui a deja ete accompli.`,
+        )
+      }
+
       promptParts.push(
         ``,
         `## Fichier Kanban`,
@@ -488,7 +559,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       const termStore = useTerminalTabStore.getState()
       const { activeWorkspaceId } = useWorkspaceStore.getState()
       if (activeWorkspaceId) {
-        const tabLabel = task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[IA] ${task.title}`
+        const tabLabel = task.isCtoTicket ? 'CTO' : task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[IA] ${task.title}`
         tabId = termStore.createTab(activeWorkspaceId, cwd, tabLabel, initialCommand)
         if (tabId) {
           termStore.setTabColor(tabId, '#fab387')
@@ -547,6 +618,13 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
                 window.mirehub.kanban.cleanupPrompt(cwd!, task.id)
               } catch { /* best-effort */ }
             }, 30000)
+
+            // Link the conversation JSONL file to the ticket for context recovery
+            setTimeout(async () => {
+              try {
+                await window.mirehub.kanban.linkConversation(cwd!, task.id, currentWorkspaceId!)
+              } catch { /* best-effort */ }
+            }, 10000)
           }, 3000)
         }
       }, 200)

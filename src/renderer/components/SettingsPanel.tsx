@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   notificationBadge: true,
   checkUpdatesOnLaunch: true,
   autoCloseCompletedTerminals: false,
+  autoCloseCtoTerminals: true,
 }
 
 type SettingsSection = 'general' | 'appearance' | 'terminal' | 'ssh' | 'claude' | 'kanban' | 'notifications' | 'about'
@@ -578,6 +579,20 @@ export function SettingsPanel() {
                   <button
                     className={`settings-toggle${settings.autoCloseCompletedTerminals ? ' settings-toggle--active' : ''}`}
                     onClick={() => updateSetting('autoCloseCompletedTerminals', !settings.autoCloseCompletedTerminals)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.autoCloseCtoTerminals')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Ferme automatiquement les terminaux des sessions CTO terminees' : 'Automatically close terminals when CTO sessions end'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.autoCloseCtoTerminals ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('autoCloseCtoTerminals', !settings.autoCloseCtoTerminals)}
                   >
                     <span className="settings-toggle-knob" />
                   </button>

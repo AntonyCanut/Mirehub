@@ -95,6 +95,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     addProject,
     moveProject,
     refreshWorkspace,
+    namespaces,
   } = useWorkspaceStore()
 
   const flashingWorkspaceId = useClaudeStore((s) => s.flashingWorkspaceId)
@@ -106,7 +107,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
   } | null>(null)
 
   useEffect(() => {
-    if (workspaceClaudeStatus === 'working') {
+    if (workspaceClaudeStatus === 'working' || workspaceClaudeStatus === 'waiting' || workspaceClaudeStatus === 'failed') {
       window.mirehub.kanban.getWorkingTicket(workspace.id).then((result) => {
         setWorkingTicketInfo(result ? { ticketNumber: result.ticketNumber, isCtoTicket: result.isCtoTicket } : null)
       }).catch(() => setWorkingTicketInfo(null))
@@ -295,6 +296,13 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     setViewMode('database')
   }, [workspace.id, setActiveWorkspace, setPendingDbProjectPath, setViewMode])
 
+  const moveToNamespaceChildren: ContextMenuItem[] = namespaces
+    .filter((ns) => ns.id !== workspace.namespaceId)
+    .map((ns) => ({
+      label: ns.name,
+      action: () => updateWorkspace(workspace.id, { namespaceId: ns.id }),
+    }))
+
   const contextMenuItems: ContextMenuItem[] = [
     { label: t('workspace.rename'), action: handleStartRename },
     { label: t('workspace.changeColor'), action: () => { setShowColorPicker(true); setShowIconPicker(false) } },
@@ -304,6 +312,9 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     { label: t('workspace.createNewProject'), action: () => { setCreateProjectName(''); setCreateError(null); setShowCreateModal(true) } },
     { label: t('workspace.addDbConnection'), action: handleAddDbConnection },
     { separator: true, label: '', action: () => {} },
+    ...(moveToNamespaceChildren.length > 0
+      ? [{ label: t('workspace.moveToNamespace'), action: () => {}, children: moveToNamespaceChildren }]
+      : []),
     { label: t('workspace.refresh'), action: () => refreshWorkspace(workspace.id) },
     { separator: true, label: '', action: () => {} },
     { label: t('workspace.export'), action: handleExportWorkspace },
@@ -354,7 +365,21 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className="workspace-item-name">{workspace.name}</span>
+          <>
+            <span className="workspace-item-name">{workspace.name}</span>
+            <button
+              className="workspace-item-rename-btn btn-icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleStartRename()
+              }}
+              title={t('workspace.rename')}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M8.5 1.5L10.5 3.5M1 11L1.5 8.5L9 1C9.3 0.7 9.8 0.7 10.1 1L11 1.9C11.3 2.2 11.3 2.7 11 3L2.5 11.5L1 11Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </>
         )}
 
         {workspaceClaudeStatus === 'working' && (
@@ -362,6 +387,22 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
             <span className={`workspace-ia-tag workspace-ia-tag--working${workingTicketInfo?.isCtoTicket ? ' workspace-ia-tag--cto' : ''}`}>
               {workingTicketInfo?.isCtoTicket ? t('workspace.ctoMode') : t('workspace.aiWorking')}
             </span>
+            {workingTicketInfo?.ticketNumber != null && (
+              <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketInfo.ticketNumber).padStart(2, '0')}</span>
+            )}
+          </>
+        )}
+        {workspaceClaudeStatus === 'waiting' && (
+          <>
+            <span className="workspace-ia-tag workspace-ia-tag--waiting">{t('workspace.aiWaiting')}</span>
+            {workingTicketInfo?.ticketNumber != null && (
+              <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketInfo.ticketNumber).padStart(2, '0')}</span>
+            )}
+          </>
+        )}
+        {workspaceClaudeStatus === 'failed' && (
+          <>
+            <span className="workspace-ia-tag workspace-ia-tag--failed">{t('workspace.aiFailed')}</span>
             {workingTicketInfo?.ticketNumber != null && (
               <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketInfo.ticketNumber).padStart(2, '0')}</span>
             )}

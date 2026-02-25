@@ -59,12 +59,15 @@ describe('Workspace IPC Handlers', () => {
     }
   })
 
-  it('enregistre les 6 handlers workspace', () => {
-    expect(mockIpcMain.handle).toHaveBeenCalledTimes(6)
+  it('enregistre les 9 handlers workspace', () => {
+    expect(mockIpcMain.handle).toHaveBeenCalledTimes(9)
     expect(mockIpcMain._handlers.has('workspace:list')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:create')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:update')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:delete')).toBe(true)
+    expect(mockIpcMain._handlers.has('workspace:permanentDelete')).toBe(true)
+    expect(mockIpcMain._handlers.has('workspace:checkDeleted')).toBe(true)
+    expect(mockIpcMain._handlers.has('workspace:restore')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:export')).toBe(true)
     expect(mockIpcMain._handlers.has('workspace:import')).toBe(true)
   })
@@ -78,7 +81,7 @@ describe('Workspace IPC Handlers', () => {
     const result = await mockIpcMain._invoke('workspace:create', { name: 'Test Workspace' })
 
     expect(result).toMatchObject({
-      id: 'test-uuid-1',
+      id: 'test-uuid-2',
       name: 'Test Workspace',
       color: '#3b82f6',
       projectIds: [],
@@ -131,7 +134,7 @@ describe('Workspace IPC Handlers', () => {
     expect(list).toHaveLength(0)
   })
 
-  it('supprime le dossier env sur disque lors de la suppression du workspace', async () => {
+  it('soft-delete ne supprime pas le dossier env', async () => {
     const ws = await mockIpcMain._invoke('workspace:create', { name: 'Env Cleanup' })
 
     // Create a fake env directory to simulate workspace env (now under .mirehub/envs/)
@@ -140,8 +143,23 @@ describe('Workspace IPC Handlers', () => {
     fs.writeFileSync(path.join(envDir, 'marker.txt'), 'test')
     expect(fs.existsSync(envDir)).toBe(true)
 
-    // Delete workspace should also clean up env
+    // Soft-delete should NOT clean up env
     await mockIpcMain._invoke('workspace:delete', { id: ws.id })
+
+    expect(fs.existsSync(envDir)).toBe(true)
+  })
+
+  it('supprime le dossier env sur disque lors de la suppression permanente', async () => {
+    const ws = await mockIpcMain._invoke('workspace:create', { name: 'Env Cleanup Perm' })
+
+    // Create a fake env directory to simulate workspace env (now under .mirehub/envs/)
+    const envDir = path.join(TEST_DIR, '.mirehub', 'envs', 'Env Cleanup Perm')
+    fs.mkdirSync(envDir, { recursive: true })
+    fs.writeFileSync(path.join(envDir, 'marker.txt'), 'test')
+    expect(fs.existsSync(envDir)).toBe(true)
+
+    // Permanent delete should clean up env
+    await mockIpcMain._invoke('workspace:permanentDelete', { id: ws.id })
 
     expect(fs.existsSync(envDir)).toBe(false)
   })

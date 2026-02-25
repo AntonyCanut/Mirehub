@@ -356,13 +356,6 @@ export function KanbanBoard() {
     return tasks.some((t) => t.isCtoTicket && !t.archived && (t.status === 'WORKING' || t.status === 'TODO'))
   }, [tasks])
 
-  const handleCreateCtoTicket = useCallback(() => {
-    if (!activeWorkspaceId || hasActiveCtoTicket) return
-    setNewIsCtoMode(true)
-    setNewPriority('high')
-    setShowCreateForm(true)
-  }, [activeWorkspaceId, hasActiveCtoTicket])
-
   const handleContextMenu = useCallback((e: React.MouseEvent, task: KanbanTask) => {
     e.preventDefault()
     e.stopPropagation()
@@ -461,10 +454,7 @@ export function KanbanBoard() {
           />
           <span className="kanban-task-count">{t('kanban.taskCount', { count: String(filteredTasks.length) })}</span>
           <button className="kanban-add-btn" onClick={() => setShowCreateForm(!showCreateForm)}>
-            {t('kanban.newTask')}
-          </button>
-          <button className="kanban-add-btn kanban-add-btn--cto" onClick={handleCreateCtoTicket}>
-            {t('kanban.newCtoTicket')}
+            + {t('kanban.newTask')}
           </button>
         </div>
       </div>
@@ -538,7 +528,7 @@ export function KanbanBoard() {
                   onChange={(e) => {
                     const checked = e.target.checked
                     setNewIsCtoMode(checked)
-                    if (checked) setNewPriority('high')
+                    if (checked) setNewPriority('low')
                   }}
                   disabled={hasActiveCtoTicket && !newIsCtoMode}
                 />
@@ -1328,6 +1318,18 @@ function TaskDetailPanel({
         <div className="kanban-detail-section">
           <span className="kanban-detail-section-title">{t('kanban.error')}</span>
           <div className="kanban-detail-error">{task.error}</div>
+        </div>
+      )}
+
+      {/* Conversation History */}
+      {task.conversationHistoryPath && (
+        <div className="kanban-detail-section">
+          <span className="kanban-detail-section-title">{t('kanban.conversationHistory')}</span>
+          <div className="kanban-detail-conversation">
+            <span className="kanban-detail-conversation-path" title={task.conversationHistoryPath}>
+              {task.conversationHistoryPath.split('/').pop()}
+            </span>
+          </div>
         </div>
       )}
 

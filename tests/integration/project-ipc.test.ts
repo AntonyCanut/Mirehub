@@ -111,7 +111,7 @@ describe('Project IPC Handlers', () => {
       })
 
       expect(result).toMatchObject({
-        id: 'test-project-uuid-1',
+        id: 'test-project-uuid-2',
         name: 'test-project',
         path: projectDir,
         hasClaude: false,
@@ -138,7 +138,7 @@ describe('Project IPC Handlers', () => {
         path: projectDir,
       })
 
-      await mockIpcMain._invoke('project:remove', { id: 'test-project-uuid-1' })
+      await mockIpcMain._invoke('project:remove', { id: 'test-project-uuid-2' })
       // No error thrown = success
     })
   })

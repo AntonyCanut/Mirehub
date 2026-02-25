@@ -530,6 +530,169 @@ body {
   color: var(--text-muted);
 }
 
+/* Namespace Dropdown */
+.sidebar-namespace-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.sidebar-namespace-trigger:hover {
+  color: var(--text-primary);
+}
+
+.sidebar-namespace-trigger .namespace-chevron {
+  display: inline-flex;
+  transition: transform 0.15s ease;
+}
+
+.sidebar-namespace-trigger .namespace-chevron--open {
+  transform: rotate(180deg);
+}
+
+.namespace-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 220px;
+  max-width: 300px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  padding: 6px;
+  margin-top: 6px;
+}
+
+.namespace-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.1s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.namespace-dropdown-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.namespace-dropdown-item--active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.namespace-dropdown-item--active:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.namespace-dropdown-item .namespace-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.namespace-dropdown-item--active .namespace-item-name {
+  color: var(--accent);
+}
+
+.namespace-dropdown-item .namespace-delete-btn,
+.namespace-dropdown-item .namespace-rename-btn {
+  display: none;
+  padding: 3px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.namespace-dropdown-item:hover .namespace-delete-btn,
+.namespace-dropdown-item:hover .namespace-rename-btn {
+  display: inline-flex;
+}
+
+.namespace-dropdown-item .namespace-rename-btn:hover {
+  color: var(--accent);
+  background: rgba(137, 180, 250, 0.1);
+}
+
+.namespace-dropdown-item .namespace-delete-btn:hover {
+  color: var(--danger);
+  background: rgba(255, 0, 0, 0.1);
+}
+
+.namespace-rename-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 2px 6px;
+  outline: none;
+}
+
+.namespace-dropdown-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 4px;
+}
+
+.namespace-create-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+}
+
+.namespace-create-inline input {
+  flex: 1;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  outline: none;
+}
+
+.namespace-create-inline input::placeholder {
+  color: var(--text-muted);
+}
+
 /* Sidebar Workspaces (scrollable list) */
 .sidebar-workspaces {
   padding: 8px;
@@ -689,6 +852,19 @@ body {
   animation: ia-pulse 2.5s ease-in-out infinite;
 }
 
+.workspace-ia-tag--waiting {
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  animation: ia-pulse 2s ease-in-out infinite;
+}
+
+.workspace-ia-tag--failed {
+  color: var(--error, #f38ba8);
+  background: transparent;
+  border: 1px solid var(--error, #f38ba8);
+}
+
 .workspace-ia-tag--finished {
   color: #1e1e2e;
   background: var(--success);
@@ -740,6 +916,18 @@ body {
 }
 
 .workspace-item-header:hover .workspace-item-add {
+  opacity: 1;
+}
+
+.workspace-item-rename-btn {
+  width: 20px;
+  height: 20px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.workspace-item-header:hover .workspace-item-rename-btn {
   opacity: 1;
 }
 
@@ -1335,6 +1523,24 @@ body {
   height: 1px;
   background: var(--border);
   margin: 4px 8px;
+}
+
+.context-menu-submenu-wrapper {
+  position: relative;
+}
+
+.context-menu-item--submenu {
+  justify-content: space-between;
+}
+
+.context-menu-submenu-chevron {
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.context-menu--sub {
+  position: absolute;
+  top: 0;
 }
 
 /* Terminal Area */
