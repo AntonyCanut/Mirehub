@@ -7,7 +7,10 @@ import { sendNotification, sendSilentNotification, playBellRepeat } from './noti
 
 const ACTIVITY_DIR = path.join(os.homedir(), '.mirehub', 'activity')
 const HOOKS_DIR = path.join(os.homedir(), '.mirehub', 'hooks')
+const ENVS_DIR = path.join(os.homedir(), '.mirehub', 'envs')
 const HOOK_SCRIPT_NAME = 'mirehub-activity.sh'
+const AUTOAPPROVE_SCRIPT_NAME = 'mirehub-autoapprove.sh'
+const KANBAN_DONE_SCRIPT_NAME = 'kanban-done.sh'
 
 /**
  * Ensures the global activity hook script exists at ~/.mirehub/hooks/mirehub-activity.sh
@@ -56,12 +59,115 @@ printf '{"status":"%s","path":"%s","timestamp":%s}\\n' "$STATUS" "$PWD" "$(date 
 }
 
 /**
+ * Ensures the auto-approve hook script exists at ~/.mirehub/hooks/mirehub-autoapprove.sh
+ * Auto-approves all tool permissions during kanban sessions (when MIREHUB_KANBAN_TASK_ID is set).
+ */
+export function ensureAutoApproveScript(): void {
+  if (!fs.existsSync(HOOKS_DIR)) {
+    fs.mkdirSync(HOOKS_DIR, { recursive: true })
+  }
+
+  const scriptPath = path.join(HOOKS_DIR, AUTOAPPROVE_SCRIPT_NAME)
+  const script = `#!/bin/bash
+# Mirehub - Auto-approve all permissions during kanban sessions (auto-generated)
+# Activated only when MIREHUB_KANBAN_TASK_ID is set (kanban terminal)
+[ -z "$MIREHUB_KANBAN_TASK_ID" ] && exit 0
+cat > /dev/null
+printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Mirehub kanban auto-approve"}}'
+`
+  fs.writeFileSync(scriptPath, script, { mode: 0o755 })
+}
+
+/**
+ * Ensures the kanban-done hook script exists at ~/.mirehub/hooks/kanban-done.sh
+ * Handles ticket status transitions on Claude Stop event.
+ */
+export function ensureKanbanDoneScript(): void {
+  if (!fs.existsSync(HOOKS_DIR)) {
+    fs.mkdirSync(HOOKS_DIR, { recursive: true })
+  }
+
+  const scriptPath = path.join(HOOKS_DIR, KANBAN_DONE_SCRIPT_NAME)
+  const script = `#!/bin/bash
+# Mirehub - Kanban task completion hook (auto-generated)
+# Runs on Claude Code Stop event to check if the kanban ticket was updated.
+#
+# Behavior:
+# - WORKING → BLOCK Claude from stopping, remind to update the ticket
+# - PENDING + CTO → auto-approve: revert to TODO (unblock CTO cycle)
+# - PENDING + regular → activity "waiting" (double bell in Electron)
+# - FAILED  → activity "failed" (quad bell in Electron)
+# - DONE    → no-op (activity "done" already written by mirehub-activity.sh)
+ACTIVITY_SCRIPT="$HOME/.mirehub/hooks/mirehub-activity.sh"
+
+[ -z "$MIREHUB_KANBAN_TASK_ID" ] && exit 0
+[ -z "$MIREHUB_KANBAN_FILE" ] && exit 0
+
+# Read ticket status, isCtoTicket flag, and title
+read -r TICKET_STATUS IS_CTO TICKET_TITLE <<< $(node -e "
+const fs = require('fs');
+const file = process.env.MIREHUB_KANBAN_FILE;
+const taskId = process.env.MIREHUB_KANBAN_TASK_ID;
+try {
+  const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
+  const task = tasks.find(t => t.id === taskId);
+  if (task) process.stdout.write(task.status + ' ' + (task.isCtoTicket ? 'true' : 'false') + ' ' + (task.title || '').replace(/[\\n\\r]/g, ' '));
+} catch(e) { /* ignore */ }
+")
+
+case "$TICKET_STATUS" in
+  PENDING)
+    if [ "$IS_CTO" = "true" ]; then
+      # CTO auto-approve: set back to TODO to unblock the CTO cycle
+      node -e "
+const fs = require('fs');
+const file = process.env.MIREHUB_KANBAN_FILE;
+const taskId = process.env.MIREHUB_KANBAN_TASK_ID;
+try {
+  const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
+  const task = tasks.find(t => t.id === taskId);
+  if (task && task.status === 'PENDING') {
+    task.status = 'TODO';
+    task.updatedAt = Date.now();
+    fs.writeFileSync(file, JSON.stringify(tasks, null, 2), 'utf-8');
+  }
+} catch(e) { /* ignore */ }
+"
+    else
+      bash "$ACTIVITY_SCRIPT" waiting
+    fi
+    ;;
+  FAILED)
+    bash "$ACTIVITY_SCRIPT" failed
+    ;;
+  WORKING)
+    # Claude forgot to update the ticket — block and remind
+    node -e "
+const reason = 'RAPPEL: Tu n as pas mis a jour le ticket kanban !\\n'
+  + 'Fichier: ' + process.env.MIREHUB_KANBAN_FILE + '\\n'
+  + 'Ticket ID: ' + process.env.MIREHUB_KANBAN_TASK_ID + '\\n\\n'
+  + 'Tu DOIS editer le fichier kanban pour mettre a jour ce ticket:\\n'
+  + '- Change status a DONE (succes), FAILED (echec), ou PENDING (question)\\n'
+  + '- Ajoute result, error, ou question selon le cas\\n'
+  + '- Mets a jour updatedAt avec Date.now()\\n\\n'
+  + 'Fais-le MAINTENANT avant de terminer.';
+process.stdout.write(JSON.stringify({ decision: 'block', reason: reason }));
+"
+    ;;
+esac
+`
+  fs.writeFileSync(scriptPath, script, { mode: 0o755 })
+}
+
+/**
  * Installs PreToolUse + Stop hooks in a project's settings.local.json
  * to signal Claude activity back to Mirehub.
  * Merges with existing hooks (e.g. kanban hooks) without overwriting.
  */
 export function installActivityHooks(projectPath: string): void {
   ensureActivityHookScript()
+  ensureAutoApproveScript()
+  ensureKanbanDoneScript()
 
   const claudeDir = path.join(projectPath, '.claude')
   if (!fs.existsSync(claudeDir)) {
@@ -81,40 +187,87 @@ export function installActivityHooks(projectPath: string): void {
   }
   const hooks = settings.hooks as Record<string, unknown[]>
 
-  const scriptPath = path.join(HOOKS_DIR, HOOK_SCRIPT_NAME)
-  const hookIdentifier = 'mirehub-activity.sh'
+  const activityScriptPath = path.join(HOOKS_DIR, HOOK_SCRIPT_NAME)
+  const autoApproveScriptPath = path.join(HOOKS_DIR, AUTOAPPROVE_SCRIPT_NAME)
+  const kanbanDoneScriptPath = path.join(HOOKS_DIR, KANBAN_DONE_SCRIPT_NAME)
 
-  // Install PreToolUse hook (for "working" signal)
+  // === PreToolUse hooks ===
   if (!hooks.PreToolUse) {
     hooks.PreToolUse = []
   }
   const preToolHooks = hooks.PreToolUse as Array<{ matcher: string; hooks: Array<{ type: string; command: string }> }>
-  const hasPreTool = preToolHooks.some((h) =>
-    h.hooks?.some((hk) => hk.command?.includes(hookIdentifier)),
-  )
-  if (!hasPreTool) {
+
+  // Activity working hook
+  if (!preToolHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes('mirehub-activity.sh')))) {
     preToolHooks.push({
       matcher: '',
-      hooks: [{ type: 'command', command: `bash "${scriptPath}" working` }],
+      hooks: [{ type: 'command', command: `bash "${activityScriptPath}" working` }],
     })
   }
 
-  // Install Stop hook (for "done" signal)
+  // Auto-approve hook (kanban sessions only)
+  if (!preToolHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes('mirehub-autoapprove.sh')))) {
+    preToolHooks.push({
+      matcher: '',
+      hooks: [{ type: 'command', command: `bash "${autoApproveScriptPath}"` }],
+    })
+  }
+
+  // === Stop hooks ===
   if (!hooks.Stop) {
     hooks.Stop = []
   }
   const stopHooks = hooks.Stop as Array<{ matcher: string; hooks: Array<{ type: string; command: string }> }>
-  const hasStop = stopHooks.some((h) =>
-    h.hooks?.some((hk) => hk.command?.includes(hookIdentifier)),
+
+  // Kanban-done hook (ensure global path, update stale paths)
+  const expectedKanbanCmd = `bash "${kanbanDoneScriptPath}"`
+  const kanbanIdx = stopHooks.findIndex((h) =>
+    h.hooks?.some((hk) => hk.command?.includes('kanban-done.sh')),
   )
-  if (!hasStop) {
+  if (kanbanIdx === -1) {
+    // Insert at the beginning so it runs before activity-done
+    stopHooks.unshift({
+      matcher: '',
+      hooks: [{ type: 'command', command: expectedKanbanCmd }],
+    })
+  } else {
+    // Update if pointing to old/stale path
+    const hookCmd = stopHooks[kanbanIdx]!.hooks?.find((hk) => hk.command?.includes('kanban-done.sh'))
+    if (hookCmd && hookCmd.command !== expectedKanbanCmd) {
+      hookCmd.command = expectedKanbanCmd
+    }
+  }
+
+  // Activity done hook
+  if (!stopHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes('mirehub-activity.sh')))) {
     stopHooks.push({
       matcher: '',
-      hooks: [{ type: 'command', command: `bash "${scriptPath}" done` }],
+      hooks: [{ type: 'command', command: `bash "${activityScriptPath}" done` }],
     })
   }
 
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
+}
+
+/**
+ * Iterates all existing workspace env directories (~/.mirehub/envs/*)
+ * and ensures hooks are installed in each one.
+ * Called at app startup to keep all envs in sync.
+ */
+export function syncAllWorkspaceEnvHooks(): void {
+  if (!fs.existsSync(ENVS_DIR)) return
+  try {
+    const entries = fs.readdirSync(ENVS_DIR)
+    for (const entry of entries) {
+      const envDir = path.join(ENVS_DIR, entry)
+      try {
+        const stat = fs.statSync(envDir)
+        if (stat.isDirectory()) {
+          installActivityHooks(envDir)
+        }
+      } catch { /* skip individual failures */ }
+    }
+  } catch { /* ignore readdir errors */ }
 }
 
 /**

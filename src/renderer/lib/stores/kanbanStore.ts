@@ -541,7 +541,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     // Launch Claude interactively with prompt as initial message (no timing dependency)
     const relativePromptPath = `.mirehub/.kanban-prompt-${task.id}.md`
     const escapedPrompt = `Lis et execute les instructions du fichier ${relativePromptPath}`
-    const initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && claude --dangerously-skip-permissions "${escapedPrompt}"`
+    const initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && claude --dangerously-skip-permissions "${escapedPrompt}" ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
 
     // Create an interactive terminal tab for this task
     let tabId: string | null = null

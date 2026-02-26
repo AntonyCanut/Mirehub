@@ -22,7 +22,7 @@ import { registerAnalysisHandlers } from './ipc/analysis'
 import { registerNamespaceHandlers } from './ipc/namespace'
 import { registerGitConfigHandlers } from './ipc/gitConfig'
 import { cleanupTerminals } from './ipc/terminal'
-import { ensureActivityHookScript, startActivityWatcher } from './services/activityHooks'
+import { ensureActivityHookScript, ensureAutoApproveScript, ensureKanbanDoneScript, syncAllWorkspaceEnvHooks, startActivityWatcher } from './services/activityHooks'
 import { clearDockBadge } from './services/notificationService'
 import { databaseService } from './services/database'
 import { StorageService } from './services/storage'
@@ -301,8 +301,11 @@ app.whenReady().then(() => {
   // Ensure a Default namespace exists (first launch or migration)
   new StorageService().ensureDefaultNamespace()
 
-  // Ensure activity hook script exists and start watching
+  // Ensure all hook scripts exist and sync hooks across all workspace envs
   ensureActivityHookScript()
+  ensureAutoApproveScript()
+  ensureKanbanDoneScript()
+  syncAllWorkspaceEnvHooks()
   startActivityWatcher()
 
   // DevTools shortcut: Cmd+Alt+I
