@@ -388,6 +388,10 @@ body {
   background: var(--bg-surface);
 }
 
+.notif-item-clickable {
+  cursor: pointer;
+}
+
 .notif-item-icon {
   font-size: 13px;
   flex-shrink: 0;

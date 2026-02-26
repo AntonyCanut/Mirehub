@@ -243,7 +243,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           const body = todoCount > 0
             ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
             : t('notifications.noMoreTickets', { ticket: ticketLabel })
-          pushNotification('success', newTask.title, body)
+          pushNotification('success', newTask.title, body, { workspaceId: currentWorkspaceId!, tabId })
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
@@ -258,7 +258,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           pushNotification('error', t('notifications.taskFailed', { ticket: ticketLabel }),
             todoCount > 0
               ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
-              : t('notifications.noMoreTickets', { ticket: ticketLabel }))
+              : t('notifications.noMoreTickets', { ticket: ticketLabel }),
+            { workspaceId: currentWorkspaceId!, tabId })
         }
         if (newTask.status === 'PENDING') {
           termStore.setTabColor(tabId, '#f9e2af')
@@ -538,10 +539,17 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       return
     }
 
-    // Launch Claude interactively with prompt as initial message (no timing dependency)
+    // Launch Claude — CTO uses direct non-interactive mode (--print), regular uses interactive
     const relativePromptPath = `.mirehub/.kanban-prompt-${task.id}.md`
-    const escapedPrompt = `Lis et execute les instructions du fichier ${relativePromptPath}`
-    const initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && claude --dangerously-skip-permissions "${escapedPrompt}" ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
+    let initialCommand: string
+    if (task.isCtoTicket) {
+      // CTO mode: direct invocation, no back-and-forth — prompt piped from file
+      initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && cat "${relativePromptPath}" | claude --dangerously-skip-permissions --print ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
+    } else {
+      // Regular tickets: interactive mode
+      const escapedPrompt = `Lis et execute les instructions du fichier ${relativePromptPath}`
+      initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && claude --dangerously-skip-permissions "${escapedPrompt}" ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
+    }
 
     // Create an interactive terminal tab for this task
     let tabId: string | null = null
@@ -658,7 +666,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           const body = todoCount > 0
             ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
             : t('notifications.noMoreTickets', { ticket: ticketLabel })
-          pushNotification('success', newTask.title, body)
+          pushNotification('success', newTask.title, body, { workspaceId: wsId, tabId })
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
@@ -672,7 +680,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           pushNotification('error', t('notifications.taskFailed', { ticket: ticketLabel }),
             todoCount > 0
               ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
-              : t('notifications.noMoreTickets', { ticket: ticketLabel }))
+              : t('notifications.noMoreTickets', { ticket: ticketLabel }),
+            { workspaceId: wsId, tabId })
         }
         if (newTask.status === 'PENDING') {
           termStore.setTabColor(tabId, '#f9e2af')

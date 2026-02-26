@@ -129,6 +129,7 @@ export const fr = {
   'settings.claude': 'Claude',
   'settings.detectionColor': 'Couleur de detection',
   'settings.autoClaude': 'Auto-Clauder actif',
+  'settings.autoApprove': 'Auto-Approve',
   'settings.notifications': 'Notifications',
   'settings.sound': 'Son de notification',
   'settings.badge': 'Pastille du dock',

@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react'
-import { useNotificationStore } from '../lib/stores/notificationStore'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { useNotificationStore, type AppNotification } from '../lib/stores/notificationStore'
+import { useWorkspaceStore } from '../lib/stores/workspaceStore'
+import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
 import { useI18n } from '../lib/i18n'
 
 function formatRelativeTime(ts: number, t: (key: string, params?: Record<string, string | number>) => string): string {
@@ -31,6 +33,7 @@ const typeColors: Record<string, string> = {
 export function NotificationCenter() {
   const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   const notifications = useNotificationStore((s) => s.notifications)
   const markAllRead = useNotificationStore((s) => s.markAllRead)
   const clearAll = useNotificationStore((s) => s.clearAll)
@@ -49,8 +52,39 @@ export function NotificationCenter() {
     setIsOpen(false)
   }, [clearAll])
 
+  // Close panel on click outside
+  useEffect(() => {
+    if (!isOpen) return
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [isOpen])
+
+  const handleNotificationClick = useCallback((notif: AppNotification) => {
+    if (!notif.workspaceId) return
+
+    const wsStore = useWorkspaceStore.getState()
+    if (wsStore.activeWorkspaceId !== notif.workspaceId) {
+      wsStore.setActiveWorkspace(notif.workspaceId)
+    }
+
+    if (notif.tabId) {
+      const termStore = useTerminalTabStore.getState()
+      const tab = termStore.tabs.find((t) => t.id === notif.tabId)
+      if (tab) {
+        termStore.setActiveTab(notif.tabId)
+      }
+    }
+
+    setIsOpen(false)
+  }, [])
+
   return (
-    <div className="notification-center">
+    <div className="notification-center" ref={containerRef}>
       <button
         className="notification-bell"
         onClick={handleToggle}
@@ -83,7 +117,11 @@ export function NotificationCenter() {
               <p className="notification-empty">{t('notifications.empty')}</p>
             ) : (
               notifications.map((notif) => (
-                <div key={notif.id} className="notif-item">
+                <div
+                  key={notif.id}
+                  className={`notif-item${notif.workspaceId ? ' notif-item-clickable' : ''}`}
+                  onClick={() => handleNotificationClick(notif)}
+                >
                   <span className="notif-item-icon" style={{ color: typeColors[notif.type] }}>
                     {typeIcons[notif.type]}
                   </span>

@@ -2,6 +2,7 @@ import { IpcMain, app } from 'electron'
 import { IPC_CHANNELS, AppSettings } from '../../shared/types'
 import { StorageService } from '../services/storage'
 import { sendNotification } from '../services/notificationService'
+import { ensureAutoApproveScript } from '../services/activityHooks'
 
 const storage = new StorageService()
 
@@ -14,6 +15,9 @@ export function registerAppHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.APP_SETTINGS_SET,
     async (_event, settings: Partial<AppSettings>) => {
       storage.updateSettings(settings)
+      if ('autoApprove' in settings) {
+        ensureAutoApproveScript(storage.getSettings().autoApprove)
+      }
       return storage.getSettings()
     },
   )

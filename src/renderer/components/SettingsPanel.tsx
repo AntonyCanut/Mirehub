@@ -32,6 +32,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   checkUpdatesOnLaunch: true,
   autoCloseCompletedTerminals: false,
   autoCloseCtoTerminals: true,
+  autoApprove: true,
 }
 
 type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'kanban' | 'notifications' | 'about'
@@ -714,6 +715,20 @@ export function SettingsPanel() {
                   <button
                     className={`settings-toggle${settings.autoClauderEnabled ? ' settings-toggle--active' : ''}`}
                     onClick={() => updateSetting('autoClauderEnabled', !settings.autoClauderEnabled)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.autoApprove')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Approuver automatiquement toutes les actions Claude (outils, commandes, etc.)' : 'Automatically approve all Claude actions (tools, commands, etc.)'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.autoApprove ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('autoApprove', !settings.autoApprove)}
                   >
                     <span className="settings-toggle-knob" />
                   </button>

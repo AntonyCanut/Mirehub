@@ -10,6 +10,8 @@ export interface AppNotification {
   createdAt: number
   read: boolean
   autoDismissMs: number
+  workspaceId?: string
+  tabId?: string
 }
 
 interface NotificationState {
@@ -17,8 +19,13 @@ interface NotificationState {
   toasts: AppNotification[]
 }
 
+interface NotificationMeta {
+  workspaceId?: string
+  tabId?: string
+}
+
 interface NotificationActions {
-  addNotification: (type: NotificationType, title: string, body: string, autoDismissMs?: number) => void
+  addNotification: (type: NotificationType, title: string, body: string, autoDismissMs?: number, meta?: NotificationMeta) => void
   dismissToast: (id: string) => void
   markAllRead: () => void
   clearAll: () => void
@@ -34,7 +41,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
   toasts: [],
 
-  addNotification: (type, title, body, autoDismissMs = DEFAULT_DISMISS_MS) => {
+  addNotification: (type, title, body, autoDismissMs = DEFAULT_DISMISS_MS, meta?) => {
     const id = crypto.randomUUID()
     const notification: AppNotification = {
       id,
@@ -44,6 +51,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       createdAt: Date.now(),
       read: false,
       autoDismissMs,
+      workspaceId: meta?.workspaceId,
+      tabId: meta?.tabId,
     }
 
     set((state) => ({
@@ -75,6 +84,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 }))
 
 /** Standalone helper — callable from other stores without circular deps */
-export function pushNotification(type: NotificationType, title: string, body: string) {
-  useNotificationStore.getState().addNotification(type, title, body)
+export function pushNotification(type: NotificationType, title: string, body: string, meta?: NotificationMeta) {
+  useNotificationStore.getState().addNotification(type, title, body, undefined, meta)
 }

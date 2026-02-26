@@ -4,6 +4,7 @@ import os from 'os'
 import { BrowserWindow } from 'electron'
 import { IPC_CHANNELS } from '../../shared/types'
 import { sendNotification, sendSilentNotification, playBellRepeat } from './notificationService'
+import { StorageService } from './storage'
 
 const ACTIVITY_DIR = path.join(os.homedir(), '.mirehub', 'activity')
 const HOOKS_DIR = path.join(os.homedir(), '.mirehub', 'hooks')
@@ -60,20 +61,21 @@ printf '{"status":"%s","path":"%s","timestamp":%s}\\n' "$STATUS" "$PWD" "$(date 
 
 /**
  * Ensures the auto-approve hook script exists at ~/.mirehub/hooks/mirehub-autoapprove.sh
- * Auto-approves all tool permissions during kanban sessions (when MIREHUB_KANBAN_TASK_ID is set).
+ * When globalAutoApprove is true: auto-approves ALL tool permissions.
+ * When globalAutoApprove is false: only auto-approves during kanban sessions (MIREHUB_KANBAN_TASK_ID).
  */
-export function ensureAutoApproveScript(): void {
+export function ensureAutoApproveScript(globalAutoApprove = false): void {
   if (!fs.existsSync(HOOKS_DIR)) {
     fs.mkdirSync(HOOKS_DIR, { recursive: true })
   }
 
   const scriptPath = path.join(HOOKS_DIR, AUTOAPPROVE_SCRIPT_NAME)
+  const kanbanOnlyCheck = '[ -z "$MIREHUB_KANBAN_TASK_ID" ] && exit 0'
   const script = `#!/bin/bash
-# Mirehub - Auto-approve all permissions during kanban sessions (auto-generated)
-# Activated only when MIREHUB_KANBAN_TASK_ID is set (kanban terminal)
-[ -z "$MIREHUB_KANBAN_TASK_ID" ] && exit 0
+# Mirehub - Auto-approve hook (auto-generated)
+${globalAutoApprove ? '# Global auto-approve enabled' : kanbanOnlyCheck}
 cat > /dev/null
-printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Mirehub kanban auto-approve"}}'
+printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Mirehub auto-approve"}}'
 `
   fs.writeFileSync(scriptPath, script, { mode: 0o755 })
 }
@@ -165,8 +167,10 @@ esac
  * Merges with existing hooks (e.g. kanban hooks) without overwriting.
  */
 export function installActivityHooks(projectPath: string): void {
+  const storage = new StorageService()
+  const { autoApprove } = storage.getSettings()
   ensureActivityHookScript()
-  ensureAutoApproveScript()
+  ensureAutoApproveScript(autoApprove)
   ensureKanbanDoneScript()
 
   const claudeDir = path.join(projectPath, '.claude')

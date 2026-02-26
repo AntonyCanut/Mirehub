@@ -129,6 +129,7 @@ export const en = {
   'settings.claude': 'Claude',
   'settings.detectionColor': 'Detection color',
   'settings.autoClaude': 'Auto-Clauder enabled',
+  'settings.autoApprove': 'Auto-Approve',
   'settings.notifications': 'Notifications',
   'settings.sound': 'Notification sound',
   'settings.badge': 'Dock badge',

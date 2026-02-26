@@ -161,6 +161,7 @@ export interface AppSettings {
   checkUpdatesOnLaunch: boolean
   autoCloseCompletedTerminals: boolean
   autoCloseCtoTerminals: boolean
+  autoApprove: boolean
 }
 
 export interface ProjectInfo {
