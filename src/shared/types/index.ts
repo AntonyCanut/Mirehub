@@ -404,6 +404,7 @@ export interface DbConnection {
   customTagName?: string
   config: DbConnectionConfig
   workspaceId: string
+  nlPermissions?: DbNlPermissions
   createdAt: number
   updatedAt: number
 }
@@ -497,6 +498,68 @@ export interface DbTransferResult {
 export interface DbFile {
   version: 1
   connections: DbConnection[]
+}
+
+// Natural Language Query types
+export interface DbNlPermissions {
+  canRead: boolean
+  canUpdate: boolean
+  canDelete: boolean
+}
+
+export type DbNlMessageRole = 'user' | 'assistant' | 'error'
+
+export interface DbNlMessage {
+  id: string
+  role: DbNlMessageRole
+  content: string
+  sql?: string
+  result?: DbQueryResult
+  timestamp: number
+}
+
+export interface DbNlQueryRequest {
+  connectionId: string
+  prompt: string
+  permissions: DbNlPermissions
+}
+
+export interface DbNlQueryResponse {
+  success: boolean
+  sql?: string
+  result?: DbQueryResult
+  explanation?: string
+  error?: string
+}
+
+export interface DbNlGenerateResponse {
+  success: boolean
+  sql?: string
+  explanation?: string
+  error?: string
+}
+
+export interface DbNlHistoryEntry {
+  role: 'user' | 'assistant'
+  content: string
+  sql?: string
+}
+
+export interface DbNlInterpretRequest {
+  connectionId: string
+  question: string
+  sql: string
+  columns: string[]
+  rows: Record<string, unknown>[]
+  rowCount: number
+  history?: DbNlHistoryEntry[]
+}
+
+export interface DbNlInterpretResponse {
+  success: boolean
+  answer?: string
+  refinedSql?: string
+  error?: string
 }
 
 // MCP Server types
@@ -831,6 +894,11 @@ export const IPC_CHANNELS = {
   DB_TRANSFER: 'db:transfer',
   DB_QUERY_PROGRESS: 'db:queryProgress',
   DB_BACKUP_LOG: 'db:backupLog',
+  DB_NL_QUERY: 'db:nlQuery',
+  DB_NL_GENERATE_SQL: 'db:nlGenerateSql',
+  DB_NL_INTERPRET: 'db:nlInterpret',
+  DB_NL_CANCEL: 'db:nlCancel',
+  DB_GET_SCHEMA_CONTEXT: 'db:getSchemaContext',
 
   // App
   APP_SETTINGS_GET: 'app:settingsGet',

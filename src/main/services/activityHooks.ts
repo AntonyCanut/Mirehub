@@ -28,6 +28,10 @@ export function ensureActivityHookScript(): void {
   const script = `#!/bin/bash
 # Mirehub Claude Activity Hook (auto-generated)
 # Signals Claude activity status to Mirehub via status files
+
+# Skip activity tracking for NL database queries (no bell sound)
+[ -n "$MIREHUB_NL_QUERY" ] && exit 0
+
 STATUS_DIR="$HOME/.mirehub/activity"
 mkdir -p "$STATUS_DIR"
 

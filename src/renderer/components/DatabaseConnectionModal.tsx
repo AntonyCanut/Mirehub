@@ -6,6 +6,7 @@ import type {
   DbConnectionConfig,
   DbEngine,
   DbEnvironmentTag,
+  DbNlPermissions,
 } from '../../shared/types'
 
 interface DatabaseConnectionModalProps {
@@ -78,6 +79,11 @@ export function DatabaseConnectionModal({
   const [filePath, setFilePath] = useState(connection?.config.filePath ?? '')
   const [ssl, setSsl] = useState(connection?.config.ssl ?? false)
 
+  // NL Permissions
+  const [nlCanRead, setNlCanRead] = useState(connection?.nlPermissions?.canRead ?? true)
+  const [nlCanUpdate, setNlCanUpdate] = useState(connection?.nlPermissions?.canUpdate ?? false)
+  const [nlCanDelete, setNlCanDelete] = useState(connection?.nlPermissions?.canDelete ?? false)
+
   // Test state
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<{
@@ -145,6 +151,11 @@ export function DatabaseConnectionModal({
 
   const handleSave = useCallback(() => {
     const now = Date.now()
+    const nlPermissions: DbNlPermissions = {
+      canRead: nlCanRead,
+      canUpdate: nlCanUpdate,
+      canDelete: nlCanDelete,
+    }
     const conn: DbConnection = {
       id: connection?.id ?? generateId(),
       name: name || t('db.untitledConnection'),
@@ -153,11 +164,12 @@ export function DatabaseConnectionModal({
       customTagName: environmentTag === 'custom' ? customTagName : undefined,
       config: buildConfig(),
       workspaceId,
+      nlPermissions,
       createdAt: connection?.createdAt ?? now,
       updatedAt: now,
     }
     onSave(conn)
-  }, [connection, name, engine, environmentTag, customTagName, buildConfig, workspaceId, onSave, t])
+  }, [connection, name, engine, environmentTag, customTagName, buildConfig, workspaceId, nlCanRead, nlCanUpdate, nlCanDelete, onSave, t])
 
   const handleBrowseFile = useCallback(async () => {
     try {
@@ -375,6 +387,42 @@ export function DatabaseConnectionModal({
               )}
             </>
           )}
+
+          {/* Claude NL Permissions */}
+          <div className="db-form-row">
+            <label className="db-form-label">{t('db.nlPermissions')}</label>
+            <div className="db-nl-perms">
+              <label className="db-form-label db-form-label--inline db-nl-perm-item">
+                <input
+                  type="checkbox"
+                  checked={nlCanRead}
+                  onChange={(e) => setNlCanRead(e.target.checked)}
+                />
+                <span style={{ marginLeft: 6 }}>{t('db.nlPermRead')}</span>
+              </label>
+              <label className="db-form-label db-form-label--inline db-nl-perm-item">
+                <input
+                  type="checkbox"
+                  checked={nlCanUpdate}
+                  onChange={(e) => setNlCanUpdate(e.target.checked)}
+                />
+                <span style={{ marginLeft: 6 }}>{t('db.nlPermUpdate')}</span>
+              </label>
+              <label className="db-form-label db-form-label--inline db-nl-perm-item">
+                <input
+                  type="checkbox"
+                  checked={nlCanDelete}
+                  onChange={(e) => setNlCanDelete(e.target.checked)}
+                />
+                <span style={{ marginLeft: 6 }}>{t('db.nlPermDelete')}</span>
+              </label>
+            </div>
+            {(nlCanUpdate || nlCanDelete) && (environmentTag === 'prd' || environmentTag === 'qua') && (
+              <div className="db-nl-perm-warning">
+                {t('db.nlPermWarning')}
+              </div>
+            )}
+          </div>
 
           {/* Test result */}
           {testResult && (

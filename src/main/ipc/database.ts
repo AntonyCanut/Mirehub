@@ -2,10 +2,11 @@ import { IpcMain, dialog } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { IPC_CHANNELS, DbConnectionConfig, DbConnection, DbFile, DbBackupEntry, DbEnvironmentTag } from '../../shared/types'
+import { IPC_CHANNELS, DbConnectionConfig, DbConnection, DbFile, DbBackupEntry, DbEnvironmentTag, DbNlPermissions, DbNlHistoryEntry, DbNlInterpretRequest } from '../../shared/types'
 import { databaseService } from '../services/database'
 import { encryptPassword, decryptPassword } from '../services/database/crypto'
 import { backupDatabase, listBackups, deleteBackup, restoreBackup } from '../services/database/backup'
+import { executeNlQuery, generateNlSql, interpretNlResults, cancelNlQuery, getSchemaContext } from '../services/database/nlQuery'
 
 const DB_DIR = path.join(os.homedir(), '.mirehub', 'databases')
 
@@ -389,6 +390,96 @@ export function registerDatabaseHandlers(ipcMain: IpcMain): void {
         return await restoreBackup(entry, decrypted)
       } catch (err) {
         return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  // Natural Language Query - translate NL to SQL via Claude and execute
+  ipcMain.handle(
+    IPC_CHANNELS.DB_NL_QUERY,
+    async (
+      _event,
+      {
+        connectionId,
+        prompt,
+        permissions,
+      }: {
+        connectionId: string
+        prompt: string
+        permissions: DbNlPermissions
+      },
+    ) => {
+      try {
+        return await executeNlQuery(connectionId, prompt, permissions)
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  // Generate SQL from natural language (without executing)
+  ipcMain.handle(
+    IPC_CHANNELS.DB_NL_GENERATE_SQL,
+    async (
+      _event,
+      {
+        connectionId,
+        prompt,
+        permissions,
+        history,
+      }: {
+        connectionId: string
+        prompt: string
+        permissions: DbNlPermissions
+        history?: DbNlHistoryEntry[]
+      },
+    ) => {
+      try {
+        return await generateNlSql(connectionId, prompt, permissions, history)
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  // Interpret query results via Claude (human answer or refinement)
+  ipcMain.handle(
+    IPC_CHANNELS.DB_NL_INTERPRET,
+    async (_event, req: DbNlInterpretRequest) => {
+      try {
+        return await interpretNlResults(
+          req.connectionId,
+          req.question,
+          req.sql,
+          req.columns,
+          req.rows,
+          req.rowCount,
+          req.history,
+        )
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  // Cancel an active NL query
+  ipcMain.handle(
+    IPC_CHANNELS.DB_NL_CANCEL,
+    async (_event, { connectionId }: { connectionId: string }) => {
+      const cancelled = cancelNlQuery(connectionId)
+      return { success: cancelled }
+    },
+  )
+
+  // Get schema context for a connection (used for NL query)
+  ipcMain.handle(
+    IPC_CHANNELS.DB_GET_SCHEMA_CONTEXT,
+    async (_event, { connectionId }: { connectionId: string }) => {
+      try {
+        const schema = await getSchemaContext(connectionId)
+        return { success: true, schema }
+      } catch (err) {
+        return { success: false, error: String(err), schema: '' }
       }
     },
   )

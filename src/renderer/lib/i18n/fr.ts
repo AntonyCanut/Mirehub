@@ -773,6 +773,23 @@ export const fr = {
   'db.confirmDeleteBackup': 'Etes-vous sur de vouloir supprimer ce backup ?',
   'db.logs': 'Logs',
   'db.logEmpty': 'Aucun log. Lancez un backup ou une restauration pour voir la sortie ici.',
+
+  // Natural Language Query
+  'db.nlChat': 'Chat IA',
+  'db.nlPlaceholder': 'Posez une question sur vos donnees en langage naturel...',
+  'db.nlSend': 'Envoyer',
+  'db.nlCancel': 'Annuler',
+  'db.nlGenerating': 'Generation de la requete...',
+  'db.nlGeneratedSql': 'SQL genere',
+  'db.nlCopyToEditor': 'Copier dans l\'editeur',
+  'db.nlPermissions': 'Permissions Claude',
+  'db.nlPermRead': 'Lecture',
+  'db.nlPermUpdate': 'Mise a jour',
+  'db.nlPermDelete': 'Suppression',
+  'db.nlPermWarning': 'Attention: vous autorisez Claude a modifier/supprimer des donnees sur cet environnement.',
+  'db.nlNoMessages': 'Posez une question en langage naturel pour interroger votre base de donnees.',
+  'db.nlError': 'Erreur lors de la requete NL',
+
   'view.database': 'Databases',
   'command.showDatabase': 'Afficher Base de donnees',
   'project.addDbConnection': 'Ajouter une connexion BDD',

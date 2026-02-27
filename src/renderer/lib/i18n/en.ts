@@ -773,6 +773,23 @@ export const en = {
   'db.confirmDeleteBackup': 'Are you sure you want to delete this backup?',
   'db.logs': 'Logs',
   'db.logEmpty': 'No logs yet. Run a backup or restore to see output here.',
+
+  // Natural Language Query
+  'db.nlChat': 'AI Chat',
+  'db.nlPlaceholder': 'Ask a question about your data in natural language...',
+  'db.nlSend': 'Send',
+  'db.nlCancel': 'Cancel',
+  'db.nlGenerating': 'Generating query...',
+  'db.nlGeneratedSql': 'Generated SQL',
+  'db.nlCopyToEditor': 'Copy to editor',
+  'db.nlPermissions': 'Claude Permissions',
+  'db.nlPermRead': 'Read',
+  'db.nlPermUpdate': 'Update',
+  'db.nlPermDelete': 'Delete',
+  'db.nlPermWarning': 'Warning: you are allowing Claude to modify/delete data on this environment.',
+  'db.nlNoMessages': 'Ask a question in natural language to query your database.',
+  'db.nlError': 'Error during NL query',
+
   'view.database': 'Databases',
   'command.showDatabase': 'Show Database',
   'project.addDbConnection': 'Add DB connection',

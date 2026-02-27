@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -453,6 +453,19 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.DB_RESTORE, { entry, targetConfig }),
     transfer: (sourceId: string, targetId: string, tables: string[]): Promise<{ success: boolean; errors: string[] }> =>
       ipcRenderer.invoke(IPC_CHANNELS.DB_TRANSFER, { sourceId, targetId, tables }),
+    nlQuery: (connectionId: string, prompt: string, permissions: DbNlPermissions): Promise<DbNlQueryResponse> =>
+      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_QUERY, { connectionId, prompt, permissions }),
+    nlGenerateSql: (connectionId: string, prompt: string, permissions: DbNlPermissions, history?: DbNlHistoryEntry[]): Promise<DbNlGenerateResponse> =>
+      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_GENERATE_SQL, { connectionId, prompt, permissions, history }),
+    nlInterpret: (req: DbNlInterpretRequest): Promise<DbNlInterpretResponse> =>
+      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_INTERPRET, req),
+    nlCancel: (connectionId: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_CANCEL, { connectionId }),
+    getSchemaContext: async (connectionId: string): Promise<string> => {
+      const r = await ipcRenderer.invoke(IPC_CHANNELS.DB_GET_SCHEMA_CONTEXT, { connectionId })
+      if (!r.success) throw new Error(r.error || 'Failed to get schema context')
+      return r.schema
+    },
   },
 
   // App info

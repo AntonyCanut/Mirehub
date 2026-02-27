@@ -1,9 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useI18n } from '../lib/i18n'
 import { DatabaseResultsTable } from './DatabaseResultsTable'
+import { DatabaseNLChat } from './DatabaseNLChat'
+import { ResizeDivider } from './ResizeDivider'
+import { DatabaseTabBar } from './DatabaseTabBar'
 import { CopyableError } from './CopyableError'
+import { useDatabaseTabStore } from '../lib/stores/databaseTabStore'
 import type {
   DbConnection,
   DbConnectionStatus,
@@ -90,36 +94,74 @@ export function DatabaseQueryArea({
 }: DatabaseQueryAreaProps) {
   const { t } = useI18n()
 
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<DbQueryResult | null>(null)
-  const [executing, setExecuting] = useState(false)
-  const [limit, setLimit] = useState(100)
-  const [page, setPage] = useState(0)
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const {
+    tabsByConnection,
+    activeTabByConnection,
+    ensureTab,
+    createTab,
+    updateTabQuery,
+    updateTabResults,
+    updateTabExecuting,
+    updateTabLimit,
+    updateTabPage,
+  } = useDatabaseTabStore()
 
-  // Handle pending query from sidebar table click
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [editorHeight, setEditorHeight] = useState(150)
+  const [chatHeight, setChatHeight] = useState(200)
+
+  const handleEditorResize = useCallback(
+    (deltaY: number) => {
+      const maxH = containerRef.current
+        ? containerRef.current.clientHeight * 0.6
+        : 400
+      setEditorHeight((h) => Math.min(Math.max(h + deltaY, 80), maxH))
+    },
+    [],
+  )
+
+  const handleChatResize = useCallback(
+    (deltaY: number) => {
+      const maxH = containerRef.current
+        ? containerRef.current.clientHeight * 0.6
+        : 400
+      setChatHeight((h) => Math.min(Math.max(h - deltaY, 80), maxH))
+    },
+    [],
+  )
+
+  const connectionId = connection?.id ?? ''
+  const tabs = tabsByConnection[connectionId] ?? []
+  const activeTabId = activeTabByConnection[connectionId] ?? ''
+  const activeTab = tabs.find((t) => t.id === activeTabId)
+
+  // Ensure a default tab exists when connection is set
   useEffect(() => {
-    if (pendingQuery) {
-      setQuery(pendingQuery)
+    if (connectionId) {
+      ensureTab(connectionId)
+    }
+  }, [connectionId, ensureTab])
+
+  // Handle pending query from sidebar table click — create a new tab
+  useEffect(() => {
+    if (pendingQuery && connectionId) {
+      const newTabId = createTab(connectionId)
+      updateTabQuery(connectionId, newTabId, pendingQuery)
       onPendingQueryConsumed()
-      // Auto-execute
       if (connectionStatus === 'connected' && connection) {
-        executeWithQuery(pendingQuery, limit, 0)
+        executeWithParams(pendingQuery, 100, 0, newTabId)
       }
     }
   }, [pendingQuery]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reset results when connection changes
-  useEffect(() => {
-    setResults(null)
-    setPage(0)
-  }, [connection?.id])
-
-  const executeWithQuery = useCallback(
-    async (sql: string, queryLimit: number, queryOffset: number) => {
+  const executeWithParams = useCallback(
+    async (sql: string, queryLimit: number, queryOffset: number, tabId?: string) => {
       if (!connection || connectionStatus !== 'connected' || !sql.trim()) return
+      const tid = tabId ?? activeTabId
+      if (!tid) return
 
-      setExecuting(true)
+      updateTabExecuting(connectionId, tid, true)
       try {
         const result = await window.mirehub.database.executeQuery(
           connection.id,
@@ -127,9 +169,9 @@ export function DatabaseQueryArea({
           queryLimit,
           queryOffset,
         )
-        setResults(result)
+        updateTabResults(connectionId, tid, result)
       } catch (err) {
-        setResults({
+        updateTabResults(connectionId, tid, {
           columns: [],
           rows: [],
           rowCount: 0,
@@ -137,16 +179,17 @@ export function DatabaseQueryArea({
           error: String(err),
         })
       } finally {
-        setExecuting(false)
+        updateTabExecuting(connectionId, tid, false)
       }
     },
-    [connection, connectionStatus],
+    [connection, connectionStatus, connectionId, activeTabId, updateTabExecuting, updateTabResults],
   )
 
   const handleExecute = useCallback(() => {
-    setPage(0)
-    executeWithQuery(query, limit, 0)
-  }, [query, limit, executeWithQuery])
+    if (!activeTab) return
+    updateTabPage(connectionId, activeTabId, 0)
+    executeWithParams(activeTab.query, activeTab.limit, 0)
+  }, [activeTab, connectionId, activeTabId, updateTabPage, executeWithParams])
 
   const handleCancelQuery = useCallback(async () => {
     if (!connection) return
@@ -155,22 +198,25 @@ export function DatabaseQueryArea({
     } catch {
       // Ignore cancel errors
     }
-    setExecuting(false)
-  }, [connection])
+    if (activeTabId) {
+      updateTabExecuting(connectionId, activeTabId, false)
+    }
+  }, [connection, connectionId, activeTabId, updateTabExecuting])
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      setPage(newPage)
-      executeWithQuery(query, limit, newPage * limit)
+      if (!activeTab) return
+      updateTabPage(connectionId, activeTabId, newPage)
+      executeWithParams(activeTab.query, activeTab.limit, newPage * activeTab.limit)
     },
-    [query, limit, executeWithQuery],
+    [activeTab, connectionId, activeTabId, updateTabPage, executeWithParams],
   )
 
   const handleExportCsv = useCallback(() => {
-    if (results) {
-      exportToCsv(results)
+    if (activeTab?.results) {
+      exportToCsv(activeTab.results)
     }
-  }, [results])
+  }, [activeTab])
 
   const handleEditorMount = useCallback(
     (editorInstance: editor.IStandaloneCodeEditor) => {
@@ -178,14 +224,54 @@ export function DatabaseQueryArea({
 
       // Add Cmd+Enter shortcut
       editorInstance.addCommand(
-        // Monaco KeyMod.CtrlCmd | Monaco KeyCode.Enter
-        2048 | 3, // KeyMod.CtrlCmd = 2048, KeyCode.Enter = 3
+        2048 | 3, // KeyMod.CtrlCmd | KeyCode.Enter
         () => {
           handleExecute()
         },
       )
     },
     [handleExecute],
+  )
+
+  // Handle NL chat copy to editor: paste SQL and focus editor
+  const handleCopyToEditor = useCallback(
+    (sql: string) => {
+      if (!connectionId) return
+      const tid = activeTabId || ensureTab(connectionId)
+      updateTabQuery(connectionId, tid, sql)
+      setTimeout(() => {
+        editorRef.current?.focus()
+      }, 50)
+    },
+    [connectionId, activeTabId, ensureTab, updateTabQuery],
+  )
+
+  // Handle NL chat execute: place SQL in editor, execute, and return results
+  const handleExecuteFromChat = useCallback(
+    async (sql: string): Promise<DbQueryResult | null> => {
+      if (!connection || connectionStatus !== 'connected' || !sql.trim()) return null
+      const tid = activeTabId || ensureTab(connectionId)
+      updateTabQuery(connectionId, tid, sql)
+      updateTabExecuting(connectionId, tid, true)
+      try {
+        const result = await window.mirehub.database.executeQuery(connection.id, sql, 100, 0)
+        updateTabResults(connectionId, tid, result)
+        return result
+      } catch (err) {
+        const errorResult: DbQueryResult = {
+          columns: [],
+          rows: [],
+          rowCount: 0,
+          executionTime: 0,
+          error: String(err),
+        }
+        updateTabResults(connectionId, tid, errorResult)
+        return errorResult
+      } finally {
+        updateTabExecuting(connectionId, tid, false)
+      }
+    },
+    [connection, connectionStatus, connectionId, activeTabId, ensureTab, updateTabQuery, updateTabExecuting, updateTabResults],
   )
 
   // Determine editor language based on engine
@@ -209,8 +295,14 @@ export function DatabaseQueryArea({
       ? connection.customTagName ?? 'custom'
       : connection.environmentTag
 
+  const query = activeTab?.query ?? ''
+  const results = activeTab?.results ?? null
+  const executing = activeTab?.executing ?? false
+  const limit = activeTab?.limit ?? 100
+  const page = activeTab?.page ?? 0
+
   return (
-    <div className="db-query-area">
+    <div className="db-query-area" ref={containerRef}>
       {/* Toolbar */}
       <div className="db-query-toolbar">
         <div className="db-query-toolbar-left">
@@ -235,7 +327,9 @@ export function DatabaseQueryArea({
           <select
             className="db-limit-select"
             value={limit}
-            onChange={(e) => setLimit(Number(e.target.value))}
+            onChange={(e) => {
+              if (activeTabId) updateTabLimit(connectionId, activeTabId, Number(e.target.value))
+            }}
           >
             {LIMIT_OPTIONS.map((l) => (
               <option key={l} value={l}>
@@ -260,13 +354,19 @@ export function DatabaseQueryArea({
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="db-editor-container">
+      {/* Tab Bar */}
+      <DatabaseTabBar connectionId={connectionId} />
+
+      {/* Row 1: SQL Editor */}
+      <div className="db-editor-container" style={{ height: editorHeight }}>
         <Editor
-          height="200px"
+          key={activeTabId}
+          height={editorHeight + 'px'}
           language={editorLanguage}
           value={query}
-          onChange={(value) => setQuery(value ?? '')}
+          onChange={(value) => {
+            if (activeTabId) updateTabQuery(connectionId, activeTabId, value ?? '')
+          }}
           onMount={handleEditorMount}
           theme="vs-dark"
           options={{
@@ -284,7 +384,9 @@ export function DatabaseQueryArea({
         />
       </div>
 
-      {/* Results */}
+      <ResizeDivider onResize={handleEditorResize} />
+
+      {/* Row 2: Results */}
       <div className="db-results-container">
         {executing && (
           <div className="db-results-loading">{t('db.executing')}</div>
@@ -316,6 +418,18 @@ export function DatabaseQueryArea({
               : t('db.connectFirst')}
           </div>
         )}
+      </div>
+
+      <ResizeDivider onResize={handleChatResize} />
+
+      {/* Row 3: NL Chat */}
+      <div style={{ height: chatHeight, flexShrink: 0 }}>
+        <DatabaseNLChat
+          connection={connection}
+          connectionStatus={connectionStatus}
+          onCopyToEditor={handleCopyToEditor}
+          onExecuteFromChat={handleExecuteFromChat}
+        />
       </div>
     </div>
   )

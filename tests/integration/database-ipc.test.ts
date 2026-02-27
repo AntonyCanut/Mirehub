@@ -99,6 +99,12 @@ vi.mock('../../src/main/services/database/backup', () => ({
   restoreBackup: mockRestoreBackup,
 }))
 
+// Mock NL query module
+vi.mock('../../src/main/services/database/nlQuery', () => ({
+  executeNlQuery: vi.fn().mockResolvedValue({ success: true, sql: 'SELECT 1', result: { columns: [], rows: [], rowCount: 0, executionTime: 0 } }),
+  getSchemaContext: vi.fn().mockResolvedValue('Table: users\n  - id: integer [PK]'),
+}))
+
 import { registerDatabaseHandlers } from '../../src/main/ipc/database'
 import type { DbFile, DbConnectionConfig } from '../../src/shared/types'
 
@@ -156,8 +162,8 @@ describe('Database IPC Handlers', () => {
 
   // --- Handler Registration ---
 
-  it('enregistre les 18 handlers database', () => {
-    expect(mockIpcMain.handle).toHaveBeenCalledTimes(18)
+  it('enregistre les 21 handlers database', () => {
+    expect(mockIpcMain.handle).toHaveBeenCalledTimes(21)
     expect(mockIpcMain._handlers.has('db:connect')).toBe(true)
     expect(mockIpcMain._handlers.has('db:disconnect')).toBe(true)
     expect(mockIpcMain._handlers.has('db:testConnection')).toBe(true)
@@ -176,6 +182,9 @@ describe('Database IPC Handlers', () => {
     expect(mockIpcMain._handlers.has('db:backupDelete')).toBe(true)
     expect(mockIpcMain._handlers.has('db:restore')).toBe(true)
     expect(mockIpcMain._handlers.has('db:transfer')).toBe(true)
+    expect(mockIpcMain._handlers.has('db:nlQuery')).toBe(true)
+    expect(mockIpcMain._handlers.has('db:nlCancel')).toBe(true)
+    expect(mockIpcMain._handlers.has('db:getSchemaContext')).toBe(true)
   })
 
   // --- DB_LOAD ---

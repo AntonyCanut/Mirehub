@@ -4,7 +4,9 @@ import type {
   DbConnectionStatus,
   DbFile,
   DbBackupLogEntry,
+  DbNlMessage,
 } from '../../../shared/types'
+import { useDatabaseTabStore } from './databaseTabStore'
 
 interface DatabaseState {
   /** Connections indexed by workspaceId */
@@ -15,6 +17,10 @@ interface DatabaseState {
   loadedWorkspaces: Record<string, boolean>
   loading: boolean
   backupLogs: DbBackupLogEntry[]
+  /** NL chat messages indexed by connectionId */
+  nlMessages: Record<string, DbNlMessage[]>
+  /** NL query loading state per connectionId */
+  nlLoading: Record<string, boolean>
 }
 
 interface DatabaseActions {
@@ -31,6 +37,9 @@ interface DatabaseActions {
   reorderConnections: (workspaceId: string, fromIndex: number, toIndex: number) => void
   appendBackupLog: (entry: DbBackupLogEntry) => void
   clearBackupLogs: () => void
+  addNlMessage: (connectionId: string, message: DbNlMessage) => void
+  setNlLoading: (connectionId: string, loading: boolean) => void
+  clearNlMessages: (connectionId: string) => void
 }
 
 type DatabaseStore = DatabaseState & DatabaseActions
@@ -53,6 +62,8 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
   loadedWorkspaces: {},
   loading: false,
   backupLogs: [],
+  nlMessages: {},
+  nlLoading: {},
 
   loadConnections: async (workspaceId: string) => {
     if (get().loadedWorkspaces[workspaceId]) return
@@ -140,10 +151,21 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
         nextConns[workspaceId] = (nextConns[workspaceId] ?? []).filter((c) => c.id !== id)
       }
 
+      // Clean up NL-related state for deleted connection
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _msgs, ...nextNlMessages } = state.nlMessages
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _loading, ...nextNlLoading } = state.nlLoading
+
+      // Clean up query tabs for deleted connection
+      useDatabaseTabStore.getState().clearTabsForConnection(id)
+
       return {
         connectionsByWorkspace: nextConns,
         connectionStatuses: nextStatuses,
         activeConnectionId: activeConnectionId === id ? null : activeConnectionId,
+        nlMessages: nextNlMessages,
+        nlLoading: nextNlLoading,
       }
     })
 
@@ -215,5 +237,26 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
 
   clearBackupLogs: () => {
     set({ backupLogs: [] })
+  },
+
+  addNlMessage: (connectionId: string, message: DbNlMessage) => {
+    set((state) => ({
+      nlMessages: {
+        ...state.nlMessages,
+        [connectionId]: [...(state.nlMessages[connectionId] ?? []), message],
+      },
+    }))
+  },
+
+  setNlLoading: (connectionId: string, loading: boolean) => {
+    set((state) => ({
+      nlLoading: { ...state.nlLoading, [connectionId]: loading },
+    }))
+  },
+
+  clearNlMessages: (connectionId: string) => {
+    set((state) => ({
+      nlMessages: { ...state.nlMessages, [connectionId]: [] },
+    }))
   },
 }))
