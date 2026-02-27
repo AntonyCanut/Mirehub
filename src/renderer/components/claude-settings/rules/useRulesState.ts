@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { RuleEntry, TemplateRuleEntry } from '../../../../shared/types'
 import { updateAuthorFrontmatter } from './treeUtils'
 
@@ -29,7 +29,7 @@ export function useRulesState(projectPath: string) {
     filename: string
     content: string
   } | null>(null)
-  const defaultsInitRef = useRef(false)
+  const [syncing, setSyncing] = useState(false)
   const [gitUserName, setGitUserName] = useState<string>('')
 
   // Get git user name for co-authoring
@@ -55,17 +55,21 @@ export function useRulesState(projectPath: string) {
     return listResult.rules
   }, [projectPath])
 
-  // Initial load + auto-create defaults if empty
+  // Initial load + auto-check ai-rules for updates (respects 24h debounce)
   useEffect(() => {
+    let cancelled = false
     const init = async () => {
-      const loadedRules = await load()
-      if (loadedRules.length === 0 && !defaultsInitRef.current) {
-        defaultsInitRef.current = true
-        await window.mirehub.claudeMemory.initDefaultRules(projectPath)
-        await load()
+      await load()
+      setSyncing(true)
+      try {
+        await window.mirehub.claudeMemory.checkAiRules(projectPath)
+        if (!cancelled) await load()
+      } finally {
+        if (!cancelled) setSyncing(false)
       }
     }
     init()
+    return () => { cancelled = true }
   }, [load, projectPath])
 
   // Auto-select first rule if none selected
@@ -283,6 +287,7 @@ export function useRulesState(projectPath: string) {
     renameValue,
     confirmReplace,
     confirmOverwriteShared,
+    syncing,
 
     // Derived
     selectedRule,

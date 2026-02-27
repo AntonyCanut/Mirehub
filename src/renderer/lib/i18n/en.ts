@@ -478,6 +478,7 @@ export const en = {
   'claude.syncAiRules': 'Update rules',
   'claude.syncAiRulesSyncing': 'Updating...',
   'claude.syncAiRulesTooltip': 'Sync rules from SpaceMalamute/ai-rules project',
+  'claude.checkingAiRules': 'Checking for rule updates...',
   'claude.selectedCount': '{count} selected',
   'claude.confirmOverwriteSharedTitle': 'Overwrite shared rule',
   'claude.confirmOverwriteSharedMessage': 'This will overwrite the existing shared rule and affect all projects using it.',

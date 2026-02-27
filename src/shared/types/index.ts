@@ -930,6 +930,7 @@ export const IPC_CHANNELS = {
   CLAUDE_MEMORY_READ_TEMPLATE: 'claude:memoryReadTemplate',
   CLAUDE_MEMORY_IMPORT_TEMPLATES: 'claude:memoryImportTemplates',
   CLAUDE_MEMORY_SYNC_AI_RULES: 'claude:memorySyncAiRules',
+  CLAUDE_MEMORY_CHECK_AI_RULES: 'claude:memoryCheckAiRules',
 
   // Claude settings hierarchy
   PROJECT_READ_CLAUDE_LOCAL_SETTINGS: 'project:readClaudeLocalSettings',

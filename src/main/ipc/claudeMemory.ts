@@ -389,8 +389,10 @@ export function registerClaudeMemoryHandlers(ipcMain: IpcMain): void {
     },
   )
 
-  // Resolve templates directory
+  // Resolve templates directory (prefer synced cache over bundled)
   function getTemplatesDir(): string {
+    const cachedDir = path.join(os.homedir(), '.mirehub', 'cache', 'rule-templates')
+    if (fs.existsSync(cachedDir)) return cachedDir
     if (app.isPackaged) return path.join(process.resourcesPath, 'rule-templates')
     return path.join(__dirname, '..', '..', 'src', 'main', 'assets', 'rule-templates')
   }
@@ -551,6 +553,22 @@ export function registerClaudeMemoryHandlers(ipcMain: IpcMain): void {
       const stateDir = path.join(projectPath, '.claude', '.ai-rules-sync')
       const timestampFile = path.join(stateDir, 'last-check')
       if (fs.existsSync(timestampFile)) fs.unlinkSync(timestampFile)
+
+      return new Promise((resolve) => {
+        execFile('bash', [syncScript], { timeout: 30_000 }, (error) => {
+          if (error) return resolve({ success: false, error: error.message })
+          resolve({ success: true })
+        })
+      })
+    },
+  )
+
+  // Check ai-rules from SpaceMalamute/ai-rules (respects script's 24h debounce)
+  ipcMain.handle(
+    IPC_CHANNELS.CLAUDE_MEMORY_CHECK_AI_RULES,
+    async (_event, { projectPath: _projectPath }: { projectPath: string }) => {
+      const syncScript = path.join(os.homedir(), '.mirehub', 'hooks', 'ai-rules-sync.sh')
+      if (!fs.existsSync(syncScript)) return { success: false, error: 'Sync script not found' }
 
       return new Promise((resolve) => {
         execFile('bash', [syncScript], { timeout: 30_000 }, (error) => {

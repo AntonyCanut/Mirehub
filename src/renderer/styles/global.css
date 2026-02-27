@@ -11213,6 +11213,13 @@ body {
   flex-wrap: wrap;
 }
 
+.cs-rules-syncing-indicator {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
 .cs-rules-sidebar-footer {
   display: flex;
   gap: 4px;

@@ -54,6 +54,7 @@ interface Props {
   onDragEnd: () => void
 
   rulesCount: number
+  syncing?: boolean
 }
 
 export function RulesSidebar({
@@ -91,6 +92,7 @@ export function RulesSidebar({
   onDrop,
   onDragEnd,
   rulesCount,
+  syncing,
 }: Props) {
   const { t } = useI18n()
 
@@ -115,6 +117,11 @@ export function RulesSidebar({
           </button>
         </div>
       </div>
+
+      {/* Syncing indicator */}
+      {syncing && (
+        <div className="cs-rules-syncing-indicator">{t('claude.checkingAiRules')}</div>
+      )}
 
       {/* New file/folder input */}
       {(creating || creatingDir) && (

@@ -478,6 +478,7 @@ export const fr = {
   'claude.syncAiRules': 'Mettre a jour',
   'claude.syncAiRulesSyncing': 'Mise a jour...',
   'claude.syncAiRulesTooltip': 'Synchroniser les regles depuis le projet SpaceMalamute/ai-rules',
+  'claude.checkingAiRules': 'Verification des mises a jour...',
   'claude.selectedCount': '{count} selectionne(s)',
   'claude.confirmOverwriteSharedTitle': 'Ecraser la regle commune',
   'claude.confirmOverwriteSharedMessage': 'Cela ecrasera la regle commune existante et affectera tous les projets l\'utilisant.',

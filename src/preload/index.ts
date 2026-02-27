@@ -291,6 +291,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_IMPORT_TEMPLATES, { projectPath, relativePaths }),
     syncAiRules: (projectPath: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_SYNC_AI_RULES, { projectPath }),
+    checkAiRules: (projectPath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_CHECK_AI_RULES, { projectPath }),
   },
 
   // Kanban

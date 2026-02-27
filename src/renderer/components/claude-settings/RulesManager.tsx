@@ -109,6 +109,7 @@ export function RulesManager({ projectPath }: Props) {
         onDrop={dnd.handleDrop}
         onDragEnd={dnd.handleDragEnd}
         rulesCount={state.rules.length}
+        syncing={state.syncing}
       />
 
       {/* Right editor */}
