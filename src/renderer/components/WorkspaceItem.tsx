@@ -107,7 +107,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
   } | null>(null)
 
   useEffect(() => {
-    if (workspaceClaudeStatus === 'working' || workspaceClaudeStatus === 'waiting' || workspaceClaudeStatus === 'failed') {
+    if (workspaceClaudeStatus === 'working' || workspaceClaudeStatus === 'ask' || workspaceClaudeStatus === 'waiting' || workspaceClaudeStatus === 'failed') {
       window.mirehub.kanban.getWorkingTicket(workspace.id).then((result) => {
         setWorkingTicketInfo(result ? { ticketNumber: result.ticketNumber, isCtoTicket: result.isCtoTicket } : null)
       }).catch(() => setWorkingTicketInfo(null))
@@ -387,6 +387,14 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
             <span className={`workspace-ia-tag workspace-ia-tag--working${workingTicketInfo?.isCtoTicket ? ' workspace-ia-tag--cto' : ''}`}>
               {workingTicketInfo?.isCtoTicket ? t('workspace.ctoMode') : t('workspace.aiWorking')}
             </span>
+            {workingTicketInfo?.ticketNumber != null && (
+              <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketInfo.ticketNumber).padStart(2, '0')}</span>
+            )}
+          </>
+        )}
+        {workspaceClaudeStatus === 'ask' && (
+          <>
+            <span className="workspace-ia-tag workspace-ia-tag--ask">{t('workspace.aiAsk')}</span>
             {workingTicketInfo?.ticketNumber != null && (
               <span className="workspace-ia-tag workspace-ia-tag--ticket">T-{String(workingTicketInfo.ticketNumber).padStart(2, '0')}</span>
             )}

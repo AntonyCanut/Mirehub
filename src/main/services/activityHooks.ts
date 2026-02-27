@@ -49,12 +49,15 @@ FILE="$STATUS_DIR/$HASH.json"
 STATUS="\${1:-working}"
 
 # For 'working' status, throttle writes (max once per 30s)
+# Only throttle working→working, not transitions from other states (ask, waiting, etc.)
 if [ "$STATUS" = "working" ] && [ -f "$FILE" ]; then
-  MTIME=$(stat -f %m "$FILE" 2>/dev/null || stat -c %Y "$FILE" 2>/dev/null || echo 0)
-  NOW=$(date +%s)
-  AGE=$((NOW - MTIME))
-  if [ "$AGE" -lt 30 ]; then
-    exit 0
+  if grep -q '"status":"working"' "$FILE" 2>/dev/null; then
+    MTIME=$(stat -f %m "$FILE" 2>/dev/null || stat -c %Y "$FILE" 2>/dev/null || echo 0)
+    NOW=$(date +%s)
+    AGE=$((NOW - MTIME))
+    if [ "$AGE" -lt 30 ]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -117,7 +120,14 @@ const taskId = process.env.MIREHUB_KANBAN_TASK_ID;
 try {
   const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
   const task = tasks.find(t => t.id === taskId);
-  if (task) process.stdout.write(task.status + ' ' + (task.isCtoTicket ? 'true' : 'false') + ' ' + (task.title || '').replace(/[\\n\\r]/g, ' '));
+  if (task) {
+    let isCto = task.isCtoTicket || false;
+    if (!isCto && task.parentTicketId) {
+      const parent = tasks.find(t => t.id === task.parentTicketId);
+      if (parent && parent.isCtoTicket) isCto = true;
+    }
+    process.stdout.write(task.status + ' ' + (isCto ? 'true' : 'false') + ' ' + (task.title || '').replace(/[\\n\\r]/g, ' '));
+  }
 } catch(e) { /* ignore */ }
 ")
 
@@ -218,6 +228,34 @@ export function installActivityHooks(projectPath: string): void {
     preToolHooks.push({
       matcher: '',
       hooks: [{ type: 'command', command: `bash "${autoApproveScriptPath}"` }],
+    })
+  }
+
+  // === PermissionRequest hooks ===
+  if (!hooks.PermissionRequest) {
+    hooks.PermissionRequest = []
+  }
+  const permReqHooks = hooks.PermissionRequest as Array<{ matcher: string; hooks: Array<{ type: string; command: string }> }>
+
+  // Activity "ask" hook — signals Claude is blocked waiting for permission
+  if (!permReqHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes('mirehub-activity.sh')))) {
+    permReqHooks.push({
+      matcher: '',
+      hooks: [{ type: 'command', command: `bash "${activityScriptPath}" ask` }],
+    })
+  }
+
+  // === PostToolUse hooks ===
+  if (!hooks.PostToolUse) {
+    hooks.PostToolUse = []
+  }
+  const postToolHooks = hooks.PostToolUse as Array<{ matcher: string; hooks: Array<{ type: string; command: string }> }>
+
+  // Restore "working" status after tool executes (permission was granted)
+  if (!postToolHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes('mirehub-activity.sh')))) {
+    postToolHooks.push({
+      matcher: '',
+      hooks: [{ type: 'command', command: `bash "${activityScriptPath}" working` }],
     })
   }
 
@@ -351,6 +389,9 @@ function broadcastActivityFromFile(filePath: string): void {
     // Notify based on activity status
     if (data.status === 'done') {
       sendNotification('Claude terminé', `Session terminée sur ${path.basename(data.path)}`)
+    } else if (data.status === 'ask') {
+      sendSilentNotification('Claude bloqué', `En attente de réponse sur ${path.basename(data.path)}`)
+      playBellRepeat(2, 300)
     } else if (data.status === 'waiting') {
       sendSilentNotification('Claude en attente', `En attente d'information sur ${path.basename(data.path)}`)
       playBellRepeat(2, 300)

@@ -10,7 +10,7 @@ const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2
 // Track tasks that have been re-launched once to avoid infinite loops
 const relaunchedTaskIds = new Set<string>()
 
-function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
+export function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
   const todo = tasks.filter((t) => t.status === 'TODO' && !t.disabled)
   if (!todo.length) return null
   todo.sort((a, b) => {
@@ -24,6 +24,12 @@ function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
     return a.createdAt - b.createdAt
   })
   return todo[0]!
+}
+
+function isChildOfCto(task: KanbanTask, tasks: KanbanTask[]): boolean {
+  if (!task.parentTicketId) return false
+  const parent = tasks.find((t) => t.id === task.parentTicketId)
+  return parent?.isCtoTicket ?? false
 }
 
 function buildCtoPrompt(task: KanbanTask, ticketLabel: string, kanbanFilePath: string): string {
@@ -202,8 +208,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           continue
         }
 
-        // CTO auto-approve: when a CTO ticket transitions to PENDING, auto-set to TODO
-        if (newTask.status === 'PENDING' && newTask.isCtoTicket) {
+        // Determine if this task operates in CTO mode (direct ticket or child of CTO)
+        const isCtoMode = newTask.isCtoTicket || isChildOfCto(newTask, newTasks)
+
+        // CTO auto-approve: when a CTO-mode ticket transitions to PENDING, auto-set to TODO
+        if (newTask.status === 'PENDING' && isCtoMode) {
           // Auto-approve by setting to TODO — unblocks the CTO cycle
           window.mirehub.kanban.update({
             id: newTask.id,
@@ -218,7 +227,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
         // Re-launch: when a ticket was WORKING and reverted to TODO (hook detected interruption),
         // re-launch once to remind Claude to update the ticket status
-        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && !newTask.isCtoTicket) {
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && !isCtoMode) {
           if (!relaunchedTaskIds.has(newTask.id)) {
             relaunchedTaskIds.add(newTask.id)
             if (tabId) tabsToClose.push(tabId)
@@ -266,8 +275,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           termStore.setTabActivity(tabId, true)
           // PENDING does NOT trigger next task — the task is still "in progress"
         }
-        // CTO tickets return to TODO when their session ends — auto-close their terminal
-        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && newTask.isCtoTicket && autoCloseCtoEnabled) {
+        // CTO-mode tickets return to TODO when their session ends — auto-close their terminal
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && isCtoMode && autoCloseCtoEnabled) {
           tabsToClose.push(tabId)
         }
       }
@@ -539,10 +548,14 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       return
     }
 
+    // Determine if this task should use CTO terminal-direct mode
+    // A task uses CTO mode if it is a CTO ticket itself, or if its parent is a CTO ticket
+    const isCtoMode = task.isCtoTicket || isChildOfCto(task, get().tasks)
+
     // Launch Claude — CTO uses direct non-interactive mode (--print), regular uses interactive
     const relativePromptPath = `.mirehub/.kanban-prompt-${task.id}.md`
     let initialCommand: string
-    if (task.isCtoTicket) {
+    if (isCtoMode) {
       // CTO mode: direct invocation, no back-and-forth — prompt piped from file
       initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && cat "${relativePromptPath}" | claude --dangerously-skip-permissions --print ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
     } else {
@@ -556,7 +569,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     try {
       const termStore = useTerminalTabStore.getState()
       if (workspaceId) {
-        const tabLabel = task.isCtoTicket ? 'CTO' : task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[IA] ${task.title}`
+        const tabLabel = task.isCtoTicket ? 'CTO' : isCtoMode ? `[CTO] ${task.title}` : task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[IA] ${task.title}`
         tabId = termStore.createTab(workspaceId, cwd, tabLabel, initialCommand)
         if (tabId) {
           termStore.setTabColor(tabId, '#fab387')
@@ -628,8 +641,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
         const tabId = kanbanTabIds[newTask.id]
 
+        // Determine if this task operates in CTO mode (direct ticket or child of CTO)
+        const isCtoMode = newTask.isCtoTicket || isChildOfCto(newTask, newTasks)
+
         // CTO auto-approve: PENDING → TODO
-        if (newTask.status === 'PENDING' && newTask.isCtoTicket) {
+        if (newTask.status === 'PENDING' && isCtoMode) {
           window.mirehub.kanban.update({
             id: newTask.id,
             status: 'TODO',
@@ -642,7 +658,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         }
 
         // Re-launch: WORKING → TODO (hook interrupted)
-        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && !newTask.isCtoTicket) {
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && !isCtoMode) {
           if (!relaunchedTaskIds.has(newTask.id)) {
             relaunchedTaskIds.add(newTask.id)
             if (tabId) tabsToClose.push(tabId)
@@ -687,7 +703,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           termStore.setTabColor(tabId, '#f9e2af')
           termStore.setTabActivity(tabId, true)
         }
-        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && newTask.isCtoTicket && autoCloseCtoEnabled) {
+        if (newTask.status === 'TODO' && oldTask.status === 'WORKING' && isCtoMode && autoCloseCtoEnabled) {
           tabsToClose.push(tabId)
         }
       }

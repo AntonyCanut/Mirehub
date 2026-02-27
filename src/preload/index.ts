@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest, RuleEntry, TemplateRuleEntry } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -92,6 +92,16 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_WRITE_CLAUDE_SETTINGS, { projectPath, settings }),
     writeClaudeMd: (projectPath: string, content: string): Promise<{ success: boolean }> =>
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_WRITE_CLAUDE_MD, { projectPath, content }),
+    readClaudeLocalSettings: (projectPath: string): Promise<Record<string, unknown> | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PROJECT_READ_CLAUDE_LOCAL_SETTINGS, { projectPath }),
+    writeClaudeLocalSettings: (projectPath: string, settings: Record<string, unknown>): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PROJECT_WRITE_CLAUDE_LOCAL_SETTINGS, { projectPath, settings }),
+    readUserClaudeSettings: (): Promise<Record<string, unknown> | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PROJECT_READ_USER_CLAUDE_SETTINGS),
+    writeUserClaudeSettings: (settings: Record<string, unknown>): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PROJECT_WRITE_USER_CLAUDE_SETTINGS, settings),
+    readManagedSettings: (): Promise<Record<string, unknown> | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PROJECT_READ_MANAGED_SETTINGS),
     scanTodos: (projectPath: string): Promise<TodoEntry[]> =>
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_SCAN_TODOS, { path: projectPath }),
     loadIgnoredTodos: (projectPath: string): Promise<string[]> =>
@@ -104,6 +114,10 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_GET_NOTES, { projectId }),
     saveNotes: (projectId: string, content: string): Promise<{ success: boolean }> =>
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_SAVE_NOTES, { projectId, content }),
+    exportClaudeConfig: (projectPath: string): Promise<{ success: boolean; filePath?: string; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_EXPORT_CONFIG, { projectPath }),
+    importClaudeConfig: (projectPath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_IMPORT_CONFIG, { projectPath }),
   },
 
   // File system
@@ -217,6 +231,64 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_VALIDATE_SETTINGS, { projectPath, workspaceName }),
     fixSettings: (projectPath: string, workspaceName?: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_FIX_SETTINGS, { projectPath, workspaceName }),
+    removeHooks: (projectPath: string, workspaceName?: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_REMOVE_HOOKS, { projectPath, workspaceName }),
+    checkHooksStatus: (projectPath: string, workspaceName?: string): Promise<{ installed: boolean; upToDate: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_CHECK_HOOKS_STATUS, { projectPath, workspaceName }),
+  },
+
+  // Claude Memory
+  claudeMemory: {
+    readAuto: (projectPath: string): Promise<{ content: string; topicFiles: { name: string; path: string }[] }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_READ_AUTO, { projectPath }),
+    toggleAuto: (projectPath: string, enabled: boolean): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_TOGGLE_AUTO, { projectPath, enabled }),
+    listRules: (projectPath: string): Promise<{ rules: RuleEntry[]; directories: string[] }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_LIST_RULES, { projectPath }),
+    readRule: (projectPath: string, filename: string): Promise<string | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_READ_RULE, { projectPath, filename }),
+    writeRule: (projectPath: string, filename: string, content: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_WRITE_RULE, { projectPath, filename, content }),
+    deleteRule: (projectPath: string, filename: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_DELETE_RULE, { projectPath, filename }),
+    readFile: (filePath: string): Promise<string | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_READ_FILE, { filePath }),
+    writeFile: (filePath: string, content: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_WRITE_FILE, { filePath, content }),
+    readManaged: (): Promise<string | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_READ_MANAGED),
+    init: (projectPath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_INIT, { projectPath }),
+    exportRules: (projectPath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_EXPORT_RULES, { projectPath }),
+    importRules: (projectPath: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_IMPORT_RULES, { projectPath }),
+    listSharedRules: (): Promise<Array<{ filename: string; fullPath: string; content: string }>> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_LIST_SHARED_RULES),
+    writeSharedRule: (filename: string, content: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_WRITE_SHARED_RULE, { filename, content }),
+    deleteSharedRule: (filename: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_DELETE_SHARED_RULE, { filename }),
+    linkSharedRule: (projectPath: string, filename: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_LINK_SHARED_RULE, { projectPath, filename }),
+    unlinkSharedRule: (projectPath: string, filename: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_UNLINK_SHARED_RULE, { projectPath, filename }),
+    initDefaultRules: (projectPath: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_INIT_DEFAULT_RULES, { projectPath }),
+    moveRule: (projectPath: string, oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_MOVE_RULE, { projectPath, oldPath, newPath }),
+    createRuleDir: (projectPath: string, dirPath: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_CREATE_RULE_DIR, { projectPath, dirPath }),
+    renameRuleDir: (projectPath: string, oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_RENAME_RULE_DIR, { projectPath, oldPath, newPath }),
+    deleteRuleDir: (projectPath: string, dirPath: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_DELETE_RULE_DIR, { projectPath, dirPath }),
+    listTemplates: (): Promise<TemplateRuleEntry[]> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_LIST_TEMPLATES),
+    readTemplate: (relativePath: string): Promise<string | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_READ_TEMPLATE, { relativePath }),
+    importTemplates: (projectPath: string, relativePaths: string[]): Promise<{ success: boolean; imported: string[] }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_MEMORY_IMPORT_TEMPLATES, { projectPath, relativePaths }),
   },
 
   // Kanban
@@ -303,6 +375,12 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.GIT_CONFIG_DELETE, { namespaceId }),
   },
 
+  // Shell
+  shell: {
+    openExternal: (url: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SHELL_OPEN_EXTERNAL, { url }),
+  },
+
   // Settings
   settings: {
     get: () => ipcRenderer.invoke(IPC_CHANNELS.APP_SETTINGS_GET),
@@ -342,6 +420,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_WRITE_AGENT, { projectPath, filename, content }),
     delete: (projectPath: string, filename: string): Promise<{ success: boolean }> =>
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_DELETE_AGENT, { projectPath, filename }),
+    rename: (projectPath: string, oldFilename: string, newFilename: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_RENAME_AGENT, { projectPath, oldFilename, newFilename }),
   },
 
   claudeSkills: {
@@ -353,6 +433,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_WRITE_SKILL, { projectPath, filename, content }),
     delete: (projectPath: string, filename: string): Promise<{ success: boolean }> =>
       ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_DELETE_SKILL, { projectPath, filename }),
+    rename: (projectPath: string, oldFilename: string, newFilename: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_RENAME_SKILL, { projectPath, oldFilename, newFilename }),
   },
 
   // MCP servers

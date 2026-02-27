@@ -238,6 +238,8 @@ describe('Project IPC Handlers', () => {
         hasClaude: false,
         claudeMd: null,
         settings: null,
+        localSettings: null,
+        userSettings: null,
       })
     })
 

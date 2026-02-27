@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { ClaudeSession } from '../../../shared/types/index'
 
-type WorkspaceClaudeStatus = 'idle' | 'working' | 'finished' | 'waiting' | 'failed'
+type WorkspaceClaudeStatus = 'idle' | 'working' | 'finished' | 'waiting' | 'failed' | 'ask'
 
 interface ClaudeState {
   sessions: ClaudeSession[]
@@ -214,6 +214,11 @@ export const useClaudeStore = create<ClaudeStore>((set, get) => ({
           }
           delete workingStaleTimers[staleWsId]
         }, 45000)
+      } else if (data.status === 'ask') {
+        clearWorkingStaleTimer(workspaceId)
+        set({
+          workspaceClaudeStatus: { ...get().workspaceClaudeStatus, [workspaceId]: 'ask' },
+        })
       } else if (data.status === 'waiting') {
         clearWorkingStaleTimer(workspaceId)
         set({

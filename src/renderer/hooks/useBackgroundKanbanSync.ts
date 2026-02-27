@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
-import { useKanbanStore } from '../lib/stores/kanbanStore'
+import { useKanbanStore, pickNextTask } from '../lib/stores/kanbanStore'
 import type { KanbanTask } from '../../shared/types/index'
 
 /**
- * Global hook that monitors kanban files for non-active workspaces.
- * When a workspace has WORKING or TODO tasks and is not currently displayed,
- * this hook ensures file watchers + polling are active so that ticket
- * completions trigger automatic pickup of the next task.
+ * Global hook that monitors kanban files for all workspaces.
+ * - Sets up file watchers + polling for non-active workspaces with active tasks
+ * - Every 60s, checks ALL boards (active + background) for idle boards with
+ *   pending TODO tasks and auto-launches the next one
  */
 export function useBackgroundKanbanSync(): void {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
@@ -65,6 +65,42 @@ export function useBackgroundKanbanSync(): void {
           if (timer) {
             clearInterval(timer)
             pollTimersRef.current.delete(wsId)
+          }
+        }
+      }
+
+      // --- Auto-resume: check ALL boards for idle boards with pending tasks ---
+      const store = useKanbanStore.getState()
+
+      // Check background workspaces
+      for (const [wsId, tasks] of Object.entries(store.backgroundTasks)) {
+        if (wsId === activeWorkspaceId) continue
+        const hasWorking = tasks.some((t) => t.status === 'WORKING')
+        if (!hasWorking) {
+          const next = pickNextTask(tasks)
+          if (next) store.sendToClaude(next, wsId)
+        }
+      }
+
+      // Check active workspace — sync from file first to catch missed events
+      if (activeWorkspaceId) {
+        await useKanbanStore.getState().syncTasksFromFile()
+        const freshStore = useKanbanStore.getState()
+        const { tasks: activeTasks, kanbanTabIds: activeTabIds } = freshStore
+        if (activeTasks.length > 0) {
+          // Resume a WORKING task that lost its terminal
+          const workingWithoutTerminal = activeTasks.find(
+            (t) => t.status === 'WORKING' && !activeTabIds[t.id],
+          )
+          if (workingWithoutTerminal) {
+            freshStore.sendToClaude(workingWithoutTerminal)
+          } else {
+            // If no WORKING task at all, pick the next TODO
+            const hasWorking = activeTasks.some((t) => t.status === 'WORKING')
+            if (!hasWorking) {
+              const next = pickNextTask(activeTasks)
+              if (next) freshStore.sendToClaude(next)
+            }
           }
         }
       }

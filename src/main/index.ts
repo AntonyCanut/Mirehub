@@ -21,6 +21,7 @@ import { registerSshHandlers } from './ipc/ssh'
 import { registerAnalysisHandlers } from './ipc/analysis'
 import { registerNamespaceHandlers } from './ipc/namespace'
 import { registerGitConfigHandlers } from './ipc/gitConfig'
+import { registerClaudeMemoryHandlers } from './ipc/claudeMemory'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, ensureAutoApproveScript, ensureKanbanDoneScript, syncAllWorkspaceEnvHooks, startActivityWatcher } from './services/activityHooks'
 import { clearDockBadge } from './services/notificationService'
@@ -297,6 +298,7 @@ app.whenReady().then(() => {
   registerNamespaceHandlers(ipcMain)
   registerGitConfigHandlers(ipcMain)
   registerAnalysisHandlers(ipcMain, () => mainWindow)
+  registerClaudeMemoryHandlers(ipcMain)
 
   // Ensure a Default namespace exists (first launch or migration)
   new StorageService().ensureDefaultNamespace()

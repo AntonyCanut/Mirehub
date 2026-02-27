@@ -1,5 +1,39 @@
 // Types partagés entre main et renderer
 
+// --- Rules tree types ---
+
+export interface RuleEntry {
+  relativePath: string    // "conventions/core.md"
+  filename: string        // "core.md"
+  fullPath: string
+  paths: string[]         // depuis frontmatter YAML
+  content: string
+  isSymlink: boolean
+  symlinkTarget: string
+  author?: string
+  authorUrl?: string
+  coAuthors?: string[]
+}
+
+export interface RuleTreeNode {
+  name: string
+  relativePath: string    // "lang/typescript"
+  type: 'file' | 'directory'
+  children?: RuleTreeNode[]
+  rule?: RuleEntry
+}
+
+export interface TemplateRuleEntry {
+  relativePath: string    // "react/rules/components.md"
+  filename: string
+  framework: string       // "_shared", "react", "nextjs"...
+  content: string
+  author: string
+  authorUrl: string
+}
+
+// --- End rules tree types ---
+
 export interface Namespace {
   id: string
   name: string
@@ -848,6 +882,8 @@ export const IPC_CHANNELS = {
   CLAUDE_READ_SKILL: 'claude:readSkill',
   CLAUDE_WRITE_SKILL: 'claude:writeSkill',
   CLAUDE_DELETE_SKILL: 'claude:deleteSkill',
+  CLAUDE_RENAME_AGENT: 'claude:renameAgent',
+  CLAUDE_RENAME_SKILL: 'claude:renameSkill',
 
   // Claude defaults library
   CLAUDE_DEFAULTS_PROFILES: 'claude:defaultsProfiles',
@@ -862,6 +898,44 @@ export const IPC_CHANNELS = {
   CLAUDE_CHECK_HOOKS: 'claude:checkHooks',
   CLAUDE_VALIDATE_SETTINGS: 'claude:validateSettings',
   CLAUDE_FIX_SETTINGS: 'claude:fixSettings',
+  CLAUDE_REMOVE_HOOKS: 'claude:removeHooks',
+  CLAUDE_CHECK_HOOKS_STATUS: 'claude:checkHooksStatus',
+  CLAUDE_EXPORT_CONFIG: 'claude:exportConfig',
+  CLAUDE_IMPORT_CONFIG: 'claude:importConfig',
+  CLAUDE_MEMORY_READ_AUTO: 'claude:memoryReadAuto',
+  CLAUDE_MEMORY_TOGGLE_AUTO: 'claude:memoryToggleAuto',
+  CLAUDE_MEMORY_LIST_RULES: 'claude:memoryListRules',
+  CLAUDE_MEMORY_READ_RULE: 'claude:memoryReadRule',
+  CLAUDE_MEMORY_WRITE_RULE: 'claude:memoryWriteRule',
+  CLAUDE_MEMORY_DELETE_RULE: 'claude:memoryDeleteRule',
+  CLAUDE_MEMORY_READ_FILE: 'claude:memoryReadFile',
+  CLAUDE_MEMORY_WRITE_FILE: 'claude:memoryWriteFile',
+  CLAUDE_MEMORY_READ_MANAGED: 'claude:memoryReadManaged',
+  CLAUDE_MEMORY_INIT: 'claude:memoryInit',
+  CLAUDE_MEMORY_EXPORT_RULES: 'claude:memoryExportRules',
+  CLAUDE_MEMORY_IMPORT_RULES: 'claude:memoryImportRules',
+  CLAUDE_MEMORY_LIST_SHARED_RULES: 'claude:memoryListSharedRules',
+  CLAUDE_MEMORY_WRITE_SHARED_RULE: 'claude:memoryWriteSharedRule',
+  CLAUDE_MEMORY_DELETE_SHARED_RULE: 'claude:memoryDeleteSharedRule',
+  CLAUDE_MEMORY_LINK_SHARED_RULE: 'claude:memoryLinkSharedRule',
+  CLAUDE_MEMORY_UNLINK_SHARED_RULE: 'claude:memoryUnlinkSharedRule',
+  CLAUDE_MEMORY_INIT_DEFAULT_RULES: 'claude:memoryInitDefaultRules',
+
+  // Claude rules tree management
+  CLAUDE_MEMORY_MOVE_RULE: 'claude:memoryMoveRule',
+  CLAUDE_MEMORY_CREATE_RULE_DIR: 'claude:memoryCreateRuleDir',
+  CLAUDE_MEMORY_RENAME_RULE_DIR: 'claude:memoryRenameRuleDir',
+  CLAUDE_MEMORY_DELETE_RULE_DIR: 'claude:memoryDeleteRuleDir',
+  CLAUDE_MEMORY_LIST_TEMPLATES: 'claude:memoryListTemplates',
+  CLAUDE_MEMORY_READ_TEMPLATE: 'claude:memoryReadTemplate',
+  CLAUDE_MEMORY_IMPORT_TEMPLATES: 'claude:memoryImportTemplates',
+
+  // Claude settings hierarchy
+  PROJECT_READ_CLAUDE_LOCAL_SETTINGS: 'project:readClaudeLocalSettings',
+  PROJECT_WRITE_CLAUDE_LOCAL_SETTINGS: 'project:writeClaudeLocalSettings',
+  PROJECT_READ_USER_CLAUDE_SETTINGS: 'project:readUserClaudeSettings',
+  PROJECT_WRITE_USER_CLAUDE_SETTINGS: 'project:writeUserClaudeSettings',
+  PROJECT_READ_MANAGED_SETTINGS: 'project:readManagedSettings',
 
   // MCP
   MCP_GET_HELP: 'mcp:getHelp',
@@ -899,6 +973,9 @@ export const IPC_CHANNELS = {
   DB_NL_INTERPRET: 'db:nlInterpret',
   DB_NL_CANCEL: 'db:nlCancel',
   DB_GET_SCHEMA_CONTEXT: 'db:getSchemaContext',
+
+  // Shell
+  SHELL_OPEN_EXTERNAL: 'shell:openExternal',
 
   // App
   APP_SETTINGS_GET: 'app:settingsGet',

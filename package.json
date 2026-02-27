@@ -133,6 +133,13 @@
       "node_modules/better-sqlite3/**",
       "dist/mcp-server/**"
     ],
+    "extraResources": [
+      {
+        "from": "src/main/assets/rule-templates",
+        "to": "rule-templates",
+        "filter": ["**/*.md"]
+      }
+    ],
     "npmRebuild": true,
     "publish": {
       "provider": "github",

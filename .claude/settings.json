@@ -15,17 +15,12 @@
       "WebSearch",
       "Task",
       "NotebookEdit"
-    ]
+    ],
+    "defaultMode": "bypassPermissions",
+    "autoApprove": true
   },
-  "_mirehubMode": "bypassPermissions",
-  "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/tmp"
-      ]
-    }
-  }
+  "availableModels": [
+    "opus"
+  ],
+  "alwaysThinkingEnabled": true
 }

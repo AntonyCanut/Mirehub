@@ -2,40 +2,29 @@ import { useState, useCallback, useMemo, type FormEvent } from 'react'
 import { useI18n } from '../lib/i18n'
 import { MCP_CATALOG, MCP_CATEGORIES, MCP_CATEGORY_ICONS } from '../../shared/constants/mcpCatalog'
 import type { McpCategory, McpCatalogEntry } from '../../shared/types'
-import { CopyableError } from './CopyableError'
 
 type McpView = 'catalog' | 'installed'
+type McpTransport = 'stdio' | 'http'
 
-interface McpPanelProps {
-  mcpServers: Record<string, { command: string; args?: string[]; env?: Record<string, string> }>
-  settings: Record<string, unknown>
-  projectPath: string
-  onServersChange: (servers: Record<string, { command: string; args?: string[]; env?: Record<string, string> }>, settings: Record<string, unknown>) => void
+interface McpStdioConfig {
+  command: string
+  args?: string[]
+  env?: Record<string, string>
 }
 
-function McpHelpOutput({ text }: { text: string }) {
-  const { t } = useI18n()
-  const [copied, setCopied] = useState(false)
+interface McpHttpConfig {
+  type: 'http'
+  url: string
+  headers?: Record<string, string>
+}
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }, [text])
+type McpServerConfig = McpStdioConfig | McpHttpConfig
 
-  return (
-    <div className="claude-mcp-help-output-wrapper">
-      <button
-        className="claude-mcp-help-copy-btn"
-        onClick={handleCopy}
-        title={t('common.copy')}
-      >
-        {copied ? '\u2713' : '\u2398'}
-      </button>
-      <pre className="claude-mcp-help-output">{text}</pre>
-    </div>
-  )
+interface McpPanelProps {
+  mcpServers: Record<string, McpServerConfig>
+  settings: Record<string, unknown>
+  projectPath: string
+  onServersChange: (servers: Record<string, McpServerConfig>, settings: Record<string, unknown>) => void
 }
 
 export function McpPanel({ mcpServers, settings, projectPath, onServersChange }: McpPanelProps) {
@@ -49,13 +38,12 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
   // Manual add state
   const [mcpAddingNew, setMcpAddingNew] = useState(false)
   const [mcpNewName, setMcpNewName] = useState('')
+  const [mcpNewTransport, setMcpNewTransport] = useState<McpTransport>('stdio')
   const [mcpNewCommand, setMcpNewCommand] = useState('')
   const [mcpNewArgs, setMcpNewArgs] = useState('')
   const [mcpNewEnv, setMcpNewEnv] = useState('')
-
-  // Help/docs state
-  const [mcpHelpData, setMcpHelpData] = useState<Record<string, { loading: boolean; output?: string; error?: string }>>({})
-  const [mcpExpandedHelp, setMcpExpandedHelp] = useState<string | null>(null)
+  const [mcpNewUrl, setMcpNewUrl] = useState('')
+  const [mcpNewHeaders, setMcpNewHeaders] = useState('')
 
   // Catalog install state (for env variable configuration)
   const [installingEntry, setInstallingEntry] = useState<McpCatalogEntry | null>(null)
@@ -140,30 +128,54 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
   // Manual add
   const handleAddMcpServer = useCallback(async (e: FormEvent) => {
     e.preventDefault()
-    if (!mcpNewName.trim() || !mcpNewCommand.trim()) return
-    const args = mcpNewArgs.trim() ? mcpNewArgs.trim().split('\n').map(a => a.trim()).filter(Boolean) : undefined
-    let env: Record<string, string> | undefined
-    if (mcpNewEnv.trim()) {
-      env = {}
-      for (const line of mcpNewEnv.trim().split('\n')) {
-        const eq = line.indexOf('=')
-        if (eq > 0) {
-          env[line.slice(0, eq).trim()] = line.slice(eq + 1).trim()
+    if (!mcpNewName.trim()) return
+
+    let newServer: McpServerConfig
+
+    if (mcpNewTransport === 'http') {
+      if (!mcpNewUrl.trim()) return
+      let headers: Record<string, string> | undefined
+      if (mcpNewHeaders.trim()) {
+        headers = {}
+        for (const line of mcpNewHeaders.trim().split('\n')) {
+          const sep = line.indexOf(':')
+          if (sep > 0) {
+            headers[line.slice(0, sep).trim()] = line.slice(sep + 1).trim()
+          }
         }
+        if (Object.keys(headers).length === 0) headers = undefined
       }
-      if (Object.keys(env).length === 0) env = undefined
+      newServer = { type: 'http', url: mcpNewUrl.trim(), ...(headers ? { headers } : {}) }
+    } else {
+      if (!mcpNewCommand.trim()) return
+      const args = mcpNewArgs.trim() ? mcpNewArgs.trim().split('\n').map(a => a.trim()).filter(Boolean) : undefined
+      let env: Record<string, string> | undefined
+      if (mcpNewEnv.trim()) {
+        env = {}
+        for (const line of mcpNewEnv.trim().split('\n')) {
+          const eq = line.indexOf('=')
+          if (eq > 0) {
+            env[line.slice(0, eq).trim()] = line.slice(eq + 1).trim()
+          }
+        }
+        if (Object.keys(env).length === 0) env = undefined
+      }
+      newServer = { command: mcpNewCommand.trim(), ...(args ? { args } : {}), ...(env ? { env } : {}) }
     }
-    const newServer = { command: mcpNewCommand.trim(), ...(args ? { args } : {}), ...(env ? { env } : {}) }
+
     const newServers = { ...mcpServers, [mcpNewName.trim()]: newServer }
     const newSettings = { ...settings, mcpServers: newServers }
     await window.mirehub.project.writeClaudeSettings(projectPath, newSettings)
     onServersChange(newServers, newSettings)
     setMcpNewName('')
+    setMcpNewTransport('stdio')
     setMcpNewCommand('')
     setMcpNewArgs('')
     setMcpNewEnv('')
+    setMcpNewUrl('')
+    setMcpNewHeaders('')
     setMcpAddingNew(false)
-  }, [mcpNewName, mcpNewCommand, mcpNewArgs, mcpNewEnv, mcpServers, settings, projectPath, onServersChange])
+  }, [mcpNewName, mcpNewTransport, mcpNewCommand, mcpNewArgs, mcpNewEnv, mcpNewUrl, mcpNewHeaders, mcpServers, settings, projectPath, onServersChange])
 
   // Remove server
   const handleRemoveMcpServer = useCallback(async (name: string) => {
@@ -177,31 +189,7 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
     }
     await window.mirehub.project.writeClaudeSettings(projectPath, newSettings)
     onServersChange(newServers, newSettings)
-    if (mcpExpandedHelp === name) setMcpExpandedHelp(null)
-  }, [mcpServers, settings, projectPath, onServersChange, mcpExpandedHelp])
-
-  // Help/docs
-  const handleGetMcpHelp = useCallback(async (name: string) => {
-    if (mcpExpandedHelp === name) {
-      setMcpExpandedHelp(null)
-      return
-    }
-    setMcpExpandedHelp(name)
-    if (mcpHelpData[name]?.output || mcpHelpData[name]?.error) return
-    setMcpHelpData(prev => ({ ...prev, [name]: { loading: true } }))
-    try {
-      const config = mcpServers[name]
-      if (!config) return
-      const result = await window.mirehub.mcp.getHelp(name, config)
-      if (result.success) {
-        setMcpHelpData(prev => ({ ...prev, [name]: { loading: false, output: result.output } }))
-      } else {
-        setMcpHelpData(prev => ({ ...prev, [name]: { loading: false, error: result.error || 'Unknown error' } }))
-      }
-    } catch (err) {
-      setMcpHelpData(prev => ({ ...prev, [name]: { loading: false, error: String(err) } }))
-    }
-  }, [mcpExpandedHelp, mcpHelpData, mcpServers])
+  }, [mcpServers, settings, projectPath, onServersChange])
 
   const installedCount = Object.keys(mcpServers).length
 
@@ -368,39 +356,88 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
                 />
               </div>
               <div className="claude-mcp-form-row">
-                <label className="claude-mcp-form-label">{t('claude.mcpServerCommand')}</label>
-                <input
-                  className="claude-mcp-form-input"
-                  value={mcpNewCommand}
-                  onChange={e => setMcpNewCommand(e.target.value)}
-                  placeholder="npx"
-                />
+                <label className="claude-mcp-form-label">{t('claude.mcpTransport')}</label>
+                <div className="cs-mcp-transport-toggle">
+                  <button
+                    type="button"
+                    className={`cs-mcp-transport-toggle-btn${mcpNewTransport === 'stdio' ? ' cs-mcp-transport-toggle-btn--active' : ''}`}
+                    onClick={() => setMcpNewTransport('stdio')}
+                  >
+                    stdio
+                  </button>
+                  <button
+                    type="button"
+                    className={`cs-mcp-transport-toggle-btn${mcpNewTransport === 'http' ? ' cs-mcp-transport-toggle-btn--active' : ''}`}
+                    onClick={() => setMcpNewTransport('http')}
+                  >
+                    http
+                  </button>
+                </div>
               </div>
-              <div className="claude-mcp-form-row">
-                <label className="claude-mcp-form-label">{t('claude.mcpServerArgs')}</label>
-                <textarea
-                  className="claude-mcp-form-textarea"
-                  value={mcpNewArgs}
-                  onChange={e => setMcpNewArgs(e.target.value)}
-                  placeholder={"-y\n@modelcontextprotocol/server-filesystem\n/tmp"}
-                  rows={3}
-                />
-              </div>
-              <div className="claude-mcp-form-row">
-                <label className="claude-mcp-form-label">{t('claude.mcpServerEnv')}</label>
-                <textarea
-                  className="claude-mcp-form-textarea"
-                  value={mcpNewEnv}
-                  onChange={e => setMcpNewEnv(e.target.value)}
-                  placeholder={"API_KEY=xxx\nDEBUG=true"}
-                  rows={2}
-                />
-              </div>
+              {mcpNewTransport === 'stdio' ? (
+                <>
+                  <div className="claude-mcp-form-row">
+                    <label className="claude-mcp-form-label">{t('claude.mcpServerCommand')}</label>
+                    <input
+                      className="claude-mcp-form-input"
+                      value={mcpNewCommand}
+                      onChange={e => setMcpNewCommand(e.target.value)}
+                      placeholder="npx"
+                    />
+                  </div>
+                  <div className="claude-mcp-form-row">
+                    <label className="claude-mcp-form-label">{t('claude.mcpServerArgs')}</label>
+                    <textarea
+                      className="claude-mcp-form-textarea"
+                      value={mcpNewArgs}
+                      onChange={e => setMcpNewArgs(e.target.value)}
+                      placeholder={"-y\n@modelcontextprotocol/server-filesystem\n/tmp"}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="claude-mcp-form-row">
+                    <label className="claude-mcp-form-label">{t('claude.mcpServerEnv')}</label>
+                    <textarea
+                      className="claude-mcp-form-textarea"
+                      value={mcpNewEnv}
+                      onChange={e => setMcpNewEnv(e.target.value)}
+                      placeholder={"API_KEY=xxx\nDEBUG=true"}
+                      rows={2}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="claude-mcp-form-row">
+                    <label className="claude-mcp-form-label">{t('claude.mcpServerUrl')}</label>
+                    <input
+                      className="claude-mcp-form-input"
+                      value={mcpNewUrl}
+                      onChange={e => setMcpNewUrl(e.target.value)}
+                      placeholder="https://example.com/mcp"
+                    />
+                  </div>
+                  <div className="claude-mcp-form-row">
+                    <label className="claude-mcp-form-label">{t('claude.mcpServerHeaders')}</label>
+                    <textarea
+                      className="claude-mcp-form-textarea"
+                      value={mcpNewHeaders}
+                      onChange={e => setMcpNewHeaders(e.target.value)}
+                      placeholder={"Authorization: Bearer xxx\nX-Custom: value"}
+                      rows={2}
+                    />
+                  </div>
+                </>
+              )}
               <div className="claude-mcp-form-actions">
                 <button type="button" className="claude-mcp-action-btn" onClick={() => setMcpAddingNew(false)}>
                   {t('common.cancel')}
                 </button>
-                <button type="submit" className="claude-mcp-add-btn" disabled={!mcpNewName.trim() || !mcpNewCommand.trim()}>
+                <button
+                  type="submit"
+                  className="claude-mcp-add-btn"
+                  disabled={!mcpNewName.trim() || (mcpNewTransport === 'stdio' ? !mcpNewCommand.trim() : !mcpNewUrl.trim())}
+                >
                   {t('common.add')}
                 </button>
               </div>
@@ -418,6 +455,7 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
             <div className="claude-mcp-server-list">
               {Object.entries(mcpServers).map(([name, config]) => {
                 const catalogEntry = MCP_CATALOG.find(e => e.id === name)
+                const isHttp = 'type' in config && config.type === 'http'
                 return (
                   <div key={name} className="claude-mcp-server-item">
                     <div className="claude-mcp-server-header">
@@ -426,16 +464,30 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
                           {catalogEntry && <span className="mcp-server-cat-icon">{MCP_CATEGORY_ICONS[catalogEntry.category]}</span>}
                           {name}
                           {catalogEntry?.official && <span className="mcp-catalog-badge-official" title="Official">MCP</span>}
+                          {isHttp && <span className="mcp-server-transport-badge">HTTP</span>}
                         </div>
                         {catalogEntry && (
                           <div className="mcp-server-description">{catalogEntry.description}</div>
                         )}
-                        <div className="claude-mcp-server-command">
-                          {config.command}{config.args ? ' ' + config.args.join(' ') : ''}
-                        </div>
-                        {config.env && Object.keys(config.env).length > 0 && (
+                        {isHttp ? (
+                          <div className="claude-mcp-server-command">
+                            {(config as McpHttpConfig).url}
+                          </div>
+                        ) : (
+                          <div className="claude-mcp-server-command">
+                            {(config as McpStdioConfig).command}{(config as McpStdioConfig).args ? ' ' + (config as McpStdioConfig).args!.join(' ') : ''}
+                          </div>
+                        )}
+                        {!isHttp && (config as McpStdioConfig).env && Object.keys((config as McpStdioConfig).env!).length > 0 && (
                           <div className="claude-mcp-server-env-chips">
-                            {Object.keys(config.env).map(key => (
+                            {Object.keys((config as McpStdioConfig).env!).map(key => (
+                              <span key={key} className="claude-mcp-env-chip">{key}</span>
+                            ))}
+                          </div>
+                        )}
+                        {isHttp && (config as McpHttpConfig).headers && Object.keys((config as McpHttpConfig).headers!).length > 0 && (
+                          <div className="claude-mcp-server-env-chips">
+                            {Object.keys((config as McpHttpConfig).headers!).map(key => (
                               <span key={key} className="claude-mcp-env-chip">{key}</span>
                             ))}
                           </div>
@@ -452,33 +504,11 @@ export function McpPanel({ mcpServers, settings, projectPath, onServersChange }:
                         )}
                       </div>
                       <div className="claude-mcp-server-actions">
-                        <button className="claude-mcp-action-btn" onClick={() => handleGetMcpHelp(name)}>
-                          {mcpExpandedHelp === name ? t('claude.mcpHideHelp') : t('claude.mcpShowHelp')}
-                        </button>
                         <button className="claude-mcp-action-btn claude-mcp-action-btn--danger" onClick={() => handleRemoveMcpServer(name)}>
                           {t('claude.mcpRemoveServer')}
                         </button>
                       </div>
                     </div>
-                    {mcpExpandedHelp === name && (
-                      <div className="claude-mcp-help-panel">
-                        {mcpHelpData[name]?.loading && (
-                          <div className="claude-mcp-help-loading">{t('claude.mcpHelpLoading')}</div>
-                        )}
-                        {mcpHelpData[name]?.error && (
-                          <CopyableError
-                            error={`${t('claude.mcpHelpError')}: ${mcpHelpData[name].error}`}
-                            className="claude-mcp-help-error-copyable"
-                          />
-                        )}
-                        {mcpHelpData[name]?.output && (
-                          <McpHelpOutput text={mcpHelpData[name].output!} />
-                        )}
-                        {!mcpHelpData[name]?.loading && !mcpHelpData[name]?.output && !mcpHelpData[name]?.error && (
-                          <div className="claude-mcp-help-loading">{t('claude.mcpHelpEmpty')}</div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 )
               })}

@@ -8,7 +8,7 @@ import { GitPanel } from './components/GitPanel'
 import { FileViewer } from './components/FileViewer'
 import { NpmPanel } from './components/NpmPanel'
 import { FileDiffViewer } from './components/FileDiffViewer'
-import { ClaudeRulesPanel } from './components/ClaudeRulesPanel'
+import { ClaudeSettingsPanel } from './components/claude-settings'
 import { SettingsPanel } from './components/SettingsPanel'
 import { SessionModal } from './components/SessionModal'
 import { CommandPalette } from './components/CommandPalette'
@@ -441,7 +441,7 @@ export function App() {
             )}
             {viewMode === 'claude' && (
               <div className="view-panel" style={{ display: 'flex' }}>
-                <ClaudeRulesPanel />
+                <ClaudeSettingsPanel />
               </div>
             )}
             {viewMode === 'settings' && (
