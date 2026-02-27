@@ -9,10 +9,11 @@ interface Props {
   onSave?: (content: string) => Promise<void>
 }
 
-export function MemoryEditor({ title, content, readOnly, onSave }: Props) {
+export function MemoryEditor({ title, content, readOnly = false, onSave }: Props) {
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const saveRef = useRef<() => void>(() => {})
 
   const handleBeforeMount: BeforeMount = useCallback((monaco) => {
     monaco.editor.defineTheme('catppuccin-mocha', {
@@ -44,6 +45,9 @@ export function MemoryEditor({ title, content, readOnly, onSave }: Props) {
     setSaving(false)
   }, [content, onSave])
 
+  // Keep save ref in sync so the Monaco action always calls the latest version
+  saveRef.current = handleSave
+
   const handleMount: OnMount = useCallback((ed) => {
     editorRef.current = ed
     if (!readOnly) {
@@ -51,10 +55,10 @@ export function MemoryEditor({ title, content, readOnly, onSave }: Props) {
         id: 'save-memory',
         label: 'Save',
         keybindings: [2048 | 49],
-        run: () => { handleSave() },
+        run: () => { saveRef.current() },
       })
     }
-  }, [readOnly, handleSave])
+  }, [readOnly])
 
   return (
     <div className="cs-memory-editor">
@@ -67,25 +71,31 @@ export function MemoryEditor({ title, content, readOnly, onSave }: Props) {
           </button>
         )}
       </div>
-      <Editor
-        key={title}
-        defaultValue={content}
-        language="markdown"
-        theme="catppuccin-mocha"
-        onChange={() => { if (!dirty) setDirty(true) }}
-        beforeMount={handleBeforeMount}
-        onMount={handleMount}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 12,
-          fontFamily: 'Menlo',
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          padding: { top: 6 },
-          wordWrap: 'on',
-          readOnly,
-        }}
-      />
+      <div style={{ flex: 1, position: 'relative', minHeight: 300 }}>
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <Editor
+            key={title}
+            height="100%"
+            defaultValue={content}
+            language="markdown"
+            theme="catppuccin-mocha"
+            onChange={() => { if (!dirty) setDirty(true) }}
+            beforeMount={handleBeforeMount}
+            onMount={handleMount}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 12,
+              fontFamily: 'Menlo',
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+              padding: { top: 6 },
+              wordWrap: 'on',
+              readOnly,
+              domReadOnly: readOnly,
+            }}
+          />
+        </div>
+      </div>
     </div>
   )
 }

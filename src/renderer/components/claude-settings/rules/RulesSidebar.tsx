@@ -125,7 +125,7 @@ export function RulesSidebar({
             onChange={(e) => onNameChange(e.target.value)}
             placeholder={creating ? t('claude.ruleName') : t('claude.folderName')}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') creating ? onCreateSubmit() : onCreateDirSubmit()
+              if (e.key === 'Enter') { if (creating) onCreateSubmit(); else onCreateDirSubmit(); }
               if (e.key === 'Escape') onCreateCancel()
             }}
             autoFocus

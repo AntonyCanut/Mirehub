@@ -2862,6 +2862,8 @@ body {
 
 .claude-rules-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
 }
 
@@ -10920,6 +10922,8 @@ body {
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: 8px;
 }
 
@@ -10942,10 +10946,15 @@ body {
 }
 
 .cs-memory-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-height: 300px;
   border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .cs-memory-content .cs-memory-editor {
@@ -11135,7 +11144,10 @@ body {
 }
 
 .cs-memory-content {
-  min-height: 300px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: 12px 0;
 }
 
