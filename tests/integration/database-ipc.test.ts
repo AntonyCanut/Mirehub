@@ -162,8 +162,8 @@ describe('Database IPC Handlers', () => {
 
   // --- Handler Registration ---
 
-  it('enregistre les 21 handlers database', () => {
-    expect(mockIpcMain.handle).toHaveBeenCalledTimes(21)
+  it('enregistre les 23 handlers database', () => {
+    expect(mockIpcMain.handle).toHaveBeenCalledTimes(23)
     expect(mockIpcMain._handlers.has('db:connect')).toBe(true)
     expect(mockIpcMain._handlers.has('db:disconnect')).toBe(true)
     expect(mockIpcMain._handlers.has('db:testConnection')).toBe(true)
@@ -183,6 +183,8 @@ describe('Database IPC Handlers', () => {
     expect(mockIpcMain._handlers.has('db:restore')).toBe(true)
     expect(mockIpcMain._handlers.has('db:transfer')).toBe(true)
     expect(mockIpcMain._handlers.has('db:nlQuery')).toBe(true)
+    expect(mockIpcMain._handlers.has('db:nlGenerateSql')).toBe(true)
+    expect(mockIpcMain._handlers.has('db:nlInterpret')).toBe(true)
     expect(mockIpcMain._handlers.has('db:nlCancel')).toBe(true)
     expect(mockIpcMain._handlers.has('db:getSchemaContext')).toBe(true)
   })

@@ -33,6 +33,19 @@ const ENV_TAG_COLORS: Record<DbEnvironmentTag, string> = {
 
 const LIMIT_OPTIONS = [50, 100, 250, 500, 1000]
 
+const PANEL_MIN_HEIGHT = 80
+const PANEL_MAX_RATIO = 0.6
+const PANEL_FALLBACK_MAX = 400
+
+export function clampPanelHeight(
+  current: number,
+  delta: number,
+  containerHeight: number | null,
+): number {
+  const maxH = containerHeight ? containerHeight * PANEL_MAX_RATIO : PANEL_FALLBACK_MAX
+  return Math.min(Math.max(current + delta, PANEL_MIN_HEIGHT), maxH)
+}
+
 function getStatusLabel(status: DbConnectionStatus, t: (key: string) => string): string {
   switch (status) {
     case 'connected':
@@ -113,20 +126,16 @@ export function DatabaseQueryArea({
 
   const handleEditorResize = useCallback(
     (deltaY: number) => {
-      const maxH = containerRef.current
-        ? containerRef.current.clientHeight * 0.6
-        : 400
-      setEditorHeight((h) => Math.min(Math.max(h + deltaY, 80), maxH))
+      const ch = containerRef.current?.clientHeight ?? null
+      setEditorHeight((h) => clampPanelHeight(h, deltaY, ch))
     },
     [],
   )
 
   const handleChatResize = useCallback(
     (deltaY: number) => {
-      const maxH = containerRef.current
-        ? containerRef.current.clientHeight * 0.6
-        : 400
-      setChatHeight((h) => Math.min(Math.max(h - deltaY, 80), maxH))
+      const ch = containerRef.current?.clientHeight ?? null
+      setChatHeight((h) => clampPanelHeight(h, -deltaY, ch))
     },
     [],
   )
