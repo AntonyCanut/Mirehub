@@ -11550,6 +11550,13 @@ body {
   font-size: 10px;
 }
 
+.cs-rules-sync-btn {
+  margin-left: auto;
+  font-size: 10px !important;
+  padding: 2px 8px !important;
+  white-space: nowrap;
+}
+
 /* Default agents grid */
 .cs-default-agents-grid {
   display: grid;

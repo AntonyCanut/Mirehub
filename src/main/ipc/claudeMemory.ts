@@ -1,4 +1,5 @@
 import { IpcMain, dialog, app, shell } from 'electron'
+import { execFile } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
@@ -536,6 +537,27 @@ export function registerClaudeMemoryHandlers(ipcMain: IpcMain): void {
       if (!stat.isSymbolicLink()) return { success: false, error: 'Not a symlink' }
       fs.unlinkSync(link)
       return { success: true }
+    },
+  )
+
+  // Sync ai-rules from SpaceMalamute/ai-rules (force-reset debounce so it runs immediately)
+  ipcMain.handle(
+    IPC_CHANNELS.CLAUDE_MEMORY_SYNC_AI_RULES,
+    async (_event, { projectPath }: { projectPath: string }) => {
+      const syncScript = path.join(os.homedir(), '.mirehub', 'hooks', 'ai-rules-sync.sh')
+      if (!fs.existsSync(syncScript)) return { success: false, error: 'Sync script not found' }
+
+      // Remove debounce timestamp so the script actually runs
+      const stateDir = path.join(projectPath, '.claude', '.ai-rules-sync')
+      const timestampFile = path.join(stateDir, 'last-check')
+      if (fs.existsSync(timestampFile)) fs.unlinkSync(timestampFile)
+
+      return new Promise((resolve) => {
+        execFile('bash', [syncScript], { timeout: 30_000 }, (error) => {
+          if (error) return resolve({ success: false, error: error.message })
+          resolve({ success: true })
+        })
+      })
     },
   )
 

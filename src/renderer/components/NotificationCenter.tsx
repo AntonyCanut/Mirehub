@@ -68,6 +68,16 @@ export function NotificationCenter() {
     if (!notif.workspaceId) return
 
     const wsStore = useWorkspaceStore.getState()
+
+    // Switch namespace if the target workspace belongs to a different one
+    const targetWorkspace = wsStore.workspaces.find((w) => w.id === notif.workspaceId)
+    if (
+      targetWorkspace?.namespaceId &&
+      wsStore.activeNamespaceId !== targetWorkspace.namespaceId
+    ) {
+      wsStore.setActiveNamespace(targetWorkspace.namespaceId)
+    }
+
     if (wsStore.activeWorkspaceId !== notif.workspaceId) {
       wsStore.setActiveWorkspace(notif.workspaceId)
     }

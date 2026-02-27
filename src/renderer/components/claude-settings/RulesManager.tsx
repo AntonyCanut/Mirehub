@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { useI18n } from '../../lib/i18n'
 import { MemoryEditor } from './MemoryEditor'
 import { ConfirmModal } from '../ConfirmModal'
@@ -24,6 +24,14 @@ export function RulesManager({ projectPath }: Props) {
     x: number
     y: number
   } | null>(null)
+
+  // Stable callback to sync ai-rules from SpaceMalamute upstream
+  const loadRef = useRef(state.load)
+  loadRef.current = state.load
+  const handleSyncAiRules = useCallback(async () => {
+    await window.mirehub.claudeMemory.syncAiRules(projectPath)
+    await loadRef.current()
+  }, [projectPath])
 
   const tree = useMemo(
     () => buildRuleTree(state.localRules, state.directories),
@@ -113,6 +121,7 @@ export function RulesManager({ projectPath }: Props) {
                 author={state.selectedRule.author}
                 authorUrl={state.selectedRule.authorUrl}
                 coAuthors={state.selectedRule.coAuthors}
+                onSync={state.selectedRule.author === 'SpaceMalamute' ? handleSyncAiRules : undefined}
               />
             )}
 
@@ -173,6 +182,7 @@ export function RulesManager({ projectPath }: Props) {
             <RuleAuthorBadge
               author={state.selectedTemplate.author}
               authorUrl={state.selectedTemplate.authorUrl}
+              onSync={state.selectedTemplate.author === 'SpaceMalamute' ? handleSyncAiRules : undefined}
             />
             <div className="cs-rules-shared-warning">
               {t('claude.templateReadOnly')}
