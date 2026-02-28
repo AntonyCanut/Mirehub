@@ -299,6 +299,37 @@ export interface NpmPackageInfo {
   type: 'dependency' | 'devDependency'
 }
 
+// Package Manager types (multi-technology)
+export type PackageManagerType = 'npm' | 'go' | 'pip' | 'cargo' | 'nuget' | 'composer' | 'bower'
+
+export interface PackageInfo {
+  name: string
+  currentVersion: string
+  latestVersion: string | null
+  updateAvailable: boolean
+  isDeprecated: boolean
+  deprecationMessage?: string
+  type: 'dependency' | 'devDependency' | 'peer' | 'optional' | 'module'
+}
+
+export interface ProjectPackageManager {
+  projectId: string
+  projectName: string
+  projectPath: string
+  manager: PackageManagerType
+  packageCount: number
+}
+
+// AI Chat types for packages
+export type PkgNlMessageRole = 'user' | 'assistant' | 'error'
+
+export interface PkgNlMessage {
+  id: string
+  role: PkgNlMessageRole
+  content: string
+  timestamp: number
+}
+
 export interface SearchResult {
   file: string
   line: number
@@ -1002,6 +1033,14 @@ export const IPC_CHANNELS = {
   SSH_DELETE_KEY: 'ssh:deleteKey',
   SSH_OPEN_DIRECTORY: 'ssh:openDirectory',
   SSH_SELECT_KEY_FILE: 'ssh:selectKeyFile',
+
+  // Packages (multi-technology)
+  PACKAGES_DETECT: 'packages:detect',
+  PACKAGES_LIST: 'packages:list',
+  PACKAGES_UPDATE: 'packages:update',
+  PACKAGES_SEARCH: 'packages:search',
+  PACKAGES_NL_ASK: 'packages:nlAsk',
+  PACKAGES_NL_CANCEL: 'packages:nlCancel',
 
   // Code Analysis
   ANALYSIS_DETECT_TOOLS: 'analysis:detectTools',

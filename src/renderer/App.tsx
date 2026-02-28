@@ -7,6 +7,7 @@ import { KanbanBoard } from './components/KanbanBoard'
 import { GitPanel } from './components/GitPanel'
 import { FileViewer } from './components/FileViewer'
 import { NpmPanel } from './components/NpmPanel'
+import { PackagesPanel } from './components/PackagesPanel'
 import { FileDiffViewer } from './components/FileDiffViewer'
 import { ClaudeSettingsPanel } from './components/claude-settings'
 import { SettingsPanel } from './components/SettingsPanel'
@@ -50,14 +51,8 @@ export function App() {
       setAvailableMagicTabs([])
       return
     }
-    // Check for package.json to enable NPM tab
-    window.mirehub.fs.readFile(activeProject.path + '/package.json').then((result) => {
-      if (result.content !== null) {
-        setAvailableMagicTabs(['npm'])
-      } else {
-        setAvailableMagicTabs([])
-      }
-    })
+    // Always enable packages tab (multi-technology detection happens inside the panel)
+    setAvailableMagicTabs(['packages'])
   }, [activeProject, setAvailableMagicTabs])
 
   // Check for saved session on startup
@@ -320,12 +315,12 @@ export function App() {
             >
               {t('view.kanban')}
             </button>
-            {availableMagicTabs.includes('npm') && (
+            {availableMagicTabs.includes('packages') && (
               <button
-                className={`view-btn${viewMode === 'npm' ? ' view-btn--active' : ''}`}
-                onClick={() => setViewMode('npm')}
+                className={`view-btn${viewMode === 'packages' ? ' view-btn--active' : ''}`}
+                onClick={() => setViewMode('packages')}
               >
-                {t('view.npm')}
+                {t('view.packages')}
               </button>
             )}
             {activeProject?.hasClaude && (
@@ -427,6 +422,11 @@ export function App() {
             {viewMode === 'npm' && (
               <div className="view-panel" style={{ display: 'flex' }}>
                 <NpmPanel />
+              </div>
+            )}
+            {viewMode === 'packages' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <PackagesPanel />
               </div>
             )}
             {viewMode === 'file' && (

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest, RuleEntry, TemplateRuleEntry } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest, RuleEntry, TemplateRuleEntry, PackageManagerType, PackageInfo, ProjectPackageManager, PkgNlMessage } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -619,6 +619,22 @@ const api = {
       ipcRenderer.on(IPC_CHANNELS.ANALYSIS_INSTALL_PROGRESS, handler)
       return () => { ipcRenderer.removeListener(IPC_CHANNELS.ANALYSIS_INSTALL_PROGRESS, handler) }
     },
+  },
+
+  // Packages (multi-technology)
+  packages: {
+    detect: (projects: Array<{ id: string; path: string; name: string }>): Promise<ProjectPackageManager[]> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_DETECT, { paths: projects }),
+    list: (projectPath: string, manager: PackageManagerType): Promise<{ packages: PackageInfo[] }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_LIST, { projectPath, manager }),
+    update: (projectPath: string, manager: PackageManagerType, packageName?: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_UPDATE, { projectPath, manager, packageName }),
+    search: (manager: PackageManagerType, query: string): Promise<{ results: PackageInfo[] }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_SEARCH, { manager, query }),
+    nlAsk: (projectPath: string, manager: PackageManagerType, question: string, history: PkgNlMessage[]): Promise<{ answer: string; action?: unknown }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_NL_ASK, { projectPath, manager, question, history }),
+    nlCancel: (): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_NL_CANCEL),
   },
 
   // Notifications

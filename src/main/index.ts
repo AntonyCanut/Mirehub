@@ -19,6 +19,7 @@ import { registerAppUpdateHandlers } from './ipc/appUpdate'
 import { registerMcpHandlers } from './ipc/mcp'
 import { registerSshHandlers } from './ipc/ssh'
 import { registerAnalysisHandlers } from './ipc/analysis'
+import { registerPackagesHandlers } from './ipc/packages'
 import { registerNamespaceHandlers } from './ipc/namespace'
 import { registerGitConfigHandlers } from './ipc/gitConfig'
 import { registerClaudeMemoryHandlers } from './ipc/claudeMemory'
@@ -298,6 +299,7 @@ app.whenReady().then(() => {
   registerNamespaceHandlers(ipcMain)
   registerGitConfigHandlers(ipcMain)
   registerAnalysisHandlers(ipcMain, () => mainWindow)
+  registerPackagesHandlers(ipcMain)
   registerClaudeMemoryHandlers(ipcMain)
 
   // Ensure a Default namespace exists (first launch or migration)
