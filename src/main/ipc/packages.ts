@@ -382,6 +382,23 @@ function getInstalledNpmVersion(projectPath: string, packageName: string): strin
   }
 }
 
+async function updateNpmPackage(projectPath: string, packageName: string): Promise<{ success: boolean; error?: string; versionBefore?: string | null; versionAfter?: string | null }> {
+  const versionBefore = getInstalledNpmVersion(projectPath, packageName)
+  await execFileAsync('npm', ['update', packageName], { cwd: projectPath, timeout: 120000 })
+  const versionAfter = getInstalledNpmVersion(projectPath, packageName)
+  const result: { success: boolean; versionBefore?: string | null; versionAfter?: string | null } = { success: true }
+  if (versionBefore !== null || versionAfter !== null) {
+    result.versionBefore = versionBefore
+    result.versionAfter = versionAfter
+  }
+  return result
+}
+
+async function updateAllNpmPackages(projectPath: string): Promise<{ success: boolean; error?: string }> {
+  await execFileAsync('npm', ['update'], { cwd: projectPath, timeout: 120000 })
+  return { success: true }
+}
+
 async function updatePackage(projectPath: string, manager: PackageManagerType, packageName?: string): Promise<{ success: boolean; error?: string; versionBefore?: string | null; versionAfter?: string | null }> {
   try {
     switch (manager) {
