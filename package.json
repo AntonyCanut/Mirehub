@@ -23,7 +23,7 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@monaco-editor/react": "^4.7.0",
     "better-sqlite3": "^12.6.2",
-    "electron-store": "^10.0.0",
+    "electron-store": "^11.0.2",
     "electron-updater": "^6.8.3",
     "ignore": "^7.0.5",
     "monaco-editor": "^0.55.1",
@@ -32,7 +32,7 @@
     "mysql2": "^3.17.4",
     "node-pty": "^1.0.0",
     "pg": "^8.18.0",
-    "uuid": "^11.1.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
@@ -137,7 +137,9 @@
       {
         "from": "src/main/assets/rule-templates",
         "to": "rule-templates",
-        "filter": ["**/*.md"]
+        "filter": [
+          "**/*.md"
+        ]
       }
     ],
     "npmRebuild": true,

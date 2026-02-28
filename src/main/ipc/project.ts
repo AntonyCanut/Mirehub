@@ -211,9 +211,22 @@ export function registerProjectHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.PROJECT_UPDATE_PACKAGE,
     async (_event, { projectPath, packageName }: { projectPath: string; packageName?: string }) => {
       try {
-        const args = packageName ? ['update', packageName] : ['update']
-        const { stdout } = await execFileAsync('npm', args, { cwd: projectPath, timeout: 60000 })
-        return { success: true, output: stdout }
+        // Use npm install <pkg>@latest for single packages (crosses major versions)
+        // Use npm update for all packages (within semver range)
+        const args = packageName ? ['install', `${packageName}@latest`] : ['update']
+
+        try {
+          const { stdout } = await execFileAsync('npm', args, { cwd: projectPath, timeout: 120000 })
+          return { success: true, output: stdout }
+        } catch (installErr: unknown) {
+          // Fallback: retry with --legacy-peer-deps for dependency conflicts
+          const errMsg = String((installErr as { stderr?: string }).stderr ?? '')
+          if (errMsg.includes('ERESOLVE') || errMsg.includes('peer dep') || errMsg.includes('Could not resolve dependency')) {
+            const { stdout } = await execFileAsync('npm', [...args, '--legacy-peer-deps'], { cwd: projectPath, timeout: 120000 })
+            return { success: true, output: stdout }
+          }
+          throw installErr
+        }
       } catch (err: unknown) {
         const execErr = err as { stderr?: string; message?: string }
         return { success: false, error: execErr.stderr || execErr.message || 'npm update failed' }

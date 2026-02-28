@@ -369,43 +369,67 @@ async function listBowerPackages(projectPath: string): Promise<PackageInfo[]> {
   }
 }
 
-async function updatePackage(projectPath: string, manager: PackageManagerType, packageName?: string): Promise<{ success: boolean; error?: string }> {
+/**
+ * Get the currently installed version of an npm package by reading its package.json in node_modules.
+ */
+function getInstalledNpmVersion(projectPath: string, packageName: string): string | null {
   try {
-    let command: string
-    let args: string[]
+    const pkgJsonPath = path.join(projectPath, 'node_modules', packageName, 'package.json')
+    const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'))
+    return pkg.version ?? null
+  } catch {
+    return null
+  }
+}
 
+async function updatePackage(projectPath: string, manager: PackageManagerType, packageName?: string): Promise<{ success: boolean; error?: string; versionBefore?: string | null; versionAfter?: string | null }> {
+  try {
     switch (manager) {
       case 'npm':
-        command = 'npm'
-        args = packageName ? ['update', packageName] : ['update']
-        break
+        if (packageName) {
+          return await updateNpmPackage(projectPath, packageName)
+        }
+        // Update all: escalating fallback chain
+        return await updateAllNpmPackages(projectPath)
       case 'go':
-        command = 'go'
-        args = packageName ? ['get', '-u', packageName] : ['get', '-u', './...']
-        break
+        await execFileAsync('go', packageName ? ['get', '-u', packageName] : ['get', '-u', './...'], {
+          cwd: projectPath,
+          timeout: 120000,
+        })
+        return { success: true }
       case 'pip':
-        command = 'pip'
-        args = packageName ? ['install', '--upgrade', packageName] : ['install', '--upgrade', '-r', 'requirements.txt']
-        break
+        await execFileAsync(
+          'pip',
+          packageName ? ['install', '--upgrade', packageName] : ['install', '--upgrade', '-r', 'requirements.txt'],
+          { cwd: projectPath, timeout: 120000 },
+        )
+        return { success: true }
       case 'cargo':
-        command = 'cargo'
-        args = packageName ? ['update', '-p', packageName] : ['update']
-        break
+        await execFileAsync('cargo', packageName ? ['update', '-p', packageName] : ['update'], {
+          cwd: projectPath,
+          timeout: 120000,
+        })
+        return { success: true }
       case 'nuget':
-        command = 'dotnet'
-        args = packageName ? ['add', 'package', packageName] : ['restore']
-        break
+        await execFileAsync('dotnet', packageName ? ['add', 'package', packageName] : ['restore'], {
+          cwd: projectPath,
+          timeout: 120000,
+        })
+        return { success: true }
       case 'composer':
-        command = 'composer'
-        args = packageName ? ['update', packageName] : ['update']
-        break
+        await execFileAsync('composer', packageName ? ['update', packageName] : ['update'], {
+          cwd: projectPath,
+          timeout: 120000,
+        })
+        return { success: true }
       case 'bower':
-        command = 'bower'
-        args = packageName ? ['update', packageName] : ['update']
-        break
+        await execFileAsync('bower', packageName ? ['update', packageName] : ['update'], {
+          cwd: projectPath,
+          timeout: 120000,
+        })
+        return { success: true }
     }
 
-    await execFileAsync(command, args, { cwd: projectPath, timeout: 120000 })
     return { success: true }
   } catch (err: unknown) {
     const execErr = err as { stderr?: string; message?: string }
