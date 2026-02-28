@@ -1,11 +1,8 @@
 import { IpcMain } from 'electron'
 import fs from 'fs'
 import path from 'path'
-import { execFile } from 'child_process'
-import { promisify } from 'util'
-
-const execFileAsync = promisify(execFile)
 import { IPC_CHANNELS, PackageInfo, PackageManagerType, PkgNlMessage, ProjectPackageManager } from '../../shared/types/index'
+import { crossExecFile } from '../../shared/platform'
 import { askPackageQuestion, cancelPackageQuery } from '../services/packages/nlPackages'
 
 interface DetectInput {
@@ -155,7 +152,7 @@ async function listNpmPackages(projectPath: string): Promise<PackageInfo[]> {
 
     let outdatedData: Record<string, { current: string; wanted: string; latest: string; deprecated?: string }> = {}
     try {
-      const { stdout } = await execFileAsync('npm', ['outdated', '--json'], { cwd: projectPath, timeout: 30000 })
+      const { stdout } = await crossExecFile('npm', ['outdated', '--json'], { cwd: projectPath, timeout: 30000 })
       outdatedData = JSON.parse(stdout || '{}')
     } catch (err: unknown) {
       // npm outdated returns exit code 1 when there ARE outdated packages — this is normal
@@ -194,7 +191,7 @@ async function listNpmPackages(projectPath: string): Promise<PackageInfo[]> {
 
 async function listGoPackages(projectPath: string): Promise<PackageInfo[]> {
   try {
-    const { stdout } = await execFileAsync('go', ['list', '-m', '-u', '-json', 'all'], {
+    const { stdout } = await crossExecFile('go', ['list', '-m', '-u', '-json', 'all'], {
       cwd: projectPath,
       timeout: 60000,
     })
@@ -234,7 +231,7 @@ async function listGoPackages(projectPath: string): Promise<PackageInfo[]> {
 
 async function listPipPackages(projectPath: string): Promise<PackageInfo[]> {
   try {
-    const { stdout } = await execFileAsync('pip', ['list', '--outdated', '--format=json'], {
+    const { stdout } = await crossExecFile('pip', ['list', '--outdated', '--format=json'], {
       cwd: projectPath,
       timeout: 30000,
     })
@@ -257,7 +254,7 @@ async function listPipPackages(projectPath: string): Promise<PackageInfo[]> {
 
 async function listCargoPackages(projectPath: string): Promise<PackageInfo[]> {
   try {
-    const { stdout } = await execFileAsync('cargo', ['outdated', '--format', 'json'], {
+    const { stdout } = await crossExecFile('cargo', ['outdated', '--format', 'json'], {
       cwd: projectPath,
       timeout: 60000,
     })
@@ -279,7 +276,7 @@ async function listCargoPackages(projectPath: string): Promise<PackageInfo[]> {
 
 async function listNugetPackages(projectPath: string): Promise<PackageInfo[]> {
   try {
-    const { stdout } = await execFileAsync('dotnet', ['list', 'package', '--outdated', '--format', 'json'], {
+    const { stdout } = await crossExecFile('dotnet', ['list', 'package', '--outdated', '--format', 'json'], {
       cwd: projectPath,
       timeout: 60000,
     })
@@ -316,7 +313,7 @@ async function listNugetPackages(projectPath: string): Promise<PackageInfo[]> {
 
 async function listComposerPackages(projectPath: string): Promise<PackageInfo[]> {
   try {
-    const { stdout } = await execFileAsync('composer', ['outdated', '--format=json'], {
+    const { stdout } = await crossExecFile('composer', ['outdated', '--format=json'], {
       cwd: projectPath,
       timeout: 60000,
     })
@@ -340,7 +337,7 @@ async function listComposerPackages(projectPath: string): Promise<PackageInfo[]>
 
 async function listBowerPackages(projectPath: string): Promise<PackageInfo[]> {
   try {
-    const { stdout } = await execFileAsync('bower', ['list', '--json'], {
+    const { stdout } = await crossExecFile('bower', ['list', '--json'], {
       cwd: projectPath,
       timeout: 30000,
     })
@@ -384,7 +381,7 @@ function getInstalledNpmVersion(projectPath: string, packageName: string): strin
 
 async function updateNpmPackage(projectPath: string, packageName: string): Promise<{ success: boolean; error?: string; versionBefore?: string | null; versionAfter?: string | null }> {
   const versionBefore = getInstalledNpmVersion(projectPath, packageName)
-  await execFileAsync('npm', ['update', packageName], { cwd: projectPath, timeout: 120000 })
+  await crossExecFile('npm', ['update', packageName], { cwd: projectPath, timeout: 120000 })
   const versionAfter = getInstalledNpmVersion(projectPath, packageName)
   const result: { success: boolean; versionBefore?: string | null; versionAfter?: string | null } = { success: true }
   if (versionBefore !== null || versionAfter !== null) {
@@ -395,7 +392,7 @@ async function updateNpmPackage(projectPath: string, packageName: string): Promi
 }
 
 async function updateAllNpmPackages(projectPath: string): Promise<{ success: boolean; error?: string }> {
-  await execFileAsync('npm', ['update'], { cwd: projectPath, timeout: 120000 })
+  await crossExecFile('npm', ['update'], { cwd: projectPath, timeout: 120000 })
   return { success: true }
 }
 
@@ -409,38 +406,38 @@ async function updatePackage(projectPath: string, manager: PackageManagerType, p
         // Update all: escalating fallback chain
         return await updateAllNpmPackages(projectPath)
       case 'go':
-        await execFileAsync('go', packageName ? ['get', '-u', packageName] : ['get', '-u', './...'], {
+        await crossExecFile('go', packageName ? ['get', '-u', packageName] : ['get', '-u', './...'], {
           cwd: projectPath,
           timeout: 120000,
         })
         return { success: true }
       case 'pip':
-        await execFileAsync(
+        await crossExecFile(
           'pip',
           packageName ? ['install', '--upgrade', packageName] : ['install', '--upgrade', '-r', 'requirements.txt'],
           { cwd: projectPath, timeout: 120000 },
         )
         return { success: true }
       case 'cargo':
-        await execFileAsync('cargo', packageName ? ['update', '-p', packageName] : ['update'], {
+        await crossExecFile('cargo', packageName ? ['update', '-p', packageName] : ['update'], {
           cwd: projectPath,
           timeout: 120000,
         })
         return { success: true }
       case 'nuget':
-        await execFileAsync('dotnet', packageName ? ['add', 'package', packageName] : ['restore'], {
+        await crossExecFile('dotnet', packageName ? ['add', 'package', packageName] : ['restore'], {
           cwd: projectPath,
           timeout: 120000,
         })
         return { success: true }
       case 'composer':
-        await execFileAsync('composer', packageName ? ['update', packageName] : ['update'], {
+        await crossExecFile('composer', packageName ? ['update', packageName] : ['update'], {
           cwd: projectPath,
           timeout: 120000,
         })
         return { success: true }
       case 'bower':
-        await execFileAsync('bower', packageName ? ['update', packageName] : ['update'], {
+        await crossExecFile('bower', packageName ? ['update', packageName] : ['update'], {
           cwd: projectPath,
           timeout: 120000,
         })
@@ -461,7 +458,7 @@ async function searchPackages(manager: PackageManagerType, query: string): Promi
   }
 
   try {
-    const { stdout } = await execFileAsync('npm', ['search', '--json', query], { timeout: 15000 })
+    const { stdout } = await crossExecFile('npm', ['search', '--json', query], { timeout: 15000 })
     const results: Array<{ name: string; version: string; description: string }> = JSON.parse(stdout || '[]')
 
     return results.map((pkg) => ({
