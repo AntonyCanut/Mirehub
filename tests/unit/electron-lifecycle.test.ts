@@ -23,7 +23,7 @@ const mockBrowserWindowInstance = {
   },
 }
 
-const mockBrowserWindowConstructor = vi.fn(() => mockBrowserWindowInstance)
+const mockBrowserWindowConstructor = vi.fn(function () { return mockBrowserWindowInstance })
 Object.defineProperty(mockBrowserWindowConstructor, 'getAllWindows', {
   value: vi.fn(() => []),
 })
@@ -224,32 +224,30 @@ describe('Electron Lifecycle (pre-upgrade baseline)', () => {
     })
   })
 
-  describe('BrowserWindow platform-specific options', () => {
-    if (IS_WIN) {
-      it('ne contient pas vibrancy sur Windows', async () => {
-        await import('../../src/main/index')
-        await new Promise((r) => setTimeout(r, 0))
+  describe.skipIf(!IS_WIN)('BrowserWindow platform-specific options', () => {
+    it('ne contient pas vibrancy sur Windows', async () => {
+      await import('../../src/main/index')
+      await new Promise((r) => setTimeout(r, 0))
 
-        const options = mockBrowserWindowConstructor.mock.calls[0][0]
-        expect(options.vibrancy).toBeUndefined()
-      })
+      const options = mockBrowserWindowConstructor.mock.calls[0][0]
+      expect(options.vibrancy).toBeUndefined()
+    })
 
-      it('ne contient pas trafficLightPosition sur Windows', async () => {
-        await import('../../src/main/index')
-        await new Promise((r) => setTimeout(r, 0))
+    it('ne contient pas trafficLightPosition sur Windows', async () => {
+      await import('../../src/main/index')
+      await new Promise((r) => setTimeout(r, 0))
 
-        const options = mockBrowserWindowConstructor.mock.calls[0][0]
-        expect(options.trafficLightPosition).toBeUndefined()
-      })
+      const options = mockBrowserWindowConstructor.mock.calls[0][0]
+      expect(options.trafficLightPosition).toBeUndefined()
+    })
 
-      it('utilise titleBarStyle default sur Windows', async () => {
-        await import('../../src/main/index')
-        await new Promise((r) => setTimeout(r, 0))
+    it('utilise titleBarStyle default sur Windows', async () => {
+      await import('../../src/main/index')
+      await new Promise((r) => setTimeout(r, 0))
 
-        const options = mockBrowserWindowConstructor.mock.calls[0][0]
-        expect(options.titleBarStyle).toBe('default')
-      })
-    }
+      const options = mockBrowserWindowConstructor.mock.calls[0][0]
+      expect(options.titleBarStyle).toBe('default')
+    })
   })
 
   describe('App lifecycle handlers', () => {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Editor, { BeforeMount, OnMount } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 
@@ -46,7 +46,7 @@ export function MemoryEditor({ title, content, readOnly = false, onSave }: Props
   }, [content, onSave])
 
   // Keep save ref in sync so the Monaco action always calls the latest version
-  saveRef.current = handleSave
+  useEffect(() => { saveRef.current = handleSave })
 
   const handleMount: OnMount = useCallback((ed) => {
     editorRef.current = ed

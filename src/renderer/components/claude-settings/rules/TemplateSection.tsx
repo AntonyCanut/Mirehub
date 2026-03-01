@@ -17,6 +17,16 @@ interface Props {
   selectedPath: string | null
 }
 
+/** Get all file paths under a directory node (pure traversal, no reactive deps) */
+function getFilesUnderDir(node: TemplateTreeNode): string[] {
+  if (node.type === 'file') return [node.path]
+  const files: string[] = []
+  for (const child of node.children || []) {
+    files.push(...getFilesUnderDir(child))
+  }
+  return files
+}
+
 export function TemplateSection({ templates, onSelect, onImport, selectedPath }: Props) {
   const { t } = useI18n()
   const [checked, setChecked] = useState<Set<string>>(new Set())
@@ -69,16 +79,6 @@ export function TemplateSection({ templates, onSelect, onImport, selectedPath }:
     return sortNodes(root)
   }, [templates])
 
-  // Get all file paths under a directory
-  const getFilesUnderDir = useCallback((node: TemplateTreeNode): string[] => {
-    if (node.type === 'file') return [node.path]
-    const files: string[] = []
-    for (const child of node.children || []) {
-      files.push(...getFilesUnderDir(child))
-    }
-    return files
-  }, [])
-
   const toggleCheck = useCallback((node: TemplateTreeNode) => {
     setChecked((prev) => {
       const next = new Set(prev)
@@ -90,7 +90,7 @@ export function TemplateSection({ templates, onSelect, onImport, selectedPath }:
       }
       return next
     })
-  }, [getFilesUnderDir])
+  }, [])
 
   const toggleExpand = useCallback((path: string) => {
     setExpanded((prev) => {

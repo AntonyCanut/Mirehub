@@ -118,12 +118,22 @@ describe('platform module', () => {
         const paths = getExtendedToolPaths()
         expect(paths.some((p) => p.includes('chocolatey'))).toBe(true)
       })
+
+      it('includes .cargo/bin on Windows', () => {
+        const paths = getExtendedToolPaths()
+        expect(paths.some((p) => p.includes('.cargo'))).toBe(true)
+      })
     }
 
     if (TEST_IS_MAC) {
       it('includes homebrew path on macOS', () => {
         const paths = getExtendedToolPaths()
         expect(paths.some((p) => p.includes('homebrew'))).toBe(true)
+      })
+
+      it('does not include .cargo/bin on macOS', () => {
+        const paths = getExtendedToolPaths()
+        expect(paths.some((p) => p.includes('.cargo'))).toBe(false)
       })
     }
   })
@@ -256,18 +266,24 @@ describe('platform module', () => {
       expect(cmds.claude).toBeDefined()
     })
 
-    it('uses --git flag and GitHub URL for rtk', () => {
-      const cmds = getUpdateCommands()
-      expect(cmds.rtk).toBeDefined()
-      expect(cmds.rtk.command).toBe('cargo')
-      expect(cmds.rtk.args).toContain('--git')
-      expect(cmds.rtk.args).toContain('https://github.com/rtk-ai/rtk')
-    })
-
     if (TEST_IS_WIN) {
       it('uses winget for node on Windows', () => {
         const cmds = getUpdateCommands()
         expect(cmds.node.command).toBe('winget')
+      })
+
+      it('includes cargo update command on Windows', () => {
+        const cmds = getUpdateCommands()
+        expect(cmds.cargo).toBeDefined()
+        expect(cmds.cargo.command).toBe('winget')
+      })
+
+      it('uses --git flag and GitHub URL for rtk on Windows', () => {
+        const cmds = getUpdateCommands()
+        expect(cmds.rtk).toBeDefined()
+        expect(cmds.rtk.command).toBe('cargo')
+        expect(cmds.rtk.args).toContain('--git')
+        expect(cmds.rtk.args).toContain('https://github.com/rtk-ai/rtk')
       })
     }
 
@@ -275,6 +291,12 @@ describe('platform module', () => {
       it('uses brew for node on macOS', () => {
         const cmds = getUpdateCommands()
         expect(cmds.node.command).toBe('brew')
+      })
+
+      it('does not include cargo or rtk on macOS', () => {
+        const cmds = getUpdateCommands()
+        expect(cmds.cargo).toBeUndefined()
+        expect(cmds.rtk).toBeUndefined()
       })
     }
   })

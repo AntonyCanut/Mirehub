@@ -117,18 +117,22 @@ export function useBackgroundKanbanSync(): void {
     refreshWatchList()
     refreshTimerRef.current = setInterval(refreshWatchList, 60000)
 
+    // Capture ref values for cleanup (refs may change before cleanup runs)
+    const watchedSet = watchedRef.current
+    const pollTimers = pollTimersRef.current
+
     return () => {
       unsubscribe()
       if (refreshTimerRef.current) clearInterval(refreshTimerRef.current)
       // Clean up all watchers and poll timers
-      for (const wsId of watchedRef.current) {
+      for (const wsId of watchedSet) {
         window.mirehub.kanban.watchRemove(wsId).catch(() => { /* best-effort */ })
       }
-      watchedRef.current.clear()
-      for (const timer of pollTimersRef.current.values()) {
+      watchedSet.clear()
+      for (const timer of pollTimers.values()) {
         clearInterval(timer)
       }
-      pollTimersRef.current.clear()
+      pollTimers.clear()
     }
   }, [activeWorkspaceId])
 }

@@ -257,6 +257,7 @@ export function getAvailableShells(): ShellOption[] {
 export function isElevated(): boolean {
   if (!IS_WIN) return false
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- synchronous function cannot use dynamic import()
     require('child_process').execFileSync('net', ['session'], {
       stdio: 'ignore',
       timeout: 5000,
@@ -303,8 +304,9 @@ export function crossExecFile(
   args: string[],
   options?: { timeout?: number; cwd?: string; env?: NodeJS.ProcessEnv; maxBuffer?: number },
 ): Promise<{ stdout: string; stderr: string }> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy require to avoid interfering with vi.mock('child_process') in tests
   const { execFile } = require('child_process') as typeof import('child_process')
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy require to avoid interfering with vi.mock('util') in tests
   const { promisify } = require('util') as typeof import('util')
   const execFileAsync = promisify(execFile)
 

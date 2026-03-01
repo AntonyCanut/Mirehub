@@ -24,9 +24,7 @@ vi.mock('electron', () => ({
 // Mock StorageService singleton
 const mockGetSettings = vi.fn(() => ({ autoApprove: false }))
 vi.mock('../../src/main/services/storage', () => ({
-  StorageService: vi.fn(() => ({
-    getSettings: mockGetSettings,
-  })),
+  StorageService: vi.fn(function () { return { getSettings: mockGetSettings } }),
 }))
 
 // Mock notification service (imported by activityHooks for broadcastActivityFromFile)

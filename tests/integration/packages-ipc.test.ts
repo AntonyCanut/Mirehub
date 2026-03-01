@@ -4,6 +4,8 @@ import path from 'path'
 import os from 'os'
 import { createMockIpcMain } from '../mocks/electron'
 
+const IS_WIN = process.platform === 'win32'
+
 const TEST_DIR = path.join(os.tmpdir(), `.mirehub-packages-ipc-test-${process.pid}-${Date.now()}`)
 
 // Mock crossExecFile from platform (instead of child_process directly)
@@ -127,7 +129,7 @@ describe('Packages IPC Handlers', () => {
       expect(results[0].manager).toBe('pip')
     })
 
-    it('detecte un projet cargo (Cargo.toml)', async () => {
+    it.skipIf(!IS_WIN)('detecte un projet cargo (Cargo.toml) — Windows only', async () => {
       const projectDir = path.join(TEST_DIR, 'cargo-project')
       fs.mkdirSync(projectDir, { recursive: true })
       fs.writeFileSync(path.join(projectDir, 'Cargo.toml'), '[package]\nname = "myapp"\nversion = "0.1.0"\n')
@@ -138,6 +140,18 @@ describe('Packages IPC Handlers', () => {
 
       expect(results).toHaveLength(1)
       expect(results[0].manager).toBe('cargo')
+    })
+
+    it.skipIf(IS_WIN)('ignore Cargo.toml sur les plateformes non-Windows', async () => {
+      const projectDir = path.join(TEST_DIR, 'cargo-project')
+      fs.mkdirSync(projectDir, { recursive: true })
+      fs.writeFileSync(path.join(projectDir, 'Cargo.toml'), '[package]\nname = "myapp"\nversion = "0.1.0"\n')
+
+      const results = await mockIpcMain._invoke('packages:detect', {
+        paths: [{ id: 'p5', path: projectDir, name: 'cargo-project' }],
+      })
+
+      expect(results).toHaveLength(0)
     })
 
     it('detecte un projet nuget (*.csproj)', async () => {
@@ -262,19 +276,26 @@ describe('Packages IPC Handlers', () => {
         ],
       })
 
-      expect(results).toHaveLength(3)
+      // Cargo detection is Windows-only, so expected count varies by platform
+      const expectedCount = IS_WIN ? 3 : 2
+      expect(results).toHaveLength(expectedCount)
       const managers = results.map((r: { manager: string }) => r.manager)
       expect(managers).toContain('npm')
       expect(managers).toContain('go')
-      expect(managers).toContain('cargo')
 
       // Verify project IDs are preserved
       const npmResult = results.find((r: { manager: string }) => r.manager === 'npm')
       expect(npmResult.projectId).toBe('a1')
       const goResult = results.find((r: { manager: string }) => r.manager === 'go')
       expect(goResult.projectId).toBe('a2')
-      const cargoResult = results.find((r: { manager: string }) => r.manager === 'cargo')
-      expect(cargoResult.projectId).toBe('a3')
+
+      if (IS_WIN) {
+        expect(managers).toContain('cargo')
+        const cargoResult = results.find((r: { manager: string }) => r.manager === 'cargo')
+        expect(cargoResult.projectId).toBe('a3')
+      } else {
+        expect(managers).not.toContain('cargo')
+      }
     })
 
     it('gere un package.json invalide en retournant packageCount a 0', async () => {

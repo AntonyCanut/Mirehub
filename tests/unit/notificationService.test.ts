@@ -30,7 +30,7 @@ const mockBrowserWindow = {
 }
 const mockApp = { dock: { setBadge: vi.fn() } }
 vi.mock('electron', () => ({
-  Notification: vi.fn(() => mockNotificationInstance),
+  Notification: vi.fn(function () { return mockNotificationInstance }),
   BrowserWindow: mockBrowserWindow,
   app: mockApp,
 }))
@@ -38,9 +38,7 @@ vi.mock('electron', () => ({
 // Mock StorageService singleton
 const mockGetSettings = vi.fn()
 vi.mock('../../src/main/services/storage', () => ({
-  StorageService: vi.fn(() => ({
-    getSettings: mockGetSettings,
-  })),
+  StorageService: vi.fn(function () { return { getSettings: mockGetSettings } }),
 }))
 
 // Import after all mocks are set up

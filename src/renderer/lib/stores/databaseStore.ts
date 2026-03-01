@@ -143,7 +143,6 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
     }
 
     set((state) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [id]: _, ...nextStatuses } = state.connectionStatuses
 
       const nextConns = { ...state.connectionsByWorkspace }
@@ -152,9 +151,7 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
       }
 
       // Clean up NL-related state for deleted connection
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [id]: _msgs, ...nextNlMessages } = state.nlMessages
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [id]: _loading, ...nextNlLoading } = state.nlLoading
 
       // Clean up query tabs for deleted connection

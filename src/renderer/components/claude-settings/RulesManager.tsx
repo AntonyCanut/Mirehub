@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useI18n } from '../../lib/i18n'
 import { MemoryEditor } from './MemoryEditor'
 import { ConfirmModal } from '../ConfirmModal'
@@ -27,7 +27,7 @@ export function RulesManager({ projectPath }: Props) {
 
   // Stable callback to sync ai-rules from SpaceMalamute upstream
   const loadRef = useRef(state.load)
-  loadRef.current = state.load
+  useEffect(() => { loadRef.current = state.load })
   const handleSyncAiRules = useCallback(async () => {
     await window.mirehub.claudeMemory.syncAiRules(projectPath)
     await loadRef.current()
