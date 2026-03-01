@@ -168,7 +168,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
 
       // Verifier que le symlink pointe vers le bon dossier
       const target = fs.readlinkSync(path.join(result.envPath, 'project-alpha'))
-      expect(target).toBe(projectDir1)
+      expect(path.resolve(target)).toBe(path.resolve(projectDir1))
     })
 
     it('gere un workspace avec un projet contenant .claude', async () => {
@@ -187,7 +187,7 @@ describe('WorkspaceEnv IPC Handlers', () => {
 
       // Le symlink doit pointer vers le projet qui contient .claude
       const linkTarget = fs.readlinkSync(path.join(result.envPath, 'project-alpha'))
-      expect(linkTarget).toBe(projectDir1)
+      expect(path.resolve(linkTarget)).toBe(path.resolve(projectDir1))
 
       // Via le symlink, on doit pouvoir acceder au .claude
       const claudeMd = fs.readFileSync(path.join(result.envPath, 'project-alpha', 'CLAUDE.md'), 'utf-8')
