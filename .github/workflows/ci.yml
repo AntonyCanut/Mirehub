@@ -194,3 +194,14 @@ jobs:
         run: npx electron-builder --win --x64 --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up release assets (remove exe blockmap)
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          for asset in $(gh release view "$TAG" --json assets -q '.assets[].name' | grep '\.blockmap$'); do
+            echo "Removing $asset"
+            gh release delete-asset "$TAG" "$asset" --yes
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
