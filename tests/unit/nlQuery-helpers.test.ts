@@ -25,13 +25,17 @@ vi.mock('../../src/main/services/database/index', () => ({
 }))
 
 // ---------------------------------------------------------------------------
-// Mock: child_process.spawn
+// Mock: crossSpawn via shared/platform (used by ai-cli.ts)
 // ---------------------------------------------------------------------------
 const mockSpawn = vi.fn()
 
-vi.mock('child_process', () => ({
-  spawn: (...args: unknown[]) => mockSpawn(...args),
-}))
+vi.mock('../../src/shared/platform', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../src/shared/platform')>()
+  return {
+    ...original,
+    crossSpawn: (...args: unknown[]) => mockSpawn(...args),
+  }
+})
 
 // ---------------------------------------------------------------------------
 // Import module under test AFTER mocks are registered

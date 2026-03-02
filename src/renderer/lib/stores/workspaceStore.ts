@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { useShallow } from 'zustand/shallow'
 import type { Workspace, Project, Namespace } from '../../../shared/types/index'
+import type { AiProviderId } from '../../../shared/types/ai-provider'
 import { useTerminalTabStore } from './terminalTabStore'
 import { useViewStore } from './viewStore'
 
@@ -25,9 +26,9 @@ interface WorkspaceActions {
   setActiveNamespace: (id: string | null) => void
   createWorkspace: (name: string, color?: string) => Promise<Workspace | null>
   createWorkspaceFromFolder: () => Promise<Workspace | null>
-  createWorkspaceFromPath: (dirPath: string) => Promise<Workspace | null>
-  createWorkspaceFromNew: (projectName: string) => Promise<Workspace | null>
-  createWorkspaceFromNewInDir: (projectName: string, parentDir: string) => Promise<Workspace | null>
+  createWorkspaceFromPath: (dirPath: string, aiProvider?: AiProviderId) => Promise<Workspace | null>
+  createWorkspaceFromNew: (projectName: string, aiProvider?: AiProviderId) => Promise<Workspace | null>
+  createWorkspaceFromNewInDir: (projectName: string, parentDir: string, aiProvider?: AiProviderId) => Promise<Workspace | null>
   deleteWorkspace: (id: string) => Promise<void>
   updateWorkspace: (id: string, data: Partial<Workspace>) => Promise<void>
   checkDeletedWorkspace: (name: string) => Promise<Workspace | null>
@@ -167,7 +168,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     return get().createWorkspaceFromPath(dirPath)
   },
 
-  createWorkspaceFromPath: async (dirPath: string) => {
+  createWorkspaceFromPath: async (dirPath: string, aiProvider?: AiProviderId) => {
     try {
       const folderName = dirPath.split(/[\\/]/).pop() || dirPath
       const workspace = await window.mirehub.workspace.create({
@@ -194,6 +195,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       })
 
       if (project) {
+        if (aiProvider) {
+          project.aiProvider = aiProvider
+        }
+
         try {
           const scanResult = await window.mirehub.project.scanClaude(dirPath)
           if (scanResult?.hasClaude) {
@@ -216,9 +221,12 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         const envPath = await get().setupWorkspaceEnv(workspace.id)
         const cwd = envPath || dirPath
 
-        // Create a single split tab: Claude (left) + Terminal (right)
+        // Create a single split tab: AI (left) + Terminal (right)
         const termStore = useTerminalTabStore.getState()
-        termStore.createSplitTab(workspace.id, cwd, 'Claude + Terminal', 'claude', null)
+        const selectedProvider = aiProvider ?? project.aiProvider
+        const aiCmd = selectedProvider === 'codex' ? 'codex' : 'claude'
+        const aiLabel = selectedProvider === 'codex' ? 'Codex + Terminal' : 'Claude + Terminal'
+        termStore.createSplitTab(workspace.id, cwd, aiLabel, aiCmd, null)
       } else {
         set({ activeWorkspaceId: workspace.id })
       }
@@ -231,13 +239,13 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     }
   },
 
-  createWorkspaceFromNew: async (projectName: string) => {
+  createWorkspaceFromNew: async (projectName: string, aiProvider?: AiProviderId) => {
     const parentDir = await window.mirehub.project.selectDir()
     if (!parentDir) return null
-    return get().createWorkspaceFromNewInDir(projectName, parentDir)
+    return get().createWorkspaceFromNewInDir(projectName, parentDir, aiProvider)
   },
 
-  createWorkspaceFromNewInDir: async (projectName: string, parentDir: string) => {
+  createWorkspaceFromNewInDir: async (projectName: string, parentDir: string, aiProvider?: AiProviderId) => {
     try {
       const projectPath = parentDir + '/' + projectName
       const exists = await window.mirehub.fs.exists(projectPath)
@@ -264,6 +272,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       })
 
       if (project) {
+        if (aiProvider) {
+          project.aiProvider = aiProvider
+        }
+
         set((state) => ({
           projects: [...state.projects, project],
           activeProjectId: project.id,
@@ -277,7 +289,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         const cwd = envPath || projectPath
 
         const termStore = useTerminalTabStore.getState()
-        termStore.createSplitTab(workspace.id, cwd, 'Claude + Terminal', 'claude', null)
+        const selectedProvider = aiProvider ?? project.aiProvider
+        const aiCmd = selectedProvider === 'codex' ? 'codex' : 'claude'
+        const aiLabel = selectedProvider === 'codex' ? 'Codex + Terminal' : 'Claude + Terminal'
+        termStore.createSplitTab(workspace.id, cwd, aiLabel, aiCmd, null)
       } else {
         set({ activeWorkspaceId: workspace.id })
       }
@@ -516,16 +531,18 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         const termStore = useTerminalTabStore.getState()
         const workspaceTabs = termStore.tabs.filter((t) => t.workspaceId === id)
         if (workspaceTabs.length === 0) {
-          // Auto-create split tab (Claude + Terminal) if none exist for this workspace
+          // Auto-create split tab (AI + Terminal) if none exist for this workspace
+          const aiCmd = firstProject.aiProvider === 'codex' ? 'codex' : 'claude'
+          const aiLabel = firstProject.aiProvider === 'codex' ? 'Codex + Terminal' : 'Claude + Terminal'
           getWorkspaceCwd(workspace.name, workspaceProjects, id)
             .then((cwd) => {
-              termStore.createSplitTab(id, cwd, 'Claude + Terminal', 'claude', null)
+              termStore.createSplitTab(id, cwd, aiLabel, aiCmd, null)
             })
             .catch((err) => {
               // eslint-disable-next-line no-console
               console.error('Failed to get workspace cwd:', err)
               // Fallback to first project path
-              termStore.createSplitTab(id, firstProject.path, 'Claude + Terminal', 'claude', null)
+              termStore.createSplitTab(id, firstProject.path, aiLabel, aiCmd, null)
             })
         } else {
           // Activate the first tab of this workspace so content is displayed

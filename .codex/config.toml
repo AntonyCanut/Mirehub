@@ -1,0 +1,9 @@
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+[features]
+web_search = "disabled"
+multi_agent = true
+
+[history]
+persistence = "save-all"

@@ -549,21 +549,23 @@
 
 .kanban-card:active { cursor: grabbing; opacity: 0.7; }
 
-/* Working card - prominent orange halo */
+/* Working card - dynamic provider-colored halo (--working-color set via inline style) */
 .kanban-card--working {
-  border-color: #fab387;
-  box-shadow: 0 0 8px rgba(250, 179, 135, 0.4), 0 0 20px rgba(250, 179, 135, 0.15);
+  --wc: var(--working-color, #fab387);
+  border-color: var(--wc);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--wc) 40%, transparent),
+              0 0 20px color-mix(in srgb, var(--wc) 15%, transparent);
   animation: kanban-halo 2s ease-in-out infinite;
 }
 
 @keyframes kanban-halo {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(250, 179, 135, 0.4), 0 0 20px rgba(250, 179, 135, 0.15);
-    border-color: #fab387;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--wc) 40%, transparent),
+                0 0 20px color-mix(in srgb, var(--wc) 15%, transparent);
   }
   50% {
-    box-shadow: 0 0 14px rgba(250, 179, 135, 0.6), 0 0 30px rgba(250, 179, 135, 0.25);
-    border-color: #f9c57a;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--wc) 60%, transparent),
+                0 0 30px color-mix(in srgb, var(--wc) 25%, transparent);
   }
 }
 

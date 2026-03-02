@@ -6,6 +6,7 @@ import { IPC_CHANNELS } from '../../shared/types'
 import { sendNotification, sendSilentNotification, playBellRepeat } from './notificationService'
 import { StorageService } from './storage'
 import { IS_WIN } from '../../shared/platform'
+import type { AiProviderId } from '../../shared/types/ai-provider'
 
 const ACTIVITY_DIR = path.join(os.homedir(), '.mirehub', 'activity')
 const HOOKS_DIR = path.join(os.homedir(), '.mirehub', 'hooks')
@@ -294,7 +295,16 @@ esac
  * to signal Claude activity back to Mirehub.
  * Merges with existing hooks (e.g. kanban hooks) without overwriting.
  */
-export function installActivityHooks(projectPath: string): void {
+export async function installActivityHooks(
+  projectPath: string,
+  workspaceName?: string,
+  provider: AiProviderId = 'claude',
+): Promise<void> {
+  if (provider === 'codex') {
+    await installCodexActivityHooks(projectPath, workspaceName)
+    return
+  }
+
   const storage = new StorageService()
   const { autoApprove } = storage.getSettings()
   ensureActivityHookScript()
@@ -415,6 +425,40 @@ export function installActivityHooks(projectPath: string): void {
   }
 
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
+}
+
+/**
+ * Installs activity hooks for Codex provider.
+ * Codex uses .codex/config.toml — we add a notify directive that calls our activity hook script.
+ */
+async function installCodexActivityHooks(
+  projectPath: string,
+  _workspaceName?: string,
+): Promise<void> {
+  ensureActivityHookScript()
+
+  const codexDir = path.join(projectPath, '.codex')
+  if (!fs.existsSync(codexDir)) {
+    fs.mkdirSync(codexDir, { recursive: true })
+  }
+
+  const hookScriptPath = path.join(os.homedir(), '.mirehub', 'hooks', 'mirehub-activity.sh')
+  const configPath = path.join(codexDir, 'config.toml')
+
+  let existingConfig = ''
+  if (fs.existsSync(configPath)) {
+    existingConfig = fs.readFileSync(configPath, 'utf-8')
+  }
+
+  // Only add if not already present
+  if (!existingConfig.includes('mirehub-activity')) {
+    const notifyLine = `notify = ["bash", "${hookScriptPath}", "working"]`
+    if (existingConfig.trim()) {
+      fs.writeFileSync(configPath, `${existingConfig.trimEnd()}\n${notifyLine}\n`, 'utf-8')
+    } else {
+      fs.writeFileSync(configPath, `${notifyLine}\n`, 'utf-8')
+    }
+  }
 }
 
 /**

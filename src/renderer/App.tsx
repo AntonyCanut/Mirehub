@@ -37,7 +37,7 @@ import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 const TUTORIAL_VIEWS = new Set([
   'kanban', 'terminal', 'git', 'database', 'packages',
   'analysis', 'todos', 'stats', 'prompts', 'api', 'healthcheck',
-  'settings', 'search', 'shortcuts', 'claude',
+  'settings', 'search', 'shortcuts', 'claude', 'ai',
 ])
 
 export function App() {
@@ -394,14 +394,12 @@ export function App() {
             >
               {t('view.prompts')}
             </button>
-            {activeProject?.hasClaude && (
-              <button
-                className={`view-btn${viewMode === 'claude' ? ' view-btn--active' : ''}`}
-                onClick={() => setViewMode('claude')}
-              >
-                {t('view.claude')}
-              </button>
-            )}
+            <button
+              className={`view-btn${viewMode === 'claude' || viewMode === 'ai' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('ai')}
+            >
+              {t('view.ai')}
+            </button>
             <button
               className={`view-btn${viewMode === 'api' ? ' view-btn--active' : ''}`}
               onClick={() => setViewMode('api')}
@@ -492,7 +490,7 @@ export function App() {
                 <FileDiffViewer />
               </div>
             )}
-            {viewMode === 'claude' && (
+            {(viewMode === 'claude' || viewMode === 'ai') && (
               <div className="view-panel" style={{ display: 'flex' }}>
                 <ClaudeSettingsPanel />
               </div>

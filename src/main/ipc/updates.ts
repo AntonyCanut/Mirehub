@@ -47,6 +47,11 @@ const TOOLS_TO_CHECK: ToolCheck[] = [
     checkCommand: 'git',
     checkArgs: ['--version'],
   },
+  {
+    name: 'codex',
+    checkCommand: 'codex',
+    checkArgs: ['--version'],
+  },
   // cargo & rtk — Windows only
   ...(IS_WIN
     ? [
@@ -73,6 +78,7 @@ async function getVersion(command: string, args: string[]): Promise<string | nul
       .replace(/^git version /, '')
       .replace(/^Claude Code /, '')
       .replace(/^cargo /, '')
+      .replace(/^codex\s+/i, '')
       .replace(/ \(.+\)$/, '')
     return version
   } catch {
@@ -169,6 +175,8 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
     } else if (tool.name === 'cargo') {
       // cargo version is managed by rustup — no easy remote version check
       latestVersion = null
+    } else if (tool.name === 'codex') {
+      latestVersion = await getLatestNpmVersion('@openai/codex')
     } else if (tool.name === 'rtk') {
       // rtk is a cargo crate — no easy remote version check, skip
       latestVersion = null
@@ -243,6 +251,10 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
           case 'claude':
             command = 'npm'
             args = ['install', '-g', '@anthropic-ai/claude-code@latest']
+            break
+          case 'codex':
+            command = 'npm'
+            args = ['install', '-g', '@openai/codex@latest']
             break
           case 'git':
             if (IS_WIN) {

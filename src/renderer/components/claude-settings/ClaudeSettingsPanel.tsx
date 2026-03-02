@@ -1,14 +1,29 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useWorkspaceStore } from '../../lib/stores/workspaceStore'
 import { useI18n } from '../../lib/i18n'
+import { AI_PROVIDERS } from '../../../shared/types/ai-provider'
+import type { AiProviderId } from '../../../shared/types/ai-provider'
+import { AiDefaultsTab } from './AiDefaultsTab'
 import { GeneralTab } from './GeneralTab'
+import { CodexGeneralTab } from './CodexGeneralTab'
+import { CodexRulesTab } from './CodexRulesTab'
+import { CodexSkillsTab } from './CodexSkillsTab'
+import { CodexMemoryTab } from './CodexMemoryTab'
 import { SecuritySandboxTab } from './SecuritySandboxTab'
 import { AgentsSkillsTab } from './AgentsSkillsTab'
 import { IntegrationsTab } from './IntegrationsTab'
 import { MemoryTab } from './MemoryTab'
 import { WORKFLOW_MARKER } from '../../../shared/constants/defaultWorkflows'
 
-type SubTab = 'general' | 'security' | 'agents' | 'integrations' | 'memory'
+type SidebarSection = 'general' | 'claude' | 'codex'
+type ClaudeSubTab = 'general' | 'security' | 'agents' | 'integrations' | 'memory'
+type CodexSubTab = 'general' | 'rules' | 'skills' | 'memory'
+
+const SIDEBAR_ITEMS: { key: SidebarSection; providerId?: AiProviderId }[] = [
+  { key: 'general' },
+  { key: 'claude', providerId: 'claude' },
+  { key: 'codex', providerId: 'codex' },
+]
 
 export function ClaudeSettingsPanel() {
   const { t } = useI18n()
@@ -16,7 +31,9 @@ export function ClaudeSettingsPanel() {
   const activeProject = projects.find((p) => p.id === activeProjectId)
   const activeWorkspace = workspaces.find((w) => w.id === activeProject?.workspaceId)
 
-  const [subTab, setSubTab] = useState<SubTab>('general')
+  const [section, setSection] = useState<SidebarSection>('general')
+  const [claudeSubTab, setClaudeSubTab] = useState<ClaudeSubTab>('general')
+  const [codexSubTab, setCodexSubTab] = useState<CodexSubTab>('general')
   const [settings, setSettings] = useState<Record<string, unknown>>({})
   const [localSettings, setLocalSettings] = useState<Record<string, unknown> | null>(null)
   const [userSettings, setUserSettings] = useState<Record<string, unknown> | null>(null)
@@ -165,7 +182,7 @@ export function ClaudeSettingsPanel() {
     return <div className="file-viewer-empty">{t('common.loading')}</div>
   }
 
-  const tabs: { key: SubTab; label: string }[] = [
+  const claudeSubTabs: { key: ClaudeSubTab; label: string }[] = [
     { key: 'general', label: t('claude.generalTab') },
     { key: 'security', label: t('claude.securityTab') },
     { key: 'agents', label: t('claude.agentsTab') },
@@ -175,65 +192,147 @@ export function ClaudeSettingsPanel() {
 
   return (
     <div className="claude-rules-panel">
-      <div className="claude-rules-tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            className={`claude-rules-tab${subTab === tab.key ? ' claude-rules-tab--active' : ''}`}
-            onClick={() => setSubTab(tab.key)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div className="claude-rules-content">
-        {subTab === 'general' && (
-          <GeneralTab
-            settings={settings}
-            settingsErrors={settingsErrors}
-            fixingSettings={fixingSettings}
-            hooksStatus={hooksStatus}
-            installingHooks={installingHooks}
-            removingHooks={removingHooks}
-            projectPath={activeProject.path}
-            onFixSettings={handleFixSettings}
-            onInstallHooks={handleInstallHooks}
-            onUpdateHooks={handleUpdateHooks}
-            onRemoveHooks={handleRemoveHooks}
-            onSettingsChange={writeSettings}
-            onExportConfig={handleExportConfig}
-            onImportConfig={handleImportConfig}
-          />
-        )}
-        {subTab === 'security' && (
-          <SecuritySandboxTab
-            settings={settings}
-            mcpServerKeys={mcpServerKeys}
-            onSettingsChange={writeSettings}
-          />
-        )}
-        {subTab === 'agents' && (
-          <AgentsSkillsTab
-            projectPath={activeProject.path}
-            onDeploySuccess={loadData}
-          />
-        )}
-        {subTab === 'integrations' && (
-          <IntegrationsTab
-            settings={settings}
-            mcpServers={mcpServers}
-            projectPath={activeProject.path}
-            claudeMd={claudeMd}
-            workflowDeployed={workflowDeployed}
-            onSettingsChange={writeSettings}
-            onMcpServersChange={handleMcpServersChange}
-            onClaudeMdChange={setClaudeMd}
-            onWorkflowDeployedChange={setWorkflowDeployed}
-          />
-        )}
-        {subTab === 'memory' && (
-          <MemoryTab projectPath={activeProject.path} />
-        )}
+      <div className="ai-panel-body">
+        <div className="ai-sidebar">
+          <div className="ai-sidebar-header">
+            <h3>{t('ai.sidebar.title')}</h3>
+          </div>
+          <div className="ai-sidebar-content">
+            {SIDEBAR_ITEMS.map((item) => {
+              const isActive = section === item.key
+              const providerColor = item.providerId ? AI_PROVIDERS[item.providerId].detectionColor : undefined
+              const activeStyle = isActive && providerColor
+                ? { borderColor: providerColor, background: `${providerColor}10` }
+                : undefined
+              return (
+                <button
+                  key={item.key}
+                  className={`ai-sidebar-item${isActive ? ' ai-sidebar-item--active' : ''}`}
+                  style={activeStyle}
+                  onClick={() => setSection(item.key)}
+                >
+                  {item.providerId ? (
+                    <span
+                      className="ai-sidebar-dot"
+                      style={{ background: AI_PROVIDERS[item.providerId].detectionColor }}
+                    />
+                  ) : (
+                    <span className="ai-sidebar-icon">&#9881;</span>
+                  )}
+                  <span className="ai-sidebar-item-label">
+                    {item.providerId ? AI_PROVIDERS[item.providerId].displayName : t('ai.sidebar.general')}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="ai-panel-content">
+          {section === 'general' && (
+            <AiDefaultsTab projectId={activeProject.id} />
+          )}
+
+          {section === 'claude' && (
+            <>
+              <div className="claude-rules-tabs">
+                {claudeSubTabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    className={`claude-rules-tab${claudeSubTab === tab.key ? ' claude-rules-tab--active' : ''}`}
+                    onClick={() => setClaudeSubTab(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div className="claude-rules-content">
+                {claudeSubTab === 'general' && (
+                  <GeneralTab
+                    settings={settings}
+                    settingsErrors={settingsErrors}
+                    fixingSettings={fixingSettings}
+                    hooksStatus={hooksStatus}
+                    installingHooks={installingHooks}
+                    removingHooks={removingHooks}
+                    projectPath={activeProject.path}
+                    onFixSettings={handleFixSettings}
+                    onInstallHooks={handleInstallHooks}
+                    onUpdateHooks={handleUpdateHooks}
+                    onRemoveHooks={handleRemoveHooks}
+                    onSettingsChange={writeSettings}
+                    onExportConfig={handleExportConfig}
+                    onImportConfig={handleImportConfig}
+                  />
+                )}
+                {claudeSubTab === 'security' && (
+                  <SecuritySandboxTab
+                    settings={settings}
+                    mcpServerKeys={mcpServerKeys}
+                    onSettingsChange={writeSettings}
+                  />
+                )}
+                {claudeSubTab === 'agents' && (
+                  <AgentsSkillsTab
+                    projectPath={activeProject.path}
+                    onDeploySuccess={loadData}
+                  />
+                )}
+                {claudeSubTab === 'integrations' && (
+                  <IntegrationsTab
+                    settings={settings}
+                    mcpServers={mcpServers}
+                    projectPath={activeProject.path}
+                    claudeMd={claudeMd}
+                    workflowDeployed={workflowDeployed}
+                    onSettingsChange={writeSettings}
+                    onMcpServersChange={handleMcpServersChange}
+                    onClaudeMdChange={setClaudeMd}
+                    onWorkflowDeployedChange={setWorkflowDeployed}
+                  />
+                )}
+                {claudeSubTab === 'memory' && (
+                  <MemoryTab projectPath={activeProject.path} />
+                )}
+              </div>
+            </>
+          )}
+
+          {section === 'codex' && (
+            <>
+              <div className="claude-rules-tabs">
+                {([
+                  { key: 'general' as CodexSubTab, label: t('codex.generalTab') },
+                  { key: 'rules' as CodexSubTab, label: t('codex.rulesTab') },
+                  { key: 'skills' as CodexSubTab, label: t('codex.skillsTab') },
+                  { key: 'memory' as CodexSubTab, label: t('codex.memoryTab') },
+                ]).map((tab) => (
+                  <button
+                    key={tab.key}
+                    className={`claude-rules-tab${codexSubTab === tab.key ? ' claude-rules-tab--active' : ''}`}
+                    onClick={() => setCodexSubTab(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div className="claude-rules-content">
+                {codexSubTab === 'general' && (
+                  <CodexGeneralTab projectPath={activeProject.path} />
+                )}
+                {codexSubTab === 'rules' && (
+                  <CodexRulesTab projectPath={activeProject.path} />
+                )}
+                {codexSubTab === 'skills' && (
+                  <CodexSkillsTab projectPath={activeProject.path} />
+                )}
+                {codexSubTab === 'memory' && (
+                  <CodexMemoryTab projectPath={activeProject.path} />
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

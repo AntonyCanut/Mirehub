@@ -24,6 +24,8 @@ import { registerNamespaceHandlers } from './ipc/namespace'
 import { registerGitConfigHandlers } from './ipc/gitConfig'
 import { registerClaudeMemoryHandlers } from './ipc/claudeMemory'
 import { registerHealthCheckHandlers } from './ipc/healthcheck'
+import { registerCodexConfigHandlers } from './ipc/codexConfig'
+import { registerAiProviderHandlers } from './ipc/aiProvider'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, ensureAutoApproveScript, ensureKanbanDoneScript, syncAllWorkspaceEnvHooks, startActivityWatcher } from './services/activityHooks'
 import { clearDockBadge } from './services/notificationService'
@@ -330,6 +332,8 @@ app.whenReady().then(() => {
   registerPackagesHandlers(ipcMain)
   registerClaudeMemoryHandlers(ipcMain)
   registerHealthCheckHandlers(ipcMain)
+  registerCodexConfigHandlers(ipcMain)
+  registerAiProviderHandlers(ipcMain)
 
   // Ensure a Default namespace exists (first launch or migration)
   new StorageService().ensureDefaultNamespace()

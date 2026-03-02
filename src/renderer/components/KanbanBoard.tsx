@@ -7,6 +7,8 @@ import { useI18n } from '../lib/i18n'
 import { ContextMenu } from './ContextMenu'
 import type { ContextMenuItem } from './ContextMenu'
 import type { KanbanStatus, KanbanTask, PromptTemplate } from '../../shared/types/index'
+import { AI_PROVIDERS } from '../../shared/types/ai-provider'
+import type { AiProviderId } from '../../shared/types/ai-provider'
 import '../styles/kanban.css'
 
 interface PendingClipboardImage {
@@ -106,6 +108,7 @@ export function KanbanBoard() {
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([])
   const [pendingClipboardImages, setPendingClipboardImages] = useState<PendingClipboardImage[]>([])
   const [newIsCtoMode, setNewIsCtoMode] = useState(false)
+  const [newAiProvider, setNewAiProvider] = useState<AiProviderId | ''>('')
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([])
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null)
 
@@ -130,6 +133,15 @@ export function KanbanBoard() {
   const [archiveExpanded, setArchiveExpanded] = useState(false)
 
   const workspaceProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
+
+  // Resolve the effective default AI provider for this workspace
+  const [appDefaultAiProvider, setAppDefaultAiProvider] = useState<AiProviderId>('claude')
+  useEffect(() => {
+    window.mirehub.settings.get().then((s) => {
+      if (s.defaultAiProvider) setAppDefaultAiProvider(s.defaultAiProvider as AiProviderId)
+    }).catch(() => {})
+  }, [])
+  const workspaceDefaultAiProvider: AiProviderId = workspaceProjects[0]?.aiProvider ?? appDefaultAiProvider
 
   useEffect(() => {
     if (activeWorkspaceId) {
@@ -292,6 +304,7 @@ export function KanbanBoard() {
       newTargetProjectId || undefined,
       newIsCtoMode || undefined,
       finalLabels.length > 0 ? finalLabels : undefined,
+      newAiProvider || undefined,
     )
     // Attach pending files
     const createdTasks = useKanbanStore.getState().tasks
@@ -321,10 +334,11 @@ export function KanbanBoard() {
     setNewTargetProjectId('')
     setNewLabels([])
     setNewIsCtoMode(false)
+    setNewAiProvider('')
     setPendingAttachments([])
     setPendingClipboardImages([])
     setShowCreateForm(false)
-  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newIsCtoMode, pendingAttachments, pendingClipboardImages, createTask, loadTasks])
+  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newIsCtoMode, newAiProvider, pendingAttachments, pendingClipboardImages, createTask, loadTasks])
 
   const handleDragStart = useCallback(
     (taskId: string) => {
@@ -587,6 +601,16 @@ export function KanbanBoard() {
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
+                <select
+                  className="kanban-select"
+                  value={newAiProvider}
+                  onChange={(e) => setNewAiProvider(e.target.value as AiProviderId | '')}
+                >
+                  <option value="">{AI_PROVIDERS[workspaceDefaultAiProvider].displayName}</option>
+                  {Object.values(AI_PROVIDERS).filter((p) => p.id !== workspaceDefaultAiProvider).map((p) => (
+                    <option key={p.id} value={p.id}>{p.displayName}</option>
+                  ))}
+                </select>
               </div>
               <div className="kanban-create-modal-labels">
                 {USER_LABELS.map((label) => (
@@ -784,6 +808,7 @@ export function KanbanBoard() {
                     onDoubleClick={() => handleOpenEditModal(task)}
                     onGoToTerminal={getGoToTerminal(task.id)}
                     projects={workspaceProjects}
+                    defaultAiProvider={workspaceDefaultAiProvider}
                   />
                 ))}
               </div>
@@ -814,6 +839,7 @@ export function KanbanBoard() {
                     onDoubleClick={() => handleOpenEditModal(task)}
                     onGoToTerminal={getGoToTerminal(task.id)}
                     projects={workspaceProjects}
+                    defaultAiProvider={workspaceDefaultAiProvider}
                   />
                   <button
                     className="kanban-archive-btn"
@@ -901,7 +927,8 @@ function KanbanCard({
   onContextMenu,
   onDoubleClick,
   onGoToTerminal,
-  projects: _projects,
+  projects,
+  defaultAiProvider,
 }: {
   task: KanbanTask
   isSelected: boolean
@@ -911,7 +938,8 @@ function KanbanCard({
   onContextMenu: (e: React.MouseEvent) => void
   onDoubleClick: () => void
   onGoToTerminal: (() => void) | null
-  projects: Array<{ id: string; name: string }>
+  projects: Array<{ id: string; name: string; aiProvider?: AiProviderId | null }>
+  defaultAiProvider: AiProviderId
 }) {
   const { t } = useI18n()
   const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -942,9 +970,15 @@ function KanbanCard({
 
   const isWorking = task.status === 'WORKING'
 
+  const resolvedProvider: AiProviderId = task.aiProvider
+    ?? projects.find((p) => p.id === task.targetProjectId)?.aiProvider
+    ?? defaultAiProvider
+  const workingColor = AI_PROVIDERS[resolvedProvider].detectionColor
+
   return (
     <div
       className={`kanban-card${isSelected ? ' kanban-card--selected' : ''}${isWorking ? ' kanban-card--working' : ''}${task.disabled ? ' kanban-card--disabled' : ''}${task.isCtoTicket ? ' kanban-card--cto' : ''}`}
+      style={isWorking ? { '--working-color': workingColor } as React.CSSProperties : undefined}
       draggable={!task.disabled}
       onDragStart={onDragStart}
       onClick={handleCardClick}

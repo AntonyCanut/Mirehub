@@ -119,7 +119,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       expect(mockCreateTab).toHaveBeenCalledWith(
         'ws-1',
         '/tmp/workspace-env',
-        '[IA] Fix bug in auth',
+        '[Claude] Fix bug in auth',
         expect.stringContaining('claude --dangerously-skip-permissions'),
       )
 
@@ -129,8 +129,8 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       expect(initialCommand).toContain('.kanban-prompt-task-1.md')
       expect(initialCommand).not.toMatch(/\s-p\s/)
 
-      // Tab color set to orange
-      expect(mockSetTabColor).toHaveBeenCalledWith('tab-new-1', '#fab387')
+      // Tab color set to provider detection color (Claude = #7c3aed)
+      expect(mockSetTabColor).toHaveBeenCalledWith('tab-new-1', '#7c3aed')
     })
 
     it('utilise le chemin du projet cible si targetProjectId est defini', async () => {
@@ -157,7 +157,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       expect(mockCreateTab).toHaveBeenCalledWith(
         'ws-1',
         '/tmp/backend',
-        '[IA] Fix bug in auth',
+        '[Claude] Fix bug in auth',
         expect.any(String),
       )
       // workspaceEnv.setup should NOT have been called since we have a target project

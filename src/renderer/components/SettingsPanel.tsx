@@ -35,6 +35,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   fontFamily: 'Menlo',
   scrollbackLines: 5000,
   claudeDetectionColor: '#7c3aed',
+  codexDetectionColor: '#10a37f',
+  defaultAiProvider: 'claude',
   autoClauderEnabled: false,
   notificationSound: true,
   notificationBadge: true,
@@ -46,7 +48,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   tutorialSeenSections: [],
 }
 
-type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'kanban' | 'notifications' | 'about'
+type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'ai' | 'kanban' | 'notifications' | 'about'
 
 const SECTIONS: { id: SettingsSection; icon: string }[] = [
   { id: 'general', icon: '⚙' },
@@ -54,7 +56,7 @@ const SECTIONS: { id: SettingsSection; icon: string }[] = [
   { id: 'terminal', icon: '▸' },
   { id: 'git', icon: '⎇' },
   { id: 'ssh', icon: '🔑' },
-  { id: 'claude', icon: '✦' },
+  { id: 'ai', icon: '✦' },
   { id: 'kanban', icon: '☰' },
   { id: 'notifications', icon: '🔔' },
   { id: 'about', icon: 'ℹ' },
@@ -306,6 +308,7 @@ export function SettingsPanel() {
       git: t('settings.git'),
       ssh: t('settings.ssh'),
       claude: t('settings.claude'),
+      ai: t('settings.ai') ?? t('settings.claude'),
       kanban: t('settings.kanban'),
       notifications: t('settings.notifications'),
       about: t('settings.about'),
@@ -361,6 +364,28 @@ export function SettingsPanel() {
                       onClick={() => handleLocaleChange('en')}
                     >
                       {t('settings.english')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('ai.defaultProvider')}</label>
+                    <span className="settings-hint">{t('ai.defaultProviderHint')}</span>
+                  </div>
+                  <div className="settings-radio-group">
+                    <button
+                      className={`settings-radio-btn${settings.defaultAiProvider === 'claude' ? ' settings-radio-btn--active' : ''}`}
+                      onClick={() => updateSetting('defaultAiProvider', 'claude')}
+                    >
+                      Claude
+                    </button>
+                    <button
+                      className={`settings-radio-btn${settings.defaultAiProvider === 'codex' ? ' settings-radio-btn--active' : ''}`}
+                      onClick={() => updateSetting('defaultAiProvider', 'codex')}
+                    >
+                      Codex
                     </button>
                   </div>
                 </div>
@@ -722,8 +747,8 @@ export function SettingsPanel() {
             </div>
           )}
 
-          {/* Claude */}
-          {activeSection === 'claude' && (
+          {/* AI */}
+          {activeSection === 'ai' && (
             <div className="settings-section">
               <div className="settings-card">
                 <div className="settings-row">
@@ -735,6 +760,18 @@ export function SettingsPanel() {
                     type="color"
                     value={settings.claudeDetectionColor}
                     onChange={(e) => updateSetting('claudeDetectionColor', e.target.value)}
+                    className="settings-color-input"
+                  />
+                </div>
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{locale === 'fr' ? 'Couleur Codex' : 'Codex Color'}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Couleur des indicateurs Codex dans les terminaux' : 'Color of Codex indicators in terminals'}</span>
+                  </div>
+                  <input
+                    type="color"
+                    value={settings.codexDetectionColor}
+                    onChange={(e) => updateSetting('codexDetectionColor', e.target.value)}
                     className="settings-color-input"
                   />
                 </div>

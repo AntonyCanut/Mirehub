@@ -6,6 +6,8 @@ import { getDefaultShell } from '../platform'
  * Using a function (not a module-level const) prevents rollup from
  * incorrectly inlining getDefaultShell() during bundling.
  */
+export const DEFAULT_CODEX_DETECTION_COLOR = '#10a37f'
+
 export function createDefaultSettings(): AppSettings {
   return {
     theme: 'dark',
@@ -15,6 +17,8 @@ export function createDefaultSettings(): AppSettings {
     fontFamily: 'Menlo, Monaco, "Courier New", monospace',
     scrollbackLines: 10000,
     claudeDetectionColor: '#7c3aed',
+    codexDetectionColor: DEFAULT_CODEX_DETECTION_COLOR,
+    defaultAiProvider: 'claude',
     autoClauderEnabled: false,
     notificationSound: true,
     notificationBadge: true,

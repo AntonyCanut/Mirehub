@@ -1,6 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useI18n } from '../lib/i18n'
 import { usePackagesStore } from '../lib/stores/packagesStore'
+import { useWorkspaceStore } from '../lib/stores/workspaceStore'
+import { AI_PROVIDERS } from '../../shared/types/ai-provider'
+import type { AiProviderId } from '../../shared/types/ai-provider'
 import type { PackageManagerType } from '../../shared/types'
 
 interface PackagesChatProps {
@@ -27,6 +30,12 @@ export function PackagesChat({ projectPath, manager }: PackagesChatProps) {
     loadPackages,
     selectedProjectId,
   } = usePackagesStore()
+  const { activeProjectId, projects } = useWorkspaceStore()
+  const packagesProvider: AiProviderId = useMemo(() => {
+    const p = projects.find((proj) => proj.id === activeProjectId)
+    return p?.aiDefaults?.packages ?? p?.aiProvider ?? 'claude'
+  }, [activeProjectId, projects])
+  const providerConfig = AI_PROVIDERS[packagesProvider]
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -63,11 +72,15 @@ export function PackagesChat({ projectPath, manager }: PackagesChatProps) {
     setInput('')
     setNlLoading(true)
     try {
+      const { activeProjectId, projects } = useWorkspaceStore.getState()
+      const activeProject = projects.find((p) => p.id === activeProjectId)
+      const packagesProvider = activeProject?.aiDefaults?.packages ?? activeProject?.aiProvider ?? 'claude'
       const result = await window.mirehub.packages.nlAsk(
         projectPath,
         manager,
         userQuestion,
         nlMessages,
+        packagesProvider,
       )
       addNlMessage({
         id: generateId(),
@@ -165,10 +178,16 @@ export function PackagesChat({ projectPath, manager }: PackagesChatProps) {
         {nlMessages.length === 0 && !nlLoading && (
           <div className="packages-chat-empty">{t('packages.chatEmpty')}</div>
         )}
-        {nlMessages.map((msg) => (
+        {nlMessages.map((msg) => {
+          const isAssistant = msg.role === 'assistant'
+          const msgStyle = isAssistant
+            ? { borderLeftColor: providerConfig.detectionColor, background: `${providerConfig.detectionColor}0a` } as React.CSSProperties
+            : undefined
+          return (
           <div
             key={msg.id}
             className={`packages-chat-message packages-chat-message--${msg.role}`}
+            style={msgStyle}
           >
             <div className="packages-chat-message-header">
               <span className="packages-chat-message-role">
@@ -176,7 +195,7 @@ export function PackagesChat({ projectPath, manager }: PackagesChatProps) {
                   ? 'You'
                   : msg.role === 'error'
                     ? 'Error'
-                    : 'Claude'}
+                    : providerConfig.displayName}
               </span>
               <span className="packages-chat-message-time">
                 {new Date(msg.timestamp).toLocaleTimeString(undefined, {
@@ -194,7 +213,8 @@ export function PackagesChat({ projectPath, manager }: PackagesChatProps) {
             </div>
             <div className="packages-chat-message-content">{msg.content}</div>
           </div>
-        ))}
+          )
+        })}
         {nlLoading && (
           <div className="packages-chat-message packages-chat-message--loading">
             <div className="packages-chat-message-content">

@@ -1,6 +1,7 @@
 import type { ChildProcess } from 'child_process'
 import type { PackageInfo, PackageManagerType, PkgNlMessage } from '../../../shared/types'
-import { crossSpawn } from '../../../shared/platform'
+import type { AiProviderId } from '../../../shared/types/ai-provider'
+import { callAiCli } from '../ai-cli'
 
 /** Active NL query process for packages (single query at a time) */
 const activeProcesses = new Map<string, ChildProcess>()
@@ -61,6 +62,7 @@ export async function askPackageQuestion(
   question: string,
   history: PkgNlMessage[],
   packages: PackageInfo[],
+  provider: AiProviderId = 'claude',
 ): Promise<{ answer: string; action?: { type: 'update'; packages: string[] } }> {
   const packagesContext = buildPackagesContext(packages)
   const historyBlock = formatHistory(history)
@@ -88,7 +90,7 @@ USER QUESTION: ${question}`
 
   let rawOutput: string
   try {
-    rawOutput = await callClaude(systemPrompt)
+    rawOutput = await callAiCli(provider, systemPrompt, 'packages', activeProcesses)
   } catch (err) {
     const msg = String(err)
     if (msg.includes('cancelled')) {
@@ -144,75 +146,3 @@ export function cancelPackageQuery(): boolean {
   return false
 }
 
-/**
- * Call Claude CLI with a prompt and return the output.
- * Uses Haiku model for fast responses.
- * Pipes prompt via stdin to avoid CLI argument length limits.
- * Uses --output-format json for reliable parsing.
- */
-function callClaude(prompt: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // Cancel any existing query
-    cancelPackageQuery()
-
-    // Strip CLAUDECODE + CLAUDE_CODE_ENTRYPOINT to allow spawning inside a Claude Code session
-    // Set MIREHUB_NL_QUERY to tell the activity hook to skip (no bell sound)
-    const env = { ...process.env }
-    delete env.CLAUDECODE
-    delete env.CLAUDE_CODE_ENTRYPOINT
-    env.MIREHUB_NL_QUERY = '1'
-
-    const proc = crossSpawn('claude', ['-p', '--model', 'claude-haiku-4-5-20251001', '--output-format', 'json'], {
-      env,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    })
-
-    activeProcesses.set('packages', proc)
-
-    // Pipe prompt via stdin instead of CLI argument (handles large package lists)
-    proc.stdin?.write(prompt)
-    proc.stdin?.end()
-
-    let stdout = ''
-    let stderr = ''
-
-    proc.stdout?.on('data', (data: Buffer) => {
-      stdout += data.toString()
-    })
-
-    proc.stderr?.on('data', (data: Buffer) => {
-      stderr += data.toString()
-    })
-
-    proc.on('error', (err) => {
-      activeProcesses.delete('packages')
-      reject(new Error(`Failed to spawn Claude CLI: ${err.message}`))
-    })
-
-    proc.on('exit', (code, signal) => {
-      activeProcesses.delete('packages')
-      if (signal === 'SIGTERM') {
-        reject(new Error('cancelled'))
-      } else if (code === 0) {
-        // Parse --output-format json wrapper: { result: "model response text" }
-        try {
-          const wrapper = JSON.parse(stdout)
-          resolve(typeof wrapper.result === 'string' ? wrapper.result.trim() : stdout.trim())
-        } catch {
-          resolve(stdout.trim())
-        }
-      } else {
-        reject(new Error(stderr.trim() || `Claude CLI exited with code ${code}`))
-      }
-    })
-
-    // Timeout after 120 seconds (CLI startup + API call can take time)
-    setTimeout(() => {
-      if (activeProcesses.has('packages')) {
-        proc.kill('SIGTERM')
-        activeProcesses.delete('packages')
-        reject(new Error('Claude CLI timed out after 120s'))
-      }
-    }, 120000)
-  })
-}

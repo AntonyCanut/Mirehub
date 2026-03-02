@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 import { IPC_CHANNELS, DbConnectionConfig, DbConnection, DbFile, DbBackupEntry, DbEnvironmentTag, DbNlPermissions, DbNlHistoryEntry, DbNlInterpretRequest } from '../../shared/types'
+import type { AiProviderId } from '../../shared/types/ai-provider'
 import { databaseService } from '../services/database'
 import { encryptPassword, decryptPassword } from '../services/database/crypto'
 import { backupDatabase, listBackups, deleteBackup, restoreBackup } from '../services/database/backup'
@@ -394,7 +395,7 @@ export function registerDatabaseHandlers(ipcMain: IpcMain): void {
     },
   )
 
-  // Natural Language Query - translate NL to SQL via Claude and execute
+  // Natural Language Query - translate NL to SQL via AI and execute
   ipcMain.handle(
     IPC_CHANNELS.DB_NL_QUERY,
     async (
@@ -403,14 +404,16 @@ export function registerDatabaseHandlers(ipcMain: IpcMain): void {
         connectionId,
         prompt,
         permissions,
+        provider,
       }: {
         connectionId: string
         prompt: string
         permissions: DbNlPermissions
+        provider?: string
       },
     ) => {
       try {
-        return await executeNlQuery(connectionId, prompt, permissions)
+        return await executeNlQuery(connectionId, prompt, permissions, (provider || 'claude') as AiProviderId)
       } catch (err) {
         return { success: false, error: String(err) }
       }
@@ -427,25 +430,27 @@ export function registerDatabaseHandlers(ipcMain: IpcMain): void {
         prompt,
         permissions,
         history,
+        provider,
       }: {
         connectionId: string
         prompt: string
         permissions: DbNlPermissions
         history?: DbNlHistoryEntry[]
+        provider?: string
       },
     ) => {
       try {
-        return await generateNlSql(connectionId, prompt, permissions, history)
+        return await generateNlSql(connectionId, prompt, permissions, history, (provider || 'claude') as AiProviderId)
       } catch (err) {
         return { success: false, error: String(err) }
       }
     },
   )
 
-  // Interpret query results via Claude (human answer or refinement)
+  // Interpret query results via AI (human answer or refinement)
   ipcMain.handle(
     IPC_CHANNELS.DB_NL_INTERPRET,
-    async (_event, req: DbNlInterpretRequest) => {
+    async (_event, req: DbNlInterpretRequest & { provider?: string }) => {
       try {
         return await interpretNlResults(
           req.connectionId,
@@ -455,6 +460,7 @@ export function registerDatabaseHandlers(ipcMain: IpcMain): void {
           req.rows,
           req.rowCount,
           req.history,
+          (req.provider || 'claude') as AiProviderId,
         )
       } catch (err) {
         return { success: false, error: String(err) }

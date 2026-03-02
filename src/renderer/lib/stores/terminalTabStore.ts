@@ -173,14 +173,14 @@ function computePaneRects(
   }
 }
 
-function isClaudeCommand(cmd: string | null | undefined): boolean {
+function isAiCommand(cmd: string | null | undefined): boolean {
   if (!cmd) return false
-  return cmd === 'claude' || cmd.includes('claude ')
+  return cmd === 'claude' || cmd.includes('claude ') || cmd === 'codex' || cmd.includes('codex ')
 }
 
-function countClaudePanes(node: PaneNode): number {
-  if (node.type === 'leaf') return isClaudeCommand(node.initialCommand) ? 1 : 0
-  return countClaudePanes(node.children[0]) + countClaudePanes(node.children[1])
+function countAiPanes(node: PaneNode): number {
+  if (node.type === 'leaf') return isAiCommand(node.initialCommand) ? 1 : 0
+  return countAiPanes(node.children[0]) + countAiPanes(node.children[1])
 }
 
 // Lazy getter to avoid circular imports; returns null in test environments
@@ -235,7 +235,7 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
       tabs: [...state.tabs, tab],
       activeTabId: id,
     }))
-    if (isClaudeCommand(initialCommand)) {
+    if (isAiCommand(initialCommand)) {
       getClaudeStore()?.getState().incrementWorkspaceClaude(workspaceId)
     }
     return id
@@ -274,7 +274,7 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
       tabs: [...state.tabs, tab],
       activeTabId: id,
     }))
-    const claudeCount = (isClaudeCommand(leftCommand) ? 1 : 0) + (isClaudeCommand(rightCommand) ? 1 : 0)
+    const claudeCount = (isAiCommand(leftCommand) ? 1 : 0) + (isAiCommand(rightCommand) ? 1 : 0)
     if (claudeCount > 0) {
       const store = getClaudeStore()?.getState()
       if (store) for (let i = 0; i < claudeCount; i++) store.incrementWorkspaceClaude(workspaceId)
@@ -317,7 +317,7 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     const index = tabs.indexOf(tab)
 
     // Track Claude pane removals
-    const claudePaneCount = countClaudePanes(tab.paneTree)
+    const claudePaneCount = countAiPanes(tab.paneTree)
     if (claudePaneCount > 0) {
       const store = getClaudeStore()?.getState()
       if (store) for (let i = 0; i < claudePaneCount; i++) store.decrementWorkspaceClaude(tab.workspaceId)
@@ -422,7 +422,7 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     const claudeStoreState = getClaudeStore()?.getState()
     for (const tab of removedTabs) {
       kanbanStore?.handleTabClosed(tab.id)
-      const claudePaneCount = countClaudePanes(tab.paneTree)
+      const claudePaneCount = countAiPanes(tab.paneTree)
       if (claudePaneCount > 0 && claudeStoreState) {
         for (let i = 0; i < claudePaneCount; i++) claudeStoreState.decrementWorkspaceClaude(tab.workspaceId)
       }
@@ -443,7 +443,7 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     const claudeStoreState = getClaudeStore()?.getState()
     for (const tab of removedTabs) {
       kanbanStore?.handleTabClosed(tab.id)
-      const claudePaneCount = countClaudePanes(tab.paneTree)
+      const claudePaneCount = countAiPanes(tab.paneTree)
       if (claudePaneCount > 0 && claudeStoreState) {
         for (let i = 0; i < claudePaneCount; i++) claudeStoreState.decrementWorkspaceClaude(tab.workspaceId)
       }
@@ -529,7 +529,7 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
 
     // Track Claude pane removal before modifying tree
     const closedPane = findPane(tab.paneTree, paneId)
-    if (closedPane && isClaudeCommand(closedPane.initialCommand)) {
+    if (closedPane && isAiCommand(closedPane.initialCommand)) {
       getClaudeStore()?.getState().decrementWorkspaceClaude(tab.workspaceId)
     }
 

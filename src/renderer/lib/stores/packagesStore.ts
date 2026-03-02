@@ -5,6 +5,7 @@ import type {
   ProjectPackageManager,
   PkgNlMessage,
 } from '../../../shared/types'
+import type { AiProviderId } from '../../../shared/types/ai-provider'
 
 interface WorkspacePackagesData {
   managers: ProjectPackageManager[]
@@ -14,6 +15,7 @@ interface WorkspacePackagesData {
   selectedManager: PackageManagerType | null
   nlMessages: PkgNlMessage[]
   nlLoading: boolean
+  nlAiProvider: AiProviderId
   searchQuery: string
 }
 
@@ -25,6 +27,7 @@ const EMPTY_WORKSPACE_DATA: WorkspacePackagesData = {
   selectedManager: null,
   nlMessages: [],
   nlLoading: false,
+  nlAiProvider: 'claude',
   searchQuery: '',
 }
 
@@ -37,6 +40,7 @@ function snapshotWorkspaceData(state: PackagesState): WorkspacePackagesData {
     selectedManager: state.selectedManager,
     nlMessages: state.nlMessages,
     nlLoading: state.nlLoading,
+    nlAiProvider: state.nlAiProvider,
     searchQuery: state.searchQuery,
   }
 }
@@ -54,6 +58,7 @@ interface PackagesState {
   selectedManager: PackageManagerType | null
   nlMessages: PkgNlMessage[]
   nlLoading: boolean
+  nlAiProvider: AiProviderId
   searchQuery: string
 }
 
@@ -79,6 +84,7 @@ interface PackagesActions {
   addNlMessage: (message: PkgNlMessage) => void
   setNlLoading: (loading: boolean) => void
   clearNlMessages: () => void
+  setNlAiProvider: (provider: AiProviderId) => void
   setSearchQuery: (query: string) => void
 }
 
@@ -94,6 +100,7 @@ export const usePackagesStore = create<PackagesStore>((set, get) => ({
   selectedManager: null,
   nlMessages: [],
   nlLoading: false,
+  nlAiProvider: 'claude',
   searchQuery: '',
 
   switchWorkspace: (workspaceId) => {
@@ -176,6 +183,8 @@ export const usePackagesStore = create<PackagesStore>((set, get) => ({
   clearNlMessages: () => {
     set({ nlMessages: [] })
   },
+
+  setNlAiProvider: (provider) => set({ nlAiProvider: provider }),
 
   setSearchQuery: (query) => {
     set({ searchQuery: query })

@@ -302,11 +302,19 @@ export function TerminalArea() {
     }
   }, [activeWorkspaceId, envCwd, createTab])
 
+  const { createSplitTab } = useTerminalTabStore()
+
   const handleNewClaudeTab = useCallback(() => {
     if (activeWorkspaceId && envCwd) {
-      createTab(activeWorkspaceId, envCwd, undefined, 'claude')
+      createSplitTab(activeWorkspaceId, envCwd, 'Claude + Terminal', 'claude', null)
     }
-  }, [activeWorkspaceId, envCwd, createTab])
+  }, [activeWorkspaceId, envCwd, createSplitTab])
+
+  const handleNewCodexTab = useCallback(() => {
+    if (activeWorkspaceId && envCwd) {
+      createSplitTab(activeWorkspaceId, envCwd, 'Codex + Terminal', 'codex', null)
+    }
+  }, [activeWorkspaceId, envCwd, createSplitTab])
 
   const addWrapperRef = useRef<HTMLDivElement>(null)
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null)
@@ -404,6 +412,10 @@ export function TerminalArea() {
               <button className="tab-add-dropdown-item" onClick={handleNewClaudeTab}>
                 <span className="tab-add-dropdown-icon tab-add-dropdown-icon--claude">C</span>
                 <span>{t('terminal.newClaudeTerminal')}</span>
+              </button>
+              <button className="tab-add-dropdown-item" onClick={handleNewCodexTab}>
+                <span className="tab-add-dropdown-icon tab-add-dropdown-icon--codex">X</span>
+                <span>{t('terminal.newCodexTerminal')}</span>
               </button>
             </div>
           )}

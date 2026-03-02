@@ -17,6 +17,8 @@ const SECTION_ICONS: Record<string, string> = {
   search: '🔎',
   shortcuts: '⌨',
   claude: '✦',
+  ai: '✦',
+  healthcheck: '🏥',
 }
 
 interface TutorialModalProps {

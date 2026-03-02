@@ -1,4 +1,6 @@
 // Types partagés entre main et renderer
+export type { AiProviderId, AiProviderConfig } from './ai-provider'
+export { AI_PROVIDERS, AI_PROVIDER_IDS } from './ai-provider'
 
 // --- Rules tree types ---
 
@@ -55,12 +57,22 @@ export interface Workspace {
   deletedAt?: number
 }
 
+export interface AiDefaults {
+  kanban?: import('./ai-provider').AiProviderId
+  packages?: import('./ai-provider').AiProviderId
+  packagesModel?: string
+  database?: import('./ai-provider').AiProviderId
+  databaseModel?: string
+}
+
 export interface Project {
   id: string
   name: string
   path: string
   hasClaude: boolean
   hasGit?: boolean
+  aiProvider?: import('./ai-provider').AiProviderId | null
+  aiDefaults?: AiDefaults
   workspaceId: string
   createdAt: number
 }
@@ -94,6 +106,7 @@ export interface ClaudeSession {
   id: string
   projectId: string
   terminalId: string
+  provider: import('./ai-provider').AiProviderId
   status: 'running' | 'completed' | 'failed' | 'paused'
   startedAt: number
   endedAt?: number
@@ -134,6 +147,7 @@ export interface KanbanTask {
   parentTicketId?: string
   childTicketIds?: string[]
   conversationHistoryPath?: string
+  aiProvider?: import('./ai-provider').AiProviderId
   createdAt: number
   updatedAt: number
 }
@@ -188,6 +202,8 @@ export interface AppSettings {
   fontFamily: string
   scrollbackLines: number
   claudeDetectionColor: string
+  codexDetectionColor: string
+  defaultAiProvider: import('./ai-provider').AiProviderId
   autoClauderEnabled: boolean
   defaultAutoClauderTemplateId?: string
   notificationSound: boolean
@@ -680,6 +696,7 @@ export interface DbNlInterpretRequest {
   rows: Record<string, unknown>[]
   rowCount: number
   history?: DbNlHistoryEntry[]
+  provider?: string
 }
 
 export interface DbNlInterpretResponse {
@@ -1116,6 +1133,34 @@ export const IPC_CHANNELS = {
   PACKAGES_SEARCH: 'packages:search',
   PACKAGES_NL_ASK: 'packages:nlAsk',
   PACKAGES_NL_CANCEL: 'packages:nlCancel',
+
+  // Codex config
+  CODEX_READ_CONFIG: 'codex:readConfig',
+  CODEX_WRITE_CONFIG: 'codex:writeConfig',
+  CODEX_CHECK_CONFIG: 'codex:checkConfig',
+
+  // Codex rules
+  CODEX_LIST_RULES: 'codex:listRules',
+  CODEX_READ_RULE: 'codex:readRule',
+  CODEX_WRITE_RULE: 'codex:writeRule',
+  CODEX_DELETE_RULE: 'codex:deleteRule',
+
+  // Codex AGENTS.md (memory)
+  CODEX_READ_AGENTS_MD: 'codex:readAgentsMd',
+  CODEX_WRITE_AGENTS_MD: 'codex:writeAgentsMd',
+  CODEX_READ_GLOBAL_AGENTS_MD: 'codex:readGlobalAgentsMd',
+  CODEX_WRITE_GLOBAL_AGENTS_MD: 'codex:writeGlobalAgentsMd',
+
+  // Codex skills
+  CODEX_LIST_SKILLS: 'codex:listSkills',
+  CODEX_READ_SKILL: 'codex:readSkill',
+  CODEX_WRITE_SKILL: 'codex:writeSkill',
+  CODEX_DELETE_SKILL: 'codex:deleteSkill',
+
+  // AI Provider
+  AI_PROVIDER_SET: 'ai:providerSet',
+  AI_DEFAULTS_SET: 'ai:defaultsSet',
+  AI_DEFAULTS_GET: 'ai:defaultsGet',
 
   // Code Analysis
   ANALYSIS_DETECT_TOOLS: 'analysis:detectTools',

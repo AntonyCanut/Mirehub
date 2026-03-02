@@ -568,10 +568,10 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.DB_RESTORE, { entry, targetConfig }),
     transfer: (sourceId: string, targetId: string, tables: string[]): Promise<{ success: boolean; errors: string[] }> =>
       ipcRenderer.invoke(IPC_CHANNELS.DB_TRANSFER, { sourceId, targetId, tables }),
-    nlQuery: (connectionId: string, prompt: string, permissions: DbNlPermissions): Promise<DbNlQueryResponse> =>
-      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_QUERY, { connectionId, prompt, permissions }),
-    nlGenerateSql: (connectionId: string, prompt: string, permissions: DbNlPermissions, history?: DbNlHistoryEntry[]): Promise<DbNlGenerateResponse> =>
-      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_GENERATE_SQL, { connectionId, prompt, permissions, history }),
+    nlQuery: (connectionId: string, prompt: string, permissions: DbNlPermissions, provider?: string): Promise<DbNlQueryResponse> =>
+      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_QUERY, { connectionId, prompt, permissions, provider }),
+    nlGenerateSql: (connectionId: string, prompt: string, permissions: DbNlPermissions, history?: DbNlHistoryEntry[], provider?: string): Promise<DbNlGenerateResponse> =>
+      ipcRenderer.invoke(IPC_CHANNELS.DB_NL_GENERATE_SQL, { connectionId, prompt, permissions, history, provider }),
     nlInterpret: (req: DbNlInterpretRequest): Promise<DbNlInterpretResponse> =>
       ipcRenderer.invoke(IPC_CHANNELS.DB_NL_INTERPRET, req),
     nlCancel: (connectionId: string): Promise<{ success: boolean }> =>
@@ -581,6 +581,48 @@ const api = {
       if (!r.success) throw new Error(r.error || 'Failed to get schema context')
       return r.schema
     },
+  },
+
+  // Codex config
+  codexConfig: {
+    read: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_READ_CONFIG, { projectPath }),
+    write: (projectPath: string, config: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_WRITE_CONFIG, { projectPath, config }),
+    check: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_CHECK_CONFIG, { projectPath }),
+  },
+
+  // Codex rules
+  codexRules: {
+    list: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_LIST_RULES, { projectPath }),
+    read: (projectPath: string, filename: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_READ_RULE, { projectPath, filename }),
+    write: (projectPath: string, filename: string, content: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_WRITE_RULE, { projectPath, filename, content }),
+    delete: (projectPath: string, filename: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_DELETE_RULE, { projectPath, filename }),
+  },
+
+  // Codex memory (AGENTS.md)
+  codexMemory: {
+    readAgentsMd: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_READ_AGENTS_MD, { projectPath }),
+    writeAgentsMd: (projectPath: string, content: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_WRITE_AGENTS_MD, { projectPath, content }),
+    readGlobalAgentsMd: () => ipcRenderer.invoke(IPC_CHANNELS.CODEX_READ_GLOBAL_AGENTS_MD),
+    writeGlobalAgentsMd: (content: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_WRITE_GLOBAL_AGENTS_MD, { content }),
+  },
+
+  // Codex skills
+  codexSkills: {
+    list: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_LIST_SKILLS, { projectPath }),
+    read: (projectPath: string, dirname: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_READ_SKILL, { projectPath, dirname }),
+    write: (projectPath: string, dirname: string, content: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_WRITE_SKILL, { projectPath, dirname, content }),
+    delete: (projectPath: string, dirname: string) => ipcRenderer.invoke(IPC_CHANNELS.CODEX_DELETE_SKILL, { projectPath, dirname }),
+  },
+
+  // AI provider
+  aiProvider: {
+    set: (projectId: string, provider: string) => ipcRenderer.invoke(IPC_CHANNELS.AI_PROVIDER_SET, { projectId, provider }),
+  },
+
+  // AI defaults per project (kanban, packages, database)
+  aiDefaults: {
+    get: (projectId: string) => ipcRenderer.invoke(IPC_CHANNELS.AI_DEFAULTS_GET, { projectId }),
+    set: (projectId: string, defaults: Record<string, unknown>) => ipcRenderer.invoke(IPC_CHANNELS.AI_DEFAULTS_SET, { projectId, defaults }),
   },
 
   // App info
@@ -660,8 +702,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_UPDATE, { projectPath, manager, packageName }),
     search: (manager: PackageManagerType, query: string): Promise<{ results: PackageInfo[] }> =>
       ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_SEARCH, { manager, query }),
-    nlAsk: (projectPath: string, manager: PackageManagerType, question: string, history: PkgNlMessage[]): Promise<{ answer: string; action?: unknown }> =>
-      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_NL_ASK, { projectPath, manager, question, history }),
+    nlAsk: (projectPath: string, manager: PackageManagerType, question: string, history: PkgNlMessage[], provider?: string): Promise<{ answer: string; action?: unknown }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_NL_ASK, { projectPath, manager, question, history, provider }),
     nlCancel: (): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_NL_CANCEL),
   },

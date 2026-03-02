@@ -125,6 +125,7 @@ export function registerClaudeHandlers(ipcMain: IpcMain): void {
         id: uuid(),
         projectId: data.projectId,
         terminalId: data.terminalId,
+        provider: 'claude',
         status: 'running',
         startedAt: Date.now(),
         prompt: data.prompt,

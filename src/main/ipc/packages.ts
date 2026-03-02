@@ -2,6 +2,7 @@ import { IpcMain } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import { IPC_CHANNELS, PackageInfo, PackageManagerType, PkgNlMessage, ProjectPackageManager } from '../../shared/types/index'
+import type { AiProviderId } from '../../shared/types/ai-provider'
 import { crossExecFile, IS_WIN } from '../../shared/platform'
 import { askPackageQuestion, cancelPackageQuery } from '../services/packages/nlPackages'
 
@@ -30,6 +31,7 @@ interface NlAskInput {
   manager: PackageManagerType
   question: string
   history: PkgNlMessage[]
+  provider?: string
 }
 
 function detectManagersInProject(project: { id: string; path: string; name: string }): ProjectPackageManager[] {
@@ -565,7 +567,7 @@ export function registerPackagesHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.PACKAGES_NL_ASK,
     async (
       _event,
-      { projectPath, manager, question, history }: NlAskInput,
+      { projectPath, manager, question, history, provider }: NlAskInput,
     ): Promise<{ answer: string; action?: { type: 'update'; packages: string[] } }> => {
       // Load the current packages list to provide as context
       let packages: PackageInfo[] = []
@@ -594,7 +596,7 @@ export function registerPackagesHandlers(ipcMain: IpcMain): void {
           break
       }
 
-      return askPackageQuestion(projectPath, manager, question, history, packages)
+      return askPackageQuestion(projectPath, manager, question, history, packages, (provider || 'claude') as AiProviderId)
     },
   )
 

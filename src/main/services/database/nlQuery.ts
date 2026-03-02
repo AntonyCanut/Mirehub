@@ -1,6 +1,8 @@
-import { spawn, type ChildProcess } from 'child_process'
+import { type ChildProcess } from 'child_process'
 import { databaseService } from './index'
 import type { DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlInterpretResponse, DbNlHistoryEntry, DbTableInfo } from '../../../shared/types'
+import type { AiProviderId } from '../../../shared/types/ai-provider'
+import { callAiCli } from '../ai-cli'
 
 /** Active NL query processes, keyed by connectionId */
 const activeProcesses = new Map<string, ChildProcess>()
@@ -116,6 +118,7 @@ export async function executeNlQuery(
   connectionId: string,
   prompt: string,
   permissions: DbNlPermissions,
+  provider: AiProviderId = 'claude',
 ): Promise<DbNlQueryResponse> {
   const driver = databaseService.getDriver(connectionId)
   if (!driver) {
@@ -151,7 +154,7 @@ USER QUESTION: ${prompt}`
   // Call Claude CLI (Haiku for speed)
   let rawOutput: string
   try {
-    rawOutput = await callClaude(connectionId, systemPrompt)
+    rawOutput = await callAiCli(provider, systemPrompt, connectionId, activeProcesses)
   } catch (err) {
     const msg = String(err)
     if (msg.includes('cancelled')) {
@@ -240,6 +243,7 @@ export async function generateNlSql(
   prompt: string,
   permissions: DbNlPermissions,
   history: DbNlHistoryEntry[] = [],
+  provider: AiProviderId = 'claude',
 ): Promise<DbNlGenerateResponse> {
   const driver = databaseService.getDriver(connectionId)
   if (!driver) {
@@ -285,7 +289,7 @@ USER QUESTION: ${prompt}`
 
   let rawOutput: string
   try {
-    rawOutput = await callClaude(connectionId, systemPrompt)
+    rawOutput = await callAiCli(provider, systemPrompt, connectionId, activeProcesses)
   } catch (err) {
     const msg = String(err)
     if (msg.includes('cancelled')) {
@@ -330,6 +334,7 @@ export async function interpretNlResults(
   rows: Record<string, unknown>[],
   rowCount: number,
   history: DbNlHistoryEntry[] = [],
+  provider: AiProviderId = 'claude',
 ): Promise<DbNlInterpretResponse> {
   const driver = databaseService.getDriver(connectionId)
   if (!driver) {
@@ -368,7 +373,7 @@ ${resultSummary}`
 
   let rawOutput: string
   try {
-    rawOutput = await callClaude(connectionId, prompt)
+    rawOutput = await callAiCli(provider, prompt, connectionId, activeProcesses)
   } catch (err) {
     const msg = String(err)
     if (msg.includes('cancelled')) {
@@ -418,79 +423,6 @@ function parseClaudeResponse(raw: string): { sql: string; explanation: string } 
     sql: parsed.sql.trim(),
     explanation: typeof parsed.explanation === 'string' ? parsed.explanation : '',
   }
-}
-
-/**
- * Call Claude CLI with a prompt and return the output.
- * Uses Haiku model for fast responses.
- * Pipes prompt via stdin to avoid CLI argument length limits.
- * Uses --output-format json for reliable parsing.
- */
-function callClaude(connectionId: string, prompt: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // Cancel any existing query for this connection
-    cancelNlQuery(connectionId)
-
-    // Strip CLAUDECODE + CLAUDE_CODE_ENTRYPOINT to allow spawning inside a Claude Code session
-    // Set MIREHUB_NL_QUERY to tell the activity hook to skip (no bell sound)
-    const env = { ...process.env }
-    delete env.CLAUDECODE
-    delete env.CLAUDE_CODE_ENTRYPOINT
-    env.MIREHUB_NL_QUERY = '1'
-
-    const proc = spawn('claude', ['-p', '--model', 'claude-haiku-4-5-20251001', '--output-format', 'json'], {
-      env,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    })
-
-    activeProcesses.set(connectionId, proc)
-
-    // Pipe prompt via stdin instead of CLI argument (handles large schemas)
-    proc.stdin?.write(prompt)
-    proc.stdin?.end()
-
-    let stdout = ''
-    let stderr = ''
-
-    proc.stdout?.on('data', (data: Buffer) => {
-      stdout += data.toString()
-    })
-
-    proc.stderr?.on('data', (data: Buffer) => {
-      stderr += data.toString()
-    })
-
-    proc.on('error', (err) => {
-      activeProcesses.delete(connectionId)
-      reject(new Error(`Failed to spawn Claude CLI: ${err.message}`))
-    })
-
-    proc.on('exit', (code, signal) => {
-      activeProcesses.delete(connectionId)
-      if (signal === 'SIGTERM') {
-        reject(new Error('cancelled'))
-      } else if (code === 0) {
-        // Parse --output-format json wrapper: { result: "model response text" }
-        try {
-          const wrapper = JSON.parse(stdout)
-          resolve(typeof wrapper.result === 'string' ? wrapper.result.trim() : stdout.trim())
-        } catch {
-          resolve(stdout.trim())
-        }
-      } else {
-        reject(new Error(stderr.trim() || `Claude CLI exited with code ${code}`))
-      }
-    })
-
-    // Timeout after 120 seconds (CLI startup + API call can take time)
-    setTimeout(() => {
-      if (activeProcesses.has(connectionId)) {
-        proc.kill('SIGTERM')
-        activeProcesses.delete(connectionId)
-        reject(new Error('Claude CLI timed out after 120s'))
-      }
-    }, 120000)
-  })
 }
 
 /**

@@ -3,7 +3,8 @@ import { useWorkspaceStore, useFilteredWorkspaces } from '../lib/stores/workspac
 import { useViewStore } from '../lib/stores/viewStore'
 import { useI18n } from '../lib/i18n'
 import { WorkspaceItem } from './WorkspaceItem'
-import type { Workspace } from '../../shared/types/index'
+import type { Workspace, AppSettings } from '../../shared/types/index'
+import type { AiProviderId } from '../../shared/types/ai-provider'
 
 export function Sidebar() {
   const { t } = useI18n()
@@ -13,7 +14,9 @@ export function Sidebar() {
 
   const [showCreateMenu, setShowCreateMenu] = useState(false)
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+  const [showFolderAiModal, setShowFolderAiModal] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectAiProvider, setNewProjectAiProvider] = useState<AiProviderId>('claude')
   const createMenuRef = useRef<HTMLDivElement>(null)
   const newProjectInputRef = useRef<HTMLInputElement>(null)
   const [showRestoreModal, setShowRestoreModal] = useState(false)
@@ -42,13 +45,13 @@ export function Sidebar() {
     if (deleted) {
       setDeletedWorkspace(deleted)
       setPendingCreateAction(() => async () => {
-        await createWorkspaceFromPath(dirPath)
+        await createWorkspaceFromPath(dirPath, newProjectAiProvider)
       })
       setShowRestoreModal(true)
       return
     }
-    await createWorkspaceFromPath(dirPath)
-  }, [createWorkspaceFromPath, checkDeletedWorkspace])
+    await createWorkspaceFromPath(dirPath, newProjectAiProvider)
+  }, [createWorkspaceFromPath, checkDeletedWorkspace, newProjectAiProvider])
 
   const handleCreateFromNew = useCallback(async () => {
     const name = newProjectName.trim()
@@ -60,7 +63,7 @@ export function Sidebar() {
       setPendingCreateAction(() => async () => {
         const parentDir = await window.mirehub.project.selectDir()
         if (!parentDir) return
-        await createWorkspaceFromNewInDir(name, parentDir)
+        await createWorkspaceFromNewInDir(name, parentDir, newProjectAiProvider)
         setShowNewProjectModal(false)
         setNewProjectName('')
       })
@@ -68,10 +71,10 @@ export function Sidebar() {
       return
     }
 
-    await createWorkspaceFromNew(name)
+    await createWorkspaceFromNew(name, newProjectAiProvider)
     setShowNewProjectModal(false)
     setNewProjectName('')
-  }, [newProjectName, createWorkspaceFromNew, createWorkspaceFromNewInDir, checkDeletedWorkspace])
+  }, [newProjectName, createWorkspaceFromNew, createWorkspaceFromNewInDir, checkDeletedWorkspace, newProjectAiProvider])
 
   const handleRestore = useCallback(async () => {
     if (!deletedWorkspace) return
@@ -97,6 +100,11 @@ export function Sidebar() {
 
   useEffect(() => {
     init()
+    window.mirehub.settings.get().then((s: AppSettings) => {
+      if (s.defaultAiProvider) {
+        setNewProjectAiProvider(s.defaultAiProvider as AiProviderId)
+      }
+    })
   }, [init])
 
   // Keyboard shortcuts: Cmd+Shift+[ / Cmd+Shift+] to navigate workspaces
@@ -358,7 +366,7 @@ export function Sidebar() {
                 className="workspace-add-menu-item"
                 onClick={() => {
                   setShowCreateMenu(false)
-                  handleCreateFromFolder()
+                  setShowFolderAiModal(true)
                 }}
               >
                 {t('sidebar.fromExisting')}
@@ -398,6 +406,25 @@ export function Sidebar() {
                   if (e.key === 'Escape') setShowNewProjectModal(false)
                 }}
               />
+              <div style={{ marginTop: 12 }}>
+                <label className="settings-label" style={{ display: 'block', marginBottom: 6, fontSize: 12 }}>
+                  {t('ai.selectProvider')}
+                </label>
+                <div className="settings-radio-group">
+                  <button
+                    className={`settings-radio-btn${newProjectAiProvider === 'claude' ? ' settings-radio-btn--active' : ''}`}
+                    onClick={() => setNewProjectAiProvider('claude')}
+                  >
+                    Claude
+                  </button>
+                  <button
+                    className={`settings-radio-btn${newProjectAiProvider === 'codex' ? ' settings-radio-btn--active' : ''}`}
+                    onClick={() => setNewProjectAiProvider('codex')}
+                  >
+                    Codex
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="modal-footer">
               <button className="modal-btn modal-btn--secondary" onClick={() => setShowNewProjectModal(false)}>
@@ -407,6 +434,47 @@ export function Sidebar() {
                 className="modal-btn modal-btn--primary"
                 onClick={handleCreateFromNew}
                 disabled={!newProjectName.trim()}
+              >
+                {t('sidebar.chooseLocationAndCreate')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFolderAiModal && (
+        <div className="modal-overlay" onClick={() => setShowFolderAiModal(false)}>
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">{t('sidebar.fromExisting')}</div>
+            <div className="modal-body">
+              <p style={{ marginBottom: 10, color: 'var(--text-muted)', fontSize: 12 }}>
+                {t('ai.selectProvider')}
+              </p>
+              <div className="settings-radio-group">
+                <button
+                  className={`settings-radio-btn${newProjectAiProvider === 'claude' ? ' settings-radio-btn--active' : ''}`}
+                  onClick={() => setNewProjectAiProvider('claude')}
+                >
+                  Claude
+                </button>
+                <button
+                  className={`settings-radio-btn${newProjectAiProvider === 'codex' ? ' settings-radio-btn--active' : ''}`}
+                  onClick={() => setNewProjectAiProvider('codex')}
+                >
+                  Codex
+                </button>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="modal-btn modal-btn--secondary" onClick={() => setShowFolderAiModal(false)}>
+                {t('common.cancel')}
+              </button>
+              <button
+                className="modal-btn modal-btn--primary"
+                onClick={() => {
+                  setShowFolderAiModal(false)
+                  handleCreateFromFolder()
+                }}
               >
                 {t('sidebar.chooseLocationAndCreate')}
               </button>

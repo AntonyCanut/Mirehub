@@ -44,7 +44,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       { mode: 'git', label: t('command.showGit'), shortcut: '' },
       { mode: 'kanban', label: t('command.showKanban'), shortcut: '' },
       { mode: 'npm', label: t('command.showNpm'), shortcut: '' },
-      { mode: 'claude', label: t('command.showClaude'), shortcut: '' },
+      { mode: 'ai' as ViewMode, label: t('command.showAi'), shortcut: '' },
       { mode: 'settings', label: t('command.showSettings'), shortcut: '' },
       { mode: 'search', label: t('command.globalSearch'), shortcut: 'Cmd+Shift+F' },
       { mode: 'todos', label: t('command.showTodos'), shortcut: '' },

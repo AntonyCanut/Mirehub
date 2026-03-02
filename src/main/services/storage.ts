@@ -69,6 +69,24 @@ export class StorageService {
         data.settings.defaultShell = getDefaultShell()
         needsSave = true
       }
+      // Migration: ensure codexDetectionColor + defaultAiProvider exist in settings
+      if (data.settings && !data.settings.codexDetectionColor) {
+        data.settings.codexDetectionColor = '#10a37f'
+        needsSave = true
+      }
+      if (data.settings && !data.settings.defaultAiProvider) {
+        data.settings.defaultAiProvider = 'claude'
+        needsSave = true
+      }
+      // Migration: hasClaude → aiProvider
+      if (data.projects) {
+        for (const project of data.projects) {
+          if (project.aiProvider === undefined) {
+            project.aiProvider = project.hasClaude ? 'claude' : null
+            needsSave = true
+          }
+        }
+      }
       // Migration: ensure namespaces array exists and assign Default namespace
       if (!data.namespaces || data.namespaces.length === 0) {
         const defaultNs: Namespace = {
@@ -192,6 +210,14 @@ export class StorageService {
   addProject(project: Project): void {
     this.data.projects.push(project)
     this.save()
+  }
+
+  updateProject(project: Project): void {
+    const idx = this.data.projects.findIndex((p) => p.id === project.id)
+    if (idx >= 0) {
+      this.data.projects[idx] = project
+      this.save()
+    }
   }
 
   deleteProject(id: string): void {

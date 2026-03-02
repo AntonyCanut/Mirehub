@@ -6,6 +6,7 @@ import type {
   DbBackupLogEntry,
   DbNlMessage,
 } from '../../../shared/types'
+import type { AiProviderId } from '../../../shared/types/ai-provider'
 import { useDatabaseTabStore } from './databaseTabStore'
 
 interface DatabaseState {
@@ -21,6 +22,7 @@ interface DatabaseState {
   nlMessages: Record<string, DbNlMessage[]>
   /** NL query loading state per connectionId */
   nlLoading: Record<string, boolean>
+  nlAiProvider: AiProviderId
 }
 
 interface DatabaseActions {
@@ -40,6 +42,7 @@ interface DatabaseActions {
   addNlMessage: (connectionId: string, message: DbNlMessage) => void
   setNlLoading: (connectionId: string, loading: boolean) => void
   clearNlMessages: (connectionId: string) => void
+  setNlAiProvider: (provider: AiProviderId) => void
 }
 
 type DatabaseStore = DatabaseState & DatabaseActions
@@ -64,6 +67,7 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
   backupLogs: [],
   nlMessages: {},
   nlLoading: {},
+  nlAiProvider: 'claude',
 
   loadConnections: async (workspaceId: string) => {
     if (get().loadedWorkspaces[workspaceId]) return
@@ -256,4 +260,6 @@ export const useDatabaseStore = create<DatabaseStore>((set, get) => ({
       nlMessages: { ...state.nlMessages, [connectionId]: [] },
     }))
   },
+
+  setNlAiProvider: (provider) => set({ nlAiProvider: provider }),
 }))

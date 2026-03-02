@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { KanbanTask, KanbanStatus } from '../../../shared/types/index'
+import { AI_PROVIDERS, type AiProviderId } from '../../../shared/types/ai-provider'
 import { useTerminalTabStore } from './terminalTabStore'
 import { useWorkspaceStore } from './workspaceStore'
 import { pushNotification } from './notificationStore'
@@ -104,6 +105,7 @@ interface KanbanActions {
     targetProjectId?: string,
     isCtoTicket?: boolean,
     labels?: string[],
+    aiProvider?: AiProviderId,
   ) => Promise<void>
   updateTaskStatus: (taskId: string, status: KanbanStatus) => Promise<void>
   updateTask: (taskId: string, data: Partial<KanbanTask>) => Promise<void>
@@ -111,6 +113,8 @@ interface KanbanActions {
   duplicateTask: (task: KanbanTask) => Promise<void>
   setDragged: (taskId: string | null) => void
   getTasksByStatus: (status: KanbanStatus) => KanbanTask[]
+  sendToAi: (task: KanbanTask, explicitWorkspaceId?: string) => Promise<void>
+  /** @deprecated Use sendToAi instead */
   sendToClaude: (task: KanbanTask, explicitWorkspaceId?: string) => Promise<void>
   syncBackgroundWorkspace: (workspaceId: string) => Promise<void>
   attachFiles: (taskId: string) => Promise<void>
@@ -158,7 +162,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           (t) => t.status === 'WORKING' && !kanbanTabIds[t.id],
         )
         if (workingWithoutTerminal) {
-          get().sendToClaude(workingWithoutTerminal)
+          get().sendToAi(workingWithoutTerminal)
           return
         }
 
@@ -166,7 +170,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         const hasWorking = tasks.some((t) => t.status === 'WORKING')
         if (!hasWorking) {
           const next = pickNextTask(tasks)
-          if (next) get().sendToClaude(next)
+          if (next) get().sendToAi(next)
         }
       }, 500)
     } finally {
@@ -285,7 +289,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
       // Launch Claude terminals for tasks manually moved to WORKING
       for (const task of tasksToLaunch) {
-        get().sendToClaude(task)
+        get().sendToAi(task)
       }
 
       // Re-launch tasks that were WORKING but reverted to TODO by the hook
@@ -293,7 +297,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       if (tasksToRelaunch.length > 0) {
         setTimeout(() => {
           for (const task of tasksToRelaunch) {
-            get().sendToClaude(task)
+            get().sendToAi(task)
           }
         }, 3000) // delay to let tabs close first
       }
@@ -323,14 +327,14 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           setTimeout(() => {
             const currentTasks = get().tasks
             const next = pickNextTask(currentTasks)
-            if (next) get().sendToClaude(next)
+            if (next) get().sendToAi(next)
           }, 1000)
         }
       }
     } catch { /* ignore sync errors */ }
   },
 
-  createTask: async (workspaceId, title, description, priority, targetProjectId?, isCtoTicket?, labels?) => {
+  createTask: async (workspaceId, title, description, priority, targetProjectId?, isCtoTicket?, labels?, aiProvider?) => {
     const task: KanbanTask = await window.mirehub.kanban.create({
       workspaceId,
       targetProjectId,
@@ -340,6 +344,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       priority,
       isCtoTicket,
       labels,
+      aiProvider,
     })
     set((state) => ({ tasks: [...state.tasks, task] }))
 
@@ -348,7 +353,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     if (!hasWorking) {
       // Pick by priority — the new task might not be highest priority
       const next = pickNextTask(get().tasks)
-      if (next) get().sendToClaude(next)
+      if (next) get().sendToAi(next)
     }
   },
 
@@ -401,7 +406,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     return get().tasks.filter((t) => t.status === status)
   },
 
-  sendToClaude: async (task: KanbanTask, explicitWorkspaceId?: string) => {
+  sendToAi: async (task: KanbanTask, explicitWorkspaceId?: string) => {
     if (task.disabled) return
     const workspaceId = explicitWorkspaceId ?? get().currentWorkspaceId
     if (!workspaceId) return
@@ -422,28 +427,39 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       set({ kanbanTabIds: newTabIds })
     }
 
-    // Determine cwd: if task targets a specific project, use its path; otherwise use workspace env
+    // Determine AI provider first — it affects cwd strategy
+    // Priority: ticket → target project kanban default → target project provider → workspace project kanban default → workspace provider → 'claude'
     const { projects, workspaces } = useWorkspaceStore.getState()
+    const targetProject = task.targetProjectId ? projects.find((p) => p.id === task.targetProjectId) : undefined
+    const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
+    const firstProject = workspaceProjects[0]
+    const kanbanDefault = targetProject?.aiDefaults?.kanban ?? firstProject?.aiDefaults?.kanban
+    const provider: AiProviderId = task.aiProvider ?? kanbanDefault ?? targetProject?.aiProvider ?? firstProject?.aiProvider ?? 'claude'
+    const providerConfig = AI_PROVIDERS[provider]
+
+    // Determine cwd: if task targets a specific project, use its path
     let cwd: string | null = null
     if (task.targetProjectId) {
       const project = projects.find((p) => p.id === task.targetProjectId)
       if (project) cwd = project.path
     }
     if (!cwd) {
-      // Use workspace env path or fallback to first project
-      const workspace = workspaces.find((w) => w.id === workspaceId)
-      const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
-      if (workspace && workspaceProjects.length > 0) {
-        try {
-          const envResult = await window.mirehub.workspaceEnv.setup(
-            workspace.name,
-            workspaceProjects.map((p) => p.path),
-            workspaceId,
-          )
-          if (envResult?.success && envResult.envPath) {
-            cwd = envResult.envPath
-          }
-        } catch { /* fallback below */ }
+      // Claude can navigate the workspace env (meta-directory with symlinks).
+      // Other providers (Codex) need a real project path to work correctly.
+      if (provider === 'claude') {
+        const workspace = workspaces.find((w) => w.id === workspaceId)
+        if (workspace && workspaceProjects.length > 0) {
+          try {
+            const envResult = await window.mirehub.workspaceEnv.setup(
+              workspace.name,
+              workspaceProjects.map((p) => p.path),
+              workspaceId,
+            )
+            if (envResult?.success && envResult.envPath) {
+              cwd = envResult.envPath
+            }
+          } catch { /* fallback below */ }
+        }
       }
       if (!cwd) {
         cwd = workspaceProjects[0]?.path ?? null
@@ -553,16 +569,20 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     // A task uses CTO mode if it is a CTO ticket itself, or if its parent is a CTO ticket
     const isCtoMode = task.isCtoTicket || isChildOfCto(task, get().tasks)
 
-    // Launch Claude — CTO uses direct non-interactive mode (--print), regular uses interactive
+    // Launch AI CLI — CTO uses direct non-interactive mode, regular uses interactive
     const relativePromptPath = `.mirehub/.kanban-prompt-${task.id}.md`
+    const unsetEnv = providerConfig.envVarsToUnset.length > 0
+      ? `unset ${providerConfig.envVarsToUnset.join(' ')} && `
+      : ''
+    const exportEnv = `export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && `
     let initialCommand: string
     if (isCtoMode) {
       // CTO mode: direct invocation, no back-and-forth — prompt piped from file
-      initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && cat "${relativePromptPath}" | claude --dangerously-skip-permissions --print ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
+      initialCommand = `${unsetEnv}${exportEnv}cat "${relativePromptPath}" | ${providerConfig.cliCommand} ${providerConfig.nonInteractiveArgs.join(' ')} ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
     } else {
       // Regular tickets: interactive mode
       const escapedPrompt = `Lis et execute les instructions du fichier ${relativePromptPath}`
-      initialCommand = `unset CLAUDECODE CLAUDE_CODE_ENTRYPOINT && export MIREHUB_KANBAN_TASK_ID="${task.id}" MIREHUB_KANBAN_FILE="${kanbanFilePath}" && claude --dangerously-skip-permissions "${escapedPrompt}" ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
+      initialCommand = `${unsetEnv}${exportEnv}${providerConfig.cliCommand} ${providerConfig.interactiveArgs.join(' ')} "${escapedPrompt}" ; bash "$HOME/.mirehub/hooks/mirehub-terminal-recovery.sh"`
     }
 
     // Create an interactive terminal tab for this task
@@ -570,10 +590,10 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     try {
       const termStore = useTerminalTabStore.getState()
       if (workspaceId) {
-        const tabLabel = task.isCtoTicket ? 'CTO' : isCtoMode ? `[CTO] ${task.title}` : task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[IA] ${task.title}`
+        const tabLabel = task.isCtoTicket ? 'CTO' : isCtoMode ? `[CTO] ${task.title}` : task.ticketNumber != null ? `[${ticketLabel}] ${task.title}` : `[${providerConfig.displayName}] ${task.title}`
         tabId = termStore.createTab(workspaceId, cwd, tabLabel, initialCommand) || null
         if (tabId) {
-          termStore.setTabColor(tabId, '#fab387')
+          termStore.setTabColor(tabId, providerConfig.detectionColor)
           set((state) => ({
             kanbanTabIds: { ...state.kanbanTabIds, [task.id]: tabId! },
           }))
@@ -637,6 +657,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         }
       }, 20000)
     }
+  },
+
+  /** @deprecated Use sendToAi instead */
+  sendToClaude: async (task: KanbanTask, explicitWorkspaceId?: string) => {
+    return get().sendToAi(task, explicitWorkspaceId)
   },
 
   syncBackgroundWorkspace: async (wsId: string) => {
@@ -757,7 +782,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       if (tasksToRelaunch.length > 0) {
         setTimeout(() => {
           for (const task of tasksToRelaunch) {
-            get().sendToClaude(task, wsId)
+            get().sendToAi(task, wsId)
           }
         }, 3000)
       }
@@ -769,7 +794,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           setTimeout(() => {
             const bgTasks = get().backgroundTasks[wsId] ?? []
             const next = pickNextTask(bgTasks)
-            if (next) get().sendToClaude(next, wsId)
+            if (next) get().sendToAi(next, wsId)
           }, 1000)
         }
       }

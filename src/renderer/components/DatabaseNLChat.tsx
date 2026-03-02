@@ -1,6 +1,9 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useI18n } from '../lib/i18n'
 import { useDatabaseStore } from '../lib/stores/databaseStore'
+import { useWorkspaceStore } from '../lib/stores/workspaceStore'
+import { AI_PROVIDERS } from '../../shared/types/ai-provider'
+import type { AiProviderId } from '../../shared/types/ai-provider'
 import type {
   DbConnection,
   DbConnectionStatus,
@@ -43,6 +46,12 @@ export function DatabaseNLChat({
   const connectionId = connection?.id ?? ''
   const messages = useMemo(() => nlMessages[connectionId] ?? [], [nlMessages, connectionId])
   const isLoading = nlLoading[connectionId] ?? false
+  const { activeProjectId, projects } = useWorkspaceStore()
+  const dbProvider: AiProviderId = useMemo(() => {
+    const p = projects.find((proj) => proj.id === activeProjectId)
+    return p?.aiDefaults?.database ?? p?.aiProvider ?? 'claude'
+  }, [activeProjectId, projects])
+  const dbProviderConfig = AI_PROVIDERS[dbProvider]
 
   // Get permissions from connection (default: read-only)
   const permissions: DbNlPermissions = useMemo(() => connection?.nlPermissions ?? {
@@ -90,12 +99,18 @@ export function DatabaseNLChat({
           sql: m.sql,
         }))
 
+      // Resolve AI provider from project defaults
+      const { activeProjectId, projects } = useWorkspaceStore.getState()
+      const activeProject = projects.find((p) => p.id === activeProjectId)
+      const dbProvider = activeProject?.aiDefaults?.database ?? activeProject?.aiProvider ?? 'claude'
+
       // Step 1: Generate SQL
       const genResponse = await window.mirehub.database.nlGenerateSql(
         connectionId,
         userQuestion,
         permissions,
         history,
+        dbProvider,
       )
 
       if (!genResponse.success || !genResponse.sql) {
@@ -125,6 +140,7 @@ export function DatabaseNLChat({
           `The previous query failed with error: "${result.error}". Fix the SQL query. Original question: ${userQuestion}`,
           permissions,
           retryHistory,
+          dbProvider,
         )
 
         if (retryResponse.success && retryResponse.sql) {
@@ -145,7 +161,7 @@ export function DatabaseNLChat({
         return
       }
 
-      // Step 3: Interpret results via Claude (human answer or refinement)
+      // Step 3: Interpret results (human answer or refinement)
       const interpretResponse = await window.mirehub.database.nlInterpret({
         connectionId,
         question: userQuestion,
@@ -154,6 +170,7 @@ export function DatabaseNLChat({
         rows: result.rows,
         rowCount: result.rowCount,
         history,
+        provider: dbProvider,
       })
 
       // Step 3b: Claude suggested a refined query — execute it and re-interpret
@@ -172,6 +189,7 @@ export function DatabaseNLChat({
             rows: refinedResult.rows,
             rowCount: refinedResult.rowCount,
             history,
+            provider: dbProvider,
           })
 
           addNlMessage(connectionId, {
@@ -244,6 +262,8 @@ export function DatabaseNLChat({
           <NLChatMessage
             key={msg.id}
             message={msg}
+            providerName={dbProviderConfig.displayName}
+            providerColor={dbProviderConfig.detectionColor}
             onCopyToEditor={onCopyToEditor}
           />
         ))}
@@ -304,22 +324,30 @@ export function DatabaseNLChat({
 
 function NLChatMessage({
   message,
+  providerName,
+  providerColor,
   onCopyToEditor,
 }: {
   message: DbNlMessage
+  providerName: string
+  providerColor: string
   onCopyToEditor: (sql: string) => void
 }) {
+  const isAssistant = message.role === 'assistant'
   const roleClass = message.role === 'user'
     ? 'db-nl-message--user'
     : message.role === 'error'
       ? 'db-nl-message--error'
       : 'db-nl-message--assistant'
+  const msgStyle = isAssistant
+    ? { borderLeftColor: providerColor, background: `${providerColor}0a` } as React.CSSProperties
+    : undefined
 
   return (
-    <div className={`db-nl-message ${roleClass}`}>
+    <div className={`db-nl-message ${roleClass}`} style={msgStyle}>
       <div className="db-nl-message-header">
         <span className="db-nl-message-role">
-          {message.role === 'user' ? 'You' : message.role === 'error' ? 'Error' : 'Claude'}
+          {message.role === 'user' ? 'You' : message.role === 'error' ? 'Error' : providerName}
         </span>
         <span className="db-nl-message-time">
           {new Date(message.timestamp).toLocaleTimeString(undefined, {
