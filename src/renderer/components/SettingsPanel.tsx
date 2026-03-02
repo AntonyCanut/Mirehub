@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoCloseCtoTerminals: true,
   autoApprove: true,
   tutorialCompleted: false,
+  tutorialSeenSections: [],
 }
 
 type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'kanban' | 'notifications' | 'about'
@@ -362,6 +363,28 @@ export function SettingsPanel() {
                       {t('settings.english')}
                     </button>
                   </div>
+                </div>
+              </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.tutorialEnabled')}</label>
+                    <span className="settings-hint">{t('settings.tutorialEnabledHint')}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${!settings.tutorialCompleted ? ' settings-toggle--active' : ''}`}
+                    onClick={() => {
+                      const nowCompleted = !settings.tutorialCompleted
+                      if (!nowCompleted) {
+                        setSettings((prev) => ({ ...prev, tutorialCompleted: false, tutorialSeenSections: [] }))
+                        window.mirehub.settings.set({ tutorialCompleted: false, tutorialSeenSections: [] })
+                      } else {
+                        updateSetting('tutorialCompleted', true)
+                      }
+                    }}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
                 </div>
               </div>
             </div>

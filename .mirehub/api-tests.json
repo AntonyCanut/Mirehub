@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "environments": [
+    {
+      "id": "mm8zhaut0qtmob",
+      "name": "dev",
+      "variables": {
+        "new_variable": ""
+      },
+      "isActive": true
+    }
+  ],
+  "collections": [],
+  "chains": [],
+  "healthChecks": []
+}

@@ -197,6 +197,7 @@ export interface AppSettings {
   autoCloseCtoTerminals: boolean
   autoApprove: boolean
   tutorialCompleted: boolean
+  tutorialSeenSections: string[]
 }
 
 export interface ProjectInfo {
@@ -443,6 +444,66 @@ export interface ApiTestFile {
   collections: ApiCollection[]
   chains: ApiChain[]
   healthChecks: HealthCheck[]
+}
+
+// Health Check Panel types (standalone tab)
+export type HealthCheckIntervalUnit = 'seconds' | 'minutes' | 'hours'
+
+export interface HealthCheckSchedule {
+  enabled: boolean
+  interval: number
+  unit: HealthCheckIntervalUnit
+  downInterval?: number
+  downUnit?: HealthCheckIntervalUnit
+}
+
+export interface HealthCheckConfig {
+  id: string
+  name: string
+  url: string
+  method: 'GET' | 'HEAD'
+  expectedStatus: number
+  headers: ApiHeader[]
+  schedule: HealthCheckSchedule
+  notifyOnDown: boolean
+  createdAt: number
+  updatedAt: number
+}
+
+export interface HealthCheckLogEntry {
+  id: string
+  healthCheckId: string
+  status: number
+  responseTime: number
+  success: boolean
+  timestamp: number
+  error?: string
+}
+
+export interface HealthCheckIncident {
+  id: string
+  healthCheckId: string
+  healthCheckName: string
+  startedAt: number
+  endedAt: number | null
+  failureCount: number
+  lastError?: string
+}
+
+export type HealthCheckStatus = 'unknown' | 'up' | 'down' | 'checking'
+
+export interface HealthCheckFile {
+  version: 1
+  checks: HealthCheckConfig[]
+  history: HealthCheckLogEntry[]
+  incidents: HealthCheckIncident[]
+}
+
+export interface HealthCheckSchedulerStatus {
+  checkId: string
+  status: HealthCheckStatus
+  lastCheck: number | null
+  nextCheck: number | null
 }
 
 // Database Explorer types
@@ -980,6 +1041,19 @@ export const IPC_CHANNELS = {
   API_SAVE: 'api:save',
   API_EXPORT: 'api:export',
   API_IMPORT: 'api:import',
+
+  // Health Check
+  HEALTHCHECK_LOAD: 'healthcheck:load',
+  HEALTHCHECK_SAVE: 'healthcheck:save',
+  HEALTHCHECK_EXECUTE: 'healthcheck:execute',
+  HEALTHCHECK_START_SCHEDULER: 'healthcheck:startScheduler',
+  HEALTHCHECK_STOP_SCHEDULER: 'healthcheck:stopScheduler',
+  HEALTHCHECK_UPDATE_INTERVAL: 'healthcheck:updateInterval',
+  HEALTHCHECK_STATUS: 'healthcheck:status',
+  HEALTHCHECK_STATUS_UPDATE: 'healthcheck:statusUpdate',
+  HEALTHCHECK_EXPORT: 'healthcheck:export',
+  HEALTHCHECK_IMPORT: 'healthcheck:import',
+  HEALTHCHECK_CLEAR_HISTORY: 'healthcheck:clearHistory',
 
   // Database Explorer
   DB_CONNECT: 'db:connect',

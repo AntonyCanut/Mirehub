@@ -79,13 +79,11 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showIconPicker, setShowIconPicker] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
-  const [showAddMenu, setShowAddMenu] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [createProjectName, setCreateProjectName] = useState('')
   const [createError, setCreateError] = useState<string | null>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
   const createInputRef = useRef<HTMLInputElement>(null)
-  const addMenuRef = useRef<HTMLDivElement>(null)
 
   const {
     setActiveWorkspace,
@@ -203,18 +201,6 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
     setShowCreateModal(false)
     setCreateProjectName('')
   }, [createProjectName, workspace.id, t])
-
-  // Close add menu on click outside
-  useEffect(() => {
-    if (!showAddMenu) return
-    const handler = (e: MouseEvent) => {
-      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
-        setShowAddMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [showAddMenu])
 
   // Focus create input when modal opens
   useEffect(() => {
@@ -365,21 +351,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <>
-            <span className="workspace-item-name">{workspace.name}</span>
-            <button
-              className="workspace-item-rename-btn btn-icon"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleStartRename()
-              }}
-              title={t('workspace.rename')}
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M8.5 1.5L10.5 3.5M1 11L1.5 8.5L9 1C9.3 0.7 9.8 0.7 10.1 1L11 1.9C11.3 2.2 11.3 2.7 11 3L2.5 11.5L1 11Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </>
+          <span className="workspace-item-name">{workspace.name}</span>
         )}
 
         {workspaceClaudeStatus === 'working' && (
@@ -420,44 +392,6 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
           <span className="workspace-ia-tag workspace-ia-tag--finished">{t('workspace.aiFinish')}</span>
         )}
 
-        <div className="workspace-item-add-wrapper" ref={addMenuRef}>
-          <button
-            className="workspace-item-add btn-icon"
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowAddMenu((prev) => !prev)
-            }}
-            title={t('workspace.addCreateProject')}
-          >
-            +
-          </button>
-          {showAddMenu && (
-            <div className="workspace-add-menu">
-              <button
-                className="workspace-add-menu-item"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowAddMenu(false)
-                  handleAddProject()
-                }}
-              >
-                {t('workspace.addExistingProject')}
-              </button>
-              <button
-                className="workspace-add-menu-item"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowAddMenu(false)
-                  setCreateProjectName('')
-                  setCreateError(null)
-                  setShowCreateModal(true)
-                }}
-              >
-                {t('workspace.createNewProject')}
-              </button>
-            </div>
-          )}
-        </div>
       </div>
 
       {showColorPicker && (

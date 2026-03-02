@@ -19,9 +19,11 @@ import { ShortcutsPanel } from './components/ShortcutsPanel'
 import { ProjectStats } from './components/ProjectStats'
 import { PromptTemplates } from './components/PromptTemplates'
 import { ApiTesterPanel } from './components/ApiTesterPanel'
+import { HealthCheckPanel } from './components/HealthCheckPanel'
 import { DatabaseExplorer } from './components/DatabaseExplorer'
 import { CodeAnalysisPanel } from './components/CodeAnalysisPanel'
 import { AppUpdateModal } from './components/AppUpdateModal'
+import { TutorialModal } from './components/TutorialModal'
 import { ToastContainer } from './components/ToastContainer'
 import { useWorkspaceStore } from './lib/stores/workspaceStore'
 import { useTerminalTabStore } from './lib/stores/terminalTabStore'
@@ -32,6 +34,12 @@ import { useI18n } from './lib/i18n'
 import { useBackgroundKanbanSync } from './hooks/useBackgroundKanbanSync'
 import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 
+const TUTORIAL_VIEWS = new Set([
+  'kanban', 'terminal', 'git', 'database', 'packages',
+  'analysis', 'todos', 'stats', 'prompts', 'api', 'healthcheck',
+  'settings', 'search', 'shortcuts', 'claude',
+])
+
 export function App() {
   const { viewMode, setViewMode, availableMagicTabs, setAvailableMagicTabs } = useViewStore()
   const { activeProjectId, projects, activeWorkspaceId, workspaces } = useWorkspaceStore()
@@ -40,6 +48,9 @@ export function App() {
   const [sessionChecked, setSessionChecked] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false)
+  const [tutorialSection, setTutorialSection] = useState<string | null>(null)
+  const [tutorialCompleted, setTutorialCompleted] = useState(true)
+  const [tutorialSeenSections, setTutorialSeenSections] = useState<string[]>([])
   const [sidebarWidth, setSidebarWidth] = useState(260)
   const [isResizing, setIsResizing] = useState(false)
   const resizingRef = useRef(false)
@@ -64,6 +75,28 @@ export function App() {
       setSessionChecked(true)
     })
   }, [])
+
+  // Load tutorial state and show welcome on first launch
+  useEffect(() => {
+    window.mirehub.settings.get().then((s: AppSettings) => {
+      const completed = s.tutorialCompleted ?? false
+      const seen = s.tutorialSeenSections ?? []
+      setTutorialCompleted(completed)
+      setTutorialSeenSections(seen)
+      if (!completed && seen.length === 0) {
+        setTutorialSection('welcome')
+      }
+    })
+  }, [])
+
+  // Show contextual tutorial when viewMode changes
+  useEffect(() => {
+    if (tutorialCompleted) return
+    if (!TUTORIAL_VIEWS.has(viewMode)) return
+    if (tutorialSeenSections.includes(viewMode)) return
+    if (tutorialSection !== null) return
+    setTutorialSection(viewMode)
+  }, [viewMode, tutorialCompleted, tutorialSeenSections, tutorialSection])
 
   // Apply theme on startup and when settings change
   useEffect(() => {
@@ -241,6 +274,20 @@ export function App() {
     setPendingSession(null)
   }, [])
 
+  const handleTutorialDone = useCallback(() => {
+    if (tutorialSection === null) return
+    const updated = [...tutorialSeenSections, tutorialSection]
+    setTutorialSeenSections(updated)
+    setTutorialSection(null)
+    window.mirehub.settings.set({ tutorialSeenSections: updated })
+  }, [tutorialSection, tutorialSeenSections])
+
+  const handleTutorialDismissAll = useCallback(() => {
+    setTutorialSection(null)
+    setTutorialCompleted(true)
+    window.mirehub.settings.set({ tutorialCompleted: true })
+  }, [])
+
   // Sidebar resize handlers
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -362,6 +409,12 @@ export function App() {
               {t('view.api')}
             </button>
             <button
+              className={`view-btn${viewMode === 'healthcheck' ? ' view-btn--active' : ''}`}
+              onClick={() => setViewMode('healthcheck')}
+            >
+              {t('view.healthcheck')}
+            </button>
+            <button
               className={`view-btn${viewMode === 'git' ? ' view-btn--active' : ''}`}
               onClick={() => setViewMode('git')}
             >
@@ -479,6 +532,11 @@ export function App() {
                 <ApiTesterPanel />
               </div>
             )}
+            {viewMode === 'healthcheck' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <HealthCheckPanel />
+              </div>
+            )}
             {viewMode === 'database' && (
               <div className="view-panel" style={{ display: 'flex' }}>
                 <DatabaseExplorer />
@@ -506,6 +564,13 @@ export function App() {
       />
       <AppUpdateModal />
       <ToastContainer />
+      {tutorialSection !== null && (
+        <TutorialModal
+          section={tutorialSection}
+          onDone={handleTutorialDone}
+          onDismissAll={handleTutorialDismissAll}
+        />
+      )}
     </div>
     </ErrorBoundary>
   )

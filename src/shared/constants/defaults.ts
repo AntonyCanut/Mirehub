@@ -23,6 +23,7 @@ export function createDefaultSettings(): AppSettings {
     autoCloseCtoTerminals: true,
     autoApprove: true,
     tutorialCompleted: false,
+    tutorialSeenSections: [],
   }
 }
 

@@ -302,6 +302,26 @@ export function TerminalArea() {
     }
   }, [activeWorkspaceId, envCwd, createTab])
 
+  const handleNewClaudeTab = useCallback(() => {
+    if (activeWorkspaceId && envCwd) {
+      createTab(activeWorkspaceId, envCwd, undefined, 'claude')
+    }
+  }, [activeWorkspaceId, envCwd, createTab])
+
+  const addWrapperRef = useRef<HTMLDivElement>(null)
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null)
+
+  const handleAddWrapperEnter = useCallback(() => {
+    if (addWrapperRef.current) {
+      const rect = addWrapperRef.current.getBoundingClientRect()
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left })
+    }
+  }, [])
+
+  const handleAddWrapperLeave = useCallback(() => {
+    setDropdownPos(null)
+  }, [])
+
   if (!activeWorkspaceId) {
     return (
       <main className="terminal-area">
@@ -363,9 +383,31 @@ export function TerminalArea() {
             </button>
           </div>
         ))}
-        <button className="btn-icon tab-add" title={t('terminal.newTerminal')} onClick={handleNewTab}>
-          +
-        </button>
+        <div
+          className="tab-add-wrapper"
+          ref={addWrapperRef}
+          onMouseEnter={handleAddWrapperEnter}
+          onMouseLeave={handleAddWrapperLeave}
+        >
+          <button className="btn-icon tab-add" title={t('terminal.newTerminal')} onClick={handleNewTab}>
+            +
+          </button>
+          {dropdownPos && (
+            <div
+              className="tab-add-dropdown"
+              style={{ display: 'block', top: dropdownPos.top, left: dropdownPos.left }}
+            >
+              <button className="tab-add-dropdown-item" onClick={handleNewTab}>
+                <span className="tab-add-dropdown-icon">{'>'}_</span>
+                <span>{t('terminal.newTerminalShort')}</span>
+              </button>
+              <button className="tab-add-dropdown-item" onClick={handleNewClaudeTab}>
+                <span className="tab-add-dropdown-icon tab-add-dropdown-icon--claude">C</span>
+                <span>{t('terminal.newClaudeTerminal')}</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <ProjectToolbar />
       <div className="terminal-content">

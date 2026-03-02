@@ -9,8 +9,6 @@ import type {
   ApiTestResult,
   ApiTestAssertion,
   ApiEnvironment,
-  HealthCheck,
-  HealthCheckResult,
   HttpMethod,
 } from '../../shared/types'
 
@@ -18,7 +16,6 @@ type RequestTab = 'headers' | 'body' | 'tests' | 'chain'
 type ResponseTab = 'body' | 'headers' | 'testResults'
 type SidebarSelection =
   | { type: 'request'; collectionId: string; requestId: string }
-  | { type: 'healthCheck'; healthCheckId: string }
   | { type: 'chain'; chainId: string }
   | null
 
@@ -146,12 +143,6 @@ export function ApiTesterPanel() {
     if (!req) return null
     return { request: req, collectionId: col.id }
   }, [selection, data.collections])
-
-  // Get selected health check
-  const getSelectedHealthCheck = useCallback((): HealthCheck | null => {
-    if (!selection || selection.type !== 'healthCheck') return null
-    return data.healthChecks.find((h) => h.id === selection.healthCheckId) ?? null
-  }, [selection, data.healthChecks])
 
   // Update a request within the data
   const updateRequest = useCallback(
@@ -291,86 +282,6 @@ export function ApiTesterPanel() {
     [data.collections, updateData],
   )
 
-  // Health Check CRUD
-  const addHealthCheck = useCallback(() => {
-    const hc: HealthCheck = {
-      id: generateId(),
-      name: 'New Health Check',
-      url: '',
-      method: 'GET',
-      expectedStatus: 200,
-      headers: [],
-    }
-    updateData((prev) => ({ ...prev, healthChecks: [...prev.healthChecks, hc] }))
-    setSelection({ type: 'healthCheck', healthCheckId: hc.id })
-  }, [updateData])
-
-  const updateHealthCheck = useCallback(
-    (hcId: string, updater: (h: HealthCheck) => HealthCheck) => {
-      updateData((prev) => ({
-        ...prev,
-        healthChecks: prev.healthChecks.map((h) => (h.id === hcId ? updater(h) : h)),
-      }))
-    },
-    [updateData],
-  )
-
-  const deleteHealthCheck = useCallback(
-    (hcId: string) => {
-      updateData((prev) => ({
-        ...prev,
-        healthChecks: prev.healthChecks.filter((h) => h.id !== hcId),
-      }))
-      if (selection?.type === 'healthCheck' && selection.healthCheckId === hcId) {
-        setSelection(null)
-      }
-    },
-    [updateData, selection],
-  )
-
-  const runHealthCheck = useCallback(
-    async (hcId: string) => {
-      const hc = data.healthChecks.find((h) => h.id === hcId)
-      if (!hc) return
-      try {
-        const result = await window.mirehub.api.execute(
-          {
-            method: hc.method,
-            url: hc.url,
-            headers: hc.headers,
-            body: '',
-            bodyType: 'none',
-            tests: [],
-          },
-          getActiveVariables(),
-        )
-        const hcResult: HealthCheckResult = {
-          status: result.response.status,
-          responseTime: result.response.time,
-          success: result.response.status === hc.expectedStatus,
-          timestamp: Date.now(),
-        }
-        updateHealthCheck(hcId, (h) => ({ ...h, lastResult: hcResult }))
-      } catch (err) {
-        const hcResult: HealthCheckResult = {
-          status: 0,
-          responseTime: 0,
-          success: false,
-          timestamp: Date.now(),
-          error: String(err),
-        }
-        updateHealthCheck(hcId, (h) => ({ ...h, lastResult: hcResult }))
-      }
-    },
-    [data.healthChecks, getActiveVariables, updateHealthCheck],
-  )
-
-  const runAllHealthChecks = useCallback(async () => {
-    for (const hc of data.healthChecks) {
-      await runHealthCheck(hc.id)
-    }
-  }, [data.healthChecks, runHealthCheck])
-
   // Environment management
   const addEnvironment = useCallback(() => {
     const env: ApiEnvironment = {
@@ -454,7 +365,6 @@ export function ApiTesterPanel() {
   }
 
   const selectedRequest = getSelectedRequest()
-  const selectedHealthCheck = getSelectedHealthCheck()
   const activeEnv = data.environments.find((e) => e.isActive)
 
   return (
@@ -591,56 +501,6 @@ export function ApiTesterPanel() {
                         <span className="api-request-name">{req.name}</span>
                       </div>
                     ))}
-                </div>
-              ))}
-            </div>
-
-            {/* Health Checks */}
-            <div className="api-sidebar-section">
-              <div className="api-sidebar-section-header">
-                <span>{t('api.healthChecks')}</span>
-                <div style={{ display: 'flex', gap: 2 }}>
-                  {data.healthChecks.length > 0 && (
-                    <button
-                      className="api-collection-action-btn"
-                      style={{ opacity: 1, fontSize: 9 }}
-                      onClick={runAllHealthChecks}
-                      title={t('api.runAll')}
-                    >
-                      &#9654;&#9654;
-                    </button>
-                  )}
-                  <button
-                    className="api-collection-action-btn"
-                    style={{ opacity: 1 }}
-                    onClick={addHealthCheck}
-                    title={t('api.newHealthCheck')}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {data.healthChecks.map((hc) => (
-                <div
-                  key={hc.id}
-                  className={`api-health-item${
-                    selection?.type === 'healthCheck' && selection.healthCheckId === hc.id
-                      ? ' api-health-item--active'
-                      : ''
-                  }`}
-                  onClick={() => setSelection({ type: 'healthCheck', healthCheckId: hc.id })}
-                >
-                  <span
-                    className={`api-health-dot${
-                      hc.lastResult
-                        ? hc.lastResult.success
-                          ? ' api-health-dot--success'
-                          : ' api-health-dot--fail'
-                        : ''
-                    }`}
-                  />
-                  <span className="api-request-name">{hc.name}</span>
                 </div>
               ))}
             </div>
@@ -1095,121 +955,6 @@ export function ApiTesterPanel() {
             </>
           )}
 
-          {/* Health Check Editor */}
-          {selectedHealthCheck && (
-            <div className="api-health-card">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <input
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--text-primary)',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    fontFamily: 'inherit',
-                    outline: 'none',
-                    flex: 1,
-                    padding: '2px 0',
-                  }}
-                  value={selectedHealthCheck.name}
-                  onChange={(e) =>
-                    updateHealthCheck(selectedHealthCheck.id, (h) => ({
-                      ...h,
-                      name: e.target.value,
-                    }))
-                  }
-                />
-                <button
-                  className="api-collection-action-btn api-collection-action-btn--danger"
-                  onClick={() => deleteHealthCheck(selectedHealthCheck.id)}
-                  title={t('common.delete')}
-                  style={{ opacity: 0.7 }}
-                >
-                  x
-                </button>
-              </div>
-              <div className="api-health-form">
-                <div className="api-health-form-row">
-                  <label>{t('api.url')}</label>
-                  <input
-                    placeholder={t('api.urlPlaceholder')}
-                    value={selectedHealthCheck.url}
-                    onChange={(e) =>
-                      updateHealthCheck(selectedHealthCheck.id, (h) => ({
-                        ...h,
-                        url: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div className="api-health-form-row">
-                  <label>{t('api.method')}</label>
-                  <select
-                    value={selectedHealthCheck.method}
-                    onChange={(e) =>
-                      updateHealthCheck(selectedHealthCheck.id, (h) => ({
-                        ...h,
-                        method: e.target.value as 'GET' | 'HEAD',
-                      }))
-                    }
-                  >
-                    <option value="GET">GET</option>
-                    <option value="HEAD">HEAD</option>
-                  </select>
-                </div>
-                <div className="api-health-form-row">
-                  <label>{t('api.expectedStatus')}</label>
-                  <input
-                    type="number"
-                    value={selectedHealthCheck.expectedStatus}
-                    onChange={(e) =>
-                      updateHealthCheck(selectedHealthCheck.id, (h) => ({
-                        ...h,
-                        expectedStatus: parseInt(e.target.value, 10) || 200,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-              <button
-                className="api-send-btn"
-                onClick={() => runHealthCheck(selectedHealthCheck.id)}
-                disabled={!selectedHealthCheck.url}
-              >
-                {t('api.run')}
-              </button>
-
-              {selectedHealthCheck.lastResult && (
-                <div className="api-health-result">
-                  <div className="api-health-result-row">
-                    <span
-                      className={
-                        selectedHealthCheck.lastResult.success
-                          ? 'api-test-result-badge api-test-result-badge--pass'
-                          : 'api-test-result-badge api-test-result-badge--fail'
-                      }
-                    >
-                      {selectedHealthCheck.lastResult.success ? t('api.passed') : t('api.failed')}
-                    </span>
-                    <span className={getStatusBadgeClass(selectedHealthCheck.lastResult.status)}>
-                      {selectedHealthCheck.lastResult.status}
-                    </span>
-                    <span className="api-response-meta">
-                      {selectedHealthCheck.lastResult.responseTime}ms
-                    </span>
-                  </div>
-                  {selectedHealthCheck.lastResult.error && (
-                    <div
-                      className="api-health-result-row"
-                      style={{ color: 'var(--danger)', fontSize: 11, marginTop: 4 }}
-                    >
-                      {selectedHealthCheck.lastResult.error}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
 

@@ -63,11 +63,6 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
     [project.id],
   )
 
-  const handleClaudeBadgeClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    setShowClaudeInfo((prev) => !prev)
-  }, [])
-
   const launchClaudeInit = useCallback((projectPath: string) => {
     const { activeWorkspaceId } = useWorkspaceStore.getState()
     if (!activeWorkspaceId) return
@@ -127,13 +122,6 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
   const handleNotesBlur = useCallback(async () => {
     await window.mirehub.project.saveNotes(project.id, notes)
   }, [project.id, notes])
-
-  const handleCreateClaudeTerminal = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    const termStore = useTerminalTabStore.getState()
-    termStore.createSplitTab(project.workspaceId, project.path, `Claude - ${project.path.split(/[\\/]/).pop() ?? project.name}`, 'claude', null)
-    useViewStore.getState().setViewMode('terminal')
-  }, [project.workspaceId, project.path, project.name])
 
   const folderName = project.path.split(/[\\/]/).pop() ?? project.name
 
@@ -212,24 +200,6 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
           )}
         </span>
         <span className="project-item-name">{folderName}</span>
-        <button
-          className="project-item-claude-btn"
-          onClick={handleCreateClaudeTerminal}
-          title={t('project.openClaudeTerminal')}
-        >
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-            <path d="M4 3l8 5-8 5V3z" fill="currentColor" />
-          </svg>
-        </button>
-        {project.hasClaude && (
-          <span
-            className="project-item-claude-badge"
-            onClick={handleClaudeBadgeClick}
-            title={t('project.claudified')}
-          >
-            <span className="claude-dot" />
-          </span>
-        )}
         {!project.hasClaude && (
           <button
             className="project-item-deploy-btn"

@@ -1,146 +1,221 @@
-# Mirehub
+<p align="center">
+  <img src="website/assets/icon-256.png" alt="Mirehub" width="128" height="128">
+</p>
 
-Environnement de developpement integre pour macOS, propulse par Electron et Claude AI. Workspaces combine un terminal multi-onglets, la gestion de projets, un tableau Kanban intelligent et des outils Git complets dans une interface native macOS.
+<h1 align="center">Mirehub</h1>
 
-## Fonctionnalites
+<p align="center">
+  <strong>AI-powered development environment for macOS</strong>
+</p>
 
-- **Terminal integre** — Emulateur xterm.js avec node-pty, multi-onglets et jusqu'a 4 panneaux divises par onglet
-- **Gestion de workspaces** — Projets isoles via environnements virtuels (`~/.workspaces/{name}` par symlinks)
-- **Integration Git complete** — Status, branches, commits, diff, stash, merge, fetch (21 canaux IPC)
-- **Tableau Kanban** — 5 colonnes (TODO, WORKING, PENDING, DONE, FAILED) avec integration Claude AI
-- **Sessions Claude Code** — Jusqu'a 4 agents AI concurrents par projet, mode boucle
-- **Gestion NPM** — Visualisation des paquets et verification de versions
-- **Editeur Monaco** — Visualisation et edition de fichiers avec coloration syntaxique
-- **Explorateur de fichiers** — Arborescence de repertoires navigable
-- **Persistance** — Recuperation de session et stockage JSON (`~/.mirehub/data.json`)
-- **Auto-Clauder** — Deploiement automatique de la configuration `.claude`
-- **Interface macOS native** — Barre de titre personnalisee, vibrancy, polices systeme
+<p align="center">
+  <a href="https://github.com/AntonyCanut/Mirehub/releases"><img src="https://img.shields.io/github/v/release/AntonyCanut/Mirehub?style=flat-square" alt="Release"></a>
+  <a href="https://github.com/AntonyCanut/Mirehub/actions"><img src="https://img.shields.io/github/actions/workflow/status/AntonyCanut/Mirehub/ci.yml?style=flat-square" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-blue?style=flat-square" alt="License"></a>
+  <a href="https://github.com/AntonyCanut/Mirehub/issues"><img src="https://img.shields.io/github/issues/AntonyCanut/Mirehub?style=flat-square" alt="Issues"></a>
+</p>
 
-## Stack technique
+<p align="center">
+  <a href="#features">Features</a> &bull;
+  <a href="#installation">Installation</a> &bull;
+  <a href="#screenshots">Screenshots</a> &bull;
+  <a href="#tech-stack">Tech Stack</a> &bull;
+  <a href="#documentation">Documentation</a> &bull;
+  <a href="#contributing">Contributing</a>
+</p>
 
-| Categorie | Technologie | Version |
-|---|---|---|
-| Framework | Electron | 33.0.0 |
-| UI | React | 19.1.0 |
-| Langage | TypeScript | 5.8.0 |
-| Build | Vite | 6.3.0 |
-| Etat | Zustand | 5.0.0 |
-| Terminal | node-pty + xterm.js | 1.0.0 / 6.0.0 |
-| Editeur | Monaco Editor | 0.55.1 |
-| Persistance | electron-store | 10.0.0 |
-| Tests | Vitest | 3.1.0 |
-| Qualite | ESLint + Prettier | — |
-| Packaging | electron-builder | 26.0.0 |
+---
 
-## Prerequis
+Mirehub combines a multi-tab terminal, project workspaces, a Kanban board, Git tools, a database explorer, and Claude AI sessions into a single native macOS application. It is built with Electron and designed to streamline the full development workflow without switching between tools.
 
-- **macOS** (application native macOS uniquement)
-- **Node.js** LTS (>= 20)
-- **npm** (inclus avec Node.js)
-- **Claude Code** (optionnel, pour les fonctionnalites AI)
+## Features
+
+### Terminal
+
+Full-featured terminal emulator powered by xterm.js and node-pty. Supports multiple tabs with up to 4 split panes per tab, WebGL rendering, search, and Unicode.
+
+### Workspaces
+
+Isolated project environments managed via symlinks (`~/.mirehub/envs/{name}`). Each workspace maintains its own terminal tabs, open files, and session state.
+
+### Git
+
+Comprehensive Git integration — status, branches, commits, diff, stash, merge, fetch, and config. All operations are available through a dedicated panel with 20+ IPC channels.
+
+### Kanban Board
+
+5-column task board (TODO, WORKING, PENDING, DONE, FAILED) with built-in Claude AI integration for automated task execution and tracking.
+
+### Claude Code Sessions
+
+Run up to 4 concurrent Claude Code AI agents per project. Includes loop mode, session history, prompt templates, and a CLAUDE.md defaults library for consistent agent behavior.
+
+### Database Explorer
+
+Connect to PostgreSQL, MySQL, MSSQL, SQLite, and MongoDB. Browse schemas, run queries, and interact with your data through a natural language chat interface.
+
+### Code Editor
+
+Monaco Editor with syntax highlighting, file diff viewer, and integrated file saving.
+
+### Package Manager
+
+Visualize installed npm packages, check for outdated versions, and manage dependencies with an AI-assisted chat for package-related questions.
+
+### Code Analysis & Health Check
+
+Static code analysis panel and application health monitoring dashboard.
+
+### API Tester
+
+Built-in HTTP client for testing API endpoints directly from the application.
+
+### Additional Tools
+
+- **File Explorer** — navigable directory tree with multi-file diff support
+- **TODO Scanner** — finds and aggregates TODO/FIXME comments across the codebase
+- **MCP Server** — Model Context Protocol integration for extended tool support
+- **Command Palette** — quick access to all application commands
+- **Global Search** — search across files in the current workspace
+- **SSH Management** — manage SSH keys and connections
+- **Auto-Updater** — built-in update mechanism with release notes
+- **Notification Center** — in-app notifications and alerts
+- **Project Statistics** — lines of code, file counts, and project metrics
+- **Native macOS UI** — custom titlebar, vibrancy effects, system fonts
+
+## Screenshots
+
+<p align="center">
+  <img src="website/screenshots/hero-terminal.png" alt="Terminal" width="800">
+</p>
+
+<details>
+<summary><strong>More screenshots</strong></summary>
+
+| Feature | Preview |
+|---------|---------|
+| Git Panel | <img src="website/screenshots/screenshot-git.png" width="400"> |
+| Kanban Board | <img src="website/screenshots/screenshot-kanban.png" width="400"> |
+| Claude Sessions | <img src="website/screenshots/screenshot-claude.png" width="400"> |
+| Database Explorer | <img src="website/screenshots/screenshot-database.png" width="400"> |
+| Package Manager | <img src="website/screenshots/screenshot-npm.png" width="400"> |
+| Code Analysis | <img src="website/screenshots/screenshot-code-analysis.png" width="400"> |
+| Project Stats | <img src="website/screenshots/screenshot-stats.png" width="400"> |
+| API Tester | <img src="website/screenshots/screenshot-api.png" width="400"> |
+
+</details>
 
 ## Installation
 
+### Prerequisites
+
+- **macOS** (native macOS application)
+- **Node.js** >= 20 (LTS)
+- **npm** (included with Node.js)
+- **Claude Code** (optional — required for AI features)
+
+### From source
+
 ```bash
-git clone https://github.com/akc/workspaces.git
-cd workspaces
+git clone https://github.com/AntonyCanut/Mirehub.git
+cd Mirehub
 npm install
-```
-
-## Demarrage rapide
-
-```bash
 npm run dev
 ```
 
-L'application demarre avec le serveur Vite en mode developpement avec hot reload.
-
-## Scripts disponibles
-
-| Commande | Description |
-|---|---|
-| `npm run dev` | Serveur de developpement avec hot reload |
-| `npm run build` | Compilation de tous les processus |
-| `npm run build:app` | Build complet + packaging macOS DMG |
-| `npm run lint` | Verification ESLint |
-| `npm run lint:fix` | Correction automatique ESLint |
-| `npm run format` | Formatage Prettier |
-| `npm test` | Lancer les tests (Vitest) |
-| `npm run test:watch` | Tests en mode surveillance |
-| `npm run test:coverage` | Tests avec rapport de couverture |
-| `npm run typecheck` | Verification de types TypeScript |
-
-Un `Makefile` est egalement disponible avec des cibles equivalentes ainsi que `install` et `clean`.
-
-## Structure du projet
-
-```
-src/
-  main/                 # Processus principal Electron
-    index.ts            # Initialisation, creation de fenetre, enregistrement IPC
-    ipc/                # 11 modules de handlers IPC
-                        #   app, terminal, workspace, project, git, filesystem,
-                        #   claude, kanban, updates, session, workspaceEnv
-    services/
-      storage.ts        # Persistance JSON singleton (~/.mirehub/data.json)
-  preload/
-    index.ts            # API contextBridge (window.mirehub)
-  renderer/             # Processus renderer (React)
-    App.tsx             # Composant racine
-    main.tsx            # Point d'entree React
-    components/         # 27 composants React (structure plate)
-    lib/
-      stores/           # 6 stores Zustand
-                        #   workspace, terminalTab, kanban, claude, view, update
-      monacoSetup.ts    # Configuration Monaco Editor
-    styles/             # 7 fichiers CSS
-  shared/
-    types/index.ts      # Interfaces TypeScript partagees
-    constants/defaults.ts # Parametres par defaut
-tests/
-  unit/                 # 7 fichiers de tests unitaires
-  integration/          # 14 fichiers de tests d'integration
-  mocks/                # Mock Electron
-  helpers/              # Utilitaires de test
-```
-
-## Tests
-
-Lancer les tests unitaires et d'integration :
-
-```bash
-npm test
-```
-
-Avec rapport de couverture :
-
-```bash
-npm run test:coverage
-```
-
-Les tests utilisent Vitest avec des mocks Electron pour simuler les canaux IPC et les services du processus principal.
-
-## Build macOS
-
-Generer un fichier DMG pour distribution :
+### Build a DMG
 
 ```bash
 npm run build:app
 ```
 
-Le DMG est produit via electron-builder avec `hardenedRuntime` active. L'application est categorisee comme outil de developpement (`public.app-category.developer-tools`).
+The DMG is generated via electron-builder with hardened runtime enabled. Output goes to the `release/` directory.
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Electron 40 |
+| UI | React 19 |
+| Language | TypeScript (strict) |
+| Build | Vite 7 |
+| State | Zustand 5 |
+| Terminal | node-pty + xterm.js |
+| Editor | Monaco Editor |
+| Database | better-sqlite3, pg, mysql2, mssql, mongodb |
+| Tests | Vitest |
+| Linting | ESLint + Prettier |
+| Packaging | electron-builder |
+
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server with hot reload |
+| `npm run build` | Build all processes (main + preload + renderer) |
+| `npm run build:app` | Build + package macOS DMG |
+| `npm test` | Run tests (Vitest) |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Auto-fix ESLint issues |
+| `npm run format` | Format with Prettier |
+| `npm run typecheck` | TypeScript type checking |
+
+A `Makefile` is also available with equivalent targets plus `make install`, `make clean`, and `make check` (pre-deploy validation).
+
+## Project Structure
+
+```
+src/
+  main/               # Electron main process (Node.js)
+    ipc/              # IPC handler modules (23 namespaces)
+    services/         # Core services (storage, etc.)
+  preload/            # Preload scripts (contextBridge API)
+  renderer/           # Renderer process (React)
+    components/       # UI components (50+)
+    lib/
+      stores/         # Zustand state stores
+      monacoSetup.ts  # Monaco Editor configuration
+    styles/           # CSS stylesheets
+  shared/             # Shared types and constants
+tests/
+  unit/               # Unit tests
+  integration/        # Integration tests
+  mocks/              # Electron mocks
+  helpers/            # Test utilities
+website/              # Project website and screenshots
+docs/                 # Extended documentation
+```
 
 ## Documentation
 
-- [Architecture](ARCHITECTURE.md) — Vue d'ensemble de l'architecture et decisions techniques
-- [API IPC](docs/IPC-API.md) — Reference des 70+ canaux IPC
-- [Composants](docs/COMPONENTS.md) — Catalogue des 27 composants React
-- [Stores Zustand](docs/STORES.md) — Documentation des 6 stores de gestion d'etat
-- [Raccourcis clavier](docs/KEYBOARD-SHORTCUTS.md) — Reference complete des raccourcis
-- [Securite](docs/SECURITY.md) — Guide securite Electron
-- [Tests](docs/TESTING.md) — Guide et strategies de test
-- [Contribution](docs/CONTRIBUTING.md) — Guide de contribution au projet
+| Document | Description |
+|----------|-------------|
+| [Architecture](ARCHITECTURE.md) | System architecture and design decisions |
+| [IPC API](docs/IPC-API.md) | Reference for 70+ IPC channels |
+| [Components](docs/COMPONENTS.md) | React component catalog |
+| [Stores](docs/STORES.md) | Zustand state management docs |
+| [Keyboard Shortcuts](docs/KEYBOARD-SHORTCUTS.md) | Complete shortcut reference |
+| [Security](docs/SECURITY.md) | Electron security guide |
+| [Testing](docs/TESTING.md) | Testing guide and strategies |
+| [MCP Endpoint](docs/MCP-ENDPOINT.md) | MCP server integration |
+| [Contributing](docs/CONTRIBUTING.md) | Contribution guidelines |
 
-## Licence
+## Contributing
 
-[MIT](LICENSE) — akc
+Contributions are welcome. Please read the [Contributing Guide](docs/CONTRIBUTING.md) before submitting a pull request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feat/my-feature`)
+3. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/)
+4. Push to your branch (`git push origin feat/my-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is released under a [Proprietary Source-Available License](LICENSE). You may view, study, and use the source code for personal, non-commercial purposes. Commercial use requires a separate license — see the [LICENSE](LICENSE) file for full terms.
+
+## Author
+
+**Antony Kervazo Canut** — [GitHub](https://github.com/AntonyCanut)

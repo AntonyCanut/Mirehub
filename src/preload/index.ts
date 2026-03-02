@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest, RuleEntry, TemplateRuleEntry, PackageManagerType, PackageInfo, ProjectPackageManager, PkgNlMessage } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest, RuleEntry, TemplateRuleEntry, PackageManagerType, PackageInfo, ProjectPackageManager, PkgNlMessage, HealthCheckConfig, HealthCheckFile, HealthCheckLogEntry, HealthCheckSchedulerStatus } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -476,6 +476,35 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.API_EXPORT, { data }),
     import: (): Promise<{ success: boolean; data: ApiTestFile | null; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.API_IMPORT),
+  },
+
+  // Health Check
+  healthcheck: {
+    load: (projectPath: string): Promise<HealthCheckFile> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_LOAD, { projectPath }),
+    save: (projectPath: string, data: HealthCheckFile): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_SAVE, { projectPath, data }),
+    execute: (projectPath: string, check: HealthCheckConfig, data: HealthCheckFile): Promise<HealthCheckLogEntry> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_EXECUTE, { projectPath, check, data }),
+    startScheduler: (projectPath: string, data: HealthCheckFile): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_START_SCHEDULER, { projectPath, data }),
+    stopScheduler: (projectPath: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_STOP_SCHEDULER, { projectPath }),
+    updateInterval: (projectPath: string, checkId: string, data: HealthCheckFile): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_UPDATE_INTERVAL, { projectPath, checkId, data }),
+    getStatuses: (projectPath: string): Promise<HealthCheckSchedulerStatus[]> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_STATUS, { projectPath }),
+    export: (data: HealthCheckFile): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_EXPORT, { data }),
+    import: (): Promise<{ success: boolean; data: HealthCheckFile | null; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_IMPORT),
+    clearHistory: (projectPath: string, data: HealthCheckFile): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.HEALTHCHECK_CLEAR_HISTORY, { projectPath, data }),
+    onStatusUpdate: (callback: (data: { projectPath: string; statuses: HealthCheckSchedulerStatus[] }) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, payload: { projectPath: string; statuses: HealthCheckSchedulerStatus[] }) => callback(payload)
+      ipcRenderer.on(IPC_CHANNELS.HEALTHCHECK_STATUS_UPDATE, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.HEALTHCHECK_STATUS_UPDATE, listener)
+    },
   },
 
   // Database Explorer
