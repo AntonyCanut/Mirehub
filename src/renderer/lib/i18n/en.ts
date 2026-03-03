@@ -718,6 +718,22 @@ export const en = {
   'kanban.reopenPlaceholder': 'Describe what the AI should do differently...',
   'kanban.reopenAndSend': 'Reopen and send',
 
+  // Predefined tasks
+  'kanban.predefined.add': 'Add',
+  'kanban.predefined.dismiss': 'Remove',
+  'kanban.predefined.git.title': 'Initialize Git',
+  'kanban.predefined.git.description': 'Set up the Git repository:\n- git init\n- Create a .gitignore file for the project\n- Make the first initial commit',
+  'kanban.predefined.makefile.title': 'Create Makefile',
+  'kanban.predefined.makefile.description': 'Set up a Makefile with essential targets:\n- build: compile/build the project\n- dev: start in development mode\n- test: run tests\n- lint: code verification\n- clean: clean build artifacts',
+  'kanban.predefined.readme.title': 'Write README',
+  'kanban.predefined.readme.description': 'Create a complete README.md:\n- Project description\n- Prerequisites and installation\n- Quick start guide\n- Available scripts\n- Project structure',
+  'kanban.predefined.testing.title': 'Set up testing',
+  'kanban.predefined.testing.description': 'Set up the testing infrastructure:\n- Install the appropriate test framework\n- Configure code coverage\n- Create initial base tests\n- Add npm/make scripts',
+  'kanban.predefined.linting.title': 'Set up linting',
+  'kanban.predefined.linting.description': 'Set up code quality tools:\n- ESLint / Ruff / appropriate linter\n- Prettier / automatic formatting\n- Strict configuration for the project\n- Pre-commit hooks (husky/lint-staged)',
+  'kanban.predefined.ci.title': 'Set up CI/CD',
+  'kanban.predefined.ci.description': 'Set up the CI/CD pipeline:\n- GitHub Actions / GitLab CI\n- Lint + type-check\n- Unit tests\n- Build\n- Deployment (if applicable)',
+
   // Git
   'git.noChanges': 'No changes',
   'git.selectProject': 'Select a project to view Git history.',

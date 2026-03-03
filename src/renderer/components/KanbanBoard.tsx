@@ -76,6 +76,80 @@ const CTO_LABEL = 'cto'
 const ALL_LABELS = Object.keys(LABEL_DEFS)
 const USER_LABELS = ALL_LABELS.filter((l) => l !== CTO_LABEL)
 
+// --- Predefined task templates ---
+interface PredefinedTaskTemplate {
+  id: string
+  titleKey: string
+  descriptionKey: string
+  priority: 'low' | 'medium' | 'high' | 'critical'
+  labels?: string[]
+}
+
+const PREDEFINED_TASKS: PredefinedTaskTemplate[] = [
+  {
+    id: 'predefined-git',
+    titleKey: 'kanban.predefined.git.title',
+    descriptionKey: 'kanban.predefined.git.description',
+    priority: 'high',
+    labels: ['feature'],
+  },
+  {
+    id: 'predefined-makefile',
+    titleKey: 'kanban.predefined.makefile.title',
+    descriptionKey: 'kanban.predefined.makefile.description',
+    priority: 'medium',
+    labels: ['feature'],
+  },
+  {
+    id: 'predefined-readme',
+    titleKey: 'kanban.predefined.readme.title',
+    descriptionKey: 'kanban.predefined.readme.description',
+    priority: 'medium',
+    labels: ['docs'],
+  },
+  {
+    id: 'predefined-testing',
+    titleKey: 'kanban.predefined.testing.title',
+    descriptionKey: 'kanban.predefined.testing.description',
+    priority: 'medium',
+    labels: ['test'],
+  },
+  {
+    id: 'predefined-linting',
+    titleKey: 'kanban.predefined.linting.title',
+    descriptionKey: 'kanban.predefined.linting.description',
+    priority: 'medium',
+    labels: ['feature'],
+  },
+  {
+    id: 'predefined-ci',
+    titleKey: 'kanban.predefined.ci.title',
+    descriptionKey: 'kanban.predefined.ci.description',
+    priority: 'low',
+    labels: ['feature'],
+  },
+]
+
+function getPredefinedDismissedKey(workspaceId: string): string {
+  return `mirehub-predefined-dismissed-${workspaceId}`
+}
+
+function getDismissedPredefined(workspaceId: string): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(getPredefinedDismissedKey(workspaceId)) || '[]')
+  } catch {
+    return []
+  }
+}
+
+function dismissPredefined(workspaceId: string, predefinedId: string): void {
+  const dismissed = getDismissedPredefined(workspaceId)
+  if (!dismissed.includes(predefinedId)) {
+    dismissed.push(predefinedId)
+    localStorage.setItem(getPredefinedDismissedKey(workspaceId), JSON.stringify(dismissed))
+  }
+}
+
 export function KanbanBoard() {
   const { t } = useI18n()
   const { activeWorkspaceId, projects } = useWorkspaceStore()
@@ -134,7 +208,57 @@ export function KanbanBoard() {
   // Archive state
   const [archiveExpanded, setArchiveExpanded] = useState(false)
 
+  // Predefined tasks state
+  const [dismissedPredefined, setDismissedPredefined] = useState<string[]>([])
+  const [editingPredefinedId, setEditingPredefinedId] = useState<string | null>(null)
+
   const workspaceProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
+
+  // Load dismissed predefined tasks from localStorage
+  useEffect(() => {
+    if (activeWorkspaceId) {
+      setDismissedPredefined(getDismissedPredefined(activeWorkspaceId))
+    }
+  }, [activeWorkspaceId])
+
+  // Visible predefined tasks (not dismissed)
+  const visiblePredefined = useMemo(() => {
+    if (!activeWorkspaceId) return []
+    return PREDEFINED_TASKS.filter((pt) => !dismissedPredefined.includes(pt.id))
+  }, [activeWorkspaceId, dismissedPredefined])
+
+  const handleAddPredefined = useCallback(async (template: PredefinedTaskTemplate) => {
+    if (!activeWorkspaceId) return
+    await createTask(
+      activeWorkspaceId,
+      t(template.titleKey),
+      t(template.descriptionKey),
+      template.priority,
+      undefined,
+      undefined,
+      template.labels,
+    )
+    dismissPredefined(activeWorkspaceId, template.id)
+    setDismissedPredefined(getDismissedPredefined(activeWorkspaceId))
+  }, [activeWorkspaceId, createTask, t])
+
+  const handleDismissPredefined = useCallback((predefinedId: string) => {
+    if (!activeWorkspaceId) return
+    dismissPredefined(activeWorkspaceId, predefinedId)
+    setDismissedPredefined(getDismissedPredefined(activeWorkspaceId))
+  }, [activeWorkspaceId])
+
+  const handleEditPredefined = useCallback((template: PredefinedTaskTemplate) => {
+    setNewTitle(t(template.titleKey))
+    setNewDesc(t(template.descriptionKey))
+    setNewPriority(template.priority)
+    setNewLabels(template.labels ?? [])
+    setNewTargetProjectId('')
+    setNewAiProvider('')
+    setNewIsCtoMode(false)
+    setEditingPredefinedId(template.id)
+    setShowCreateForm(true)
+  }, [t])
 
   // Resolve the effective default AI provider for this workspace
   const [appDefaultAiProvider, setAppDefaultAiProvider] = useState<AiProviderId>('claude')
@@ -339,6 +463,11 @@ export function KanbanBoard() {
     if (newest && (pendingAttachments.length > 0 || pendingClipboardImages.length > 0)) {
       await loadTasks(activeWorkspaceId)
     }
+    // Dismiss predefined task if this creation originated from one
+    if (editingPredefinedId && activeWorkspaceId) {
+      dismissPredefined(activeWorkspaceId, editingPredefinedId)
+      setDismissedPredefined(getDismissedPredefined(activeWorkspaceId))
+    }
     setNewTitle('')
     setNewDesc('')
     setNewPriority('medium')
@@ -348,8 +477,9 @@ export function KanbanBoard() {
     setNewAiProvider('')
     setPendingAttachments([])
     setPendingClipboardImages([])
+    setEditingPredefinedId(null)
     setShowCreateForm(false)
-  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newIsCtoMode, newAiProvider, pendingAttachments, pendingClipboardImages, createTask, loadTasks])
+  }, [activeWorkspaceId, newTitle, newDesc, newPriority, newTargetProjectId, newLabels, newIsCtoMode, newAiProvider, pendingAttachments, pendingClipboardImages, editingPredefinedId, createTask, loadTasks])
 
   const handleDragStart = useCallback(
     (taskId: string) => {
@@ -559,9 +689,9 @@ export function KanbanBoard() {
       </div>
 
       {showCreateForm && (
-        <div className="modal-overlay" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>
+        <div className="modal-overlay" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false); setEditingPredefinedId(null) }}>
           <div className={`kanban-create-modal${newIsCtoMode ? ' kanban-create-modal--cto' : ''}`} onClick={(e) => e.stopPropagation()} onPaste={handleCreateModalPaste}>
-            <button className="kanban-create-modal-close" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>&times;</button>
+            <button className="kanban-create-modal-close" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false); setEditingPredefinedId(null) }}>&times;</button>
             <div className="kanban-create-modal-body">
               <input
                 className="kanban-create-modal-title-input"
@@ -710,7 +840,7 @@ export function KanbanBoard() {
               )}
             </div>
             <div className="kanban-create-modal-footer">
-              <button className="kanban-create-modal-cancel" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false) }}>
+              <button className="kanban-create-modal-cancel" onClick={() => { setShowCreateForm(false); setNewIsCtoMode(false); setEditingPredefinedId(null) }}>
                 {t('common.cancel')}
               </button>
               <button className={`kanban-create-modal-submit${newIsCtoMode ? ' kanban-create-modal-submit--cto' : ''}`} onClick={handleCreate}>
@@ -835,6 +965,19 @@ export function KanbanBoard() {
                     defaultAiProvider={workspaceDefaultAiProvider}
                   />
                 ))}
+                {col.status === 'TODO' && visiblePredefined.length > 0 && (
+                  <>
+                    {visiblePredefined.map((pt) => (
+                      <PredefinedTaskCard
+                        key={pt.id}
+                        template={pt}
+                        onAdd={() => handleAddPredefined(pt)}
+                        onDismiss={() => handleDismissPredefined(pt.id)}
+                        onDoubleClick={() => handleEditPredefined(pt)}
+                      />
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           ))}
@@ -936,6 +1079,68 @@ export function KanbanBoard() {
           onClose={() => setContextMenu(null)}
         />
       )}
+    </div>
+  )
+}
+
+// --- Predefined Task Card ---
+
+function PredefinedTaskCard({
+  template,
+  onAdd,
+  onDismiss,
+  onDoubleClick,
+}: {
+  template: PredefinedTaskTemplate
+  onAdd: () => void
+  onDismiss: () => void
+  onDoubleClick: () => void
+}) {
+  const { t } = useI18n()
+
+  const priorityColors: Record<string, string> = {
+    low: '#6c7086',
+    medium: '#89b4fa',
+    high: '#fab387',
+    critical: '#f38ba8',
+  }
+
+  return (
+    <div className="kanban-card kanban-card--predefined" onDoubleClick={onDoubleClick}>
+      <div className="kanban-card-header">
+        <span
+          className="kanban-card-priority"
+          style={{ backgroundColor: priorityColors[template.priority] }}
+        />
+        <span className="kanban-card-title">{t(template.titleKey)}</span>
+      </div>
+      <p className="kanban-card-desc">{t(template.descriptionKey)}</p>
+      {template.labels && template.labels.length > 0 && (
+        <div className="kanban-card-labels">
+          {template.labels.map((label) => (
+            <span
+              key={label}
+              className={`kanban-label-chip kanban-label-chip--${label} kanban-label-chip--small`}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="kanban-predefined-actions">
+        <button
+          className="kanban-predefined-add"
+          onClick={onAdd}
+        >
+          {t('kanban.predefined.add')}
+        </button>
+        <button
+          className="kanban-predefined-dismiss"
+          onClick={onDismiss}
+        >
+          {t('kanban.predefined.dismiss')}
+        </button>
+      </div>
     </div>
   )
 }
@@ -1116,7 +1321,7 @@ function CommentsSection({ task, onUpdate }: { task: KanbanTask; onUpdate: (data
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={handleKeyDown}
-            rows={1}
+            rows={3}
           />
           <button
             className="kanban-comment-add-btn"

@@ -66,8 +66,9 @@ export function TerminalArea() {
   const [editingLabel, setEditingLabel] = useState('')
   const editInputRef = useRef<HTMLInputElement>(null)
   const dragTabIdRef = useRef<string | null>(null)
-  const isDraggingRef = useRef(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [dragOverTabId, setDragOverTabId] = useState<string | null>(null)
+  const tabBarRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
 
   // Terminal font size (shared across all terminals)
@@ -253,12 +254,13 @@ export function TerminalArea() {
   // Drag & drop handlers — use tab IDs to avoid stale index issues
   const handleDragStart = useCallback((e: React.DragEvent, tabId: string) => {
     dragTabIdRef.current = tabId
-    isDraggingRef.current = true
+    setIsDragging(true)
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', '')
     setTooltip(null)
     const target = e.currentTarget as HTMLElement
     target.classList.add('tab--dragging')
+    tabBarRef.current?.classList.add('tabs--dragging')
   }, [])
 
   const handleDragEnd = useCallback((e: React.DragEvent) => {
@@ -266,11 +268,12 @@ export function TerminalArea() {
     target.classList.remove('tab--dragging')
     dragTabIdRef.current = null
     setDragOverTabId(null)
-    // Keep isDraggingRef true briefly to suppress spurious click events
-    // that macOS may fire after a drag ends (especially on the close button)
+    // Keep close buttons disabled long enough to suppress any spurious
+    // click/mouseup events that macOS Chromium may fire after drag ends
     setTimeout(() => {
-      isDraggingRef.current = false
-    }, 100)
+      setIsDragging(false)
+      tabBarRef.current?.classList.remove('tabs--dragging')
+    }, 300)
   }, [])
 
   const handleDragOver = useCallback((e: React.DragEvent, tabId: string) => {
@@ -289,6 +292,7 @@ export function TerminalArea() {
   const handleDrop = useCallback(
     (e: React.DragEvent, toTabId: string) => {
       e.preventDefault()
+      e.stopPropagation()
       const fromTabId = dragTabIdRef.current
       if (fromTabId && fromTabId !== toTabId) {
         // Read fresh state at drop time to get correct global indices
@@ -308,23 +312,21 @@ export function TerminalArea() {
   const handleTabClose = useCallback(
     (e: React.MouseEvent, tabId: string) => {
       e.stopPropagation()
-      // Suppress close triggered by spurious click events after a drag
-      if (isDraggingRef.current) return
+      if (isDragging) return
       closeTab(tabId)
     },
-    [closeTab],
+    [closeTab, isDragging],
   )
 
   const handleTabMouseDown = useCallback(
     (e: React.MouseEvent, tabId: string) => {
       if (e.button === 1) {
         e.preventDefault()
-        // Suppress middle-click close during drag operations
-        if (isDraggingRef.current) return
+        if (isDragging) return
         closeTab(tabId)
       }
     },
-    [closeTab],
+    [closeTab, isDragging],
   )
 
   const handleNewTab = useCallback(() => {
@@ -414,7 +416,7 @@ export function TerminalArea() {
 
   return (
     <main className="terminal-area">
-      <div className="terminal-tabs">
+      <div className="terminal-tabs" ref={tabBarRef}>
         {tabs.map((tab) => (
           <div
             key={tab.id}
@@ -462,8 +464,11 @@ export function TerminalArea() {
             )}
             <button
               className="tab-close"
-              data-tooltip={t('common.close')}
-              onClick={(e) => handleTabClose(e, tab.id)}
+              data-tooltip={isDragging ? undefined : t('common.close')}
+              disabled={isDragging}
+              style={isDragging ? { pointerEvents: 'none' } : undefined}
+              onClick={isDragging ? undefined : (e) => handleTabClose(e, tab.id)}
+              onMouseDown={isDragging ? (e) => { e.preventDefault(); e.stopPropagation() } : undefined}
             >
               x
             </button>

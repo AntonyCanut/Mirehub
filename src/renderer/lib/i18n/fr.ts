@@ -718,6 +718,22 @@ export const fr = {
   'kanban.reopenPlaceholder': 'Decrivez ce que l\'IA doit faire differemment...',
   'kanban.reopenAndSend': 'Rouvrir et envoyer',
 
+  // Predefined tasks
+  'kanban.predefined.add': 'Ajouter',
+  'kanban.predefined.dismiss': 'Supprimer',
+  'kanban.predefined.git.title': 'Initialiser Git',
+  'kanban.predefined.git.description': 'Mettre en place le repository Git :\n- git init\n- Creer le .gitignore adapte au projet\n- Premier commit initial',
+  'kanban.predefined.makefile.title': 'Creer le Makefile',
+  'kanban.predefined.makefile.description': 'Mettre en place un Makefile avec les targets essentielles :\n- build : compilation/build du projet\n- dev : lancement en mode developpement\n- test : execution des tests\n- lint : verification du code\n- clean : nettoyage des artefacts',
+  'kanban.predefined.readme.title': 'Rediger le README',
+  'kanban.predefined.readme.description': 'Creer un README.md complet :\n- Description du projet\n- Prerequis et installation\n- Guide de demarrage rapide\n- Scripts disponibles\n- Structure du projet',
+  'kanban.predefined.testing.title': 'Configurer les tests',
+  'kanban.predefined.testing.description': 'Mettre en place l\'infrastructure de tests :\n- Installer le framework de test adapte au projet\n- Configurer la couverture de code\n- Creer les premiers tests de base\n- Ajouter les scripts npm/make',
+  'kanban.predefined.linting.title': 'Configurer le linting',
+  'kanban.predefined.linting.description': 'Mettre en place les outils de qualite de code :\n- ESLint / Ruff / autre linter adapte\n- Prettier / formatage automatique\n- Configuration stricte adaptee au projet\n- Pre-commit hooks (husky/lint-staged)',
+  'kanban.predefined.ci.title': 'Configurer la CI/CD',
+  'kanban.predefined.ci.description': 'Mettre en place le pipeline CI/CD :\n- GitHub Actions / GitLab CI\n- Lint + type-check\n- Tests unitaires\n- Build\n- Deploiement (si applicable)',
+
   // Git
   'git.noChanges': 'Aucune modification',
   'git.selectProject': 'Selectionnez un projet pour voir son historique Git.',

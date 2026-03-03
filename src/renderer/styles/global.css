@@ -1775,6 +1775,12 @@ body {
   cursor: grabbing;
 }
 
+/* Disable close buttons on ALL tabs during drag to prevent spurious
+   click events from Chromium/macOS when dropping near the "x" button */
+.tabs--dragging .tab-close {
+  pointer-events: none !important;
+}
+
 /* Tab tooltip — rendered as React element with position: fixed to avoid overflow clipping */
 .tab-tooltip {
   position: fixed;
