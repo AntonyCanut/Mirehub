@@ -733,6 +733,11 @@ export function startActivityWatcher(): () => void {
   }
 }
 
+// Bell cooldown per project path — prevents double bells when multiple Stop hooks
+// (kanban-done + kanbai-activity) write terminal statuses to the same activity file.
+const lastBellTimestamp: Record<string, number> = {}
+const BELL_COOLDOWN_MS = 3000
+
 function broadcastActivityFromFile(filePath: string): void {
   try {
     if (!fs.existsSync(filePath)) return
@@ -746,21 +751,32 @@ function broadcastActivityFromFile(filePath: string): void {
       timestamp: data.timestamp || Math.floor(Date.now() / 1000),
     }
 
-    // Notify based on activity status
-    if (data.status === 'done') {
-      sendNotification('Claude terminé', `Session terminée sur ${path.basename(data.path)}`)
-    } else if (data.status === 'ask') {
-      sendSilentNotification('Claude bloqué', `En attente de réponse sur ${path.basename(data.path)}`)
-      playBellRepeat(2, 300)
-    } else if (data.status === 'waiting') {
-      sendSilentNotification('Claude en attente', `En attente d'information sur ${path.basename(data.path)}`)
-      playBellRepeat(2, 300)
-    } else if (data.status === 'failed') {
-      sendSilentNotification('Claude échoué', `Échec sur ${path.basename(data.path)}`)
-      playBellRepeat(4, 250)
+    // Notify based on activity status (with cooldown to prevent duplicate bells)
+    const isTerminal = data.status === 'done' || data.status === 'ask' || data.status === 'waiting' || data.status === 'failed'
+    const now = Date.now()
+    const lastBell = lastBellTimestamp[data.path]
+    const bellOnCooldown = isTerminal && lastBell !== undefined && now - lastBell < BELL_COOLDOWN_MS
+
+    if (!bellOnCooldown) {
+      if (data.status === 'done') {
+        sendNotification('Claude terminé', `Session terminée sur ${path.basename(data.path)}`)
+      } else if (data.status === 'ask') {
+        sendSilentNotification('Claude bloqué', `En attente de réponse sur ${path.basename(data.path)}`)
+        playBellRepeat(2, 300)
+      } else if (data.status === 'waiting') {
+        sendSilentNotification('Claude en attente', `En attente d'information sur ${path.basename(data.path)}`)
+        playBellRepeat(2, 300)
+      } else if (data.status === 'failed') {
+        sendSilentNotification('Claude échoué', `Échec sur ${path.basename(data.path)}`)
+        playBellRepeat(4, 250)
+      }
+
+      if (isTerminal) {
+        lastBellTimestamp[data.path] = now
+      }
     }
 
-    // Send to all renderer windows
+    // Always broadcast state update to renderer windows (even if bell is on cooldown)
     for (const win of BrowserWindow.getAllWindows()) {
       try {
         if (!win.isDestroyed() && !win.webContents.isDestroyed()) {

@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useClaudeStore } from '../lib/stores/claudeStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 
 export function ClaudeSessionPanel() {
-  const { sessions, flashingSessionId, startSession, stopSession, initListeners } = useClaudeStore()
+  const { sessions, flashingSessionId, startSession, stopSession } = useClaudeStore()
   const { activeProjectId, projects } = useWorkspaceStore()
   const [prompt, setPrompt] = useState('')
   const [loopMode, setLoopMode] = useState(false)
@@ -11,11 +11,6 @@ export function ClaudeSessionPanel() {
   const [showConfig, setShowConfig] = useState(false)
 
   const activeProject = projects.find((p) => p.id === activeProjectId)
-
-  useEffect(() => {
-    const unsub = initListeners()
-    return unsub
-  }, [initListeners])
 
   const handleStart = useCallback(async () => {
     if (!activeProject) return
