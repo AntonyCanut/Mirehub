@@ -2061,6 +2061,16 @@ body {
   background: color-mix(in srgb, #a6e3a1 25%, transparent);
 }
 
+.tab-add-dropdown-icon--copilot {
+  color: #e2538a;
+  background: color-mix(in srgb, #e2538a 15%, transparent);
+}
+
+.tab-add-dropdown-item:hover .tab-add-dropdown-icon--copilot {
+  color: #e2538a;
+  background: color-mix(in srgb, #e2538a 25%, transparent);
+}
+
 /* Split Container / Panes */
 .terminal-tab-content {
   position: absolute;

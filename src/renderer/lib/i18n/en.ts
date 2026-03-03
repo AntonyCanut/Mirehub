@@ -796,6 +796,7 @@ export const en = {
   'terminal.newTerminalShort': 'Terminal',
   'terminal.newClaudeTerminal': 'Claude + Terminal',
   'terminal.newCodexTerminal': 'Codex + Terminal',
+  'terminal.newCopilotTerminal': 'Copilot + Terminal',
   'terminal.noTerminalOpen': 'No terminal open',
 
   // Session modal

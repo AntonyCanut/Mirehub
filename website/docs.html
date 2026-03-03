@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mirehub — Documentation</title>
-  <meta name="description" content="Documentation complete de Mirehub : Terminal, Claude AI, Codex, Git, Kanban avec Mode CTO, Packages multi-ecosysteme avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester. Guide d'utilisation avec screenshots.">
+  <meta name="description" content="Documentation complete de Mirehub : Terminal, Claude AI, Codex, Copilot, Git, Kanban avec Mode CTO, Packages multi-ecosysteme avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester. Guide d'utilisation avec screenshots.">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -116,6 +116,22 @@
               </a>
               <a href="#codex-skills" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Skills</a>
             </div>
+            <div class="docs-nav-group">
+              <a href="#copilot" class="docs-nav-group-title">Copilot</a>
+              <a href="#copilot-general" class="docs-nav-link" style="padding-left:28px;font-size:13px;">
+                <span data-lang="fr">General</span>
+                <span data-lang="en">General</span>
+              </a>
+              <a href="#copilot-rules" class="docs-nav-link" style="padding-left:28px;font-size:13px;">
+                <span data-lang="fr">Regles</span>
+                <span data-lang="en">Rules</span>
+              </a>
+              <a href="#copilot-memory" class="docs-nav-link" style="padding-left:28px;font-size:13px;">
+                <span data-lang="fr">Memoire</span>
+                <span data-lang="en">Memory</span>
+              </a>
+              <a href="#copilot-skills" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Skills</a>
+            </div>
             <a href="#git" class="docs-nav-link">Git</a>
             <div class="docs-nav-group">
               <a href="#kanban" class="docs-nav-group-title">Kanban</a>
@@ -166,8 +182,8 @@
             <span data-lang="en">Mirehub Documentation</span>
           </h1>
           <p>
-            <span data-lang="fr">Guide complet de toutes les fonctionnalites de Mirehub, votre IDE macOS natif. De l'installation aux workflows avances avec Claude AI et Codex, cette documentation couvre chaque outil en detail.</span>
-            <span data-lang="en">Complete guide to all Mirehub features, your native macOS IDE. From installation to advanced workflows with Claude AI and Codex, this documentation covers every tool in detail.</span>
+            <span data-lang="fr">Guide complet de toutes les fonctionnalites de Mirehub, votre IDE macOS natif. De l'installation aux workflows avances avec Claude AI, Codex et Copilot, cette documentation couvre chaque outil en detail.</span>
+            <span data-lang="en">Complete guide to all Mirehub features, your native macOS IDE. From installation to advanced workflows with Claude AI, Codex and Copilot, this documentation covers every tool in detail.</span>
           </p>
         </div>
 
@@ -181,8 +197,8 @@
           </h2>
           <div class="docs-text">
             <p>
-              <span data-lang="fr">Mirehub est un IDE natif (macOS &amp; Windows) qui reunit plus de 15 outils de developpement dans une seule fenetre : Terminal, Claude AI, Codex, Git, Kanban avec Mode CTO, Packages multi-ecosysteme avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester, et bien plus encore. Aucune configuration n'est necessaire. Les mises a jour sont automatiques.</span>
-              <span data-lang="en">Mirehub is a native IDE (macOS &amp; Windows) that combines over 15 development tools in a single window: Terminal, Claude AI, Codex, Git, Kanban with CTO Mode, multi-ecosystem Packages with AI, TODO Scanner, Statistics, Prompts, Database Explorer with AI chat, Code Analysis, API Tester, and much more. No configuration needed. Updates are automatic.</span>
+              <span data-lang="fr">Mirehub est un IDE natif (macOS &amp; Windows) qui reunit plus de 15 outils de developpement dans une seule fenetre : Terminal, Claude AI, Codex, Copilot, Git, Kanban avec Mode CTO, Packages multi-ecosysteme avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester, et bien plus encore. Aucune configuration n'est necessaire. Les mises a jour sont automatiques.</span>
+              <span data-lang="en">Mirehub is a native IDE (macOS &amp; Windows) that combines over 15 development tools in a single window: Terminal, Claude AI, Codex, Copilot, Git, Kanban with CTO Mode, multi-ecosystem Packages with AI, TODO Scanner, Statistics, Prompts, Database Explorer with AI chat, Code Analysis, API Tester, and much more. No configuration needed. Updates are automatic.</span>
             </p>
           </div>
 
@@ -1478,8 +1494,142 @@
           <div class="docs-callout docs-callout--tip">
             <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             <div class="docs-callout-content">
-              <p><span data-lang="fr">Utilisez Claude et Codex de maniere complementaire : Claude excelle en architecture et raisonnement complexe, Codex est rapide pour les modifications simples et le scaffolding de code. Envoyez chaque ticket a l'agent le plus adapte.</span><span data-lang="en">Use Claude and Codex in a complementary way: Claude excels at architecture and complex reasoning, Codex is fast for simple changes and code scaffolding. Send each ticket to the most suitable agent.</span></p>
+              <p><span data-lang="fr">Utilisez Claude, Codex et Copilot de maniere complementaire : Claude excelle en architecture et raisonnement complexe, Codex est rapide pour les modifications simples et le scaffolding de code, Copilot brille en autocompletion et suggestions contextuelles. Envoyez chaque ticket a l'agent le plus adapte.</span><span data-lang="en">Use Claude, Codex and Copilot in a complementary way: Claude excels at architecture and complex reasoning, Codex is fast for simple changes and code scaffolding, Copilot shines at autocompletion and contextual suggestions. Send each ticket to the most suitable agent.</span></p>
             </div>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- COPILOT                                      -->
+        <!-- ============================================ -->
+        <section class="docs-section" id="copilot">
+          <h2>Copilot</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Mirehub integre GitHub Copilot en tant que troisieme agent IA, aux cotes de Claude et Codex. Un tableau de bord dedie avec quatre onglets permet de configurer Copilot : General, Regles, Memoire et Skills. Copilot fonctionne avec le meme Kanban que Claude et Codex — envoyez un ticket a Copilot, il le resout automatiquement.</span>
+              <span data-lang="en">Mirehub integrates GitHub Copilot as a third AI agent, alongside Claude and Codex. A dedicated dashboard with four tabs lets you configure Copilot: General, Rules, Memory and Skills. Copilot works with the same Kanban as Claude and Codex — send a ticket to Copilot, it resolves it automatically.</span>
+            </p>
+          </div>
+
+          <div class="docs-callout docs-callout--note">
+            <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="docs-callout-content">
+              <p><span data-lang="fr">Copilot CLI doit etre installe sur votre systeme. Mirehub detecte automatiquement sa presence et active l'onglet Copilot dans le tableau de bord AI.</span><span data-lang="en">Copilot CLI must be installed on your system. Mirehub automatically detects its presence and activates the Copilot tab in the AI dashboard.</span></p>
+            </div>
+          </div>
+
+          <!-- Copilot General -->
+          <div id="copilot-general">
+            <h3>
+              <span data-lang="fr">Onglet General</span>
+              <span data-lang="en">General tab</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet General de Copilot controle les parametres fondamentaux de l'agent : selection du modele, politique d'approbation et fonctionnalites avancees.</span>
+                <span data-lang="en">The Copilot General tab controls the agent's core settings: model selection, approval policy and advanced features.</span>
+              </p>
+
+              <h4>
+                <span data-lang="fr">Politique d'approbation</span>
+                <span data-lang="en">Approval policy</span>
+              </h4>
+              <p>
+                <span data-lang="fr">Trois modes disponibles pour controler le niveau d'autonomie de Copilot :</span>
+                <span data-lang="en">Three modes available to control Copilot's autonomy level:</span>
+              </p>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Suggest</strong> — Copilot propose des modifications, vous les validez avant application</span>
+                  <span data-lang="en"><strong>Suggest</strong> — Copilot proposes changes, you validate them before applying</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Auto-edit</strong> — Copilot applique automatiquement les modifications aux fichiers mais demande approbation pour les commandes systeme</span>
+                  <span data-lang="en"><strong>Auto-edit</strong> — Copilot automatically applies file changes but asks approval for system commands</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Full auto</strong> — Copilot agit sans approbation. Mode le plus rapide, ideal pour les taches de confiance</span>
+                  <span data-lang="en"><strong>Full auto</strong> — Copilot acts without approval. Fastest mode, ideal for trusted tasks</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Fonctionnalites avancees</span>
+                <span data-lang="en">Advanced features</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Recherche web</strong> — Autorisez Copilot a effectuer des recherches web pour enrichir ses reponses</span>
+                  <span data-lang="en"><strong>Web search</strong> — Allow Copilot to perform web searches to enrich its responses</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Mode plan</strong> — Activez le mode plan pour que Copilot propose un plan avant d'agir</span>
+                  <span data-lang="en"><strong>Plan mode</strong> — Enable plan mode so Copilot proposes a plan before acting</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Delegation</strong> — Autorisez Copilot a deleguer des sous-taches a d'autres agents</span>
+                  <span data-lang="en"><strong>Delegation</strong> — Allow Copilot to delegate subtasks to other agents</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <hr class="docs-separator">
+
+          <!-- Copilot Rules -->
+          <div id="copilot-rules">
+            <h3>
+              <span data-lang="fr">Onglet Regles</span>
+              <span data-lang="en">Rules tab</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet Regles permet de definir les instructions que Copilot doit suivre pendant ses sessions. Gerez les regles partagees via le systeme de fichiers de regles. Les modifications sont sauvegardees automatiquement.</span>
+                <span data-lang="en">The Rules tab lets you define instructions that Copilot must follow during its sessions. Manage shared rules via the rules file system. Changes are saved automatically.</span>
+              </p>
+            </div>
+          </div>
+
+          <hr class="docs-separator">
+
+          <!-- Copilot Memory -->
+          <div id="copilot-memory">
+            <h3>
+              <span data-lang="fr">Onglet Memoire</span>
+              <span data-lang="en">Memory tab</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet Memoire de Copilot centralise les instructions persistantes. Editez les instructions projet (<code>.copilot/instructions.md</code>) et les instructions globales (<code>~/.copilot/instructions.md</code>) directement dans Mirehub.</span>
+                <span data-lang="en">The Copilot Memory tab centralizes persistent instructions. Edit project instructions (<code>.copilot/instructions.md</code>) and global instructions (<code>~/.copilot/instructions.md</code>) directly in Mirehub.</span>
+              </p>
+            </div>
+          </div>
+
+          <hr class="docs-separator">
+
+          <!-- Copilot Skills -->
+          <div id="copilot-skills">
+            <h3>Skills</h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet Skills de Copilot permet d'etendre les capacites de l'agent avec des competences personnalisees. Ajoutez des skills specifiques a votre projet qui seront automatiquement disponibles dans les sessions Copilot.</span>
+                <span data-lang="en">The Copilot Skills tab lets you extend the agent's capabilities with custom skills. Add project-specific skills that will be automatically available in Copilot sessions.</span>
+              </p>
+            </div>
+          </div>
+
+          <hr class="docs-separator">
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Integration Kanban</span>
+              <span data-lang="en">Kanban integration</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Copilot s'integre au Kanban de la meme maniere que Claude et Codex. Chaque ticket peut etre envoye a Copilot via le bouton dedie. Mirehub ouvre un onglet terminal avec Copilot CLI et lui transmet le fichier prompt du ticket. Le workflow est identique : TODO → WORKING → DONE/PENDING/FAILED.</span>
+              <span data-lang="en">Copilot integrates with the Kanban the same way as Claude and Codex. Every ticket can be sent to Copilot via the dedicated button. Mirehub opens a terminal tab with Copilot CLI and passes it the ticket's prompt file. The workflow is identical: TODO → WORKING → DONE/PENDING/FAILED.</span>
+            </p>
           </div>
         </section>
 
@@ -1655,8 +1805,8 @@
           <h2>Kanban</h2>
           <div class="docs-text">
             <p>
-              <span data-lang="fr">Le Kanban integre vous permet de gerer vos taches directement a cote de votre code. Plus besoin d'ouvrir Trello ou Notion — vos taches vivent dans votre workspace. Et surtout, le Kanban de Mirehub est propulse par l'IA : envoyez un ticket a Claude ou Codex, l'agent le resout automatiquement.</span>
-              <span data-lang="en">The integrated Kanban lets you manage tasks right next to your code. No need to open Trello or Notion — your tasks live in your workspace. And best of all, Mirehub's Kanban is AI-powered: send a ticket to Claude or Codex, the agent solves it automatically.</span>
+              <span data-lang="fr">Le Kanban integre vous permet de gerer vos taches directement a cote de votre code. Plus besoin d'ouvrir Trello ou Notion — vos taches vivent dans votre workspace. Et surtout, le Kanban de Mirehub est propulse par l'IA : envoyez un ticket a Claude, Codex ou Copilot, l'agent le resout automatiquement.</span>
+              <span data-lang="en">The integrated Kanban lets you manage tasks right next to your code. No need to open Trello or Notion — your tasks live in your workspace. And best of all, Mirehub's Kanban is AI-powered: send a ticket to Claude, Codex or Copilot, the agent solves it automatically.</span>
             </p>
           </div>
 
@@ -1731,12 +1881,12 @@
 
           <div class="docs-text">
             <h3>
-              <span data-lang="fr">Integration IA (Claude &amp; Codex)</span>
-              <span data-lang="en">AI integration (Claude &amp; Codex)</span>
+              <span data-lang="fr">Integration IA (Claude, Codex &amp; Copilot)</span>
+              <span data-lang="en">AI integration (Claude, Codex &amp; Copilot)</span>
             </h3>
             <p>
-              <span data-lang="fr">Le Kanban de Mirehub est propulse par l'IA. Chaque ticket peut etre envoye directement a Claude Code ou Codex qui le resout automatiquement. Voici le workflow complet :</span>
-              <span data-lang="en">Mirehub's Kanban is AI-powered. Every ticket can be sent directly to Claude Code or Codex which resolves it automatically. Here is the complete workflow:</span>
+              <span data-lang="fr">Le Kanban de Mirehub est propulse par l'IA. Chaque ticket peut etre envoye directement a Claude Code, Codex ou Copilot qui le resout automatiquement. Voici le workflow complet :</span>
+              <span data-lang="en">Mirehub's Kanban is AI-powered. Every ticket can be sent directly to Claude Code, Codex or Copilot which resolves it automatically. Here is the complete workflow:</span>
             </p>
             <ol class="docs-steps">
               <li>
@@ -3388,8 +3538,8 @@
               <span data-lang="en">Does Mirehub work offline?</span>
             </h3>
             <p>
-              <span data-lang="fr">Oui, la plupart des fonctionnalites fonctionnent hors ligne : Terminal, Git (operations locales), Kanban, File Viewer, TODO Scanner, Statistiques et Code Analysis. Les fonctionnalites qui necessitent une connexion sont : Claude AI (API Anthropic), les mises a jour de l'application, les health checks de l'API Tester, et les connexions a des bases de donnees distantes.</span>
-              <span data-lang="en">Yes, most features work offline: Terminal, Git (local operations), Kanban, File Viewer, TODO Scanner, Statistics and Code Analysis. Features that require a connection are: Claude AI (Anthropic API), application updates, API Tester health checks, and remote database connections.</span>
+              <span data-lang="fr">Oui, la plupart des fonctionnalites fonctionnent hors ligne : Terminal, Git (operations locales), Kanban, File Viewer, TODO Scanner, Statistiques et Code Analysis. Les fonctionnalites qui necessitent une connexion sont : Claude AI (API Anthropic), Codex (API OpenAI), Copilot (API GitHub), les mises a jour de l'application, les health checks de l'API Tester, et les connexions a des bases de donnees distantes.</span>
+              <span data-lang="en">Yes, most features work offline: Terminal, Git (local operations), Kanban, File Viewer, TODO Scanner, Statistics and Code Analysis. Features that require a connection are: Claude AI (Anthropic API), Codex (OpenAI API), Copilot (GitHub API), application updates, API Tester health checks, and remote database connections.</span>
             </p>
           </div>
 

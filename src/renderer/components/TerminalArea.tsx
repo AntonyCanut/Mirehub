@@ -65,8 +65,9 @@ export function TerminalArea() {
   const [editingTabId, setEditingTabId] = useState<string | null>(null)
   const [editingLabel, setEditingLabel] = useState('')
   const editInputRef = useRef<HTMLInputElement>(null)
-  const dragIndexRef = useRef<number | null>(null)
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const dragTabIdRef = useRef<string | null>(null)
+  const isDraggingRef = useRef(false)
+  const [dragOverTabId, setDragOverTabId] = useState<string | null>(null)
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
 
   // Terminal font size (shared across all terminals)
@@ -249,9 +250,10 @@ export function TerminalArea() {
     [commitRename],
   )
 
-  // Drag & drop handlers — indices are workspace-scoped, must map to global
-  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
-    dragIndexRef.current = index
+  // Drag & drop handlers — use tab IDs to avoid stale index issues
+  const handleDragStart = useCallback((e: React.DragEvent, tabId: string) => {
+    dragTabIdRef.current = tabId
+    isDraggingRef.current = true
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', '')
     setTooltip(null)
@@ -262,48 +264,52 @@ export function TerminalArea() {
   const handleDragEnd = useCallback((e: React.DragEvent) => {
     const target = e.currentTarget as HTMLElement
     target.classList.remove('tab--dragging')
-    dragIndexRef.current = null
-    setDragOverIndex(null)
+    dragTabIdRef.current = null
+    setDragOverTabId(null)
+    // Keep isDraggingRef true briefly to suppress spurious click events
+    // that macOS may fire after a drag ends (especially on the close button)
+    setTimeout(() => {
+      isDraggingRef.current = false
+    }, 100)
   }, [])
 
-  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+  const handleDragOver = useCallback((e: React.DragEvent, tabId: string) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
-    setDragOverIndex(index)
+    setDragOverTabId(tabId)
   }, [])
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     const relatedTarget = e.relatedTarget as HTMLElement | null
     if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
-      setDragOverIndex(null)
+      setDragOverTabId(null)
     }
   }, [])
 
   const handleDrop = useCallback(
-    (e: React.DragEvent, toLocalIndex: number) => {
+    (e: React.DragEvent, toTabId: string) => {
       e.preventDefault()
-      const fromLocalIndex = dragIndexRef.current
-      if (fromLocalIndex !== null && fromLocalIndex !== toLocalIndex) {
-        const allCurrentTabs = useTerminalTabStore.getState().tabs
-        const fromTab = tabs[fromLocalIndex]
-        const toTab = tabs[toLocalIndex]
-        if (fromTab && toTab) {
-          const fromGlobal = allCurrentTabs.findIndex((t) => t.id === fromTab.id)
-          const toGlobal = allCurrentTabs.findIndex((t) => t.id === toTab.id)
-          if (fromGlobal !== -1 && toGlobal !== -1) {
-            reorderTabs(fromGlobal, toGlobal)
-          }
+      const fromTabId = dragTabIdRef.current
+      if (fromTabId && fromTabId !== toTabId) {
+        // Read fresh state at drop time to get correct global indices
+        const currentTabs = useTerminalTabStore.getState().tabs
+        const fromGlobal = currentTabs.findIndex((t) => t.id === fromTabId)
+        const toGlobal = currentTabs.findIndex((t) => t.id === toTabId)
+        if (fromGlobal !== -1 && toGlobal !== -1) {
+          reorderTabs(fromGlobal, toGlobal)
         }
       }
-      dragIndexRef.current = null
-      setDragOverIndex(null)
+      dragTabIdRef.current = null
+      setDragOverTabId(null)
     },
-    [reorderTabs, tabs],
+    [reorderTabs],
   )
 
   const handleTabClose = useCallback(
     (e: React.MouseEvent, tabId: string) => {
       e.stopPropagation()
+      // Suppress close triggered by spurious click events after a drag
+      if (isDraggingRef.current) return
       closeTab(tabId)
     },
     [closeTab],
@@ -313,6 +319,8 @@ export function TerminalArea() {
     (e: React.MouseEvent, tabId: string) => {
       if (e.button === 1) {
         e.preventDefault()
+        // Suppress middle-click close during drag operations
+        if (isDraggingRef.current) return
         closeTab(tabId)
       }
     },
@@ -349,6 +357,12 @@ export function TerminalArea() {
   const handleNewCodexTab = useCallback(() => {
     if (activeWorkspaceId && envCwd) {
       createSplitTab(activeWorkspaceId, envCwd, 'Codex + Terminal', 'codex', null)
+    }
+  }, [activeWorkspaceId, envCwd, createSplitTab])
+
+  const handleNewCopilotTab = useCallback(() => {
+    if (activeWorkspaceId && envCwd) {
+      createSplitTab(activeWorkspaceId, envCwd, 'Copilot + Terminal', 'copilot', null)
     }
   }, [activeWorkspaceId, envCwd, createSplitTab])
 
@@ -401,22 +415,22 @@ export function TerminalArea() {
   return (
     <main className="terminal-area">
       <div className="terminal-tabs">
-        {tabs.map((tab, index) => (
+        {tabs.map((tab) => (
           <div
             key={tab.id}
             className={`tab ${tab.id === activeTabId ? 'active' : ''} ${
-              dragOverIndex === index ? 'tab-drag-over' : ''
+              dragOverTabId === tab.id ? 'tab-drag-over' : ''
             }${tab.color === '#fab387' ? ' tab--streaming' : ''}${tab.color ? ' tab--tinted' : ''}`}
             style={tab.color ? { '--tab-tint-color': tab.color } as React.CSSProperties : undefined}
             onClick={() => setActiveTab(tab.id)}
             onMouseDown={(e) => handleTabMouseDown(e, tab.id)}
             onDoubleClick={() => handleDoubleClick(tab.id, tab.label)}
             draggable={editingTabId !== tab.id}
-            onDragStart={(e) => handleDragStart(e, index)}
+            onDragStart={(e) => handleDragStart(e, tab.id)}
             onDragEnd={handleDragEnd}
-            onDragOver={(e) => handleDragOver(e, index)}
+            onDragOver={(e) => handleDragOver(e, tab.id)}
             onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, index)}
+            onDrop={(e) => handleDrop(e, tab.id)}
             onMouseEnter={(e) => {
               if (editingTabId !== tab.id) {
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
@@ -487,6 +501,10 @@ export function TerminalArea() {
               <button className="tab-add-dropdown-item" onClick={handleNewCodexTab}>
                 <span className="tab-add-dropdown-icon tab-add-dropdown-icon--codex">X</span>
                 <span>{t('terminal.newCodexTerminal')}</span>
+              </button>
+              <button className="tab-add-dropdown-item" onClick={handleNewCopilotTab}>
+                <span className="tab-add-dropdown-icon tab-add-dropdown-icon--copilot">P</span>
+                <span>{t('terminal.newCopilotTerminal')}</span>
               </button>
             </div>
           )}
