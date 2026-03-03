@@ -14,6 +14,7 @@ const ENVS_DIR = path.join(os.homedir(), '.kanbai', 'envs')
 const HOOK_SCRIPT_NAME = IS_WIN ? 'kanbai-activity.ps1' : 'kanbai-activity.sh'
 const AUTOAPPROVE_SCRIPT_NAME = IS_WIN ? 'kanbai-autoapprove.ps1' : 'kanbai-autoapprove.sh'
 const KANBAN_DONE_SCRIPT_NAME = IS_WIN ? 'kanban-done.ps1' : 'kanban-done.sh'
+const PIXEL_AGENTS_SCRIPT_NAME = IS_WIN ? 'kanbai-pixel-agents.ps1' : 'kanbai-pixel-agents.sh'
 
 /**
  * Ensures the global activity hook script exists at ~/.kanbai/hooks/kanbai-activity.sh
@@ -291,6 +292,110 @@ esac
 }
 
 /**
+ * Ensures the pixel-agents hook script exists at ~/.kanbai/hooks/kanbai-pixel-agents.sh
+ * Feeds Claude tool activity to the Pixel Agents visualization via events.jsonl.
+ */
+export function ensurePixelAgentsHookScript(): void {
+  if (!fs.existsSync(HOOKS_DIR)) {
+    fs.mkdirSync(HOOKS_DIR, { recursive: true })
+  }
+
+  const scriptPath = path.join(HOOKS_DIR, PIXEL_AGENTS_SCRIPT_NAME)
+
+  if (IS_WIN) {
+    const script = `# Kanbai Pixel Agents Hook (auto-generated)
+# Feeds agent tool activity to Pixel Agents visualization
+if ($env:KANBAI_NL_QUERY) { exit 0 }
+
+$EventDir = "$env:USERPROFILE\\.kanbai\\pixel-agents"
+if (!(Test-Path $EventDir)) { New-Item -ItemType Directory -Path $EventDir -Force | Out-Null }
+$EventFile = "$EventDir\\events.jsonl"
+
+$EventType = if ($args[0]) { $args[0] } else { "toolStart" }
+
+$RawInput = $input | Out-String
+$SessionId = ""
+if ($RawInput -match '"session_id":"([^"]*)"') { $SessionId = $Matches[1] }
+if (!$SessionId) { exit 0 }
+
+$ToolName = ""
+if ($EventType -eq "toolStart" -or $EventType -eq "toolDone") {
+  if ($RawInput -match '"tool_name":"([^"]*)"') { $ToolName = $Matches[1] }
+}
+
+$Ticket = $env:KANBAI_KANBAN_TICKET
+$WorkspaceId = $env:KANBAI_WORKSPACE_ID
+$TabId = $env:KANBAI_TAB_ID
+$Provider = $env:KANBAI_AI_PROVIDER
+$Ts = [Math]::Floor(([DateTimeOffset]::UtcNow).ToUnixTimeSeconds())
+$Line = '{"type":"' + $EventType + '","sessionId":"' + $SessionId + '","tool":"' + $ToolName + '","ts":' + $Ts
+if ($Ticket) { $Line += ',"ticket":"' + $Ticket + '"' }
+if ($WorkspaceId) { $Line += ',"workspaceId":"' + $WorkspaceId + '"' }
+if ($TabId) { $Line += ',"tabId":"' + $TabId + '"' }
+if ($Provider) { $Line += ',"provider":"' + $Provider + '"' }
+$Line += '}'
+Add-Content -Path $EventFile -Value $Line
+`
+    fs.writeFileSync(scriptPath, script)
+  } else {
+    const script = `#!/bin/bash
+# Kanbai Pixel Agents Hook (auto-generated)
+# Feeds agent tool activity to Pixel Agents visualization
+
+[ -n "$KANBAI_NL_QUERY" ] && exit 0
+
+EVENT_DIR="$HOME/.kanbai/pixel-agents"
+mkdir -p "$EVENT_DIR"
+EVENT_FILE="$EVENT_DIR/events.jsonl"
+
+EVENT_TYPE="\${1:-toolStart}"
+
+# Read hook stdin JSON
+INPUT=$(cat)
+
+# Extract session_id (fast grep — no jq/node dependency)
+SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+[ -z "$SESSION_ID" ] && exit 0
+
+# Extract tool_name for tool events
+TOOL_NAME=""
+if [ "$EVENT_TYPE" = "toolStart" ] || [ "$EVENT_TYPE" = "toolDone" ]; then
+  TOOL_NAME=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+
+# Include ticket label from kanban env var if available
+TICKET_FIELD=""
+if [ -n "$KANBAI_KANBAN_TICKET" ]; then
+  TICKET_FIELD=',"ticket":"'"$KANBAI_KANBAN_TICKET"'"'
+fi
+
+# Include workspace ID if available
+WORKSPACE_FIELD=""
+if [ -n "$KANBAI_WORKSPACE_ID" ]; then
+  WORKSPACE_FIELD=',"workspaceId":"'"$KANBAI_WORKSPACE_ID"'"'
+fi
+
+# Include tab ID if available
+TAB_FIELD=""
+if [ -n "$KANBAI_TAB_ID" ]; then
+  TAB_FIELD=',"tabId":"'"$KANBAI_TAB_ID"'"'
+fi
+
+# Include AI provider if available
+PROVIDER_FIELD=""
+if [ -n "$KANBAI_AI_PROVIDER" ]; then
+  PROVIDER_FIELD=',"provider":"'"$KANBAI_AI_PROVIDER"'"'
+fi
+
+TS=$(date +%s)
+printf '{"type":"%s","sessionId":"%s","tool":"%s","ts":%s%s%s%s%s}\\n' \\
+  "$EVENT_TYPE" "$SESSION_ID" "$TOOL_NAME" "$TS" "$TICKET_FIELD" "$WORKSPACE_FIELD" "$TAB_FIELD" "$PROVIDER_FIELD" >> "$EVENT_FILE"
+`
+    fs.writeFileSync(scriptPath, script, { mode: 0o755 })
+  }
+}
+
+/**
  * Installs PreToolUse + Stop hooks in a project's settings.local.json
  * to signal Claude activity back to Kanbai.
  * Merges with existing hooks (e.g. kanban hooks) without overwriting.
@@ -314,6 +419,7 @@ export async function installActivityHooks(
   ensureActivityHookScript()
   ensureAutoApproveScript(autoApprove)
   ensureKanbanDoneScript()
+  ensurePixelAgentsHookScript()
 
   const claudeDir = path.join(projectPath, '.claude')
   if (!fs.existsSync(claudeDir)) {
@@ -344,10 +450,12 @@ export async function installActivityHooks(
   const activityScriptIncludes = IS_WIN ? 'kanbai-activity.ps1' : 'kanbai-activity.sh'
   const autoApproveScriptIncludes = IS_WIN ? 'kanbai-autoapprove.ps1' : 'kanbai-autoapprove.sh'
   const kanbanDoneScriptIncludes = IS_WIN ? 'kanban-done.ps1' : 'kanban-done.sh'
+  const pixelAgentsScriptPath = path.join(HOOKS_DIR, PIXEL_AGENTS_SCRIPT_NAME)
+  const pixelAgentsScriptIncludes = IS_WIN ? 'kanbai-pixel-agents.ps1' : 'kanbai-pixel-agents.sh'
 
   // Clean up legacy mirehub hook entries (renamed to kanbai)
   const legacyPatterns = ['mirehub-activity', 'mirehub-autoapprove', '.mirehub/hooks/']
-  for (const eventName of ['PreToolUse', 'Stop', 'PermissionRequest', 'PostToolUse']) {
+  for (const eventName of ['PreToolUse', 'Stop', 'PermissionRequest', 'PostToolUse', 'SessionEnd']) {
     const eventHooks = hooks[eventName] as Array<{ matcher: string; hooks: Array<{ type: string; command: string }> }> | undefined
     if (eventHooks) {
       hooks[eventName] = eventHooks.filter(
@@ -378,6 +486,14 @@ export async function installActivityHooks(
     })
   }
 
+  // Pixel-agents: signal tool start
+  if (!preToolHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes(pixelAgentsScriptIncludes)))) {
+    preToolHooks.push({
+      matcher: '',
+      hooks: [{ type: 'command', command: shellCmd(pixelAgentsScriptPath, 'toolStart') }],
+    })
+  }
+
   // === PermissionRequest hooks ===
   if (!hooks.PermissionRequest) {
     hooks.PermissionRequest = []
@@ -403,6 +519,14 @@ export async function installActivityHooks(
     postToolHooks.push({
       matcher: '',
       hooks: [{ type: 'command', command: shellCmd(activityScriptPath, 'working') }],
+    })
+  }
+
+  // Pixel-agents: signal tool done
+  if (!postToolHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes(pixelAgentsScriptIncludes)))) {
+    postToolHooks.push({
+      matcher: '',
+      hooks: [{ type: 'command', command: shellCmd(pixelAgentsScriptPath, 'toolDone') }],
     })
   }
 
@@ -439,6 +563,28 @@ export async function installActivityHooks(
     })
   }
 
+  // Pixel-agents: signal turn end
+  if (!stopHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes(pixelAgentsScriptIncludes)))) {
+    stopHooks.push({
+      matcher: '',
+      hooks: [{ type: 'command', command: shellCmd(pixelAgentsScriptPath, 'turnEnd') }],
+    })
+  }
+
+  // === SessionEnd hooks ===
+  if (!hooks.SessionEnd) {
+    hooks.SessionEnd = []
+  }
+  const sessionEndHooks = hooks.SessionEnd as Array<{ matcher: string; hooks: Array<{ type: string; command: string }> }>
+
+  // Pixel-agents: signal session end for immediate agent removal
+  if (!sessionEndHooks.some((h) => h.hooks?.some((hk) => hk.command?.includes(pixelAgentsScriptIncludes)))) {
+    sessionEndHooks.push({
+      matcher: '',
+      hooks: [{ type: 'command', command: shellCmd(pixelAgentsScriptPath, 'sessionEnd') }],
+    })
+  }
+
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
 }
 
@@ -451,6 +597,7 @@ async function installCodexActivityHooks(
   _workspaceName?: string,
 ): Promise<void> {
   ensureActivityHookScript()
+  ensurePixelAgentsHookScript()
 
   const codexDir = path.join(projectPath, '.codex')
   if (!fs.existsSync(codexDir)) {
@@ -485,6 +632,7 @@ async function installCopilotActivityHooks(
   _workspaceName?: string,
 ): Promise<void> {
   ensureActivityHookScript()
+  ensurePixelAgentsHookScript()
 
   const copilotDir = path.join(projectPath, '.copilot')
   if (!fs.existsSync(copilotDir)) {

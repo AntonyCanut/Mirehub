@@ -208,7 +208,7 @@ export function UpdateCenter() {
                       <span className="notification-item-version">
                         {update.currentVersion}
                         {update.updateAvailable && (
-                          <> {' \u2192 '} <span className="notification-item-latest">{update.latestVersion}</span> </>
+                          <> {' \u2192 '} <span className="notification-item-latest">{update.latestVersion.split('+')[0]}</span> </>
                         )}
                       </span>
                     ) : (
@@ -238,6 +238,23 @@ export function UpdateCenter() {
                       <button className="notification-item-btn notification-item-btn--uninstall" onClick={() => handleUninstall(update.tool)} disabled={installingTool === update.tool}>
                         {installingTool === update.tool ? '...' : t('updates.uninstall')}
                       </button>
+                    )}
+                    {!update.installed && update.tool === 'pixel-agents' && (
+                      <button className="notification-item-btn notification-item-btn--install" onClick={() => handleInstall(update.tool, update.scope)} disabled={installingTool === update.tool}>
+                        {installingTool === update.tool ? '...' : t('updates.install')}
+                      </button>
+                    )}
+                    {update.installed && update.tool === 'pixel-agents' && (
+                      <>
+                        {update.updateAvailable && (
+                          <button className="notification-item-btn" onClick={() => handleInstall(update.tool, update.scope)} disabled={installingTool === update.tool}>
+                            {installingTool === update.tool ? '...' : t('updates.update')}
+                          </button>
+                        )}
+                        <button className="notification-item-btn notification-item-btn--uninstall" onClick={() => handleUninstall(update.tool)} disabled={installingTool === update.tool}>
+                          {installingTool === update.tool ? '...' : t('updates.uninstall')}
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

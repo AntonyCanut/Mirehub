@@ -11,6 +11,7 @@ const mockKanbanGetPath = vi.fn()
 const mockKanbanSelectFiles = vi.fn()
 const mockKanbanAttachFile = vi.fn()
 const mockKanbanRemoveAttachment = vi.fn()
+const mockKanbanLinkConversation = vi.fn()
 const mockTerminalWrite = vi.fn()
 const mockWorkspaceEnvSetup = vi.fn()
 
@@ -30,6 +31,7 @@ vi.stubGlobal('window', {
       selectFiles: mockKanbanSelectFiles,
       attachFile: mockKanbanAttachFile,
       removeAttachment: mockKanbanRemoveAttachment,
+      linkConversation: mockKanbanLinkConversation,
     },
     workspaceEnv: {
       setup: mockWorkspaceEnvSetup,
@@ -70,6 +72,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
     mockCreateTab.mockReturnValue('tab-new-1')
     mockWorkspaceEnvSetup.mockResolvedValue({ success: true, envPath: '/tmp/workspace-env' })
     mockKanbanGetPath.mockResolvedValue('/Users/test/.kanbai/kanban/ws-1.json')
+    mockKanbanCleanupPrompt.mockResolvedValue(undefined)
 
     useKanbanStore.setState({
       tasks: [],
@@ -77,6 +80,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       draggedTaskId: null,
       currentWorkspaceId: 'ws-1',
       kanbanTabIds: {},
+      kanbanPromptCwds: {},
     })
 
     // Inject mock functions into the real terminal tab store
@@ -802,6 +806,99 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       await useKanbanStore.getState().sendToAi(task)
 
       expect(mockSetViewMode).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('reactivateIfDone (user input on DONE terminal)', () => {
+    it('remet un ticket DONE en WORKING quand l\'utilisateur tape dans le terminal', () => {
+      useKanbanStore.setState({
+        tasks: [makeTask({ id: 'task-1', status: 'DONE' })],
+        kanbanTabIds: { 'task-1': 'tab-abc' },
+      })
+
+      useKanbanStore.getState().reactivateIfDone('tab-abc')
+
+      const task = useKanbanStore.getState().tasks.find((t) => t.id === 'task-1')
+      expect(task?.status).toBe('WORKING')
+      expect(mockKanbanUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'task-1',
+          status: 'WORKING',
+          workspaceId: 'ws-1',
+        }),
+      )
+    })
+
+    it('restaure la couleur du provider apres reactivation', () => {
+      useKanbanStore.setState({
+        tasks: [makeTask({ id: 'task-1', status: 'DONE', aiProvider: 'claude' })],
+        kanbanTabIds: { 'task-1': 'tab-abc' },
+      })
+
+      useKanbanStore.getState().reactivateIfDone('tab-abc')
+
+      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#C15F3C')
+    })
+
+    it('ne fait rien si le ticket n\'est pas DONE', () => {
+      useKanbanStore.setState({
+        tasks: [makeTask({ id: 'task-1', status: 'WORKING' })],
+        kanbanTabIds: { 'task-1': 'tab-abc' },
+      })
+
+      useKanbanStore.getState().reactivateIfDone('tab-abc')
+
+      expect(mockKanbanUpdate).not.toHaveBeenCalled()
+    })
+
+    it('ne fait rien si le tabId n\'est pas lie a un ticket', () => {
+      useKanbanStore.setState({
+        tasks: [makeTask({ id: 'task-1', status: 'DONE' })],
+        kanbanTabIds: {},
+      })
+
+      useKanbanStore.getState().reactivateIfDone('tab-unknown')
+
+      expect(mockKanbanUpdate).not.toHaveBeenCalled()
+    })
+
+    it('ne fait rien sans workspaceId', () => {
+      useKanbanStore.setState({
+        currentWorkspaceId: null,
+        tasks: [makeTask({ id: 'task-1', status: 'DONE' })],
+        kanbanTabIds: { 'task-1': 'tab-abc' },
+      })
+
+      useKanbanStore.getState().reactivateIfDone('tab-abc')
+
+      expect(mockKanbanUpdate).not.toHaveBeenCalled()
+    })
+
+    it('utilise la couleur Claude par defaut si pas de aiProvider', () => {
+      useKanbanStore.setState({
+        tasks: [makeTask({ id: 'task-1', status: 'DONE' })],
+        kanbanTabIds: { 'task-1': 'tab-abc' },
+      })
+
+      useKanbanStore.getState().reactivateIfDone('tab-abc')
+
+      // Default to Claude color (#C15F3C) when no aiProvider set
+      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#C15F3C')
+    })
+
+    it('ne fait pas de double reactivation sur des appels rapides', () => {
+      mockKanbanUpdate.mockReturnValue(new Promise(() => { /* never resolves */ }))
+
+      useKanbanStore.setState({
+        tasks: [makeTask({ id: 'task-1', status: 'DONE' })],
+        kanbanTabIds: { 'task-1': 'tab-abc' },
+      })
+
+      useKanbanStore.getState().reactivateIfDone('tab-abc')
+      useKanbanStore.getState().reactivateIfDone('tab-abc')
+
+      // Only one update call despite two invocations
+      expect(mockKanbanUpdate).toHaveBeenCalledTimes(1)
     })
   })
 })

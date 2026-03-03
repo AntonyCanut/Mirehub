@@ -9,7 +9,7 @@ ipcRenderer.setMaxListeners(50)
 const api = {
   // Terminal
   terminal: {
-    create: (options: { cwd?: string; shell?: string }) =>
+    create: (options: { cwd?: string; shell?: string; workspaceId?: string; tabId?: string; provider?: string }) =>
       ipcRenderer.invoke(IPC_CHANNELS.TERMINAL_CREATE, options),
     write: (id: string, data: string) =>
       ipcRenderer.send(IPC_CHANNELS.TERMINAL_INPUT, { id, data }),
@@ -729,6 +729,19 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_NL_ASK, { projectPath, manager, question, history, provider }),
     nlCancel: (): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.PACKAGES_NL_CANCEL),
+  },
+
+  // Pixel Agents
+  pixelAgents: {
+    start: () => ipcRenderer.invoke(IPC_CHANNELS.PIXEL_AGENTS_START),
+    stop: () => ipcRenderer.invoke(IPC_CHANNELS.PIXEL_AGENTS_STOP),
+    webviewReady: () => ipcRenderer.invoke(IPC_CHANNELS.PIXEL_AGENTS_WEBVIEW_READY),
+    saveLayout: (layout: unknown) => ipcRenderer.invoke(IPC_CHANNELS.PIXEL_AGENTS_SAVE_LAYOUT, layout),
+    onEvent: (callback: (event: { type: string; [key: string]: unknown }) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, data: { type: string }) => callback(data)
+      ipcRenderer.on(IPC_CHANNELS.PIXEL_AGENTS_EVENT, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.PIXEL_AGENTS_EVENT, listener)
+    },
   },
 
   // Notifications

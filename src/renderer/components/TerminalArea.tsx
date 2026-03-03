@@ -3,6 +3,7 @@ import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useKanbanStore } from '../lib/stores/kanbanStore'
 import { useViewStore } from '../lib/stores/viewStore'
+import { useUpdateStore } from '../lib/stores/updateStore'
 import { useI18n } from '../lib/i18n'
 import { AI_PROVIDERS } from '../../shared/types/ai-provider'
 import { SplitContainer } from './SplitContainer'
@@ -348,6 +349,8 @@ export function TerminalArea() {
     return map
   }, [kanbanTabIds])
 
+  const pixelAgentsInstalled = useUpdateStore((s) => s.updates.find((u) => u.tool === 'pixel-agents')?.installed ?? false)
+
   const { createSplitTab } = useTerminalTabStore()
 
   const handleNewClaudeTab = useCallback(() => {
@@ -367,6 +370,20 @@ export function TerminalArea() {
       createSplitTab(activeWorkspaceId, envCwd, 'Copilot + Terminal', 'copilot', null)
     }
   }, [activeWorkspaceId, envCwd, createSplitTab])
+
+  const { createPixelAgentsTab, createPixelAgentsSplitTab } = useTerminalTabStore()
+
+  const handleNewPixelAgentsOnlyTab = useCallback(() => {
+    if (activeWorkspaceId && envCwd) {
+      createPixelAgentsTab(activeWorkspaceId, envCwd)
+    }
+  }, [activeWorkspaceId, envCwd, createPixelAgentsTab])
+
+  const handleNewPixelAgentsTab = useCallback(() => {
+    if (activeWorkspaceId && envCwd) {
+      createPixelAgentsSplitTab(activeWorkspaceId, envCwd)
+    }
+  }, [activeWorkspaceId, envCwd, createPixelAgentsSplitTab])
 
   const addWrapperRef = useRef<HTMLDivElement>(null)
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null)
@@ -511,6 +528,18 @@ export function TerminalArea() {
                 <span className="tab-add-dropdown-icon tab-add-dropdown-icon--copilot">P</span>
                 <span>{t('terminal.newCopilotTerminal')}</span>
               </button>
+              {pixelAgentsInstalled && (
+                <>
+                  <button className="tab-add-dropdown-item" onClick={handleNewPixelAgentsTab}>
+                    <span className="tab-add-dropdown-icon tab-add-dropdown-icon--pixel-agents">PA</span>
+                    <span>{t('terminal.newPixelAgentsTerminal')}</span>
+                  </button>
+                  <button className="tab-add-dropdown-item" onClick={handleNewPixelAgentsOnlyTab}>
+                    <span className="tab-add-dropdown-icon tab-add-dropdown-icon--pixel-agents">PA</span>
+                    <span>{t('terminal.newPixelAgentsOnly')}</span>
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

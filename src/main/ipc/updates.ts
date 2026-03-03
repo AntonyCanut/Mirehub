@@ -1,4 +1,6 @@
 import { IpcMain, BrowserWindow } from 'electron'
+import fs from 'fs/promises'
+import path from 'path'
 import { IPC_CHANNELS, UpdateInfo } from '../../shared/types'
 import { IS_WIN, getWhichCommand, getExtendedToolPaths, PATH_SEP, crossExecFile } from '../../shared/platform'
 
@@ -140,6 +142,58 @@ async function getLatestBrewVersion(formula: string): Promise<string | null> {
   }
 }
 
+function getPixelAgentsDistPath(): string {
+  if (process.env['VITE_DEV_SERVER_URL']) {
+    return path.join(__dirname, '../../vendor/pixel-agents/dist/webview')
+  }
+  return path.join(process.resourcesPath, 'pixel-agents')
+}
+
+async function isPixelAgentsInstalled(): Promise<boolean> {
+  try {
+    await fs.access(path.join(getPixelAgentsDistPath(), 'index.html'))
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function getPixelAgentsVersion(): Promise<string> {
+  try {
+    const pkgPath = path.join(__dirname, '../../vendor/pixel-agents/package.json')
+    const content = await fs.readFile(pkgPath, 'utf-8')
+    const pkg = JSON.parse(content) as { version?: string }
+    return pkg.version || 'installed'
+  } catch {
+    return 'installed'
+  }
+}
+
+async function getLocalPixelAgentsCommit(): Promise<string | null> {
+  try {
+    const repoPath = path.join(__dirname, '../../vendor/pixel-agents')
+    const { stdout } = await enrichedExecFile(
+      'git', ['-C', repoPath, 'rev-parse', '--short=7', 'HEAD'], 5000,
+    )
+    return stdout.trim() || null
+  } catch {
+    return null
+  }
+}
+
+async function getRemotePixelAgentsCommit(): Promise<string | null> {
+  try {
+    const { stdout } = await enrichedExecFile(
+      'git', ['ls-remote', 'https://github.com/pablodelucca/pixel-agents.git', 'HEAD'],
+      15000,
+    )
+    const hash = stdout.trim().split('\t')[0]
+    return hash?.substring(0, 7) || null
+  } catch {
+    return null
+  }
+}
+
 async function checkToolUpdates(): Promise<UpdateInfo[]> {
   const results: UpdateInfo[] = []
 
@@ -199,6 +253,36 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
       scope: 'global',
     })
   }
+
+  // pixel-agents — directory-based detection, compare git commits
+  const pixelAgentsInstalled = await isPixelAgentsInstalled()
+  let paCurrentVersion = ''
+  let paLatestVersion = ''
+  let paUpdateAvailable = false
+
+  if (pixelAgentsInstalled) {
+    paCurrentVersion = await getPixelAgentsVersion()
+    const [localCommit, remoteCommit] = await Promise.all([
+      getLocalPixelAgentsCommit(),
+      getRemotePixelAgentsCommit(),
+    ])
+
+    if (localCommit && remoteCommit && localCommit !== remoteCommit) {
+      paUpdateAvailable = true
+      paLatestVersion = `${paCurrentVersion}+${remoteCommit}`
+    } else {
+      paLatestVersion = paCurrentVersion
+    }
+  }
+
+  results.push({
+    tool: 'pixel-agents',
+    currentVersion: paCurrentVersion,
+    latestVersion: paLatestVersion,
+    updateAvailable: paUpdateAvailable,
+    installed: pixelAgentsInstalled,
+    scope: 'global',
+  })
 
   return results
 }
@@ -306,6 +390,17 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
             args = ['install', '--git', 'https://github.com/rtk-ai/rtk']
             break
           }
+          case 'pixel-agents': {
+            sendStatus('installing', 10)
+            const projectRoot = path.join(__dirname, '../..')
+            await crossExecFile(
+              'bash',
+              [path.join(projectRoot, 'scripts/setup-pixel-agents.sh')],
+              { timeout: 300000, env: enrichedEnv(), maxBuffer: 50 * 1024 * 1024 },
+            )
+            sendStatus('completed', 100)
+            return { success: true }
+          }
           default:
             throw new Error(`Unknown tool: ${tool}`)
         }
@@ -354,6 +449,12 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
             command = 'cargo'
             args = ['uninstall', 'rtk']
             break
+          }
+          case 'pixel-agents': {
+            const vendorPath = path.join(__dirname, '../../vendor/pixel-agents')
+            await fs.rm(vendorPath, { recursive: true, force: true })
+            sendStatus('completed')
+            return { success: true }
           }
           default:
             throw new Error(`Cannot uninstall core tool: ${tool}`)

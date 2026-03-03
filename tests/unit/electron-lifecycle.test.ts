@@ -64,6 +64,13 @@ vi.mock('electron', () => ({
   shell: {
     openExternal: (...args: unknown[]) => mockShellOpenExternal(...args),
   },
+  protocol: {
+    registerSchemesAsPrivileged: vi.fn(),
+    handle: vi.fn(),
+  },
+  net: {
+    fetch: vi.fn(),
+  },
 }))
 
 vi.mock('child_process', () => ({
@@ -141,10 +148,27 @@ vi.mock('../../src/main/ipc/gitConfig', () => ({
 vi.mock('../../src/main/ipc/claudeMemory', () => ({
   registerClaudeMemoryHandlers: vi.fn(),
 }))
+vi.mock('../../src/main/ipc/healthCheck', () => ({
+  registerHealthCheckHandlers: vi.fn(),
+}))
+vi.mock('../../src/main/ipc/codexConfig', () => ({
+  registerCodexConfigHandlers: vi.fn(),
+}))
+vi.mock('../../src/main/ipc/copilotConfig', () => ({
+  registerCopilotConfigHandlers: vi.fn(),
+}))
+vi.mock('../../src/main/ipc/aiProvider', () => ({
+  registerAiProviderHandlers: vi.fn(),
+}))
+vi.mock('../../src/main/ipc/pixel-agents', () => ({
+  registerPixelAgentsHandlers: vi.fn(),
+  shutdownPixelAgentsService: vi.fn(),
+}))
 vi.mock('../../src/main/services/activityHooks', () => ({
   ensureActivityHookScript: vi.fn(),
   ensureAutoApproveScript: vi.fn(),
   ensureKanbanDoneScript: vi.fn(),
+  ensurePixelAgentsHookScript: vi.fn(),
   syncAllWorkspaceEnvHooks: vi.fn(),
   startActivityWatcher: vi.fn(),
 }))

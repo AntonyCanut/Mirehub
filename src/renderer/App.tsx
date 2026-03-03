@@ -132,7 +132,16 @@ export function App() {
       const { activeWorkspaceId, activeProjectId, activeNamespaceId } = useWorkspaceStore.getState()
       const { tabs } = useTerminalTabStore.getState()
 
-      const sessionTabs: SessionTab[] = tabs.map((tab) => ({
+      // Skip pixel-agents tabs — they cannot be properly restored (componentType is lost)
+      const isPixelAgentsPane = (node: { type: string; componentType?: string; children?: unknown[] }): boolean => {
+        if (node.type === 'leaf') return node.componentType === 'pixel-agents'
+        if (node.type === 'split' && Array.isArray(node.children)) {
+          return node.children.some((c) => isPixelAgentsPane(c as typeof node))
+        }
+        return false
+      }
+
+      const sessionTabs: SessionTab[] = tabs.filter((tab) => !isPixelAgentsPane(tab.paneTree)).map((tab) => ({
         workspaceId: tab.workspaceId,
         cwd: tab.cwd,
         label: tab.label,
@@ -243,8 +252,10 @@ export function App() {
     const { setActiveWorkspace, setActiveProject } = useWorkspaceStore.getState()
     const termStore = useTerminalTabStore.getState()
 
-    // Restore tabs
+    // Restore tabs (skip pixel-agents tabs — they cannot be properly restored)
+    const PIXEL_AGENTS_LABELS = ['Pixel Agents', 'Claude + Pixel Agents']
     for (const tab of pendingSession.tabs) {
+      if (PIXEL_AGENTS_LABELS.includes(tab.label)) continue
       if (tab.isSplit) {
         termStore.createSplitTab(tab.workspaceId, tab.cwd, tab.label, tab.leftCommand, tab.rightCommand)
       } else {

@@ -11,6 +11,9 @@ const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2
 // Track tasks that have been re-launched once to avoid infinite loops
 const relaunchedTaskIds = new Set<string>()
 
+// Track tasks currently being reactivated to prevent duplicate updates
+const reactivatingTaskIds = new Set<string>()
+
 export function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
   const todo = tasks.filter((t) => t.status === 'TODO' && !t.disabled)
   if (!todo.length) return null
@@ -123,6 +126,7 @@ interface KanbanActions {
   attachFromClipboard: (taskId: string, dataBase64: string, filename: string, mimeType: string) => Promise<void>
   removeAttachment: (taskId: string, attachmentId: string) => Promise<void>
   handleTabClosed: (tabId: string) => void
+  reactivateIfDone: (tabId: string) => void
 }
 
 type KanbanStore = KanbanState & KanbanActions
@@ -631,7 +635,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     const unsetEnv = providerConfig.envVarsToUnset.length > 0
       ? `unset ${providerConfig.envVarsToUnset.join(' ')} && `
       : ''
-    const exportEnv = `export KANBAI_KANBAN_TASK_ID="${task.id}" KANBAI_KANBAN_FILE="${kanbanFilePath}" && `
+    const exportEnv = `export KANBAI_KANBAN_TASK_ID="${task.id}" KANBAI_KANBAN_FILE="${kanbanFilePath}" KANBAI_KANBAN_TICKET="${ticketLabel}" KANBAI_WORKSPACE_ID="${workspaceId}" && `
     let initialCommand: string
     if (isCtoMode) {
       // CTO mode: direct invocation, no back-and-forth — prompt piped from file
@@ -888,6 +892,65 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         workspaceId: currentWorkspaceId,
       }).catch(() => { /* best-effort */ })
     }
+  },
+
+  reactivateIfDone: (tabId: string) => {
+    const { kanbanTabIds } = get()
+    const taskId = Object.keys(kanbanTabIds).find((id) => kanbanTabIds[id] === tabId)
+    if (!taskId || reactivatingTaskIds.has(taskId)) return
+
+    // Find the task across current and background workspaces
+    const { tasks, currentWorkspaceId, backgroundTasks } = get()
+    let task: KanbanTask | undefined
+    let workspaceId: string | null = null
+
+    task = tasks.find((t) => t.id === taskId)
+    if (task) {
+      workspaceId = currentWorkspaceId
+    } else {
+      for (const [wsId, wsTasks] of Object.entries(backgroundTasks)) {
+        task = wsTasks.find((t) => t.id === taskId)
+        if (task) {
+          workspaceId = wsId
+          break
+        }
+      }
+    }
+
+    if (!task || task.status !== 'DONE' || !workspaceId) return
+
+    reactivatingTaskIds.add(taskId)
+
+    const isCurrentWorkspace = workspaceId === currentWorkspaceId
+    const updateTask = (t: KanbanTask): KanbanTask =>
+      t.id === taskId ? { ...t, status: 'WORKING' as KanbanStatus, updatedAt: Date.now() } : t
+
+    if (isCurrentWorkspace) {
+      set((state) => ({ tasks: state.tasks.map(updateTask) }))
+    } else {
+      set((state) => ({
+        backgroundTasks: {
+          ...state.backgroundTasks,
+          [workspaceId!]: (state.backgroundTasks[workspaceId!] ?? []).map(updateTask),
+        },
+      }))
+    }
+
+    // Reset tab color to provider detection color
+    const termStore = useTerminalTabStore.getState()
+    const providerColor = AI_PROVIDERS[task.aiProvider ?? 'claude']?.detectionColor ?? null
+    termStore.setTabColor(tabId, providerColor)
+
+    // Persist to file
+    window.kanbai.kanban.update({
+      id: taskId,
+      status: 'WORKING',
+      workspaceId,
+    }).then(() => {
+      reactivatingTaskIds.delete(taskId)
+    }).catch(() => {
+      reactivatingTaskIds.delete(taskId)
+    })
   },
 
   attachFiles: async (taskId: string) => {

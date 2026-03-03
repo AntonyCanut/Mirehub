@@ -286,6 +286,9 @@ a:hover { color: var(--accent-hover); }
 .hero h1 em.hero-codex {
   -webkit-text-fill-color: #10A37F;
 }
+.hero h1 em.hero-copilot {
+  -webkit-text-fill-color: #e2538a;
+}
 
 /* Punchline rotation */
 .hero-rotate {
@@ -308,8 +311,28 @@ a:hover { color: var(--accent-hover); }
   font-size: 17px;
   color: var(--text-secondary);
   max-width: 580px;
-  margin: 0 auto 36px;
+  margin: 0 auto 16px;
   line-height: 1.7;
+}
+
+.hero-also {
+  font-size: 15px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin: 0 auto 36px;
+}
+.hero-also em {
+  font-style: normal;
+  font-weight: 600;
+}
+.hero-also em.hero-claudez {
+  color: #C15F3C;
+}
+.hero-also em.hero-codex {
+  color: #10A37F;
+}
+.hero-also em.hero-copilot {
+  color: #e2538a;
 }
 
 .hero-actions {

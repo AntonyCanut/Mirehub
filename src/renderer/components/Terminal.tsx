@@ -11,14 +11,17 @@ interface TerminalProps {
   shell?: string
   initialCommand?: string | null
   externalSessionId?: string | null
+  workspaceId?: string
+  tabId?: string
   isVisible: boolean
   fontSize: number
   onActivity?: () => void
   onClose?: () => void
   onSessionCreated?: (sessionId: string) => void
+  onUserInput?: () => void
 }
 
-export function Terminal({ cwd, shell, initialCommand, externalSessionId, isVisible, fontSize, onActivity, onClose, onSessionCreated }: TerminalProps) {
+export function Terminal({ cwd, shell, initialCommand, externalSessionId, workspaceId, tabId, isVisible, fontSize, onActivity, onClose, onSessionCreated, onUserInput }: TerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const xtermRef = useRef<XTerm | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
@@ -30,6 +33,7 @@ export function Terminal({ cwd, shell, initialCommand, externalSessionId, isVisi
   const onActivityRef = useRef(onActivity)
   const onCloseRef = useRef(onClose)
   const onSessionCreatedRef = useRef(onSessionCreated)
+  const onUserInputRef = useRef(onUserInput)
 
   // Search bar state
   const [searchVisible, setSearchVisible] = useState(false)
@@ -43,6 +47,7 @@ export function Terminal({ cwd, shell, initialCommand, externalSessionId, isVisi
   onActivityRef.current = onActivity
   onCloseRef.current = onClose
   onSessionCreatedRef.current = onSessionCreated
+  onUserInputRef.current = onUserInput
 
   const fitTerminal = useCallback(() => {
     const fitAddon = fitAddonRef.current
@@ -206,11 +211,20 @@ export function Terminal({ cwd, shell, initialCommand, externalSessionId, isVisi
       xterm.onData((data: string) => {
         if (sessionIdRef.current) {
           window.kanbai.terminal.write(sessionIdRef.current, data)
+          onUserInputRef.current?.()
         }
       })
 
+      // Detect AI provider from the initial command for pixel-agents tracking
+      let provider: string | undefined
+      if (initialCommand) {
+        if (initialCommand === 'codex' || initialCommand.startsWith('codex ')) provider = 'codex'
+        else if (initialCommand === 'copilot' || initialCommand.startsWith('copilot ')) provider = 'copilot'
+        else if (initialCommand === 'claude' || initialCommand.startsWith('claude ')) provider = 'claude'
+      }
+
       // Create PTY session
-      window.kanbai.terminal.create({ cwd, shell }).then(
+      window.kanbai.terminal.create({ cwd, shell, workspaceId, tabId, provider }).then(
         (result: { id: string; pid: number }) => {
           sessionIdRef.current = result.id
           onSessionCreatedRef.current?.(result.id)
@@ -291,7 +305,7 @@ export function Terminal({ cwd, shell, initialCommand, externalSessionId, isVisi
       xterm.dispose()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cwd, shell, initialCommand, externalSessionId, fitTerminal])
+  }, [cwd, shell, initialCommand, externalSessionId, workspaceId, tabId, fitTerminal])
 
   // Focus the terminal when it becomes visible
   useEffect(() => {

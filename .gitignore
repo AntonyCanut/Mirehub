@@ -54,6 +54,9 @@ megalinter-reports/
 # Local task tracking
 tasks/
 
+# Vendored dependencies (git clones)
+vendor/
+
 # IDE
 .idea/
 .vscode/

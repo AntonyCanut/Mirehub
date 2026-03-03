@@ -1197,4 +1197,11 @@ export const IPC_CHANNELS = {
   ANALYSIS_CREATE_TICKETS: 'analysis:createTickets',
   ANALYSIS_INSTALL_TOOL: 'analysis:installTool',
   ANALYSIS_INSTALL_PROGRESS: 'analysis:installProgress',
+
+  // Pixel Agents
+  PIXEL_AGENTS_START: 'pixel-agents:start',
+  PIXEL_AGENTS_STOP: 'pixel-agents:stop',
+  PIXEL_AGENTS_EVENT: 'pixel-agents:event',
+  PIXEL_AGENTS_WEBVIEW_READY: 'pixel-agents:webviewReady',
+  PIXEL_AGENTS_SAVE_LAYOUT: 'pixel-agents:saveLayout',
 } as const

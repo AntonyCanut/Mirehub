@@ -3,9 +3,12 @@ import {
   useTerminalTabStore,
   computePaneRects,
   computeSplitDividers,
+  findPaneComponentType,
   type PaneNode,
 } from '../lib/stores/terminalTabStore'
+import { useKanbanStore } from '../lib/stores/kanbanStore'
 import { Terminal } from './Terminal'
+import { PixelAgentsPane } from './PixelAgentsPane'
 
 function findPaneInitialCommand(node: PaneNode, paneId: string): string | null {
   if (node.type === 'leaf') return node.id === paneId ? node.initialCommand : null
@@ -15,6 +18,10 @@ function findPaneInitialCommand(node: PaneNode, paneId: string): string | null {
 function findPaneExternalSessionId(node: PaneNode, paneId: string): string | null {
   if (node.type === 'leaf') return node.id === paneId ? node.externalSessionId : null
   return findPaneExternalSessionId(node.children[0], paneId) ?? findPaneExternalSessionId(node.children[1], paneId)
+}
+
+function findPaneComponent(node: PaneNode, paneId: string): 'terminal' | 'pixel-agents' {
+  return findPaneComponentType(node, paneId)
 }
 
 interface SplitContainerProps {
@@ -60,8 +67,10 @@ export function SplitContainer({ tabId, fontSize }: SplitContainerProps) {
           isActive={tab.activePaneId === rect.id}
           isTabVisible={isTabVisible}
           cwd={cwd}
+          workspaceId={tab.workspaceId}
           initialCommand={findPaneInitialCommand(tab.paneTree, rect.id)}
           externalSessionId={findPaneExternalSessionId(tab.paneTree, rect.id)}
+          componentType={findPaneComponent(tab.paneTree, rect.id)}
           rect={rect}
           fontSize={fontSize}
           setActivePane={setActivePane}
@@ -93,8 +102,10 @@ interface FlatPaneViewProps {
   isActive: boolean
   isTabVisible: boolean
   cwd: string
+  workspaceId: string
   initialCommand: string | null
   externalSessionId: string | null
+  componentType: 'terminal' | 'pixel-agents'
   rect: { x: number; y: number; w: number; h: number }
   fontSize: number
   setActivePane: (tabId: string, paneId: string) => void
@@ -110,8 +121,10 @@ function FlatPaneView({
   isActive,
   isTabVisible,
   cwd,
+  workspaceId,
   initialCommand,
   externalSessionId,
+  componentType,
   rect,
   fontSize,
   setActivePane,
@@ -141,6 +154,11 @@ function FlatPaneView({
     [tabId, paneId, setPaneSessionId],
   )
 
+  const reactivateIfDone = useKanbanStore((s) => s.reactivateIfDone)
+  const handleUserInput = useCallback(() => {
+    reactivateIfDone(tabId)
+  }, [tabId, reactivateIfDone])
+
   // Gap for dividers (2px on each side = 1px effective divider)
   const gap = 1
 
@@ -156,7 +174,11 @@ function FlatPaneView({
       }}
       onMouseDown={handleFocus}
     >
-      <Terminal cwd={cwd} initialCommand={initialCommand} externalSessionId={externalSessionId} isVisible={isTabVisible} fontSize={fontSize} onActivity={handleActivity} onClose={handleClose} onSessionCreated={handleSessionCreated} />
+      {componentType === 'pixel-agents' ? (
+        <PixelAgentsPane isVisible={isTabVisible} workspaceId={workspaceId} />
+      ) : (
+        <Terminal cwd={cwd} initialCommand={initialCommand} externalSessionId={externalSessionId} workspaceId={workspaceId} tabId={tabId} isVisible={isTabVisible} fontSize={fontSize} onActivity={handleActivity} onClose={handleClose} onSessionCreated={handleSessionCreated} onUserInput={handleUserInput} />
+      )}
     </div>
   )
 }

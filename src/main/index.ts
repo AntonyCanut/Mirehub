@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain, globalShortcut, Menu, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, globalShortcut, Menu, shell, protocol, net } from 'electron'
 import path from 'path'
+import { pathToFileURL } from 'url'
 import { execSync } from 'child_process'
 import { registerTerminalHandlers } from './ipc/terminal'
 import { registerWorkspaceHandlers } from './ipc/workspace'
@@ -27,8 +28,9 @@ import { registerHealthCheckHandlers } from './ipc/healthcheck'
 import { registerCodexConfigHandlers } from './ipc/codexConfig'
 import { registerCopilotConfigHandlers } from './ipc/copilotConfig'
 import { registerAiProviderHandlers } from './ipc/aiProvider'
+import { registerPixelAgentsHandlers, shutdownPixelAgentsService } from './ipc/pixel-agents'
 import { cleanupTerminals } from './ipc/terminal'
-import { ensureActivityHookScript, ensureAutoApproveScript, ensureKanbanDoneScript, syncAllWorkspaceEnvHooks, startActivityWatcher } from './services/activityHooks'
+import { ensureActivityHookScript, ensureAutoApproveScript, ensureKanbanDoneScript, ensurePixelAgentsHookScript, syncAllWorkspaceEnvHooks, startActivityWatcher } from './services/activityHooks'
 import { clearDockBadge } from './services/notificationService'
 import { databaseService } from './services/database'
 import { StorageService } from './services/storage'
@@ -61,6 +63,12 @@ if (process.platform === 'darwin') {
 
 // Set the app name for macOS menu bar (overrides default "Electron" in dev mode)
 app.name = 'Kanbai'
+
+// Register the pixel-agents custom scheme before app is ready
+protocol.registerSchemesAsPrivileged([{
+  scheme: 'pixel-agents',
+  privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true },
+}])
 
 // vite-plugin-electron sets VITE_DEV_SERVER_URL in dev mode
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -304,6 +312,16 @@ function buildApplicationMenu(): void {
 }
 
 app.whenReady().then(() => {
+  // Register pixel-agents protocol handler
+  protocol.handle('pixel-agents', (request) => {
+    const url = new URL(request.url)
+    const relativePath = url.pathname === '/' ? '/index.html' : url.pathname
+    const basePath = VITE_DEV_SERVER_URL
+      ? path.join(__dirname, '../../vendor/pixel-agents/dist/webview')
+      : path.join(process.resourcesPath, 'pixel-agents')
+    return net.fetch(pathToFileURL(path.join(basePath, relativePath)).toString())
+  })
+
   mainWindow = createMainWindow()
 
   // Build application menu (cross-platform)
@@ -336,6 +354,7 @@ app.whenReady().then(() => {
   registerCodexConfigHandlers(ipcMain)
   registerCopilotConfigHandlers(ipcMain)
   registerAiProviderHandlers(ipcMain)
+  registerPixelAgentsHandlers(ipcMain, () => mainWindow)
 
   // Ensure a Default namespace exists (first launch or migration)
   new StorageService().ensureDefaultNamespace()
@@ -344,6 +363,7 @@ app.whenReady().then(() => {
   ensureActivityHookScript()
   ensureAutoApproveScript()
   ensureKanbanDoneScript()
+  ensurePixelAgentsHookScript()
   syncAllWorkspaceEnvHooks()
   startActivityWatcher()
 
@@ -370,6 +390,7 @@ app.on('before-quit', () => {
   cleanupTerminals()
   cleanupClaudeSessions()
   databaseService.disconnectAll()
+  shutdownPixelAgentsService()
 })
 
 // Security: prevent new window creation

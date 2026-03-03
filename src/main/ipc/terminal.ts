@@ -81,7 +81,7 @@ function ensureZshWrapper(): string {
 export function registerTerminalHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.TERMINAL_CREATE,
-    async (_event, options: { cwd?: string; shell?: string }) => {
+    async (_event, options: { cwd?: string; shell?: string; workspaceId?: string; tabId?: string; provider?: string }) => {
       const id = uuid()
       const savedShell = new StorageService().getSettings().defaultShell
       // Validate saved shell exists — it may be a macOS path (e.g. /bin/zsh)
@@ -106,6 +106,11 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
       // "nested session" errors (the app may itself be launched from a Claude session)
       delete shellEnv.CLAUDECODE
       delete shellEnv.CLAUDE_CODE_ENTRYPOINT
+
+      // Inject workspace, tab ID, and AI provider for pixel-agents hook tracking
+      if (options.workspaceId) shellEnv.KANBAI_WORKSPACE_ID = options.workspaceId
+      if (options.tabId) shellEnv.KANBAI_TAB_ID = options.tabId
+      if (options.provider) shellEnv.KANBAI_AI_PROVIDER = options.provider
 
       if (isZsh) {
         shellEnv.ZDOTDIR = ensureZshWrapper()

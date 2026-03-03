@@ -8,6 +8,7 @@ export interface PaneLeaf {
   sessionId: string | null
   initialCommand: string | null
   externalSessionId: string | null
+  componentType?: 'terminal' | 'pixel-agents'
 }
 
 export interface PaneSplit {
@@ -46,6 +47,8 @@ interface TerminalTabActions {
   createTab: (workspaceId: string, cwd: string, label?: string, initialCommand?: string) => string
   createSplitTab: (workspaceId: string, cwd: string, label: string, leftCommand: string | null, rightCommand: string | null) => string
   createViewOnlyTab: (workspaceId: string, cwd: string, label: string, externalSessionId: string) => string
+  createPixelAgentsTab: (workspaceId: string, cwd: string) => string
+  createPixelAgentsSplitTab: (workspaceId: string, cwd: string) => string
   closeTab: (id: string) => void
   setActiveTab: (id: string) => void
   renameTab: (id: string, label: string) => void
@@ -78,8 +81,15 @@ function generateId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-function createLeafPane(initialCommand?: string, externalSessionId?: string): PaneLeaf {
-  return { type: 'leaf', id: generateId('pane'), sessionId: null, initialCommand: initialCommand ?? null, externalSessionId: externalSessionId ?? null }
+function createLeafPane(initialCommand?: string, externalSessionId?: string, componentType?: 'terminal' | 'pixel-agents'): PaneLeaf {
+  return {
+    type: 'leaf',
+    id: generateId('pane'),
+    sessionId: null,
+    initialCommand: initialCommand ?? null,
+    externalSessionId: externalSessionId ?? null,
+    ...(componentType && componentType !== 'terminal' ? { componentType } : {}),
+  }
 }
 
 // Count leaf panes in a tree
@@ -307,6 +317,71 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
       tabs: [...state.tabs, tab],
       activeTabId: id,
     }))
+    return id
+  },
+
+  createPixelAgentsTab: (workspaceId: string, cwd: string) => {
+    const workspaceTabs = get().tabs.filter((t) => t.workspaceId === workspaceId)
+    if (workspaceTabs.length >= MAX_TERMINALS_PER_WORKSPACE) {
+      // eslint-disable-next-line no-console
+      console.warn(`Terminal limit (${MAX_TERMINALS_PER_WORKSPACE}) reached for workspace ${workspaceId}`)
+      return ''
+    }
+    const pane = createLeafPane(undefined, undefined, 'pixel-agents')
+    const id = generateId('tab')
+    const tab: TerminalTabData = {
+      id,
+      label: 'Pixel Agents',
+      color: null,
+      hasActivity: false,
+      paneTree: pane,
+      activePaneId: pane.id,
+      zoomedPaneId: null,
+      workspaceId,
+      cwd,
+      initialCommand: null,
+    }
+    set((state) => ({
+      tabs: [...state.tabs, tab],
+      activeTabId: id,
+    }))
+    return id
+  },
+
+  createPixelAgentsSplitTab: (workspaceId: string, cwd: string) => {
+    const workspaceTabs = get().tabs.filter((t) => t.workspaceId === workspaceId)
+    if (workspaceTabs.length >= MAX_TERMINALS_PER_WORKSPACE) {
+      // eslint-disable-next-line no-console
+      console.warn(`Terminal limit (${MAX_TERMINALS_PER_WORKSPACE}) reached for workspace ${workspaceId}`)
+      return ''
+    }
+    const leftPane = createLeafPane('claude')
+    const rightPane = createLeafPane(undefined, undefined, 'pixel-agents')
+    const splitNode: PaneSplit = {
+      type: 'split',
+      id: generateId('split'),
+      direction: 'horizontal',
+      children: [leftPane, rightPane],
+      ratio: 0.5,
+    }
+    const id = generateId('tab')
+    const tab: TerminalTabData = {
+      id,
+      label: 'Claude + Pixel Agents',
+      color: null,
+      hasActivity: false,
+      paneTree: splitNode,
+      activePaneId: leftPane.id,
+      zoomedPaneId: null,
+      workspaceId,
+      cwd,
+      initialCommand: null,
+    }
+    set((state) => ({
+      tabs: [...state.tabs, tab],
+      activeTabId: id,
+    }))
+    getClaudeStore()?.getState().incrementWorkspaceClaude(workspaceId)
     return id
   },
 
@@ -662,6 +737,14 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     }
   },
 }))
+
+export function findPaneComponentType(node: PaneNode, paneId: string): 'terminal' | 'pixel-agents' {
+  if (node.type === 'leaf') {
+    return node.id === paneId ? (node.componentType ?? 'terminal') : 'terminal'
+  }
+  const left = findPaneComponentType(node.children[0], paneId)
+  return left !== 'terminal' ? left : findPaneComponentType(node.children[1], paneId)
+}
 
 // Export utility for components
 export { countLeaves, collectLeafIds, computePaneRects }

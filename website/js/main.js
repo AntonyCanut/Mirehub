@@ -141,31 +141,47 @@
   // --- Punchline Rotation ---
   var punchlines = [
     {
-      fr: 'Arretez de jongler<br>entre vos outils. <em class="hero-claudez">Claudez.</em>',
+      fr: 'Arrêtez de jongler<br>entre vos outils. <em class="hero-claudez">Claudez.</em>',
       en: 'Stop juggling<br>your tools. <em class="hero-claudez">Claude this.</em>',
-      subtitleFr: 'Ecrivez un ticket. Claude le resout. Vous reviewez. C\u2019est tout.',
+      subtitleFr: 'Écrivez un ticket. Claude le résout. Vous reviewez. C\u2019est tout.',
       subtitleEn: 'Write a ticket. Claude solves it. You review. That\u2019s it.',
-      descFr: 'Le Kanban de Kanbai transforme chaque tache en action concrete pour Claude AI. Il code, il met a jour le ticket en temps reel, vous gardez le controle. Plus Terminal, Git et 8 autres outils \u2014 dans une seule fenetre.',
-      descEn: 'Kanbai\u2019s Kanban turns every task into a concrete action for Claude AI. It codes, it updates the ticket in real time, you stay in control. Plus Terminal, Git and 8 more tools \u2014 in a single window.'
+      descFr: 'Le Kanban de Kanbai transforme chaque tâche en action concrète pour Claude AI. Il code, il met à jour le ticket en temps réel, vous gardez le contrôle. Plus Terminal, Git et 8 autres outils \u2014 dans une seule fenêtre.',
+      descEn: 'Kanbai\u2019s Kanban turns every task into a concrete action for Claude AI. It codes, it updates the ticket in real time, you stay in control. Plus Terminal, Git and 8 more tools \u2014 in a single window.',
+      alsoFr: 'Tourne aussi avec <em class="hero-codex">Codex</em>, <em class="hero-copilot">Copilot</em>.',
+      alsoEn: 'Also works with <em class="hero-codex">Codex</em>, <em class="hero-copilot">Copilot</em>.'
     },
     {
-      fr: 'Arretez de coder<br>a la main. <em class="hero-codex">Codex.</em>',
+      fr: 'Arrêtez de coder<br>à la main. <em class="hero-codex">Codex.</em>',
       en: 'Stop hand-coding<br>everything. <em class="hero-codex">Codex.</em>',
-      subtitleFr: 'Decrivez la tache. Codex genere le code. Vous mergez.',
+      subtitleFr: 'Décrivez la tâche. Codex génère le code. Vous mergez.',
       subtitleEn: 'Describe the task. Codex generates the code. You merge.',
-      descFr: 'Kanbai connecte OpenAI Codex a votre workflow. Chaque ticket devient du code fonctionnel \u2014 revise, teste, pret a merger. Terminal, Git et 8 autres outils dans une seule fenetre.',
-      descEn: 'Kanbai connects OpenAI Codex to your workflow. Every ticket becomes working code \u2014 reviewed, tested, ready to merge. Terminal, Git and 8 more tools in a single window.'
+      descFr: 'Kanbai connecte OpenAI Codex à votre workflow. Chaque ticket devient du code fonctionnel \u2014 révisé, testé, prêt à merger. Terminal, Git et 8 autres outils dans une seule fenêtre.',
+      descEn: 'Kanbai connects OpenAI Codex to your workflow. Every ticket becomes working code \u2014 reviewed, tested, ready to merge. Terminal, Git and 8 more tools in a single window.',
+      alsoFr: 'Tourne aussi avec <em class="hero-claudez">Claude</em>, <em class="hero-copilot">Copilot</em>.',
+      alsoEn: 'Also works with <em class="hero-claudez">Claude</em>, <em class="hero-copilot">Copilot</em>.'
+    },
+    {
+      fr: 'Plus qu\u2019un IDE,<br>votre <em class="hero-copilot">Copilot.</em>',
+      en: 'More than an IDE,<br>your <em class="hero-copilot">Copilot.</em>',
+      subtitleFr: 'Copilot code. Kanbai orchestre. Vous décidez.',
+      subtitleEn: 'Copilot codes. Kanbai orchestrates. You decide.',
+      descFr: 'Kanbai intègre GitHub Copilot à votre workflow. Chaque ticket devient une session assistée \u2014 suggestions intelligentes, complétions contextuelles, prêt à merger. Terminal, Git et 8 autres outils dans une seule fenêtre.',
+      descEn: 'Kanbai integrates GitHub Copilot into your workflow. Every ticket becomes an assisted session \u2014 smart suggestions, contextual completions, ready to merge. Terminal, Git and 8 more tools in a single window.',
+      alsoFr: 'Tourne aussi avec <em class="hero-claudez">Claude</em>, <em class="hero-codex">Codex</em>.',
+      alsoEn: 'Also works with <em class="hero-claudez">Claude</em>, <em class="hero-codex">Codex</em>.'
     }
   ];
 
   var heroTitle = document.querySelector('.hero h1');
   var heroSubtitle = document.querySelector('.hero-subtitle');
   var heroDesc = document.querySelector('.hero-description');
+  var heroAlso = document.querySelector('.hero-also');
 
-  if (heroTitle && heroSubtitle && heroDesc) {
+  if (heroTitle && heroSubtitle && heroDesc && heroAlso) {
     heroTitle.classList.add('hero-rotate');
     heroSubtitle.classList.add('hero-rotate');
     heroDesc.classList.add('hero-rotate');
+    heroAlso.classList.add('hero-rotate');
 
     var currentPunchline = Math.floor(Math.random() * punchlines.length);
 
@@ -177,12 +193,16 @@
       var enSub = heroSubtitle.querySelector('[data-lang="en"]');
       var frDesc = heroDesc.querySelector('[data-lang="fr"]');
       var enDesc = heroDesc.querySelector('[data-lang="en"]');
+      var frAlso = heroAlso.querySelector('[data-lang="fr"]');
+      var enAlso = heroAlso.querySelector('[data-lang="en"]');
       if (frTitle) frTitle.innerHTML = p.fr;
       if (enTitle) enTitle.innerHTML = p.en;
       if (frSub) frSub.textContent = p.subtitleFr;
       if (enSub) enSub.textContent = p.subtitleEn;
       if (frDesc) frDesc.textContent = p.descFr;
       if (enDesc) enDesc.textContent = p.descEn;
+      if (frAlso) frAlso.innerHTML = p.alsoFr;
+      if (enAlso) enAlso.innerHTML = p.alsoEn;
     }
 
     applyPunchline(currentPunchline);
@@ -192,12 +212,14 @@
       heroTitle.classList.add('fade-out');
       heroSubtitle.classList.add('fade-out');
       heroDesc.classList.add('fade-out');
+      heroAlso.classList.add('fade-out');
 
       setTimeout(function () {
         applyPunchline(currentPunchline);
         heroTitle.classList.remove('fade-out');
         heroSubtitle.classList.remove('fade-out');
         heroDesc.classList.remove('fade-out');
+        heroAlso.classList.remove('fade-out');
       }, 600);
     }, 120000);
   }
