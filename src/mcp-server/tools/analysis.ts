@@ -12,7 +12,7 @@ import {
   groupFindings,
   buildTicketTitle,
   buildTicketDescription,
-  ensureGitignoreExcludesReports,
+  ensureGitignoreExcludesReportsForWorkspace,
 } from '../lib/analysis-runner.js'
 import {
   readKanbanTasks,
@@ -72,8 +72,8 @@ export function registerAnalysisTools(server: McpServer, ctx: WorkspaceContext):
 
       const report = await runTool(entry, { projectPath, toolId, extraArgs })
 
-      // Auto-update .gitignore to exclude tool report directories
-      ensureGitignoreExcludesReports(projectPath, toolId)
+      // Auto-update .gitignore for all projects in the workspace
+      ensureGitignoreExcludesReportsForWorkspace(projectPath, toolId, ctx.workspaceId)
 
       const summaryText = report.error
         ? `Error: ${report.error}`

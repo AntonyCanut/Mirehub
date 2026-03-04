@@ -256,11 +256,115 @@
   flex-shrink: 0;
 }
 
+.analysis-run-all-btn--top {
+  margin-bottom: 4px;
+}
+
 .analysis-run-all-btn:hover { opacity: 0.85; }
 
 .analysis-run-all-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Project tree nodes */
+.analysis-project-node {
+  border-bottom: 1px solid var(--border);
+}
+
+.analysis-project-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.analysis-project-header:hover {
+  background: var(--bg-surface);
+}
+
+.analysis-project-header--active {
+  background: var(--bg-surface);
+  border-left: 2px solid var(--accent);
+  padding-left: 10px;
+}
+
+.analysis-project-chevron {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.analysis-project-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.analysis-project-run-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 4px;
+  font-size: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.analysis-project-header:hover .analysis-project-run-btn {
+  opacity: 1;
+}
+
+.analysis-project-run-btn:hover {
+  background: var(--accent);
+  color: var(--bg-tertiary);
+}
+
+.analysis-project-run-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.analysis-project-tools {
+  padding-left: 12px;
+}
+
+.analysis-project-tools-empty {
+  padding: 4px 12px 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.analysis-tool-item--nested {
+  padding-left: 20px;
+  border-bottom: none;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 /* Content area (right side) */

@@ -22,6 +22,7 @@ import {
   readKanbanTasks as readKanbanTasksShared,
   writeKanbanTasks as writeKanbanTasksShared,
 } from '../../mcp-server/lib/kanban-store'
+import { StorageService } from '../services/storage'
 
 // ---------------------------------------------------------------------------
 // Tool-specific JSON output types (used by parsers)
@@ -963,14 +964,16 @@ const TOOL_REPORT_PATTERNS: Record<string, string[]> = {
 const GITIGNORE_SECTION_HEADER = '# Analysis tool reports (auto-managed by Kanbai)'
 const GITIGNORE_SECTION_FOOTER = '# End analysis tool reports'
 
-function ensureGitignoreExcludesReports(projectPath: string, toolId: string): void {
-  const patterns = TOOL_REPORT_PATTERNS[toolId]
-  if (!patterns || patterns.length === 0) return
+function ensureGitignoreExcludesReports(projectPath: string, toolId?: string): void {
+  const patterns = toolId
+    ? (TOOL_REPORT_PATTERNS[toolId] ?? [])
+    : Object.values(TOOL_REPORT_PATTERNS).flat()
+  if (patterns.length === 0) return
 
   const gitignorePath = path.join(projectPath, '.gitignore')
-  if (!fs.existsSync(gitignorePath)) return
-
-  const content = fs.readFileSync(gitignorePath, 'utf-8')
+  const content = fs.existsSync(gitignorePath)
+    ? fs.readFileSync(gitignorePath, 'utf-8')
+    : ''
   const missingPatterns = patterns.filter((p) => !content.includes(p))
   if (missingPatterns.length === 0) return
 
@@ -991,6 +994,28 @@ function ensureGitignoreExcludesReports(projectPath: string, toolId: string): vo
       '',
     ].join('\n')
     fs.writeFileSync(gitignorePath, content.trimEnd() + '\n' + section, 'utf-8')
+  }
+}
+
+/**
+ * Update .gitignore for ALL projects in the same workspace as the given project.
+ * Adds ALL known report patterns (not just the current tool's) to every project.
+ * Falls back to single-project update if the project cannot be resolved to a workspace.
+ */
+function ensureGitignoreExcludesReportsForWorkspace(projectPath: string, toolId: string): void {
+  const storage = new StorageService()
+  const allProjects = storage.getProjects()
+  const project = allProjects.find((p) => p.path === projectPath)
+
+  if (!project) {
+    ensureGitignoreExcludesReports(projectPath, toolId)
+    return
+  }
+
+  // Add ALL known report patterns to ALL projects in the workspace
+  const workspaceProjects = allProjects.filter((p) => p.workspaceId === project.workspaceId)
+  for (const wp of workspaceProjects) {
+    ensureGitignoreExcludesReports(wp.path)
   }
 }
 
@@ -1163,8 +1188,8 @@ export function registerAnalysisHandlers(
       storeReport(report)
       persistReport(report)
 
-      // Auto-update .gitignore to exclude tool report directories
-      ensureGitignoreExcludesReports(options.projectPath, options.toolId)
+      // Auto-update .gitignore for all projects in the workspace
+      ensureGitignoreExcludesReportsForWorkspace(options.projectPath, options.toolId)
 
       return report
     },

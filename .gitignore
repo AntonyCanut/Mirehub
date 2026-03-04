@@ -67,3 +67,10 @@ vendor/
 # macOS code signing
 *.provisionprofile
 embedded.provisionprofile
+
+# Analysis tool reports (auto-managed by Kanbai)
+.semgrep/
+.bearer/
+.trivycache/
+.checkov/
+# End analysis tool reports

@@ -9,6 +9,7 @@ import type {
   AnalysisSeverity,
   AnalysisProgress,
   ProjectStatsData,
+  Project,
 } from '../../shared/types'
 import '../styles/analysis.css'
 
@@ -50,6 +51,7 @@ const EXT_TO_LANGUAGES: Record<string, string[]> = {
 }
 
 const ALL_REPORTS_ID = '__all__'
+const ALL_PROJECTS_ID = '__all_projects__'
 
 function formatDuration(ms: number): string {
   const seconds = (ms / 1000).toFixed(1)
@@ -71,15 +73,47 @@ function computeGrade(reports: AnalysisReport[]): 'A' | 'B' | 'C' | 'D' | 'E' | 
   return 'F'
 }
 
+function computeProjectLanguages(stats: ProjectStatsData | null): Set<string> {
+  if (!stats) return new Set<string>()
+  const langs = new Set<string>()
+  for (const entry of stats.fileTypeBreakdown) {
+    const ext = entry.ext.startsWith('.') ? entry.ext : `.${entry.ext}`
+    const mapped = EXT_TO_LANGUAGES[ext.toLowerCase()]
+    if (mapped) {
+      for (const lang of mapped) langs.add(lang)
+    }
+  }
+  if (stats.fileTypeBreakdown.some((e) => e.ext === '' || e.ext === 'Dockerfile')) {
+    langs.add('docker')
+  }
+  return langs
+}
+
+function filterRelevantTools(tools: AnalysisToolDef[], stats: ProjectStatsData | null, languages: Set<string>): AnalysisToolDef[] {
+  if (!stats || languages.size === 0) return tools
+  return tools.filter((tool) => {
+    if (tool.languages.includes('*')) return true
+    return tool.languages.some((lang) => languages.has(lang))
+  })
+}
+
 export function CodeAnalysisPanel() {
   const { t } = useI18n()
-  const { activeProjectId, projects } = useWorkspaceStore()
+  const { projects } = useWorkspaceStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const { openFile } = useViewStore()
 
-  const [tools, setTools] = useState<AnalysisToolDef[]>([])
-  const [reports, setReports] = useState<AnalysisReport[]>([])
+  // Multi-project state: Maps keyed by project ID
+  const [toolsByProject, setToolsByProject] = useState<Map<string, AnalysisToolDef[]>>(new Map())
+  const [reportsByProject, setReportsByProject] = useState<Map<string, AnalysisReport[]>>(new Map())
+  const [statsByProject, setStatsByProject] = useState<Map<string, ProjectStatsData>>(new Map())
+
+  // Sidebar selection
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [activeReportId, setActiveReportId] = useState<string | null>(ALL_REPORTS_ID)
+  const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set())
+
+  // Running / UI state
   const [runningTools, setRunningTools] = useState<Set<string>>(new Set())
   const [severityFilter, setSeverityFilter] = useState<AnalysisSeverity | 'all'>('all')
   const [selectedFindings, setSelectedFindings] = useState<Set<string>>(new Set())
@@ -90,7 +124,6 @@ export function CodeAnalysisPanel() {
   const [showTicketModal, setShowTicketModal] = useState(false)
   const [detectingTools, setDetectingTools] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
-  const [projectStats, setProjectStats] = useState<ProjectStatsData | null>(null)
 
   // Install states
   const [installingTools, setInstallingTools] = useState<Set<string>>(new Set())
@@ -104,42 +137,76 @@ export function CodeAnalysisPanel() {
 
   const installBufferRef = useRef<HTMLPreElement>(null)
 
-  const activeProject = projects.find((p) => p.id === activeProjectId)
+  // All projects in the current workspace
+  const workspaceProjects = useMemo(() => {
+    if (!activeWorkspaceId) return []
+    return projects.filter((p) => p.workspaceId === activeWorkspaceId)
+  }, [projects, activeWorkspaceId])
 
-  // Compute project languages from file extensions
-  const projectLanguages = useMemo(() => {
-    if (!projectStats) return new Set<string>()
-    const langs = new Set<string>()
-    for (const entry of projectStats.fileTypeBreakdown) {
-      const ext = entry.ext.startsWith('.') ? entry.ext : `.${entry.ext}`
-      const mapped = EXT_TO_LANGUAGES[ext.toLowerCase()]
-      if (mapped) {
-        for (const lang of mapped) langs.add(lang)
+  // The project currently selected in the sidebar (or null for "All")
+  const selectedProject = useMemo(() => {
+    if (!selectedProjectId || selectedProjectId === ALL_PROJECTS_ID) return null
+    return workspaceProjects.find((p) => p.id === selectedProjectId) ?? null
+  }, [workspaceProjects, selectedProjectId])
+
+  // Compute relevant tools per project
+  const relevantToolsByProject = useMemo(() => {
+    const result = new Map<string, AnalysisToolDef[]>()
+    for (const project of workspaceProjects) {
+      const tools = toolsByProject.get(project.id) ?? []
+      const stats = statsByProject.get(project.id) ?? null
+      const languages = computeProjectLanguages(stats)
+      result.set(project.id, filterRelevantTools(tools, stats, languages))
+    }
+    return result
+  }, [workspaceProjects, toolsByProject, statsByProject])
+
+  // Current view: tools for selected project or all
+  const currentRelevantTools = useMemo(() => {
+    if (selectedProjectId && selectedProjectId !== ALL_PROJECTS_ID) {
+      return relevantToolsByProject.get(selectedProjectId) ?? []
+    }
+    // Deduplicate tools across all projects (by tool id)
+    const seen = new Set<string>()
+    const result: AnalysisToolDef[] = []
+    for (const tools of relevantToolsByProject.values()) {
+      for (const tool of tools) {
+        if (!seen.has(tool.id)) {
+          seen.add(tool.id)
+          result.push(tool)
+        }
       }
     }
-    // Also detect Docker from Dockerfile (no extension)
-    if (projectStats.fileTypeBreakdown.some((e) => e.ext === '' || e.ext === 'Dockerfile')) {
-      langs.add('docker')
-    }
-    return langs
-  }, [projectStats])
+    return result
+  }, [selectedProjectId, relevantToolsByProject])
 
-  // Filter tools: only show tools relevant to the project languages
-  const relevantTools = useMemo(() => {
-    if (!projectStats || projectLanguages.size === 0) return tools
-    return tools.filter((tool) => {
-      // Universal tools (languages: ['*']) always relevant
-      if (tool.languages.includes('*')) return true
-      // Tool is relevant if any of its languages matches project languages
-      return tool.languages.some((lang) => projectLanguages.has(lang))
-    })
-  }, [tools, projectStats, projectLanguages])
+  // Reports for the current view
+  const currentReports = useMemo(() => {
+    if (selectedProjectId && selectedProjectId !== ALL_PROJECTS_ID) {
+      return reportsByProject.get(selectedProjectId) ?? []
+    }
+    // All reports from all projects
+    const allReports: AnalysisReport[] = []
+    for (const reports of reportsByProject.values()) {
+      allReports.push(...reports)
+    }
+    return allReports
+  }, [selectedProjectId, reportsByProject])
+
+  // All reports flattened (for grade computation)
+  const allReportsFlat = useMemo(() => {
+    const result: AnalysisReport[] = []
+    for (const reports of reportsByProject.values()) {
+      result.push(...reports)
+    }
+    return result
+  }, [reportsByProject])
 
   const aggregatedReport = useMemo(() => {
-    if (reports.length === 0) return null
+    if (currentReports.length === 0) return null
     const allFindings: AnalysisFinding[] = []
     const summary = { total: 0, critical: 0, high: 0, medium: 0, low: 0, info: 0 }
-    for (const r of reports) {
+    for (const r of currentReports) {
       allFindings.push(...r.findings)
       summary.total += r.summary.total
       summary.critical += r.summary.critical
@@ -154,82 +221,107 @@ export function CodeAnalysisPanel() {
       toolName: t('analysis.allReports'),
       findings: allFindings,
       summary,
-      duration: reports.reduce((sum, r) => sum + r.duration, 0),
+      duration: currentReports.reduce((sum, r) => sum + r.duration, 0),
       timestamp: Date.now(),
     } as AnalysisReport
-  }, [reports, t])
+  }, [currentReports, t])
 
   const activeReport = useMemo(() => {
     if (activeReportId === ALL_REPORTS_ID) return aggregatedReport
     if (!activeReportId) return null
-    return reports.find((r) => r.id === activeReportId) ?? null
-  }, [reports, activeReportId, aggregatedReport])
+    return currentReports.find((r) => r.id === activeReportId) ?? null
+  }, [currentReports, activeReportId, aggregatedReport])
 
   const projectGrade = useMemo(() => {
-    if (reports.length === 0) return null
-    return computeGrade(reports)
-  }, [reports])
+    if (allReportsFlat.length === 0) return null
+    return computeGrade(allReportsFlat)
+  }, [allReportsFlat])
 
-  // Map toolId → report for sidebar navigation
-  const reportsByTool = useMemo(() => {
-    const map = new Map<string, AnalysisReport>()
-    for (const r of reports) {
-      map.set(r.toolId, r)
+  // Count findings per project (for sidebar badges)
+  const findingsCountByProject = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const [projectId, reports] of reportsByProject) {
+      let total = 0
+      for (const r of reports) total += r.summary.total
+      counts.set(projectId, total)
     }
-    return map
-  }, [reports])
+    return counts
+  }, [reportsByProject])
 
-  // Detect tools on project change
-  const detectTools = useCallback(async () => {
-    if (!activeProject) return
-    setDetectingTools(true)
+  // Detect tools for a single project
+  const detectToolsForProject = useCallback(async (project: Project) => {
     try {
-      const detected = await window.kanbai.analysis.detectTools(activeProject.path)
-      setTools(detected)
+      const detected = await window.kanbai.analysis.detectTools(project.path)
+      setToolsByProject((prev) => new Map(prev).set(project.id, detected))
     } catch {
-      setTools([])
-    } finally {
-      setDetectingTools(false)
+      setToolsByProject((prev) => new Map(prev).set(project.id, []))
     }
-  }, [activeProject])
+  }, [])
 
-  // Load persisted reports from disk
-  const loadReports = useCallback(async () => {
-    if (!activeProject) return
+  // Load reports for a single project
+  const loadReportsForProject = useCallback(async (project: Project) => {
     try {
-      const loaded = await window.kanbai.analysis.loadReports(activeProject.path)
+      const loaded = await window.kanbai.analysis.loadReports(project.path)
       if (loaded.length > 0) {
-        setReports(loaded)
-        setActiveReportId(ALL_REPORTS_ID)
+        setReportsByProject((prev) => new Map(prev).set(project.id, loaded))
       }
     } catch {
       // silently fail
     }
-  }, [activeProject])
+  }, [])
 
-  // Load project stats to determine relevant languages
-  const loadProjectStats = useCallback(async () => {
-    if (!activeProject) return
+  // Load stats for a single project
+  const loadStatsForProject = useCallback(async (project: Project) => {
     try {
-      const stats = await window.kanbai.project.stats(activeProject.path)
-      setProjectStats(stats)
+      const stats = await window.kanbai.project.stats(project.path)
+      setStatsByProject((prev) => new Map(prev).set(project.id, stats))
     } catch {
-      setProjectStats(null)
+      // silently fail
     }
-  }, [activeProject])
+  }, [])
 
+  // Detect tools and load data for all workspace projects
+  const detectAllTools = useCallback(async () => {
+    if (workspaceProjects.length === 0) return
+    setDetectingTools(true)
+    try {
+      await Promise.allSettled(
+        workspaceProjects.map((project) => detectToolsForProject(project)),
+      )
+    } finally {
+      setDetectingTools(false)
+    }
+  }, [workspaceProjects, detectToolsForProject])
+
+  // Load all data on workspace change
   useEffect(() => {
-    detectTools()
-    loadProjectStats()
-    setReports([])
+    if (workspaceProjects.length === 0) return
+
+    // Load tools, stats, and reports for all projects
+    setDetectingTools(true)
+    const loadAll = async () => {
+      try {
+        await Promise.allSettled([
+          ...workspaceProjects.map((p) => detectToolsForProject(p)),
+          ...workspaceProjects.map((p) => loadStatsForProject(p)),
+          ...workspaceProjects.map((p) => loadReportsForProject(p)),
+        ])
+      } finally {
+        setDetectingTools(false)
+      }
+    }
+    loadAll()
+
+    // Reset selection state but keep data
     setActiveReportId(ALL_REPORTS_ID)
+    setSelectedProjectId(null)
     setSelectedFindings(new Set())
     setInstallOutput({})
     setActiveInstallTool(null)
     setInstallingTools(new Set())
     setSelectedFinding(null)
-    loadReports()
-  }, [detectTools, loadProjectStats, loadReports])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load on workspace change only
+  }, [activeWorkspaceId])
 
   // Subscribe to progress events
   useEffect(() => {
@@ -289,7 +381,7 @@ export function CodeAnalysisPanel() {
     try {
       const result = await window.kanbai.analysis.installTool(toolId)
       if (result.installed) {
-        detectTools()
+        detectAllTools()
         setToastMessage(t('analysis.installSuccess'))
         setTimeout(() => setToastMessage(null), 3000)
       } else if (result.error) {
@@ -306,21 +398,23 @@ export function CodeAnalysisPanel() {
         return n
       })
     }
-  }, [detectTools, t])
+  }, [detectAllTools, t])
 
-  // Run a single tool
-  const runTool = useCallback(async (toolId: string) => {
-    if (!activeProject) return
-    setActiveInstallTool(null) // switch to reports view
-    setRunningTools((prev) => new Set(prev).add(toolId))
+  // Run a tool on a specific project
+  const runToolForProject = useCallback(async (project: Project, toolId: string) => {
+    setActiveInstallTool(null)
+    setRunningTools((prev) => new Set(prev).add(`${project.id}:${toolId}`))
     try {
       const report = await window.kanbai.analysis.run({
-        projectPath: activeProject.path,
+        projectPath: project.path,
         toolId,
       })
-      setReports((prev) => {
-        const filtered = prev.filter((r) => r.toolId !== toolId)
-        return [...filtered, report]
+      setReportsByProject((prev) => {
+        const next = new Map(prev)
+        const existing = next.get(project.id) ?? []
+        const filtered = existing.filter((r) => r.toolId !== toolId)
+        next.set(project.id, [...filtered, report])
+        return next
       })
       setActiveReportId(report.id)
     } catch {
@@ -328,11 +422,11 @@ export function CodeAnalysisPanel() {
     } finally {
       setRunningTools((prev) => {
         const next = new Set(prev)
-        next.delete(toolId)
+        next.delete(`${project.id}:${toolId}`)
         return next
       })
     }
-  }, [activeProject])
+  }, [])
 
   // Cancel a running tool
   const cancelTool = useCallback(async (toolId: string) => {
@@ -340,7 +434,12 @@ export function CodeAnalysisPanel() {
       await window.kanbai.analysis.cancel(toolId)
       setRunningTools((prev) => {
         const next = new Set(prev)
-        next.delete(toolId)
+        // Remove all entries matching this toolId
+        for (const key of next) {
+          if (key === toolId || key.endsWith(`:${toolId}`)) {
+            next.delete(key)
+          }
+        }
         return next
       })
     } catch {
@@ -350,38 +449,76 @@ export function CodeAnalysisPanel() {
 
   // Delete a report
   const deleteReport = useCallback(async (reportId: string) => {
-    if (!activeProject) return
-    try {
-      await window.kanbai.analysis.deleteReport(activeProject.path, reportId)
-      setReports((prev) => prev.filter((r) => r.id !== reportId))
-      if (activeReportId === reportId) {
-        setActiveReportId(null)
+    // Find which project owns this report
+    for (const [projectId, reports] of reportsByProject) {
+      const report = reports.find((r) => r.id === reportId)
+      if (report) {
+        const project = workspaceProjects.find((p) => p.id === projectId)
+        if (!project) return
+        try {
+          await window.kanbai.analysis.deleteReport(project.path, reportId)
+          setReportsByProject((prev) => {
+            const next = new Map(prev)
+            const existing = next.get(projectId) ?? []
+            next.set(projectId, existing.filter((r) => r.id !== reportId))
+            return next
+          })
+          if (activeReportId === reportId) {
+            setActiveReportId(ALL_REPORTS_ID)
+          }
+        } catch {
+          // silently fail
+        }
+        return
       }
-    } catch {
-      // silently fail
     }
-  }, [activeProject, activeReportId])
+  }, [reportsByProject, workspaceProjects, activeReportId])
 
-  // Run all installed relevant tools
+  // Run all installed relevant tools on ALL workspace projects
   const runAll = useCallback(async () => {
-    const installed = relevantTools.filter((tool) => tool.installed)
-    for (const tool of installed) {
-      await runTool(tool.id)
-    }
-    if (installed.length > 1) {
-      setActiveReportId(ALL_REPORTS_ID)
-    }
-  }, [relevantTools, runTool])
+    const promises = workspaceProjects.flatMap((project) => {
+      const tools = relevantToolsByProject.get(project.id) ?? []
+      return tools
+        .filter((tool) => tool.installed)
+        .map((tool) => runToolForProject(project, tool.id))
+    })
+    await Promise.allSettled(promises)
+    setActiveReportId(ALL_REPORTS_ID)
+    setSelectedProjectId(null)
+  }, [workspaceProjects, relevantToolsByProject, runToolForProject])
+
+  // Run all tools for a specific project
+  const runAllForProject = useCallback(async (project: Project) => {
+    const tools = relevantToolsByProject.get(project.id) ?? []
+    const installed = tools.filter((tool) => tool.installed)
+    await Promise.allSettled(installed.map((tool) => runToolForProject(project, tool.id)))
+    setSelectedProjectId(project.id)
+    setActiveReportId(ALL_REPORTS_ID)
+  }, [relevantToolsByProject, runToolForProject])
 
   // Re-analyze current report or all reports
   const reanalyze = useCallback(async () => {
     if (activeReportId === ALL_REPORTS_ID) {
-      await runAll()
+      if (selectedProjectId && selectedProjectId !== ALL_PROJECTS_ID) {
+        const project = workspaceProjects.find((p) => p.id === selectedProjectId)
+        if (project) await runAllForProject(project)
+      } else {
+        await runAll()
+      }
     } else {
-      const report = reports.find((r) => r.id === activeReportId)
-      if (report) await runTool(report.toolId)
+      const report = currentReports.find((r) => r.id === activeReportId)
+      if (report) {
+        // Find which project owns this report and run on that project
+        for (const [projectId, reports] of reportsByProject) {
+          if (reports.some((r) => r.id === activeReportId)) {
+            const project = workspaceProjects.find((p) => p.id === projectId)
+            if (project) await runToolForProject(project, report.toolId)
+            break
+          }
+        }
+      }
     }
-  }, [activeReportId, reports, runAll, runTool])
+  }, [activeReportId, selectedProjectId, currentReports, reportsByProject, workspaceProjects, runAll, runAllForProject, runToolForProject])
 
   // Filtered findings
   const filteredFindings = useMemo(() => {
@@ -396,7 +533,14 @@ export function CodeAnalysisPanel() {
     for (const finding of filteredFindings) {
       let key: string
       if (groupBy === 'file') {
-        key = finding.file
+        // When showing all projects, prefix with project name
+        if (!selectedProjectId || selectedProjectId === ALL_PROJECTS_ID) {
+          const ownerProject = findProjectForFinding(finding, reportsByProject, workspaceProjects)
+          const prefix = ownerProject ? `${ownerProject.name}/` : ''
+          key = prefix + finding.file
+        } else {
+          key = finding.file
+        }
       } else if (groupBy === 'rule') {
         key = finding.rule || '(no rule)'
       } else {
@@ -414,7 +558,7 @@ export function CodeAnalysisPanel() {
       entries.sort(([a], [b]) => a.localeCompare(b))
     }
     return entries
-  }, [filteredFindings, groupBy])
+  }, [filteredFindings, groupBy, selectedProjectId, reportsByProject, workspaceProjects])
 
   // Toggle group collapse
   const toggleGroup = useCallback((group: string) => {
@@ -424,6 +568,19 @@ export function CodeAnalysisPanel() {
         next.delete(group)
       } else {
         next.add(group)
+      }
+      return next
+    })
+  }, [])
+
+  // Toggle project collapse in sidebar
+  const toggleProjectCollapse = useCallback((projectId: string) => {
+    setCollapsedProjects((prev) => {
+      const next = new Set(prev)
+      if (next.has(projectId)) {
+        next.delete(projectId)
+      } else {
+        next.add(projectId)
       }
       return next
     })
@@ -459,11 +616,13 @@ export function CodeAnalysisPanel() {
   // Handle click on file link (navigate to file)
   const handleNavigateToFile = useCallback(
     (finding: AnalysisFinding) => {
-      if (!activeProject) return
-      const fullPath = activeProject.path + '/' + finding.file
+      // Find the project that owns this finding
+      const ownerProject = selectedProject ?? findProjectForFinding(finding, reportsByProject, workspaceProjects)
+      if (!ownerProject) return
+      const fullPath = ownerProject.path + '/' + finding.file
       openFile(fullPath, finding.line)
     },
-    [activeProject, openFile],
+    [selectedProject, reportsByProject, workspaceProjects, openFile],
   )
 
   // Ticket preview count
@@ -487,21 +646,23 @@ export function CodeAnalysisPanel() {
       if (activeReportId === ALL_REPORTS_ID) {
         // Group findings by source report
         const findingToReport = new Map<string, string>()
-        for (const r of reports) {
-          for (const f of r.findings) {
-            findingToReport.set(f.id, r.id)
+        for (const reports of reportsByProject.values()) {
+          for (const r of reports) {
+            for (const f of r.findings) {
+              findingToReport.set(f.id, r.id)
+            }
           }
         }
-        const grouped = new Map<string, string[]>()
+        const groupedByReport = new Map<string, string[]>()
         for (const fid of selectedFindings) {
           const rid = findingToReport.get(fid)
           if (rid) {
-            if (!grouped.has(rid)) grouped.set(rid, [])
-            grouped.get(rid)!.push(fid)
+            if (!groupedByReport.has(rid)) groupedByReport.set(rid, [])
+            groupedByReport.get(rid)!.push(fid)
           }
         }
         let totalTickets = 0
-        for (const [reportId, findingIds] of grouped) {
+        for (const [reportId, findingIds] of groupedByReport) {
           const result = await window.kanbai.analysis.createTickets({
             findingIds,
             reportId,
@@ -533,20 +694,35 @@ export function CodeAnalysisPanel() {
     } catch {
       // silently fail
     }
-  }, [activeReport, activeReportId, activeWorkspaceId, reports, selectedFindings, ticketPriority, ticketGroupBy, t])
+  }, [activeReport, activeReportId, activeWorkspaceId, reportsByProject, selectedFindings, ticketPriority, ticketGroupBy, t])
 
-  const installedCount = relevantTools.filter((tool) => tool.installed).length
+  // Is a tool running for a given project?
+  const isToolRunningForProject = useCallback((projectId: string, toolId: string) => {
+    return runningTools.has(`${projectId}:${toolId}`)
+  }, [runningTools])
+
+  const installedCount = currentRelevantTools.filter((tool) => tool.installed).length
   const isAnyRunning = runningTools.size > 0
 
   // Name of the currently running tool (for display in content area)
   const runningToolName = useMemo(() => {
     if (runningTools.size === 0) return null
-    const firstRunningId = runningTools.values().next().value as string
-    const tool = relevantTools.find((t) => t.id === firstRunningId)
-    return tool?.name ?? firstRunningId
-  }, [runningTools, relevantTools])
+    const firstRunningKey = runningTools.values().next().value as string
+    const toolId = firstRunningKey.includes(':') ? firstRunningKey.split(':')[1]! : firstRunningKey
+    const tool = currentRelevantTools.find((t) => t.id === toolId)
+    return tool?.name ?? toolId
+  }, [runningTools, currentRelevantTools])
 
-  if (!activeProject) {
+  // Total findings across all projects
+  const totalFindingsAllProjects = useMemo(() => {
+    let total = 0
+    for (const reports of reportsByProject.values()) {
+      for (const r of reports) total += r.summary.total
+    }
+    return total
+  }, [reportsByProject])
+
+  if (workspaceProjects.length === 0) {
     return <div className="analysis-panel-empty">{t('analysis.noProject')}</div>
   }
 
@@ -567,7 +743,7 @@ export function CodeAnalysisPanel() {
         )}
         <button
           className="analysis-refresh-btn"
-          onClick={detectTools}
+          onClick={detectAllTools}
           disabled={detectingTools}
           title={t('common.refresh')}
         >
@@ -580,94 +756,157 @@ export function CodeAnalysisPanel() {
         {/* Sidebar */}
         <div className="analysis-sidebar">
           <div className="analysis-sidebar-header">
-            <span>{t('analysis.relevantTools')}</span>
+            <span>{t('analysis.projects')}</span>
           </div>
+
+          {/* Run All button at top */}
+          {workspaceProjects.length > 0 && (
+            <button
+              className="analysis-run-all-btn analysis-run-all-btn--top"
+              onClick={runAll}
+              disabled={isAnyRunning}
+            >
+              {isAnyRunning ? t('analysis.running') : `\u25B6 ${t('analysis.runAllProjects')}`}
+            </button>
+          )}
+
           <div className="analysis-sidebar-list">
-            {detectingTools && tools.length === 0 && (
+            {detectingTools && toolsByProject.size === 0 && (
               <div className="analysis-loading">
                 <span className="analysis-spinner" />
                 {t('analysis.detectingTools')}
               </div>
             )}
 
-            {!detectingTools && relevantTools.length === 0 && (
-              <div className="analysis-tools-empty">
-                <span>{t('analysis.notRelevant')}</span>
-                <span className="analysis-tools-empty-hint">{t('analysis.installHint')}</span>
-              </div>
-            )}
+            {/* Project tree */}
+            {workspaceProjects.map((project) => {
+              const projectTools = relevantToolsByProject.get(project.id) ?? []
+              const projectReports = reportsByProject.get(project.id) ?? []
+              const reportsByToolForProject = new Map<string, AnalysisReport>()
+              for (const r of projectReports) reportsByToolForProject.set(r.toolId, r)
+              const isCollapsed = collapsedProjects.has(project.id)
+              const projectFindingsCount = findingsCountByProject.get(project.id) ?? 0
+              const isProjectSelected = selectedProjectId === project.id && activeReportId === ALL_REPORTS_ID
 
-            {/* "Tous" entry */}
-            {reports.length > 0 && (
-              <div
-                className={`analysis-tool-item analysis-tool-item--tous${activeReportId === ALL_REPORTS_ID ? ' analysis-tool-item--active' : ''}`}
-                onClick={() => setActiveReportId(ALL_REPORTS_ID)}
-              >
-                <span className="analysis-tool-name">{t('common.all')}</span>
-                {aggregatedReport && (
-                  <span className="analysis-tool-count">{aggregatedReport.summary.total}</span>
-                )}
-              </div>
-            )}
-
-            {relevantTools.map((tool) => {
-              const toolReport = reportsByTool.get(tool.id)
-              const isToolActive = activeReportId !== ALL_REPORTS_ID && toolReport?.id === activeReportId
               return (
-                <div
-                  key={tool.id}
-                  className={`analysis-tool-item${isToolActive ? ' analysis-tool-item--active' : ''}`}
-                  onClick={() => toolReport && setActiveReportId(toolReport.id)}
-                  style={toolReport ? { cursor: 'pointer' } : undefined}
-                >
-                  <span className="analysis-tool-category-dot" data-category={tool.category} />
-                  <span className="analysis-tool-name">{tool.name}</span>
-                  {toolReport && (
-                    <span className="analysis-tool-count">{toolReport.summary.total}</span>
-                  )}
-                  {tool.installed ? (
-                    runningTools.has(tool.id) ? (
-                      <button
-                        className="analysis-tool-cancel-btn"
-                        onClick={(e) => { e.stopPropagation(); cancelTool(tool.id) }}
-                        title={t('common.cancel')}
-                      >
-                        {'\u25A0'}
-                      </button>
-                    ) : (
-                      <button
-                        className="analysis-tool-run-btn"
-                        onClick={(e) => { e.stopPropagation(); runTool(tool.id) }}
-                        title={t('analysis.runAll')}
-                      >
-                        {'\u25B6'}
-                      </button>
-                    )
-                  ) : installingTools.has(tool.id) ? (
-                    <span className="analysis-tool-installing-spinner" />
-                  ) : (
+                <div key={project.id} className="analysis-project-node">
+                  {/* Project header */}
+                  <div
+                    className={`analysis-project-header${isProjectSelected ? ' analysis-project-header--active' : ''}`}
+                    onClick={() => {
+                      setSelectedProjectId(project.id)
+                      setActiveReportId(ALL_REPORTS_ID)
+                      setSelectedFinding(null)
+                    }}
+                  >
                     <button
-                      className="analysis-tool-install-btn"
-                      onClick={(e) => { e.stopPropagation(); installTool(tool.id) }}
-                      title={t('analysis.installButton')}
+                      className="analysis-project-chevron"
+                      onClick={(e) => { e.stopPropagation(); toggleProjectCollapse(project.id) }}
                     >
-                      {'\u2B07'} {t('analysis.installButton')}
+                      <span style={{ transform: isCollapsed ? 'rotate(0deg)' : 'rotate(90deg)', display: 'inline-block', transition: 'transform 0.15s ease', fontSize: '8px' }}>
+                        {'\u25B6'}
+                      </span>
                     </button>
+                    <span className="analysis-project-name">{project.name}</span>
+                    {projectFindingsCount > 0 && (
+                      <span className="analysis-tool-count">{projectFindingsCount}</span>
+                    )}
+                    <button
+                      className="analysis-project-run-btn"
+                      onClick={(e) => { e.stopPropagation(); runAllForProject(project) }}
+                      disabled={isAnyRunning}
+                      title={t('analysis.runAll')}
+                    >
+                      {'\u25B6'}
+                    </button>
+                  </div>
+
+                  {/* Tools under this project */}
+                  {!isCollapsed && (
+                    <div className="analysis-project-tools">
+                      {projectTools.length === 0 && !detectingTools && (
+                        <div className="analysis-project-tools-empty">
+                          {t('analysis.notRelevant')}
+                        </div>
+                      )}
+                      {projectTools.map((tool) => {
+                        const toolReport = reportsByToolForProject.get(tool.id)
+                        const isToolActive = selectedProjectId === project.id && activeReportId !== ALL_REPORTS_ID && toolReport?.id === activeReportId
+                        const isRunning = isToolRunningForProject(project.id, tool.id) || runningTools.has(tool.id)
+
+                        return (
+                          <div
+                            key={tool.id}
+                            className={`analysis-tool-item analysis-tool-item--nested${isToolActive ? ' analysis-tool-item--active' : ''}`}
+                            onClick={() => {
+                              if (toolReport) {
+                                setSelectedProjectId(project.id)
+                                setActiveReportId(toolReport.id)
+                                setSelectedFinding(null)
+                              }
+                            }}
+                            style={toolReport ? { cursor: 'pointer' } : undefined}
+                          >
+                            <span className="analysis-tool-category-dot" data-category={tool.category} />
+                            <span className="analysis-tool-name">{tool.name}</span>
+                            {toolReport && (
+                              <span className="analysis-tool-count">{toolReport.summary.total}</span>
+                            )}
+                            {tool.installed ? (
+                              isRunning ? (
+                                <button
+                                  className="analysis-tool-cancel-btn"
+                                  onClick={(e) => { e.stopPropagation(); cancelTool(tool.id) }}
+                                  title={t('common.cancel')}
+                                >
+                                  {'\u25A0'}
+                                </button>
+                              ) : (
+                                <button
+                                  className="analysis-tool-run-btn"
+                                  onClick={(e) => { e.stopPropagation(); runToolForProject(project, tool.id) }}
+                                  title={t('analysis.runAll')}
+                                >
+                                  {'\u25B6'}
+                                </button>
+                              )
+                            ) : installingTools.has(tool.id) ? (
+                              <span className="analysis-tool-installing-spinner" />
+                            ) : (
+                              <button
+                                className="analysis-tool-install-btn"
+                                onClick={(e) => { e.stopPropagation(); installTool(tool.id) }}
+                                title={t('analysis.installButton')}
+                              >
+                                {'\u2B07'} {t('analysis.installButton')}
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
                   )}
                 </div>
               )
             })}
-          </div>
 
-          {installedCount > 1 && (
-            <button
-              className="analysis-run-all-btn"
-              onClick={runAll}
-              disabled={isAnyRunning}
-            >
-              {isAnyRunning ? t('analysis.running') : t('analysis.runAll')}
-            </button>
-          )}
+            {/* "All" entry at bottom */}
+            {allReportsFlat.length > 0 && (
+              <div
+                className={`analysis-tool-item analysis-tool-item--tous${!selectedProjectId || selectedProjectId === ALL_PROJECTS_ID ? (activeReportId === ALL_REPORTS_ID ? ' analysis-tool-item--active' : '') : ''}`}
+                onClick={() => {
+                  setSelectedProjectId(null)
+                  setActiveReportId(ALL_REPORTS_ID)
+                  setSelectedFinding(null)
+                }}
+              >
+                <span className="analysis-tool-name">{t('common.all')}</span>
+                {totalFindingsAllProjects > 0 && (
+                  <span className="analysis-tool-count">{totalFindingsAllProjects}</span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Content area */}
@@ -716,7 +955,7 @@ export function CodeAnalysisPanel() {
               )}
 
               {/* Empty state: no reports yet, nothing running — central launch button */}
-              {reports.length === 0 && !isAnyRunning && (
+              {allReportsFlat.length === 0 && !isAnyRunning && (
                 <div className="analysis-content-empty">
                   <span className="analysis-content-empty-icon">{'\u{1F50D}'}</span>
                   <span>{t('analysis.emptyTitle')}</span>
@@ -740,7 +979,7 @@ export function CodeAnalysisPanel() {
                 </div>
               )}
 
-              {reports.length > 0 && (
+              {currentReports.length > 0 && (
                 <div className="analysis-reports">
                   {activeReport && (
                     <>
@@ -1044,4 +1283,20 @@ export function CodeAnalysisPanel() {
       )}
     </div>
   )
+}
+
+/** Find which project owns a given finding by searching through all reports */
+function findProjectForFinding(
+  finding: AnalysisFinding,
+  reportsByProject: Map<string, AnalysisReport[]>,
+  workspaceProjects: Project[],
+): Project | null {
+  for (const [projectId, reports] of reportsByProject) {
+    for (const r of reports) {
+      if (r.findings.some((f) => f.id === finding.id)) {
+        return workspaceProjects.find((p) => p.id === projectId) ?? null
+      }
+    }
+  }
+  return null
 }

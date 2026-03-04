@@ -890,16 +890,18 @@ const GITIGNORE_SECTION_FOOTER = '# End analysis tool reports'
 /**
  * After running an analysis tool, ensure the project's .gitignore excludes
  * any report directories the tool may have created.
- * Only modifies .gitignore if the project already has one (i.e. is a git repo).
+ * Creates .gitignore if it does not exist yet.
  */
-export function ensureGitignoreExcludesReports(projectPath: string, toolId: string): void {
-  const patterns = TOOL_REPORT_PATTERNS[toolId]
-  if (!patterns || patterns.length === 0) return
+export function ensureGitignoreExcludesReports(projectPath: string, toolId?: string): void {
+  const patterns = toolId
+    ? (TOOL_REPORT_PATTERNS[toolId] ?? [])
+    : Object.values(TOOL_REPORT_PATTERNS).flat()
+  if (patterns.length === 0) return
 
   const gitignorePath = path.join(projectPath, '.gitignore')
-  if (!fs.existsSync(gitignorePath)) return
-
-  const content = fs.readFileSync(gitignorePath, 'utf-8')
+  const content = fs.existsSync(gitignorePath)
+    ? fs.readFileSync(gitignorePath, 'utf-8')
+    : ''
   const missingPatterns = patterns.filter((p) => !content.includes(p))
   if (missingPatterns.length === 0) return
 
@@ -923,6 +925,45 @@ export function ensureGitignoreExcludesReports(projectPath: string, toolId: stri
       '',
     ].join('\n')
     fs.writeFileSync(gitignorePath, content.trimEnd() + '\n' + section, 'utf-8')
+  }
+}
+
+/**
+ * Update .gitignore for ALL projects in the same workspace as the given project.
+ * Reads the Kanbai data file directly to resolve workspace membership.
+ * Falls back to single-project update if the project cannot be resolved.
+ */
+export function ensureGitignoreExcludesReportsForWorkspace(
+  projectPath: string,
+  toolId: string,
+  workspaceId?: string,
+): void {
+  const dataPath = path.join(os.homedir(), '.kanbai', 'data.json')
+  if (!fs.existsSync(dataPath)) {
+    ensureGitignoreExcludesReports(projectPath, toolId)
+    return
+  }
+
+  try {
+    const raw = fs.readFileSync(dataPath, 'utf-8')
+    const data = JSON.parse(raw) as { projects?: Array<{ path: string; workspaceId: string }> }
+    const projects = data.projects ?? []
+
+    const resolvedWorkspaceId =
+      workspaceId ?? projects.find((p) => p.path === projectPath)?.workspaceId
+
+    if (!resolvedWorkspaceId) {
+      ensureGitignoreExcludesReports(projectPath, toolId)
+      return
+    }
+
+    // Add ALL known report patterns to ALL projects in the workspace
+    const workspaceProjects = projects.filter((p) => p.workspaceId === resolvedWorkspaceId)
+    for (const wp of workspaceProjects) {
+      ensureGitignoreExcludesReports(wp.path)
+    }
+  } catch {
+    ensureGitignoreExcludesReports(projectPath, toolId)
   }
 }
 

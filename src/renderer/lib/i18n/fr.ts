@@ -1688,6 +1688,8 @@ export const fr = {
   'analysis.emptyTitle': 'Aucune analyse lancee',
   'analysis.emptyHint': 'Lancez une analyse pour détecter les problemes de votre projet',
   'analysis.launchAnalysis': 'Lancer l\'analyse',
+  'analysis.projects': 'Projets',
+  'analysis.runAllProjects': 'Analyser tous les projets',
   'view.analysis': 'Analyse',
 
   // Namespace
