@@ -221,6 +221,7 @@ export interface AppSettings {
   autoCloseCompletedTerminals: boolean
   autoCloseCtoTerminals: boolean
   autoApprove: boolean
+  autoCreateAiMemoryRefactorTickets: boolean
   tutorialCompleted: boolean
   tutorialSeenSections: string[]
 }

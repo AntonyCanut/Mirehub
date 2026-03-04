@@ -30,6 +30,7 @@ export function createDefaultSettings(): AppSettings {
     autoCloseCompletedTerminals: false,
     autoCloseCtoTerminals: true,
     autoApprove: true,
+    autoCreateAiMemoryRefactorTickets: true,
     tutorialCompleted: false,
     tutorialSeenSections: [],
   }

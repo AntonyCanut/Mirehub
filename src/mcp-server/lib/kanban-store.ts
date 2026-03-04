@@ -37,6 +37,91 @@ export function getNextTicketNumber(tasks: KanbanTask[]): number {
   return tasks.reduce((max, t) => Math.max(max, t.ticketNumber ?? 0), 0) + 1
 }
 
+export const AI_MEMORY_REFACTOR_LABEL = 'ai-memory-refactor'
+
+const MEMORY_REFACTOR_INTERVAL = 10
+
+const MEMORY_REFACTOR_DESCRIPTION = `## Objective
+Review and consolidate all AI memory files to reflect the current project state.
+
+## Files to review
+- [ ] CLAUDE.md / CLAUDE.local.md (workspace + each project)
+- [ ] .claude/rules/ (rule files)
+- [ ] .claude/agents/ (agent configs)
+- [ ] GEMINI.md / .gemini/settings.json
+- [ ] .codex/config.toml
+- [ ] .copilot/config.json
+
+## Tasks
+1. Read all existing AI memory files in the workspace and each project
+2. Consolidate duplicated information across files
+3. Update with new knowledge gained from recent tickets
+4. Improve clarity: architecture, technologies, conventions, decisions
+5. Copy useful project-level memory files to the workspace level
+6. Remove outdated or contradictory information
+
+## Acceptance Criteria
+- No redundant information across memory files
+- Memory reflects the current project architecture and conventions
+- Files are clear and easy to understand for any AI agent
+`
+
+function readAutoMemoryRefactorSetting(): boolean {
+  try {
+    const dataPath = path.join(os.homedir(), '.kanbai', 'data.json')
+    if (!fs.existsSync(dataPath)) return true
+    const raw = fs.readFileSync(dataPath, 'utf-8')
+    const data = JSON.parse(raw)
+    return data.settings?.autoCreateAiMemoryRefactorTickets ?? true
+  } catch {
+    return true
+  }
+}
+
+/**
+ * Creates an AI memory refactor ticket when:
+ * - The setting is enabled in app settings (defaults to true)
+ * - No open refactor ticket (TODO/WORKING) already exists
+ * - Either: (a) no refactor ticket has ever been created (first run),
+ *   or (b) the ticket count has reached a multiple of MEMORY_REFACTOR_INTERVAL
+ */
+export function maybeCreateMemoryRefactorTicket(
+  workspaceId: string,
+  tasks: KanbanTask[],
+): KanbanTask | null {
+  if (!readAutoMemoryRefactorSetting()) return null
+
+  const hasOpenRefactor = tasks.some(
+    (t) =>
+      t.labels?.includes(AI_MEMORY_REFACTOR_LABEL) &&
+      (t.status === 'TODO' || t.status === 'WORKING'),
+  )
+  if (hasOpenRefactor) return null
+
+  const hasAnyRefactorHistory = tasks.some(
+    (t) => t.labels?.includes(AI_MEMORY_REFACTOR_LABEL),
+  )
+
+  const shouldCreate = !hasAnyRefactorHistory || tasks.length % MEMORY_REFACTOR_INTERVAL === 0
+  if (!shouldCreate) return null
+
+  const refactorTask: KanbanTask = {
+    id: uuid(),
+    workspaceId,
+    ticketNumber: getNextTicketNumber(tasks),
+    title: 'Refonte des memoires IA (Claude.md, Gemini.md, etc)',
+    description: MEMORY_REFACTOR_DESCRIPTION,
+    status: 'TODO',
+    priority: 'medium',
+    labels: [AI_MEMORY_REFACTOR_LABEL, 'maintenance'],
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  }
+  tasks.push(refactorTask)
+  writeKanbanTasks(workspaceId, tasks)
+  return refactorTask
+}
+
 export function createKanbanTask(
   workspaceId: string,
   data: {
@@ -87,6 +172,12 @@ export function createKanbanTask(
   }
 
   writeKanbanTasks(workspaceId, tasks)
+
+  // Auto-create memory refactor ticket every N tickets
+  // Setting check is delegated to the caller (IPC handler passes the setting value).
+  // When called from MCP, defaults to enabled.
+  maybeCreateMemoryRefactorTicket(workspaceId, readKanbanTasks(workspaceId))
+
   return task
 }
 

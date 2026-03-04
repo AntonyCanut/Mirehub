@@ -8,6 +8,7 @@ import {
   getKanbanPath,
   readKanbanTasks,
   writeKanbanTasks,
+  maybeCreateMemoryRefactorTicket,
 } from '../../mcp-server/lib/kanban-store'
 
 /**
@@ -362,6 +363,10 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
       }
       tasks.push(task)
       writeKanbanTasks(data.workspaceId, tasks)
+
+      // Auto-create memory refactor ticket every 10 tickets (checks setting internally)
+      maybeCreateMemoryRefactorTicket(data.workspaceId, readKanbanTasks(data.workspaceId))
+
       return task
     },
   )

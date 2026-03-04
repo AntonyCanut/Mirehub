@@ -36,6 +36,7 @@ import { ensureActivityHookScript, ensureAutoApproveScript, ensureKanbanDoneScri
 import { clearDockBadge } from './services/notificationService'
 import { databaseService } from './services/database'
 import { StorageService } from './services/storage'
+import { readKanbanTasks, maybeCreateMemoryRefactorTicket } from '../mcp-server/lib/kanban-store'
 import { IPC_CHANNELS } from '../shared/types'
 import { IS_MAC, IS_WIN, getExtendedToolPaths } from '../shared/platform'
 
@@ -376,6 +377,15 @@ app.whenReady().then(() => {
   ensurePixelAgentsHookScript()
   syncAllWorkspaceEnvHooks()
   startActivityWatcher()
+
+  // Check if any workspace needs an AI memory refactor ticket (first run or milestone)
+  const storage = new StorageService()
+  for (const ws of storage.getWorkspaces()) {
+    const tasks = readKanbanTasks(ws.id)
+    if (tasks.length > 0) {
+      maybeCreateMemoryRefactorTicket(ws.id, tasks)
+    }
+  }
 
   // DevTools shortcut: Cmd+Alt+I
   globalShortcut.register('CommandOrControl+Alt+I', () => {

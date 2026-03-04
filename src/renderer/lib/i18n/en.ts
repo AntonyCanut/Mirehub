@@ -149,6 +149,7 @@ export const en = {
   'settings.kanban': 'Kanban',
   'settings.autoCloseCompletedTerminals': 'Auto-close terminals of completed tickets',
   'settings.autoCloseCtoTerminals': 'Auto-close CTO mode terminals',
+  'settings.autoCreateAiMemoryRefactorTickets': 'Auto-create AI memory refactor tickets',
   'settings.about': 'About',
   'settings.appName': 'Name',
   'settings.version': 'Version',

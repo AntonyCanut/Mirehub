@@ -876,6 +876,20 @@ export function SettingsPanel() {
                   </button>
                 </div>
               </div>
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.autoCreateAiMemoryRefactorTickets')}</label>
+                    <span className="settings-hint">{locale === 'fr' ? 'Tous les 10 tickets, cree un ticket pour refondre les memoires IA (Claude.md, Gemini.md, etc)' : 'Every 10 tickets, create a ticket to refactor AI memory files (Claude.md, Gemini.md, etc)'}</span>
+                  </div>
+                  <button
+                    className={`settings-toggle${settings.autoCreateAiMemoryRefactorTickets ? ' settings-toggle--active' : ''}`}
+                    onClick={() => updateSetting('autoCreateAiMemoryRefactorTickets', !settings.autoCreateAiMemoryRefactorTickets)}
+                  >
+                    <span className="settings-toggle-knob" />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
