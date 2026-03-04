@@ -102,6 +102,10 @@ Built-in HTTP client for testing API endpoints directly from the application.
 | Code Analysis | <img src="website/screenshots/screenshot-code-analysis.png" width="400"> |
 | Project Stats | <img src="website/screenshots/screenshot-stats.png" width="400"> |
 | API Tester | <img src="website/screenshots/screenshot-api.png" width="400"> |
+| Codex Config | <img src="website/screenshots/screenshot-codex.png" width="400"> |
+| Copilot Config | <img src="website/screenshots/screenshot-copilot.png" width="400"> |
+| Gemini Config | <img src="website/screenshots/screenshot-gemini.png" width="400"> |
+| Pixel Agents | <img src="website/screenshots/screenshot-pixel-agents.png" width="400"> |
 
 </details>
 

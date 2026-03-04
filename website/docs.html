@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kanbai — Documentation</title>
-  <meta name="description" content="Documentation complète de Kanbai : Terminal, Claude AI, Codex, Copilot, Gemini, Git, Kanban avec Mode CTO, Packages multi-ecosystème avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester. Guide d'utilisation avec screenshots.">
+  <meta name="description" content="Documentation complète de Kanbai : Terminal, Claude AI, Codex, Copilot, Gemini, Pixel Agents, Git, Kanban avec Mode CTO, Packages multi-ecosystème avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester, Health Checks. Guide d'utilisation avec screenshots.">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -138,12 +138,23 @@
                 <span data-lang="fr">Général</span>
                 <span data-lang="en">General</span>
               </a>
+              <a href="#gemini-interface" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Interface</a>
+              <a href="#gemini-tools" class="docs-nav-link" style="padding-left:28px;font-size:13px;">
+                <span data-lang="fr">Outils</span>
+                <span data-lang="en">Tools</span>
+              </a>
+              <a href="#gemini-security" class="docs-nav-link" style="padding-left:28px;font-size:13px;">
+                <span data-lang="fr">Sécurité</span>
+                <span data-lang="en">Security</span>
+              </a>
+              <a href="#gemini-agents" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Agents</a>
               <a href="#gemini-memory" class="docs-nav-link" style="padding-left:28px;font-size:13px;">
                 <span data-lang="fr">Mémoire</span>
                 <span data-lang="en">Memory</span>
               </a>
               <a href="#gemini-skills" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Skills</a>
             </div>
+            <a href="#pixel-agents" class="docs-nav-link">Pixel Agents</a>
             <a href="#git" class="docs-nav-link">Git</a>
             <div class="docs-nav-group">
               <a href="#kanban" class="docs-nav-group-title">Kanban</a>
@@ -596,6 +607,13 @@
                 <span data-lang="fr">Bouton de lancement direct dans la barre d'outils, s'ouvre dans un pane dédié</span><span data-lang="en">Direct launch button in the toolbar, opens in a dedicated pane</span>
               </div>
             </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong>Pixel Agents</strong>
+                <span data-lang="fr">Bureau virtuel pixel art pour vos agents IA, accessible via le bouton + du terminal</span><span data-lang="en">Pixel art virtual office for your AI agents, accessible via the terminal's + button</span>
+              </div>
+            </div>
           </div>
 
           <div class="docs-callout docs-callout--tip">
@@ -605,7 +623,52 @@
             </div>
           </div>
 
-          
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Types d'onglets</span>
+              <span data-lang="en">Tab types</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Le bouton <strong>+</strong> de la barre d'onglets propose six types d'onglets pour différents workflows :</span>
+              <span data-lang="en">The <strong>+</strong> button in the tab bar offers six tab types for different workflows:</span>
+            </p>
+            <ul>
+              <li>
+                <span data-lang="fr"><strong>Terminal</strong> — Shell seul, pour les opérations en ligne de commande</span>
+                <span data-lang="en"><strong>Terminal</strong> — Shell only, for command-line operations</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Claude + Terminal</strong> — Vue splitée Claude Code + shell côte à côte</span>
+                <span data-lang="en"><strong>Claude + Terminal</strong> — Split view with Claude Code + shell side by side</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Codex + Terminal</strong> — Vue splitée Codex + shell côte à côte</span>
+                <span data-lang="en"><strong>Codex + Terminal</strong> — Split view with Codex + shell side by side</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Copilot + Terminal</strong> — Vue splitée Copilot + shell côte à côte</span>
+                <span data-lang="en"><strong>Copilot + Terminal</strong> — Split view with Copilot + shell side by side</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Claude + Pixel Agents</strong> — Vue splitée Claude Code + bureau virtuel pixel art</span>
+                <span data-lang="en"><strong>Claude + Pixel Agents</strong> — Split view with Claude Code + pixel art virtual office</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Pixel Agents</strong> — Bureau virtuel pixel art en plein écran</span>
+                <span data-lang="en"><strong>Pixel Agents</strong> — Full screen pixel art virtual office</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-terminal-menu.png" alt="Terminal — Tab type menu" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Terminal — Menu de création d'onglets avec les 6 types disponibles</span>
+              <span data-lang="en">Terminal — Tab creation menu with all 6 available types</span>
+            </p>
+          </div>
+
+
           <div class="docs-text">
             <h3>
               <span data-lang="fr">Guide : configurér un terminal de travail efficace</span>
@@ -1503,6 +1566,14 @@
             </p>
           </div>
 
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-codex.png" alt="Codex — Configuration dashboard" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Codex — Tableau de bord de configuration avec modèles GPT-5.3/5.2/5.1, politique d'approbation et paramètres sandbox</span>
+              <span data-lang="en">Codex — Configuration dashboard with GPT-5.3/5.2/5.1 models, approval policy and sandbox settings</span>
+            </p>
+          </div>
+
           <div class="docs-callout docs-callout--tip">
             <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             <div class="docs-callout-content">
@@ -1643,6 +1714,14 @@
               <span data-lang="en">Copilot integrates with the Kanban the same way as Claude and Codex. Every ticket can be sent to Copilot via the dedicated button. Kanbai opens a terminal tab with Copilot CLI and passes it the ticket's prompt file. The workflow is identical: TODO → WORKING → DONE/PENDING/FAILED.</span>
             </p>
           </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-copilot.png" alt="Copilot — Configuration dashboard" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Copilot — Tableau de bord avec sélection de modèles (Claude Sonnet 4.5, Opus 4.5, GPT-5.2, o4-mini) et modes d'approbation</span>
+              <span data-lang="en">Copilot — Dashboard with model selection (Claude Sonnet 4.5, Opus 4.5, GPT-5.2, o4-mini) and approval modes</span>
+            </p>
+          </div>
         </section>
 
         <!-- ============================================ -->
@@ -1652,8 +1731,8 @@
           <h2>Gemini</h2>
           <div class="docs-text">
             <p>
-              <span data-lang="fr">Kanbai intègre Google Gemini en tant que quatrième agent IA, aux côtés de Claude, Codex et Copilot. Un tableau de bord dédié avec trois onglets permet de configurer Gemini : Général, Mémoire et Skills. Gemini fonctionne avec le même Kanban que les autres agents — envoyez un ticket à Gemini, il le résout automatiquement.</span>
-              <span data-lang="en">Kanbai integrates Google Gemini as a fourth AI agent, alongside Claude, Codex and Copilot. A dedicated dashboard with three tabs lets you configure Gemini: General, Memory and Skills. Gemini works with the same Kanban as the other agents — send a ticket to Gemini, it resolves it automatically.</span>
+              <span data-lang="fr">Kanbai intègre Google Gemini en tant que quatrième agent IA, aux côtés de Claude, Codex et Copilot. Un tableau de bord dédié avec sept onglets permet de configurer Gemini : Général, Interface, Outils, Sécurité, Agents, Mémoire et Skills. Gemini fonctionne avec le même Kanban que les autres agents — envoyez un ticket à Gemini, il le résout automatiquement.</span>
+              <span data-lang="en">Kanbai integrates Google Gemini as a fourth AI agent, alongside Claude, Codex and Copilot. A dedicated dashboard with seven tabs lets you configure Gemini: General, Interface, Tools, Security, Agents, Memory and Skills. Gemini works with the same Kanban as the other agents — send a ticket to Gemini, it resolves it automatically.</span>
             </p>
           </div>
 
@@ -1721,16 +1800,8 @@
               </h4>
               <ul>
                 <li>
-                  <span data-lang="fr"><strong>Sandbox</strong> — Exécutez les commandes dans un environnement isolé</span>
-                  <span data-lang="en"><strong>Sandbox</strong> — Run commands in an isolated environment</span>
-                </li>
-                <li>
                   <span data-lang="fr"><strong>Mode Vim</strong> — Activez les raccourcis Vim dans l'interface</span>
                   <span data-lang="en"><strong>Vim mode</strong> — Enable Vim keybindings in the interface</span>
-                </li>
-                <li>
-                  <span data-lang="fr"><strong>Thinking mode</strong> — Activez le raisonnement inline pour des réponses plus détaillées</span>
-                  <span data-lang="en"><strong>Thinking mode</strong> — Enable inline reasoning for more detailed responses</span>
                 </li>
                 <li>
                   <span data-lang="fr"><strong>Arbre de répertoires</strong> — Incluez automatiquement la structure des fichiers dans le contexte</span>
@@ -1738,6 +1809,322 @@
                 </li>
               </ul>
             </div>
+          </div>
+
+          <hr class="docs-separator">
+
+          <!-- Gemini Interface -->
+          <div id="gemini-interface">
+            <h3>
+              <span data-lang="fr">Onglet Interface</span>
+              <span data-lang="en">Interface tab</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet Interface contrôle l'apparence et le comportement visuel de Gemini CLI.</span>
+                <span data-lang="en">The Interface tab controls the appearance and visual behavior of Gemini CLI.</span>
+              </p>
+
+              <h4>
+                <span data-lang="fr">Mode de réflexion</span>
+                <span data-lang="en">Thinking mode</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Off</strong> — Désactivé, réponses directes</span>
+                  <span data-lang="en"><strong>Off</strong> — Disabled, direct responses</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Full</strong> — Raisonnement complet visible dans les réponses</span>
+                  <span data-lang="en"><strong>Full</strong> — Full reasoning visible in responses</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Affichage</span>
+                <span data-lang="en">Display</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Thème automatique</strong> — Suit le thème du système (clair/sombre)</span>
+                  <span data-lang="en"><strong>Auto theme</strong> — Follows system theme (light/dark)</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Masquer titre</strong> — Cache le titre de la fenêtre</span>
+                  <span data-lang="en"><strong>Hide title</strong> — Hides the window title</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Titre dynamique</strong> — Met à jour le titre selon le contexte</span>
+                  <span data-lang="en"><strong>Dynamic title</strong> — Updates the title based on context</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Buffer alternatif</strong> — Utilise le buffer alternatif du terminal</span>
+                  <span data-lang="en"><strong>Alternate buffer</strong> — Uses the terminal's alternate buffer</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Couleur de fond</strong> — Couleur personnalisée pour le fond du terminal</span>
+                  <span data-lang="en"><strong>Background color</strong> — Custom background color for the terminal</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Rendu incrémental</strong> — Affiche les réponses progressivement</span>
+                  <span data-lang="en"><strong>Incremental rendering</strong> — Displays responses progressively</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Visibilité</span>
+                <span data-lang="en">Visibility</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Masquer bannière / astuces</strong> — Cache les éléments d'aide au démarrage</span>
+                  <span data-lang="en"><strong>Hide banner / tips</strong> — Hides startup help elements</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Raccourcis</strong> — Affiche ou masque les raccourcis clavier</span>
+                  <span data-lang="en"><strong>Shortcuts</strong> — Show or hide keyboard shortcuts</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Résumé du contexte</strong> — Affiche un résumé du contexte actuel</span>
+                  <span data-lang="en"><strong>Context summary</strong> — Shows a summary of the current context</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Spinner</strong> — Affiche un indicateur de chargement</span>
+                  <span data-lang="en"><strong>Spinner</strong> — Shows a loading indicator</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Avertissement répertoire home</strong> — Alerte quand Gemini s'exécute dans le répertoire home</span>
+                  <span data-lang="en"><strong>Home directory warning</strong> — Warns when Gemini runs in the home directory</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-gemini-interface.png" alt="Gemini — Interface settings" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Gemini — Paramètres d'interface : mode de réflexion, affichage et visibilité</span>
+              <span data-lang="en">Gemini — Interface settings: thinking mode, display and visibility</span>
+            </p>
+          </div>
+
+          <hr class="docs-separator">
+
+          <!-- Gemini Outils -->
+          <div id="gemini-tools">
+            <h3>
+              <span data-lang="fr">Onglet Outils</span>
+              <span data-lang="en">Tools tab</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet Outils configure l'environnement d'exécution de Gemini : sandbox, shell, outils disponibles et gestion du contexte fichier.</span>
+                <span data-lang="en">The Tools tab configures Gemini's execution environment: sandbox, shell, available tools and file context management.</span>
+              </p>
+
+              <h4>Sandbox</h4>
+              <ul>
+                <li><strong>Off</strong> — <span data-lang="fr">Pas d'isolation, exécution directe</span><span data-lang="en">No isolation, direct execution</span></li>
+                <li><strong>Auto</strong> — <span data-lang="fr">Isolation automatique selon le contexte</span><span data-lang="en">Automatic isolation based on context</span></li>
+                <li><strong>Seatbelt</strong> — <span data-lang="fr">Sandbox macOS natif (léger)</span><span data-lang="en">Native macOS sandbox (lightweight)</span></li>
+                <li><strong>Docker</strong> — <span data-lang="fr">Isolation complète via Docker</span><span data-lang="en">Full isolation via Docker</span></li>
+                <li><strong>Podman</strong> — <span data-lang="fr">Alternative rootless à Docker</span><span data-lang="en">Rootless alternative to Docker</span></li>
+              </ul>
+
+              <h4>Shell</h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Shell interactif</strong> — Charge le profil shell complet (.bashrc, .zshrc)</span>
+                  <span data-lang="en"><strong>Interactive shell</strong> — Loads full shell profile (.bashrc, .zshrc)</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Couleurs</strong> — Active les couleurs ANSI dans les sorties</span>
+                  <span data-lang="en"><strong>Colors</strong> — Enables ANSI colors in output</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Outils</span>
+                <span data-lang="en">Tools</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>ripgrep</strong> — Utilise ripgrep pour la recherche dans les fichiers</span>
+                  <span data-lang="en"><strong>ripgrep</strong> — Uses ripgrep for file search</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Correction LLM</strong> — Corrige automatiquement les erreurs via le modèle</span>
+                  <span data-lang="en"><strong>LLM correction</strong> — Automatically fixes errors via the model</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Seuil de troncature</strong> — Limite la taille des sorties longues</span>
+                  <span data-lang="en"><strong>Truncation threshold</strong> — Limits the size of long outputs</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Contexte</span>
+                <span data-lang="en">Context</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Max directories</strong> — Nombre maximum de répertoires à inclure dans le contexte</span>
+                  <span data-lang="en"><strong>Max directories</strong> — Maximum number of directories to include in context</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Mémoire include dirs</strong> — Répertoires supplémentaires inclus dans la mémoire</span>
+                  <span data-lang="en"><strong>Memory include dirs</strong> — Additional directories included in memory</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Filtrage fichiers</span>
+                <span data-lang="en">File filtering</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>.gitignore / .geminiignore</strong> — Respect des fichiers d'exclusion</span>
+                  <span data-lang="en"><strong>.gitignore / .geminiignore</strong> — Respects exclusion files</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Recherche récursive / fuzzy</strong> — Options de recherche avancée dans les fichiers</span>
+                  <span data-lang="en"><strong>Recursive / fuzzy search</strong> — Advanced file search options</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Chemins ignorés</strong> — Liste de chemins exclus de l'analyse</span>
+                  <span data-lang="en"><strong>Ignored paths</strong> — List of paths excluded from analysis</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <hr class="docs-separator">
+
+          <!-- Gemini Sécurité -->
+          <div id="gemini-security">
+            <h3>
+              <span data-lang="fr">Onglet Sécurité</span>
+              <span data-lang="en">Security tab</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet Sécurité contrôle les niveaux de confiance, les extensions autorisées et les options de confidentialité de Gemini.</span>
+                <span data-lang="en">The Security tab controls trust levels, allowed extensions and Gemini's privacy options.</span>
+              </p>
+
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Mode YOLO</strong> — Désactive toutes les confirmations (usage avancé uniquement)</span>
+                  <span data-lang="en"><strong>YOLO mode</strong> — Disables all confirmations (advanced use only)</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Approbation permanente</strong> — Mémorise les approbations pour les actions récurrentes</span>
+                  <span data-lang="en"><strong>Permanent approval</strong> — Remembers approvals for recurring actions</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Conseca</strong> — Mode de sécurité renforcée</span>
+                  <span data-lang="en"><strong>Conseca</strong> — Enhanced security mode</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Extensions Git</strong> — Contrôle les extensions Git autorisées</span>
+                  <span data-lang="en"><strong>Git extensions</strong> — Controls allowed Git extensions</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Extensions autorisées</strong> — Liste blanche des extensions tierces</span>
+                  <span data-lang="en"><strong>Allowed extensions</strong> — Whitelist of third-party extensions</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Confiance dossiers</strong> — Niveaux de confiance par répertoire de travail</span>
+                  <span data-lang="en"><strong>Folder trust</strong> — Trust levels per working directory</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Rédaction variables d'env</strong> — Masque les variables d'environnement sensibles dans les logs</span>
+                  <span data-lang="en"><strong>Env variable redaction</strong> — Hides sensitive environment variables in logs</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <hr class="docs-separator">
+
+          <!-- Gemini Agents -->
+          <div id="gemini-agents">
+            <h3>
+              <span data-lang="fr">Onglet Agents</span>
+              <span data-lang="en">Agents tab</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet Agents gère les fonctionnalités expérimentales liées aux sous-agents et au routage intelligent de Gemini.</span>
+                <span data-lang="en">The Agents tab manages experimental features related to sub-agents and Gemini's intelligent routing.</span>
+              </p>
+
+              <h4>
+                <span data-lang="fr">Fonctionnalités expérimentales</span>
+                <span data-lang="en">Experimental features</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Activer agents</strong> — Active le système d'agents multiples</span>
+                  <span data-lang="en"><strong>Enable agents</strong> — Activates the multi-agent system</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Mode plan</strong> — Les agents proposent un plan avant d'agir</span>
+                  <span data-lang="en"><strong>Plan mode</strong> — Agents propose a plan before acting</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Routage modèle</strong> — Sélection intelligente du modèle selon la tâche</span>
+                  <span data-lang="en"><strong>Model routing</strong> — Intelligent model selection based on task</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Récupération web directe</strong> — Permet aux agents d'accéder directement au web</span>
+                  <span data-lang="en"><strong>Direct web fetch</strong> — Allows agents to access the web directly</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Sous-agents</span>
+                <span data-lang="en">Sub-agents</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Routeur Gemma</strong> — Utilise Gemma pour le routage local des sous-agents</span>
+                  <span data-lang="en"><strong>Gemma router</strong> — Uses Gemma for local sub-agent routing</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Masquage sorties</strong> — Cache les sorties détaillées des sous-agents</span>
+                  <span data-lang="en"><strong>Output masking</strong> — Hides detailed sub-agent outputs</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Presse-papiers</span>
+                <span data-lang="en">Clipboard</span>
+              </h4>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>OSC52</strong> — Support du protocole OSC52 pour le copier-coller via le terminal</span>
+                  <span data-lang="en"><strong>OSC52</strong> — OSC52 protocol support for copy-paste via terminal</span>
+                </li>
+              </ul>
+
+              <h4>
+                <span data-lang="fr">Skills, Hooks et agents personnalisés</span>
+                <span data-lang="en">Skills, Hooks and custom agents</span>
+              </h4>
+              <p>
+                <span data-lang="fr">Configuration des skills spécifiques, des hooks d'événements et définition d'agents personnalisés pour des workflows sur mesure.</span>
+                <span data-lang="en">Configuration of specific skills, event hooks and custom agent definitions for tailored workflows.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-gemini-agents.png" alt="Gemini — Agents settings" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Gemini — Agents : fonctionnalités expérimentales, sous-agents, presse-papiers et agents personnalisés</span>
+              <span data-lang="en">Gemini — Agents: experimental features, sub-agents, clipboard and custom agents</span>
+            </p>
           </div>
 
           <hr class="docs-separator">
@@ -1779,6 +2166,97 @@
             <p>
               <span data-lang="fr">Gemini s'intègre au Kanban de la même manière que Claude, Codex et Copilot. Chaque ticket peut être envoyé à Gemini via le bouton dédié. Kanbai ouvre un onglet terminal avec Gemini CLI et lui transmet le fichier prompt du ticket. Le workflow est identique : TODO → WORKING → DONE/PENDING/FAILED.</span>
               <span data-lang="en">Gemini integrates with the Kanban the same way as Claude, Codex and Copilot. Every ticket can be sent to Gemini via the dedicated button. Kanbai opens a terminal tab with Gemini CLI and passes it the ticket's prompt file. The workflow is identical: TODO → WORKING → DONE/PENDING/FAILED.</span>
+            </p>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-gemini.png" alt="Gemini — General configuration" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Gemini — Configuration générale avec modèles 2.5 Pro/Flash et 3 Pro/Flash, paramètres de session et mode d'approbation</span>
+              <span data-lang="en">Gemini — General configuration with 2.5 Pro/Flash and 3 Pro/Flash models, session parameters and approval mode</span>
+            </p>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-gemini-outils.png" alt="Gemini — Tools and sandbox" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Gemini — Outils et sandbox (Off/Auto/Seatbelt/Docker/Podman), configuration shell et outils disponibles</span>
+              <span data-lang="en">Gemini — Tools and sandbox (Off/Auto/Seatbelt/Docker/Podman), shell configuration and available tools</span>
+            </p>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-gemini-securite.png" alt="Gemini — Security settings" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Gemini — Sécurité : mode YOLO, extensions, niveaux de confiance et vie privée</span>
+              <span data-lang="en">Gemini — Security: YOLO mode, extensions, trust levels and privacy</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- PIXEL AGENTS                                 -->
+        <!-- ============================================ -->
+        <section class="docs-section" id="pixel-agents">
+          <h2>Pixel Agents</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Pixel Agents est une fonctionnalité ludique intégrée à Kanbai qui visualise vos agents IA sous forme de personnages pixel art dans un bureau virtuel. Chaque agent (Claude, Codex, Copilot, Gemini) est représenté par un avatar animé qui travaille dans un espace partagé. C'est un moyen fun et visuel de suivre l'activité de vos agents IA.</span>
+              <span data-lang="en">Pixel Agents is a fun feature integrated into Kanbai that visualizes your AI agents as pixel art characters in a virtual office. Each agent (Claude, Codex, Copilot, Gemini) is represented by an animated avatar working in a shared space. It's a fun and visual way to track your AI agents' activity.</span>
+            </p>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Accès</span>
+              <span data-lang="en">Access</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Pixel Agents est accessible depuis l'onglet Terminal via le bouton <strong>+</strong>. Deux modes sont disponibles :</span>
+              <span data-lang="en">Pixel Agents is accessible from the Terminal tab via the <strong>+</strong> button. Two modes are available:</span>
+            </p>
+            <ul>
+              <li><span data-lang="fr"><strong>Pixel Agents</strong> — Vue plein écran du bureau virtuel avec vos agents</span><span data-lang="en"><strong>Pixel Agents</strong> — Full screen view of the virtual office with your agents</span></li>
+              <li><span data-lang="fr"><strong>Claude + Pixel Agents</strong> — Vue splitée avec un terminal Claude Code à gauche et le bureau virtuel à droite</span><span data-lang="en"><strong>Claude + Pixel Agents</strong> — Split view with a Claude Code terminal on the left and the virtual office on the right</span></li>
+            </ul>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Fonctionnalités</span>
+              <span data-lang="en">Features</span>
+            </h3>
+            <ul>
+              <li><span data-lang="fr"><strong>+ Agent</strong> — Ajoutez de nouveaux agents à votre bureau virtuel</span><span data-lang="en"><strong>+ Agent</strong> — Add new agents to your virtual office</span></li>
+              <li><span data-lang="fr"><strong>Layout</strong> — Personnalisez la disposition du bureau (meubles, décorations)</span><span data-lang="en"><strong>Layout</strong> — Customize the office layout (furniture, decorations)</span></li>
+              <li><span data-lang="fr"><strong>Settings</strong> — Configurez le comportement des agents et les animations</span><span data-lang="en"><strong>Settings</strong> — Configure agent behavior and animations</span></li>
+            </ul>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Installation</span>
+              <span data-lang="en">Installation</span>
+            </h3>
+            <p>
+              <span data-lang="fr">Pixel Agents peut être installé et mis à jour depuis le centre de mises à jour de Kanbai (icône en haut à droite). Une fois installé, les options Pixel Agents apparaissent automatiquement dans le menu + du Terminal.</span>
+              <span data-lang="en">Pixel Agents can be installed and updated from Kanbai's update center (icon in the top right). Once installed, Pixel Agents options automatically appear in the Terminal's + menu.</span>
+            </p>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-terminal-menu.png" alt="Terminal — Menu with Pixel Agents options" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Terminal — Menu de création d'onglet affichant toutes les options : Terminal, Claude, Codex, Copilot et Pixel Agents</span>
+              <span data-lang="en">Terminal — Tab creation menu showing all options: Terminal, Claude, Codex, Copilot and Pixel Agents</span>
+            </p>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-pixel-agents.png" alt="Pixel Agents — Virtual office with AI agents" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Pixel Agents — Bureau virtuel pixel art avec agents IA animés, bureaux, bibliothèques et décorations personnalisables</span>
+              <span data-lang="en">Pixel Agents — Pixel art virtual office with animated AI agents, desks, bookshelves and customizable decorations</span>
             </p>
           </div>
         </section>
@@ -2428,6 +2906,14 @@
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Vue Packages : gestionnaire multi-ecosystème avec filtres intelligents, liens directs vers les registres, mises à jour en un clic et chat IA pour l'analyse de dépendances.</span>
               <span data-lang="en">Packages view: multi-ecosystem manager with smart filters, direct registry links, one-click updates and AI chat for dependency analysis.</span>
+            </p>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-packages-updates.png" alt="Packages — Available updates with batch update" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Mises à jour disponibles : 5 packages avec nouvelles versions détectées (react, zustand, zod...), bouton « Tout mettre à jour » pour mise à jour groupée en un clic.</span>
+              <span data-lang="en">Available updates: 5 packages with new versions detected (react, zustand, zod...), "Update all" button for one-click batch updates.</span>
             </p>
           </div>
         </section>
@@ -3475,6 +3961,7 @@
               <li><strong>Claude Code</strong> — <span data-lang="fr">Dernière version disponible</span><span data-lang="en">Latest available version</span></li>
               <li><strong>Git</strong> — <span data-lang="fr">Version actuelle vs dernière version</span><span data-lang="en">Current version vs latest version</span></li>
               <li><strong>RTK</strong> — <span data-lang="fr">Token-optimized CLI proxy</span><span data-lang="en">Token-optimized CLI proxy</span></li>
+              <li><strong>Pixel Agents</strong> — <span data-lang="fr">Installation et mises à jour du bureau virtuel pixel art</span><span data-lang="en">Installation and updates for the pixel art virtual office</span></li>
             </ul>
             <p>
               <span data-lang="fr">Chaque outil affiche sa version actuelle, la dernière version disponible, et un bouton d'installation en un clic avec suivi de progression en temps reel.</span>

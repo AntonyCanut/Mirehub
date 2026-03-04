@@ -1,0 +1,20 @@
+{
+  "general": {
+    "enableNotifications": false,
+    "vimMode": false,
+    "debugKeystrokeLogging": false
+  },
+  "billing": {
+    "overageStrategy": "never"
+  },
+  "ide": {
+    "enabled": false
+  },
+  "hooks": {
+    "notify": [
+      "bash",
+      "/Users/akc/.kanbai/hooks/kanbai-activity.sh",
+      "working"
+    ]
+  }
+}
