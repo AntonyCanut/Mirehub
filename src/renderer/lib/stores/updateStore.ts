@@ -7,6 +7,16 @@ interface InstallStatus {
   error?: string
 }
 
+interface UpdateActionResult {
+  success: boolean
+  error?: string
+}
+
+function ensureSuccessfulUpdate(result: UpdateActionResult, fallback: string): void {
+  if (result.success) return
+  throw new Error(result.error || fallback)
+}
+
 interface UpdateState {
   updates: UpdateInfo[]
   isChecking: boolean
@@ -47,12 +57,14 @@ export const useUpdateStore = create<UpdateStore>((set, get) => ({
   installUpdate: async (tool: string, scope: string, projectId?: string) => {
     set({ installingTool: tool, installStatus: null })
     try {
-      await window.kanbai.updates.install(tool, scope, projectId)
+      const result = await window.kanbai.updates.install(tool, scope, projectId)
+      ensureSuccessfulUpdate(result, 'Unknown error during update')
       set({ installStatus: { tool, success: true } })
       // Re-check after install
       await get().checkUpdates()
-    } catch (err) {
-      set({ installStatus: { tool, success: false, error: String(err) } })
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err.message : String(err)
+      set({ installStatus: { tool, success: false, error } })
     } finally {
       set({ installingTool: null })
     }
@@ -61,11 +73,13 @@ export const useUpdateStore = create<UpdateStore>((set, get) => ({
   uninstallUpdate: async (tool: string) => {
     set({ installingTool: tool, installStatus: null })
     try {
-      await window.kanbai.updates.uninstall(tool)
+      const result = await window.kanbai.updates.uninstall(tool)
+      ensureSuccessfulUpdate(result, 'Unknown error during uninstall')
       set({ installStatus: { tool, success: true } })
       await get().checkUpdates()
-    } catch (err) {
-      set({ installStatus: { tool, success: false, error: String(err) } })
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err.message : String(err)
+      set({ installStatus: { tool, success: false, error } })
     } finally {
       set({ installingTool: null })
     }

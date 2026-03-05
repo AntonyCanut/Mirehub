@@ -358,9 +358,9 @@ const api = {
   // Updates
   updates: {
     check: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_CHECK),
-    install: (tool: string, scope: string, projectId?: string) =>
+    install: (tool: string, scope: string, projectId?: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.UPDATE_INSTALL, { tool, scope, projectId }),
-    uninstall: (tool: string) =>
+    uninstall: (tool: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.UPDATE_UNINSTALL, { tool }),
     onStatus: (callback: (data: unknown) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, payload: unknown) => callback(payload)
