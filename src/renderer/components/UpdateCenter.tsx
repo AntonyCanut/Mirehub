@@ -140,7 +140,9 @@ export function UpdateCenter() {
                 disabled={isAnyChecking}
                 title={t('updates.checkTooltip')}
               >
-                {isAnyChecking ? '...' : '\u21BB'}
+                {isAnyChecking ? (
+                  <span className="notification-spinner">{'\u21BB'}</span>
+                ) : '\u21BB'}
               </button>
               {availableUpdates.length > 1 && (
                 <button className="notification-update-all" onClick={handleInstallAll}>
@@ -237,7 +239,9 @@ export function UpdateCenter() {
                     </div>
                     <div className="notification-item-actions">
                       <button className="notification-item-btn" onClick={() => handleInstall(update.tool, update.scope)} disabled={installingTool === update.tool}>
-                        {installingTool === update.tool ? '...' : t('updates.update')}
+                        {installingTool === update.tool ? (
+                          <span className="notification-spinner">{'\u21BB'}</span>
+                        ) : t('updates.update')}
                       </button>
                     </div>
                   </div>
@@ -250,6 +254,11 @@ export function UpdateCenter() {
             <span className="notification-last-check">
               {t('updates.lastCheck', { time: formatTime(lastChecked) })}
             </span>
+            {badgeCount > 0 && (
+              <button className="notification-footer-settings" onClick={openToolsSettings}>
+                {t('updates.openToolsSettings')}
+              </button>
+            )}
           </div>
         </div>
       )}

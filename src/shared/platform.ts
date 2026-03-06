@@ -60,6 +60,9 @@ export function getExtendedToolPaths(): string[] {
     '/usr/local/bin',
     '/usr/local/sbin',
     `${home}/.nvm/versions/node`,
+    `${home}/.local/bin`,
+    `${home}/.cargo/bin`,
+    `${home}/go/bin`,
   ]
 }
 

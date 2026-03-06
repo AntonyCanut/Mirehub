@@ -34,6 +34,11 @@ vi.mock('electron', () => ({
     ],
   },
   app: {
+    getName: () => 'Kanbai',
+    getPath: (name: string) => {
+      if (name === 'home') return '/tmp/test-home'
+      return `/tmp/test-${name}`
+    },
     relaunch: (...args: unknown[]) => mockAppRelaunch(...args),
     quit: (...args: unknown[]) => mockAppQuit(...args),
   },

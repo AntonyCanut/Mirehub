@@ -131,9 +131,9 @@ describe('platform module', () => {
         expect(paths.some((p) => p.includes('homebrew'))).toBe(true)
       })
 
-      it('does not include .cargo/bin on macOS', () => {
+      it('includes .cargo/bin on macOS', () => {
         const paths = getExtendedToolPaths()
-        expect(paths.some((p) => p.includes('.cargo'))).toBe(false)
+        expect(paths.some((p) => p.includes('.cargo/bin'))).toBe(true)
       })
     }
   })

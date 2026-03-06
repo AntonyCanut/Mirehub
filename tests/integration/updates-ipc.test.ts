@@ -13,6 +13,27 @@ vi.mock('../../src/shared/platform', async () => {
   }
 })
 
+// Mock fs/promises for rtk vendor operations
+const mockFsRm = vi.fn().mockResolvedValue(undefined)
+const mockFsMkdir = vi.fn().mockResolvedValue(undefined)
+const mockFsAccess = vi.fn().mockRejectedValue(new Error('not found'))
+
+vi.mock('fs/promises', async () => {
+  const actual = await vi.importActual<typeof import('fs/promises')>('fs/promises')
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      rm: mockFsRm,
+      mkdir: mockFsMkdir,
+      access: mockFsAccess,
+    },
+    rm: mockFsRm,
+    mkdir: mockFsMkdir,
+    access: mockFsAccess,
+  }
+})
+
 // Mock BrowserWindow
 const mockWebContentsSend = vi.fn()
 vi.mock('electron', () => ({
@@ -27,6 +48,9 @@ vi.mock('electron', () => ({
       },
     ],
   },
+  app: {
+    getPath: () => '/tmp/kanbai-test',
+  },
 }))
 
 describe('Update IPC Handlers', () => {
@@ -35,6 +59,9 @@ describe('Update IPC Handlers', () => {
   beforeEach(async () => {
     mockExecFile.mockReset()
     mockWebContentsSend.mockClear()
+    mockFsRm.mockReset().mockResolvedValue(undefined)
+    mockFsMkdir.mockReset().mockResolvedValue(undefined)
+    mockFsAccess.mockReset().mockRejectedValue(new Error('not found'))
     vi.resetModules()
 
     const { registerUpdateHandlers } = await import('../../src/main/ipc/updates')
@@ -223,12 +250,19 @@ describe('Update IPC Handlers', () => {
       }))
     })
 
-    it('installe rtk avec --git et l URL GitHub', async () => {
-      // First call: 'where'/'which' check for cargo → found
-      // Second call: cargo install → success
-      mockExecFile.mockImplementation((cmd: string) => {
+    it('installe rtk via git clone en mode release', async () => {
+      // which rtk → not found (not brew-managed)
+      // brew info → not found
+      // git clone → success
+      mockExecFile.mockImplementation((cmd: string, args: string[]) => {
         if (cmd === (IS_WIN ? 'where' : 'which')) {
-          return Promise.resolve({ stdout: '/usr/bin/cargo\n', stderr: '' })
+          return Promise.reject(new Error('not found'))
+        }
+        if (cmd === 'brew') {
+          return Promise.reject(new Error('not found'))
+        }
+        if (cmd === 'git') {
+          return Promise.resolve({ stdout: '', stderr: '' })
         }
         return Promise.resolve({ stdout: '', stderr: '' })
       })
@@ -240,23 +274,27 @@ describe('Update IPC Handlers', () => {
 
       expect(result).toEqual({ success: true })
 
-      // Verify the correct args were passed to cargo
-      const installCall = mockExecFile.mock.calls.find(
-        (call: unknown[]) => call[0] === 'cargo' && (call[1] as string[]).includes('install'),
+      // Verify git clone was called with the correct repo URL
+      const cloneCall = mockExecFile.mock.calls.find(
+        (call: unknown[]) => call[0] === 'git' && (call[1] as string[]).includes('clone'),
       )
-      expect(installCall).toBeDefined()
-      const args = installCall![1] as string[]
-      expect(args).toContain('install')
-      expect(args).toContain('--git')
-      expect(args).toContain('https://github.com/rtk-ai/rtk')
-      // Must NOT contain the old crate name
-      expect(args).not.toContain('rtk-token-killer')
+      expect(cloneCall).toBeDefined()
+      const args = cloneCall![1] as string[]
+      expect(args).toContain('clone')
+      expect(args).toContain('--depth=1')
+      expect(args).toContain('https://github.com/rtk-ai/rtk.git')
     })
 
-    it('echoue pour rtk si cargo n est pas installe', async () => {
-      mockExecFile.mockImplementation((cmd: string) => {
+    it('echoue pour rtk si git clone echoue', async () => {
+      mockExecFile.mockImplementation((cmd: string, args: string[]) => {
         if (cmd === (IS_WIN ? 'where' : 'which')) {
           return Promise.reject(new Error('not found'))
+        }
+        if (cmd === 'brew') {
+          return Promise.reject(new Error('not found'))
+        }
+        if (cmd === 'git' && args[0] === 'clone') {
+          return Promise.reject(new Error('git clone failed'))
         }
         return Promise.resolve({ stdout: '', stderr: '' })
       })
@@ -268,7 +306,7 @@ describe('Update IPC Handlers', () => {
 
       expect(result).toEqual({
         success: false,
-        error: expect.stringContaining('Cargo is not installed'),
+        error: expect.stringContaining('git clone failed'),
       })
     })
 
@@ -458,10 +496,15 @@ describe('Update IPC Handlers', () => {
   })
 
   describe('uninstall', () => {
-    it('desinstalle rtk avec le bon nom de binaire', async () => {
+    it('desinstalle rtk en supprimant le repertoire source', async () => {
+      // which rtk → found (system install, not brew)
+      // brew info → not found
       mockExecFile.mockImplementation((cmd: string) => {
         if (cmd === (IS_WIN ? 'where' : 'which')) {
-          return Promise.resolve({ stdout: '/usr/bin/cargo\n', stderr: '' })
+          return Promise.resolve({ stdout: '/usr/local/bin/rtk\n', stderr: '' })
+        }
+        if (cmd === 'brew') {
+          return Promise.reject(new Error('not found'))
         }
         return Promise.resolve({ stdout: '', stderr: '' })
       })
@@ -469,16 +512,10 @@ describe('Update IPC Handlers', () => {
       const result = await mockIpcMain._invoke('update:uninstall', { tool: 'rtk' })
 
       expect(result).toEqual({ success: true })
-
-      const uninstallCall = mockExecFile.mock.calls.find(
-        (call: unknown[]) => call[0] === 'cargo' && (call[1] as string[]).includes('uninstall'),
+      expect(mockFsRm).toHaveBeenCalledWith(
+        expect.stringContaining('vendor/rtk'),
+        expect.objectContaining({ recursive: true, force: true }),
       )
-      expect(uninstallCall).toBeDefined()
-      const args = uninstallCall![1] as string[]
-      expect(args).toContain('uninstall')
-      expect(args).toContain('rtk')
-      // Must NOT contain the old crate name
-      expect(args).not.toContain('rtk-token-killer')
     })
 
     it('refuse de desinstaller un outil systeme', async () => {
@@ -493,7 +530,10 @@ describe('Update IPC Handlers', () => {
     it('envoie les notifications de statut pour la desinstallation', async () => {
       mockExecFile.mockImplementation((cmd: string) => {
         if (cmd === (IS_WIN ? 'where' : 'which')) {
-          return Promise.resolve({ stdout: '/usr/bin/cargo\n', stderr: '' })
+          return Promise.resolve({ stdout: '/usr/local/bin/rtk\n', stderr: '' })
+        }
+        if (cmd === 'brew') {
+          return Promise.reject(new Error('not found'))
         }
         return Promise.resolve({ stdout: '', stderr: '' })
       })
@@ -508,15 +548,22 @@ describe('Update IPC Handlers', () => {
       expect(statusCalls[1][1]).toMatchObject({ status: 'completed' })
     })
 
-    it('gere les erreurs de desinstallation', async () => {
-      let callCount = 0
-      mockExecFile.mockImplementation((cmd: string) => {
+    it('gere les erreurs de desinstallation via brew', async () => {
+      // Simulate rtk installed via brew, but brew uninstall fails
+      mockExecFile.mockImplementation((cmd: string, args: string[]) => {
         if (cmd === (IS_WIN ? 'where' : 'which')) {
-          return Promise.resolve({ stdout: '/usr/bin/cargo\n', stderr: '' })
+          return Promise.resolve({ stdout: '/opt/homebrew/bin/rtk\n', stderr: '' })
         }
-        callCount++
-        if (callCount === 1) {
-          return Promise.reject(new Error('cargo not found'))
+        if (cmd === 'brew' && args[0] === 'info') {
+          return Promise.resolve({
+            stdout: JSON.stringify({
+              formulae: [{ name: 'rtk', versions: { stable: '1.0.0' }, installed: [{}] }],
+              casks: [],
+            }),
+          })
+        }
+        if (cmd === 'brew' && args[0] === 'uninstall') {
+          return Promise.reject(new Error('brew uninstall failed'))
         }
         return Promise.resolve({ stdout: '', stderr: '' })
       })
@@ -525,7 +572,7 @@ describe('Update IPC Handlers', () => {
 
       expect(result).toEqual({
         success: false,
-        error: 'cargo not found',
+        error: 'brew uninstall failed',
       })
       expect(mockWebContentsSend).toHaveBeenCalledWith('update:status', expect.objectContaining({
         status: 'failed',

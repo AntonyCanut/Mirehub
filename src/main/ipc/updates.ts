@@ -7,8 +7,22 @@ import { IS_WIN, getWhichCommand, getExtendedToolPaths, PATH_SEP, crossExecFile 
 
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
+function resolveNvmBinPaths(): string[] {
+  const home = process.env.HOME || ''
+  const nvmDir = path.join(home, '.nvm', 'versions', 'node')
+  try {
+    const versions = fsSync.readdirSync(nvmDir)
+      .filter((d) => d.startsWith('v'))
+      .sort()
+      .reverse()
+    return versions.slice(0, 2).map((v) => path.join(nvmDir, v, 'bin'))
+  } catch {
+    return []
+  }
+}
+
 function enrichedEnv(): NodeJS.ProcessEnv {
-  const extraPaths = getExtendedToolPaths()
+  const extraPaths = [...getExtendedToolPaths(), ...resolveNvmBinPaths()]
   return {
     ...process.env,
     PATH: `${process.env.PATH || ''}${PATH_SEP}${extraPaths.join(PATH_SEP)}`,
@@ -184,7 +198,7 @@ const TOOL_METADATA: Record<string, ToolMetadata> = {
 
 async function getVersion(command: string, args: string[]): Promise<string | null> {
   try {
-    const { stdout, stderr } = await enrichedExecFile(command, args, 10000)
+    const { stdout, stderr } = await enrichedExecFile(command, args, 5000)
     const version = (stdout || stderr)
       .trim()
       .replace(/^v/, '')
@@ -230,7 +244,7 @@ async function isBrewManaged(command: string): Promise<boolean> {
 
 async function getLatestNpmVersion(pkg: string): Promise<string | null> {
   try {
-    const { stdout } = await enrichedExecFile('npm', ['view', pkg, 'version'], 15000)
+    const { stdout } = await enrichedExecFile('npm', ['view', pkg, 'version'], 5000)
     return stdout.trim()
   } catch {
     return null
@@ -245,7 +259,7 @@ interface BrewPackageInfo {
 
 async function getBrewPackageInfo(name: string): Promise<BrewPackageInfo | null> {
   try {
-    const { stdout } = await enrichedExecFile('brew', ['info', '--json=v2', name], 15000)
+    const { stdout } = await enrichedExecFile('brew', ['info', '--json=v2', name], 8000)
     const data = JSON.parse(stdout) as {
       formulae?: Array<{ versions?: { stable?: string }; installed?: unknown[] }>
       casks?: Array<{ version?: string; installed?: string }>
@@ -325,15 +339,6 @@ async function findInstalledBrewPackage(candidates: string[] | undefined): Promi
   return null
 }
 
-async function isNpmGlobalPackageInstalled(pkg: string): Promise<boolean> {
-  try {
-    await enrichedExecFile('npm', ['ls', '-g', '--depth=0', pkg], 15000)
-    return true
-  } catch (err: unknown) {
-    const stdout = String((err as { stdout?: string }).stdout ?? '')
-    return stdout.includes(`${pkg}@`)
-  }
-}
 
 async function resolveToolInstallSource(tool: string): Promise<ToolInstallResolution> {
   const meta = TOOL_METADATA[tool] ?? {}
@@ -343,37 +348,42 @@ async function resolveToolInstallSource(tool: string): Promise<ToolInstallResolu
   }
   if (tool === 'cargo') {
     if (IS_WIN) return { source: 'winget' }
+    // Use cached brew info instead of sequential checks
     const brew = await findInstalledBrewPackage(meta.brewCandidates)
     if (brew) return { source: brew.kind === 'cask' ? 'brew-cask' : 'brew-formula', brew }
     return { source: 'rustup' }
   }
 
-  if (!IS_WIN) {
-    const commandPath = await getCommandPath(tool)
-    const brew = await findInstalledBrewPackage(meta.brewCandidates)
-    if (brew && (!commandPath || isBrewBinPath(commandPath))) {
-      return {
-        source: brew.kind === 'cask' ? 'brew-cask' : 'brew-formula',
-        brew,
-        npmPackage: meta.npmPackage,
+  // Optimize RTK check - no need for multiple sequential brew calls
+  if (tool === 'rtk') {
+    if (!IS_WIN) {
+      const commandPath = await getCommandPath(tool)
+      const rtkBrew = await findInstalledBrewPackage(['rtk'])
+      if (rtkBrew && (!commandPath || isBrewBinPath(commandPath))) {
+        return { source: 'brew-formula', brew: rtkBrew }
       }
     }
+    return await getCommandPath(tool) !== null ? { source: 'system' } : { source: 'unknown' }
   }
 
-  if (meta.npmPackage) {
-    const npmInstalled = await isNpmGlobalPackageInstalled(meta.npmPackage)
-    if (npmInstalled) {
-      return { source: 'npm-global', npmPackage: meta.npmPackage }
+  if (tool === 'node') {
+    // Optimize node check - try brew first since it's common on macOS
+    if (!IS_WIN) {
+      const commandPath = await getCommandPath(tool)
+      const nodeBrew = await findInstalledBrewPackage(['node'])
+      if (nodeBrew && (!commandPath || isBrewBinPath(commandPath))) {
+        return { source: 'brew-formula', brew: nodeBrew, npmPackage: meta.npmPackage }
+      }
     }
-  }
-
-  if (tool === 'node' || tool === 'git') {
     return { source: IS_WIN ? 'winget' : 'system' }
   }
-  if (tool === 'go' || tool === 'python') {
-    return { source: IS_WIN ? 'winget' : 'system' }
-  }
-  if (tool === 'pip') {
+  if (tool === 'go' || tool === 'python' || tool === 'pip' || tool === 'git') {
+    if (!IS_WIN) {
+      const brew = await findInstalledBrewPackage(meta.brewCandidates)
+      if (brew) {
+        return { source: brew.kind === 'cask' ? 'brew-cask' : 'brew-formula', brew }
+      }
+    }
     return { source: IS_WIN ? 'winget' : 'system' }
   }
   if (tool === 'npm') {
@@ -385,10 +395,13 @@ async function resolveToolInstallSource(tool: string): Promise<ToolInstallResolu
     }
     return { source: 'npm-global', npmPackage: 'npm' }
   }
-  if (tool === 'pnpm' || tool === 'yarn') {
-    return { source: 'npm-global', npmPackage: meta.npmPackage }
-  }
-  if (tool === 'claude' || tool === 'codex' || tool === 'copilot') {
+  if (tool === 'pnpm' || tool === 'yarn' || tool === 'claude' || tool === 'codex' || tool === 'copilot') {
+    if (!IS_WIN) {
+      const brew = await findInstalledBrewPackage(meta.brewCandidates)
+      if (brew) {
+        return { source: brew.kind === 'cask' ? 'brew-cask' : 'brew-formula', brew, npmPackage: meta.npmPackage }
+      }
+    }
     return { source: 'npm-global', npmPackage: meta.npmPackage }
   }
 
@@ -400,8 +413,14 @@ async function getLatestVersionForTool(
   currentVersion: string,
   resolution: ToolInstallResolution,
 ): Promise<string | null> {
-  if (tool === 'cargo' || tool === 'rtk') {
-    // cargo and crates do not expose reliable "latest" through a simple command.
+  // cargo does not expose reliable "latest" through a simple command.
+  if (tool === 'cargo') {
+    return null
+  }
+
+  if (tool === 'rtk') {
+    if (IS_WIN) return getLatestNpmVersion('rtk')
+    if (resolution.brew?.name) return getLatestBrewVersion(resolution.brew.name)
     return null
   }
 
@@ -539,7 +558,7 @@ async function getRemotePixelAgentsCommit(): Promise<string | null> {
   try {
     const { stdout } = await enrichedExecFile(
       'git', ['ls-remote', 'https://github.com/pablodelucca/pixel-agents.git', 'HEAD'],
-      15000,
+      8000,
     )
     const hash = stdout.trim().split('\t')[0]
     return hash?.substring(0, 7) || null
@@ -569,54 +588,66 @@ async function isRtkInstalled(): Promise<boolean> {
 async function checkToolUpdates(): Promise<UpdateInfo[]> {
   const results: UpdateInfo[] = []
 
-  for (const tool of TOOLS_TO_CHECK) {
+  // Check all tool versions in parallel
+  const versionChecks = TOOLS_TO_CHECK.map(async (tool) => {
     const currentVersion = await getVersion(tool.checkCommand, tool.checkArgs)
-    const canUninstall = Boolean(TOOL_METADATA[tool.name]?.canUninstall)
+    return { name: tool.name, version: currentVersion }
+  })
 
-    if (!currentVersion) {
-      const fallbackSource: ToolInstallSource =
-        tool.name === 'cargo' ? (IS_WIN ? 'winget' : 'rustup')
-          : tool.name === 'rtk' ? (IS_WIN ? 'winget' : 'brew-formula')
-            : tool.name === 'pixel-agents' ? 'internal'
-              : (tool.name === 'node'
-                || tool.name === 'git'
-                || tool.name === 'go'
-                || tool.name === 'python'
-                || tool.name === 'pip') ? (IS_WIN ? 'winget' : 'system')
-                : tool.name === 'npm' ? (IS_WIN ? 'winget' : 'npm-global')
-                  : 'npm-global'
-      results.push({
-        tool: tool.name,
-        currentVersion: '',
-        latestVersion: '',
-        updateAvailable: false,
-        installed: false,
-        scope: 'global',
-        installSource: fallbackSource,
-        canInstall: canInstallTool(tool.name),
+  const versionResults = await Promise.all(versionChecks)
+
+  // Resolve install sources and latest versions in parallel for all installed tools
+  const resolvedTools = await Promise.all(
+    versionResults.map(async (result) => {
+      const canUninstall = Boolean(TOOL_METADATA[result.name]?.canUninstall)
+
+      if (!result.version) {
+        const fallbackSource: ToolInstallSource =
+          result.name === 'cargo' ? (IS_WIN ? 'winget' : 'rustup')
+            : result.name === 'rtk' ? (IS_WIN ? 'winget' : 'brew-formula')
+              : result.name === 'pixel-agents' ? 'internal'
+                : (result.name === 'node'
+                  || result.name === 'git'
+                  || result.name === 'go'
+                  || result.name === 'python'
+                  || result.name === 'pip') ? (IS_WIN ? 'winget' : 'system')
+                  : result.name === 'npm' ? (IS_WIN ? 'winget' : 'npm-global')
+                    : 'npm-global'
+        return {
+          tool: result.name,
+          currentVersion: '',
+          latestVersion: '',
+          updateAvailable: false,
+          installed: false,
+          scope: 'global' as const,
+          installSource: fallbackSource,
+          canInstall: canInstallTool(result.name),
+          canUninstall,
+        }
+      }
+
+      const installResolution = await resolveToolInstallSource(result.name)
+      const latestVersion = await getLatestVersionForTool(result.name, result.version, installResolution)
+
+      return {
+        tool: result.name,
+        currentVersion: extractVersion(result.version),
+        latestVersion: latestVersion ? extractVersion(latestVersion) : extractVersion(result.version),
+        updateAvailable: latestVersion !== null && compareVersions(result.version, latestVersion),
+        installed: true,
+        scope: 'global' as const,
+        installSource: installResolution.source,
+        canInstall: canInstallTool(result.name),
         canUninstall,
-      })
-      continue
-    }
+      }
+    }),
+  )
 
-    const installResolution = await resolveToolInstallSource(tool.name)
-    const latestVersion = await getLatestVersionForTool(tool.name, currentVersion, installResolution)
-
-    results.push({
-      tool: tool.name,
-      currentVersion: extractVersion(currentVersion),
-      latestVersion: latestVersion ? extractVersion(latestVersion) : extractVersion(currentVersion),
-      updateAvailable: latestVersion !== null && compareVersions(currentVersion, latestVersion),
-      installed: true,
-      scope: 'global',
-      installSource: installResolution.source,
-      canInstall: canInstallTool(tool.name),
-      canUninstall,
-    })
-  }
+  results.push(...resolvedTools)
 
   // pixel-agents — directory-based detection, compare git commits
   const pixelAgentsInstalled = await isPixelAgentsInstalled()
+
   let paCurrentVersion = ''
   let paLatestVersion = ''
   let paUpdateAvailable = false

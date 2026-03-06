@@ -1,11 +1,49 @@
 import { IpcMain, BrowserWindow, app } from 'electron'
 import { autoUpdater } from 'electron-updater'
+import fs from 'fs'
+import path from 'path'
 import { IPC_CHANNELS } from '../../shared/types'
 import { StorageService } from '../services/storage'
 import { cleanupTerminals } from './terminal'
 import { cleanupClaudeSessions } from './claude'
 
 const storage = new StorageService()
+
+function getUpdaterCacheDir(): string {
+  const appName = app.getName()
+  if (process.platform === 'darwin') {
+    return path.join(app.getPath('home'), 'Library', 'Caches', `${appName}-updater`)
+  }
+  if (process.platform === 'win32') {
+    return path.join(app.getPath('home'), 'AppData', 'Local', `${appName}-updater`)
+  }
+  return path.join(app.getPath('home'), '.cache', `${appName}-updater`)
+}
+
+function cleanUpdaterCache(): void {
+  const cacheDir = getUpdaterCacheDir()
+  try {
+    if (!fs.existsSync(cacheDir)) return
+    const entries = fs.readdirSync(cacheDir)
+    for (const entry of entries) {
+      const entryPath = path.join(cacheDir, entry)
+      try {
+        const stat = fs.statSync(entryPath)
+        if (stat.isDirectory()) {
+          fs.rmSync(entryPath, { recursive: true, force: true })
+        } else {
+          fs.unlinkSync(entryPath)
+        }
+      } catch {
+        // Ignore individual file deletion errors
+      }
+    }
+    // eslint-disable-next-line no-console
+    console.log('[appUpdate] Cleaned updater cache:', cacheDir)
+  } catch {
+    // Cache dir may not exist or be inaccessible — not critical
+  }
+}
 
 type UpdatePhase = 'idle' | 'checking' | 'downloading' | 'downloaded'
 let updatePhase: UpdatePhase = 'idle'
@@ -23,6 +61,9 @@ function sendStatusToRenderer(
 export function registerAppUpdateHandlers(ipcMain: IpcMain): void {
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = true
+
+  // Clean leftover update cache from previous versions on startup
+  cleanUpdaterCache()
 
   // Forward autoUpdater events to renderer
   autoUpdater.on('checking-for-update', () => {

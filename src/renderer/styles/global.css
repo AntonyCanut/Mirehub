@@ -359,11 +359,32 @@ body {
 .notification-panel-footer {
   padding: 8px 14px;
   border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .notification-last-check {
   font-size: 10px;
   color: var(--text-muted);
+}
+
+.notification-footer-settings {
+  font-size: 10px;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notification-footer-settings:hover {
+  text-decoration: underline;
+}
+
+.notification-spinner {
+  display: inline-block;
+  animation: spin-update 1s linear infinite;
 }
 
 /* Notification Center (in-app notifications) */

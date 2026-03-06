@@ -37,7 +37,7 @@ export const useAppUpdateStore = create<AppUpdateStore>((set) => ({
   errorMessage: null,
 
   checkForUpdate: async () => {
-    set({ status: 'checking', errorMessage: null })
+    set({ status: 'checking', errorMessage: null, version: null })
     try {
       await window.kanbai.appUpdate.check()
     } catch {
@@ -46,7 +46,7 @@ export const useAppUpdateStore = create<AppUpdateStore>((set) => ({
   },
 
   downloadUpdate: async () => {
-    set({ status: 'downloading', downloadPercent: 0 })
+    set({ status: 'downloading', downloadPercent: 0, version: null })
     try {
       await window.kanbai.appUpdate.download()
     } catch {
@@ -59,7 +59,11 @@ export const useAppUpdateStore = create<AppUpdateStore>((set) => ({
   },
 
   dismissModal: () => {
-    set({ showModal: false })
+    set({
+      showModal: false,
+      status: 'idle',
+      errorMessage: null,
+    })
   },
 
   initListener: () => {
@@ -83,7 +87,7 @@ export const useAppUpdateStore = create<AppUpdateStore>((set) => ({
           set({ status: 'downloading', downloadPercent: data.percent ?? 0, showModal: true })
           break
         case 'downloaded':
-          set({ status: 'downloaded', downloadPercent: 100 })
+          set({ status: 'downloaded', downloadPercent: 100, version: data.version ?? null })
           break
         case 'error': {
           const current = useAppUpdateStore.getState()
