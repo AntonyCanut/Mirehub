@@ -125,13 +125,23 @@ export interface KanbanAttachment {
   addedAt: number
 }
 
+export type KanbanCommentType = 'user' | 'resolution-done' | 'resolution-failed'
+
 export interface KanbanComment {
   id: string
   text: string
+  type?: KanbanCommentType
   createdAt: number
 }
 
 export type KanbanTaskType = 'bug' | 'feature' | 'test' | 'doc' | 'ia' | 'refactor'
+
+export interface KanbanSplitSuggestion {
+  title: string
+  description: string
+  type: KanbanTaskType
+  priority: 'low' | 'medium' | 'high'
+}
 
 export interface KanbanTask {
   id: string
@@ -158,6 +168,7 @@ export interface KanbanTask {
   conversationHistoryPath?: string
   aiProvider?: import('./ai-provider').AiProviderId
   isPrequalifying?: boolean
+  splitSuggestions?: KanbanSplitSuggestion[]
   createdAt: number
   updatedAt: number
 }

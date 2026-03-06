@@ -93,6 +93,7 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
+  z-index: 100;
   border-bottom: 1px solid var(--border);
   -webkit-app-region: drag;
 }

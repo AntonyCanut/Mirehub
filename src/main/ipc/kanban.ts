@@ -752,9 +752,15 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
       { title, description }: { title: string; description: string },
     ) => {
       const prompt = `Analyse ce ticket Kanban et retourne UNIQUEMENT un JSON valide (pas de markdown, pas de texte autour) avec cette structure exacte :
-{"suggestedType":"bug"|"feature"|"test"|"doc"|"ia"|"refactor","suggestedPriority":"low"|"medium"|"high","clarifiedDescription":"description amelioree","isVague":true|false}
+{"suggestedType":"bug"|"feature"|"test"|"doc"|"ia"|"refactor","suggestedPriority":"low"|"medium"|"high","clarifiedDescription":"description amelioree","isVague":true|false,"splitSuggestions":[]}
 
-IMPORTANT : La "clarifiedDescription" doit IMPERATIVEMENT conserver l'idee originale du ticket. Tu ameliores la formulation pour qu'elle soit claire et actionnable par une IA, mais tu ne remplaces JAMAIS l'intention de l'utilisateur. Si le titre dit "fix le bug X", la description amelioree doit toujours parler de corriger le bug X, pas d'autre chose.
+REGLES IMPORTANTES :
+1. La "clarifiedDescription" doit IMPERATIVEMENT conserver l'idee originale du ticket. Tu ameliores la formulation pour qu'elle soit claire et actionnable par une IA, mais tu ne remplaces JAMAIS l'intention de l'utilisateur. Si le titre dit "fix le bug X", la description amelioree doit toujours parler de corriger le bug X, pas d'autre chose.
+
+2. DETECTION MULTI-ITEMS : Analyse si le ticket contient plusieurs elements DISTINCTS et NON-LIES (ex: un bug + une feature, ou plusieurs features independantes). Si oui, remplis "splitSuggestions" avec un tableau d'objets {"title":"...","description":"...","type":"bug"|"feature"|...,"priority":"low"|"medium"|"high"} pour chaque sous-ticket propose.
+   - EXCEPTION : Si une SEULE feature impacte plusieurs applications ou environnements, ne PAS decouper — c'est un seul ticket.
+   - "splitSuggestions" doit etre un tableau VIDE [] si le ticket ne contient qu'un seul element ou si les elements sont lies.
+   - Chaque suggestion doit avoir un titre clair et une description actionnable.
 
 Titre: ${title}
 Description: ${description || '(aucune)'}`

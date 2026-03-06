@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { KanbanTask, KanbanTaskType, KanbanStatus, KanbanComment } from '../../../shared/types/index'
+import type { KanbanTask, KanbanTaskType, KanbanStatus, KanbanComment, KanbanSplitSuggestion } from '../../../shared/types/index'
 import { AI_PROVIDERS, type AiProviderId } from '../../../shared/types/ai-provider'
 import { useTerminalTabStore } from './terminalTabStore'
 import { useWorkspaceStore } from './workspaceStore'
@@ -138,6 +138,8 @@ interface KanbanActions {
   removeAttachment: (taskId: string, attachmentId: string) => Promise<void>
   handleTabClosed: (tabId: string) => void
   reactivateIfDone: (tabId: string, message?: string) => void
+  acceptSplit: (taskId: string) => Promise<void>
+  dismissSplit: (taskId: string) => void
 }
 
 type KanbanStore = KanbanState & KanbanActions
@@ -225,13 +227,55 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     if (!currentWorkspaceId) return
     try {
       const newTasks: KanbanTask[] = await window.kanbai.kanban.list(currentWorkspaceId)
-      // Preserve in-memory isPrequalifying flag (not persisted to file)
+      // Preserve in-memory transient flags (not persisted to file)
       for (const newTask of newTasks) {
         const oldTask = oldTasks.find((t) => t.id === newTask.id)
         if (oldTask?.isPrequalifying) {
           newTask.isPrequalifying = true
         } else {
           delete newTask.isPrequalifying
+        }
+        if (oldTask?.splitSuggestions?.length) {
+          newTask.splitSuggestions = oldTask.splitSuggestions
+        } else {
+          delete newTask.splitSuggestions
+        }
+      }
+
+      // Archive previous resolutions as styled comments when a reopened ticket gets re-resolved
+      for (const newTask of newTasks) {
+        const oldTask = oldTasks.find((t) => t.id === newTask.id)
+        if (!oldTask) continue
+
+        const resultChanged = oldTask.result && newTask.result && oldTask.result !== newTask.result
+        const errorChanged = oldTask.error && newTask.error && oldTask.error !== newTask.error
+
+        if (resultChanged || errorChanged) {
+          const archiveComments: KanbanComment[] = [...(newTask.comments ?? [])]
+
+          if (resultChanged) {
+            archiveComments.push({
+              id: crypto.randomUUID(),
+              text: oldTask.result!,
+              type: 'resolution-done',
+              createdAt: oldTask.updatedAt,
+            })
+          }
+          if (errorChanged) {
+            archiveComments.push({
+              id: crypto.randomUUID(),
+              text: oldTask.error!,
+              type: 'resolution-failed',
+              createdAt: oldTask.updatedAt,
+            })
+          }
+
+          newTask.comments = archiveComments
+          window.kanbai.kanban.update({
+            id: newTask.id,
+            comments: archiveComments,
+            workspaceId: currentWorkspaceId!,
+          }).catch(() => { /* best-effort */ })
         }
       }
 
@@ -285,11 +329,12 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           // Push notification
           const t = useI18n.getState().t
           const ticketLabel = formatTicketLabel(newTask)
+          const wsName = useWorkspaceStore.getState().workspaces.find((w) => w.id === currentWorkspaceId)?.name ?? ''
           const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
           const body = todoCount > 0
             ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
             : t('notifications.noMoreTickets', { ticket: ticketLabel })
-          pushNotification('success', newTask.title, body, { workspaceId: currentWorkspaceId!, tabId })
+          pushNotification('success', wsName, `${ticketLabel} — ${body}`, { workspaceId: currentWorkspaceId!, tabId })
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
@@ -305,11 +350,9 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           // Push notification
           const t = useI18n.getState().t
           const ticketLabel = formatTicketLabel(newTask)
+          const wsName = useWorkspaceStore.getState().workspaces.find((w) => w.id === currentWorkspaceId)?.name ?? ''
           const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
-          pushNotification('error', t('notifications.taskFailed', { ticket: ticketLabel }),
-            todoCount > 0
-              ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
-              : t('notifications.noMoreTickets', { ticket: ticketLabel }),
+          pushNotification('error', wsName, `${ticketLabel} — ${t('notifications.taskFailed', { ticket: ticketLabel })}${todoCount > 0 ? `. ${t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })}` : ''}`,
             { workspaceId: currentWorkspaceId!, tabId })
         }
         if (newTask.status === 'PENDING') {
@@ -382,9 +425,14 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           if (result.clarifiedDescription && result.clarifiedDescription !== description) {
             updates.description = result.clarifiedDescription
           }
+          if (result.splitSuggestions && Array.isArray(result.splitSuggestions) && result.splitSuggestions.length > 0) {
+            updates.splitSuggestions = result.splitSuggestions as KanbanSplitSuggestion[]
+          }
         }
-        if (Object.keys(updates).length > 0) {
-          await window.kanbai.kanban.update({ id: task.id, ...updates, workspaceId })
+        // Only persist non-transient fields to file
+        const { splitSuggestions: _split, ...persistedUpdates } = updates
+        if (Object.keys(persistedUpdates).length > 0) {
+          await window.kanbai.kanban.update({ id: task.id, ...persistedUpdates, workspaceId })
         }
         set((state) => ({
           tasks: state.tasks.map((t) => (t.id === task.id ? { ...t, ...updates, isPrequalifying: false } : t)),
@@ -812,11 +860,12 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
           const t = useI18n.getState().t
           const ticketLabel = formatTicketLabel(newTask)
+          const wsName = useWorkspaceStore.getState().workspaces.find((w) => w.id === wsId)?.name ?? ''
           const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
           const body = todoCount > 0
             ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
             : t('notifications.noMoreTickets', { ticket: ticketLabel })
-          pushNotification('success', newTask.title, body, { workspaceId: wsId, tabId })
+          pushNotification('success', wsName, `${ticketLabel} — ${body}`, { workspaceId: wsId, tabId })
         }
         if (newTask.status === 'FAILED') {
           termStore.setTabColor(tabId, '#f38ba8')
@@ -831,11 +880,9 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
           const t = useI18n.getState().t
           const ticketLabel = formatTicketLabel(newTask)
+          const wsName = useWorkspaceStore.getState().workspaces.find((w) => w.id === wsId)?.name ?? ''
           const todoCount = newTasks.filter((tt) => tt.status === 'TODO' && !tt.disabled).length
-          pushNotification('error', t('notifications.taskFailed', { ticket: ticketLabel }),
-            todoCount > 0
-              ? t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })
-              : t('notifications.noMoreTickets', { ticket: ticketLabel }),
+          pushNotification('error', wsName, `${ticketLabel} — ${t('notifications.taskFailed', { ticket: ticketLabel })}${todoCount > 0 ? `. ${t('notifications.ticketsRemaining', { ticket: ticketLabel, count: todoCount })}` : ''}`,
             { workspaceId: wsId, tabId })
         }
         if (newTask.status === 'PENDING') {
@@ -1010,6 +1057,51 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           updatedAt: Date.now(),
         }
       }),
+    }))
+  },
+
+  acceptSplit: async (taskId: string) => {
+    const { currentWorkspaceId, tasks } = get()
+    if (!currentWorkspaceId) return
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task?.splitSuggestions?.length) return
+
+    // Create child tickets from split suggestions
+    for (const suggestion of task.splitSuggestions) {
+      await window.kanbai.kanban.create({
+        workspaceId: currentWorkspaceId,
+        targetProjectId: task.targetProjectId,
+        title: suggestion.title,
+        description: suggestion.description,
+        status: 'TODO',
+        priority: suggestion.priority,
+        type: suggestion.type,
+      })
+    }
+
+    // Delete the original task
+    await window.kanbai.kanban.delete(taskId, currentWorkspaceId)
+
+    // Reload tasks from file to get the new tickets
+    const newTasks: KanbanTask[] = await window.kanbai.kanban.list(currentWorkspaceId)
+    for (const t of newTasks) {
+      delete t.isPrequalifying
+    }
+    set({ tasks: newTasks })
+
+    // Auto-send if no WORKING task
+    const hasWorking = newTasks.some((t) => t.status === 'WORKING')
+    if (!hasWorking) {
+      const next = pickNextTask(newTasks)
+      if (next) get().sendToAi(next)
+    }
+  },
+
+  dismissSplit: (taskId: string) => {
+    set((state) => ({
+      tasks: state.tasks.map((t) =>
+        t.id === taskId ? { ...t, splitSuggestions: undefined } : t,
+      ),
     }))
   },
 }))

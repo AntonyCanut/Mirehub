@@ -1396,6 +1396,9 @@ function KanbanCard({
       {task.isPrequalifying && (
         <span className="kanban-card-prequalifying">{t('kanban.prequalifyRunning')}</span>
       )}
+      {task.splitSuggestions && task.splitSuggestions.length > 0 && (
+        <span className="kanban-card-split-badge">{t('kanban.splitDetected')}</span>
+      )}
       <p className="kanban-card-desc">
         {task.description || t('kanban.noDescription')}
       </p>
@@ -1750,6 +1753,45 @@ function TaskDetailPanel({
         )}
       </div>
 
+      {/* Split Suggestions */}
+      {task.splitSuggestions && task.splitSuggestions.length > 0 && (
+        <div className="kanban-detail-section kanban-split-section">
+          <span className="kanban-detail-section-title kanban-split-title">{t('kanban.splitDetected')}</span>
+          <p className="kanban-split-hint">{t('kanban.splitDetectedHint')}</p>
+          <div className="kanban-split-suggestions">
+            {task.splitSuggestions.map((s, i) => (
+              <div key={i} className="kanban-split-suggestion-card">
+                <span className="kanban-split-suggestion-type" style={{ color: TYPE_CONFIG[s.type]?.color ?? '#cdd6f4' }}>
+                  {locale === 'en' ? (TYPE_CONFIG[s.type]?.labelEn ?? s.type) : (TYPE_CONFIG[s.type]?.labelFr ?? s.type)}
+                </span>
+                <span className="kanban-split-suggestion-title">{s.title}</span>
+                <span className="kanban-split-suggestion-desc">{s.description}</span>
+                <span className="kanban-split-suggestion-priority" style={{ color: priorityColors[s.priority] ?? '#6c7086' }}>
+                  {priorityLabels[s.priority] ?? s.priority}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="kanban-split-actions">
+            <button
+              className="kanban-split-accept-btn"
+              onClick={() => {
+                useKanbanStore.getState().acceptSplit(task.id)
+                onClose()
+              }}
+            >
+              {t('kanban.splitAccept').replace('{count}', String(task.splitSuggestions.length))}
+            </button>
+            <button
+              className="kanban-split-dismiss-btn"
+              onClick={() => useKanbanStore.getState().dismissSplit(task.id)}
+            >
+              {t('kanban.splitDismiss')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* AI Agent info */}
       {task.agentId && (
         <div className="kanban-detail-section">
@@ -1792,14 +1834,26 @@ function TaskDetailPanel({
         <div className="kanban-detail-section">
           <span className="kanban-detail-section-title">{t('kanban.comments')} ({task.comments.length})</span>
           <div className="kanban-detail-comments">
-            {task.comments.map((comment) => (
-              <div key={comment.id} className="kanban-detail-comment">
-                <span className="kanban-detail-comment-date">
-                  {new Date(comment.createdAt).toLocaleString(locale === 'en' ? 'en-US' : 'fr-FR')}
-                </span>
-                <p className="kanban-detail-comment-text">{comment.text}</p>
-              </div>
-            ))}
+            {task.comments.map((comment) => {
+              const isResolution = comment.type === 'resolution-done' || comment.type === 'resolution-failed'
+              const commentClass = isResolution
+                ? `kanban-detail-comment kanban-detail-comment--${comment.type}`
+                : 'kanban-detail-comment'
+              const label = comment.type === 'resolution-done'
+                ? t('kanban.previousResult')
+                : comment.type === 'resolution-failed'
+                  ? t('kanban.previousError')
+                  : null
+              return (
+                <div key={comment.id} className={commentClass}>
+                  <span className="kanban-detail-comment-date">
+                    {label && <span className="kanban-detail-comment-label">{label} — </span>}
+                    {new Date(comment.createdAt).toLocaleString(locale === 'en' ? 'en-US' : 'fr-FR')}
+                  </span>
+                  <p className="kanban-detail-comment-text">{comment.text}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
