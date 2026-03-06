@@ -12,20 +12,30 @@ interface Props {
 
 interface CodexConfig {
   model: string
+  provider: string
   approvalPolicy: string
   sandboxMode: string
   webSearch: string
   multiAgent: boolean
   historyPersistence: string
+  flex: boolean
+  reasoning: string
+  quiet: boolean
+  disableProjectDoc: boolean
 }
 
 const DEFAULT_CONFIG: CodexConfig = {
   model: '',
+  provider: '',
   approvalPolicy: 'untrusted',
   sandboxMode: 'workspace-write',
   webSearch: 'disabled',
   multiAgent: false,
   historyPersistence: 'save-all',
+  flex: false,
+  reasoning: '',
+  quiet: false,
+  disableProjectDoc: false,
 }
 
 function parseToml(content: string): CodexConfig {
@@ -39,8 +49,13 @@ function parseToml(content: string): CodexConfig {
     const val = rawVal.replace(/^["']|["']$/g, '')
     switch (key) {
       case 'model': config.model = val; break
+      case 'provider': config.provider = val; break
       case 'approval_policy': config.approvalPolicy = val; break
       case 'sandbox_mode': config.sandboxMode = val; break
+      case 'flex': config.flex = val === 'true'; break
+      case 'reasoning': config.reasoning = val; break
+      case 'quiet': config.quiet = val === 'true'; break
+      case 'disable_project_doc': config.disableProjectDoc = val === 'true'; break
       default: break
     }
   }
@@ -80,8 +95,13 @@ function parseToml(content: string): CodexConfig {
 function serializeToml(config: CodexConfig): string {
   const lines: string[] = []
   if (config.model) lines.push(`model = "${config.model}"`)
+  if (config.provider) lines.push(`provider = "${config.provider}"`)
   lines.push(`approval_policy = "${config.approvalPolicy}"`)
   lines.push(`sandbox_mode = "${config.sandboxMode}"`)
+  if (config.flex) lines.push(`flex = true`)
+  if (config.reasoning) lines.push(`reasoning = "${config.reasoning}"`)
+  if (config.quiet) lines.push(`quiet = true`)
+  if (config.disableProjectDoc) lines.push(`disable_project_doc = true`)
   lines.push('')
   lines.push('[features]')
   lines.push(`web_search = "${config.webSearch}"`)
@@ -182,6 +202,14 @@ export function CodexGeneralTab({ projectPath }: Props) {
     { value: 'danger-full-access', label: 'Full access', description: t('codex.sandboxFullAccess') },
   ]
 
+  const reasoningOptions = [
+    { value: '', label: 'Default', description: t('codex.reasoningDefault') },
+    { value: 'high', label: 'High', description: t('codex.reasoningHigh') },
+    { value: 'medium', label: 'Medium', description: t('codex.reasoningMedium') },
+    { value: 'low', label: 'Low', description: t('codex.reasoningLow') },
+    { value: 'none', label: 'None', description: t('codex.reasoningNone') },
+  ]
+
   const features = [
     {
       key: 'webSearch',
@@ -196,6 +224,27 @@ export function CodexGeneralTab({ projectPath }: Props) {
       description: t('codex.featureMultiAgentDesc'),
       active: config.multiAgent,
       onToggle: () => saveConfig({ ...config, multiAgent: !config.multiAgent }),
+    },
+    {
+      key: 'flex',
+      label: t('codex.featureFlex'),
+      description: t('codex.featureFlexDesc'),
+      active: config.flex,
+      onToggle: () => saveConfig({ ...config, flex: !config.flex }),
+    },
+    {
+      key: 'quiet',
+      label: t('codex.featureQuiet'),
+      description: t('codex.featureQuietDesc'),
+      active: config.quiet,
+      onToggle: () => saveConfig({ ...config, quiet: !config.quiet }),
+    },
+    {
+      key: 'disableProjectDoc',
+      label: t('codex.featureDisableProjectDoc'),
+      description: t('codex.featureDisableProjectDocDesc'),
+      active: config.disableProjectDoc,
+      onToggle: () => saveConfig({ ...config, disableProjectDoc: !config.disableProjectDoc }),
     },
     {
       key: 'history',
@@ -218,6 +267,22 @@ export function CodexGeneralTab({ projectPath }: Props) {
             value={config.model}
             onChange={(v) => saveConfig({ ...config, model: v })}
             accentColor={ACCENT_COLOR}
+          />
+        </div>
+      </div>
+
+      {/* Provider */}
+      <div className="cs-general-section">
+        <div className="cs-general-section-header">{t('codex.provider')}</div>
+        <div className="cs-general-card">
+          <p style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 8 }}>{t('codex.providerDesc')}</p>
+          <input
+            type="text"
+            className="claude-md-editor"
+            value={config.provider}
+            onChange={(e) => saveConfig({ ...config, provider: e.target.value })}
+            placeholder="openai (default)"
+            style={{ fontFamily: 'monospace', fontSize: 12, padding: '6px 8px', width: '100%', boxSizing: 'border-box' }}
           />
         </div>
       </div>
@@ -245,6 +310,20 @@ export function CodexGeneralTab({ projectPath }: Props) {
             options={sandboxOptions}
             value={config.sandboxMode}
             onChange={(v) => saveConfig({ ...config, sandboxMode: v })}
+            accentColor={ACCENT_COLOR}
+          />
+        </div>
+      </div>
+
+      {/* Reasoning */}
+      <div className="cs-general-section">
+        <div className="cs-general-section-header">{t('codex.reasoning')}</div>
+        <div className="cs-general-card cs-agent-teams">
+          <CardSelector
+            label={t('codex.reasoning')}
+            options={reasoningOptions}
+            value={config.reasoning}
+            onChange={(v) => saveConfig({ ...config, reasoning: v })}
             accentColor={ACCENT_COLOR}
           />
         </div>
