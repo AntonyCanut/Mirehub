@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { KanbanTask, KanbanTaskType, KanbanStatus, KanbanComment, KanbanSplitSuggestion } from '../../../shared/types/index'
+import type { KanbanTask, KanbanTaskType, KanbanStatus, KanbanComment } from '../../../shared/types/index'
 import { AI_PROVIDERS, type AiProviderId } from '../../../shared/types/ai-provider'
 import { useTerminalTabStore } from './terminalTabStore'
 import { useWorkspaceStore } from './workspaceStore'
@@ -434,8 +434,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
                 title: suggestion.title,
                 description: suggestion.description,
                 status: 'TODO',
-                priority: suggestion.priority,
-                type: suggestion.type,
+                priority: suggestion.priority as KanbanTask['priority'],
+                type: suggestion.type as KanbanTaskType,
               })
             }
             await window.kanbai.kanban.delete(task.id, workspaceId)
