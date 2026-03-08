@@ -799,10 +799,7 @@ export function KanbanBoard() {
                     <button
                       key={tp}
                       className={`kanban-create-type-btn${isActive ? ' kanban-create-type-btn--active' : ''}`}
-                      style={isActive
-                        ? { color: conf.color, borderColor: conf.color, background: `${conf.color}15` }
-                        : { color: 'var(--text-muted)' }
-                      }
+                      style={isActive ? { color: conf.color } : undefined}
                       onClick={() => setNewType(tp)}
                     >
                       {locale === 'en' ? conf.labelEn : conf.labelFr}
@@ -837,13 +834,11 @@ export function KanbanBoard() {
                   <span className="kanban-create-meta-label">{t('kanban.priority')}</span>
                   <div className="kanban-create-pill-row">
                     {PRIORITIES.map((p) => {
-                      const pColors: Record<string, string> = { low: '#565C66', medium: '#6C8CFF', high: '#F5A623' }
                       const isActive = newPriority === p
                       return (
                         <button
                           key={p}
                           className={`kanban-create-pill${isActive ? ' kanban-create-pill--active' : ''}`}
-                          style={isActive ? { color: pColors[p], borderColor: pColors[p], background: `${pColors[p]}15` } : undefined}
                           onClick={() => setNewPriority(p)}
                         >
                           {t(`kanban.${p}`)}
@@ -879,7 +874,7 @@ export function KanbanBoard() {
                         <button
                           key={p.id}
                           className={`kanban-create-pill kanban-create-pill--ai${isActive ? ' kanban-create-pill--active' : ''}`}
-                          style={isActive ? { color: p.detectionColor, borderColor: p.detectionColor, background: `${p.detectionColor}15` } : undefined}
+                          style={isActive ? { color: '#fff', background: p.detectionColor } : undefined}
                           onClick={() => setNewAiProvider(isDefault ? '' : p.id)}
                         >
                           {p.displayName}
@@ -897,7 +892,7 @@ export function KanbanBoard() {
                   onClick={handleSelectPendingFiles}
                   title={t('kanban.attachFiles')}
                 >
-                  {t('kanban.attachFiles')}{pendingAttachments.length + pendingClipboardImages.length > 0 ? ` (${pendingAttachments.length + pendingClipboardImages.length})` : ''}
+                  <span style={{ fontSize: 14 }}>&#128206;</span> {t('kanban.attachFiles')}{pendingAttachments.length + pendingClipboardImages.length > 0 ? ` (${pendingAttachments.length + pendingClipboardImages.length})` : ''}
                 </button>
                 <button
                   className={`kanban-create-cto-btn${newIsCtoMode ? ' kanban-create-cto-btn--active' : ''}`}
@@ -998,10 +993,7 @@ export function KanbanBoard() {
                     <button
                       key={tp}
                       className={`kanban-create-type-btn${isActive ? ' kanban-create-type-btn--active' : ''}`}
-                      style={isActive
-                        ? { color: conf.color, borderColor: conf.color, background: `${conf.color}15` }
-                        : { color: 'var(--text-muted)' }
-                      }
+                      style={isActive ? { color: conf.color } : undefined}
                       onClick={() => setEditType(tp)}
                     >
                       {locale === 'en' ? conf.labelEn : conf.labelFr}
@@ -1036,13 +1028,11 @@ export function KanbanBoard() {
                   <span className="kanban-create-meta-label">{t('kanban.priority')}</span>
                   <div className="kanban-create-pill-row">
                     {PRIORITIES.map((p) => {
-                      const pColors: Record<string, string> = { low: '#565C66', medium: '#6C8CFF', high: '#F5A623' }
                       const isActive = editPriority === p
                       return (
                         <button
                           key={p}
                           className={`kanban-create-pill${isActive ? ' kanban-create-pill--active' : ''}`}
-                          style={isActive ? { color: pColors[p], borderColor: pColors[p], background: `${pColors[p]}15` } : undefined}
                           onClick={() => setEditPriority(p)}
                         >
                           {t(`kanban.${p}`)}
@@ -1078,7 +1068,7 @@ export function KanbanBoard() {
                         <button
                           key={p.id}
                           className={`kanban-create-pill kanban-create-pill--ai${isActive ? ' kanban-create-pill--active' : ''}`}
-                          style={isActive ? { color: p.detectionColor, borderColor: p.detectionColor, background: `${p.detectionColor}15` } : undefined}
+                          style={isActive ? { color: '#fff', background: p.detectionColor } : undefined}
                           onClick={() => setEditAiProvider(isDefault ? '' : p.id)}
                         >
                           {p.displayName}
@@ -1286,34 +1276,36 @@ function PredefinedTaskCard({
 
   return (
     <div className="kanban-card kanban-card--predefined" onDoubleClick={onDoubleClick}>
-      <div className="kanban-card-type-strip" style={{ backgroundColor: typeConf.color }} />
-      <div className="kanban-card-header">
-        <span
-          className="kanban-card-priority"
-          style={{ backgroundColor: priorityColors[template.priority] }}
-        />
+      <div className="kanban-card-accent" style={{ backgroundColor: typeConf.color }} />
+      <div className="kanban-card-inner">
+        <div className="kanban-card-top-row">
+          <span
+            className="kanban-card-type-badge"
+            style={{ color: typeConf.color, background: `${typeConf.color}1a` }}
+          >
+            {locale === 'en' ? typeConf.labelEn : typeConf.labelFr}
+          </span>
+          <span
+            className="kanban-card-priority"
+            style={{ backgroundColor: priorityColors[template.priority] }}
+          />
+        </div>
         <span className="kanban-card-title">{t(template.titleKey)}</span>
-      </div>
-      <span
-        className="kanban-card-type-badge"
-        style={{ color: typeConf.color, background: `${typeConf.color}1a` }}
-      >
-        {locale === 'en' ? typeConf.labelEn : typeConf.labelFr}
-      </span>
-      <p className="kanban-card-desc">{t(template.descriptionKey)}</p>
-      <div className="kanban-predefined-actions">
-        <button
-          className="kanban-predefined-add"
-          onClick={onAdd}
-        >
-          {t('kanban.predefined.add')}
-        </button>
-        <button
-          className="kanban-predefined-dismiss"
-          onClick={onDismiss}
-        >
-          {t('kanban.predefined.dismiss')}
-        </button>
+        <p className="kanban-card-desc">{t(template.descriptionKey)}</p>
+        <div className="kanban-predefined-actions">
+          <button
+            className="kanban-predefined-add"
+            onClick={onAdd}
+          >
+            {t('kanban.predefined.add')}
+          </button>
+          <button
+            className="kanban-predefined-dismiss"
+            onClick={onDismiss}
+          >
+            {t('kanban.predefined.dismiss')}
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -1390,51 +1382,54 @@ function KanbanCard({
       onDoubleClick={handleCardDoubleClick}
       onContextMenu={onContextMenu}
     >
-      <div className="kanban-card-type-strip" style={{ backgroundColor: typeConf.color }} />
-      <div className="kanban-card-header">
-        <span
-          className="kanban-card-priority"
-          style={{ backgroundColor: priorityColors[task.priority] }}
-        />
-        {task.ticketNumber != null && (
-          <span className="kanban-card-ticket-number">{formatTicketNumber(task.ticketNumber, task.type, task.isPrequalifying)}</span>
-        )}
+      <div className="kanban-card-accent" style={{ backgroundColor: typeConf.color }} />
+      <div className="kanban-card-inner">
+        <div className="kanban-card-top-row">
+          {task.ticketNumber != null && (
+            <span className="kanban-card-ticket-number">{formatTicketNumber(task.ticketNumber, task.type, task.isPrequalifying)}</span>
+          )}
+          <span className="kanban-card-type-badge" style={{ color: typeConf.color, background: `${typeConf.color}1a` }}>
+            {locale === 'en' ? typeConf.labelEn : typeConf.labelFr}
+          </span>
+          <span
+            className="kanban-card-priority"
+            style={{ backgroundColor: priorityColors[task.priority] }}
+            title={task.priority}
+          />
+          <button
+            className="kanban-card-delete"
+            onClick={(e) => { e.stopPropagation(); onDelete() }}
+            title={t('common.delete')}
+          >
+            &times;
+          </button>
+        </div>
         <span className="kanban-card-title">{task.title}</span>
-        <button
-          className="kanban-card-delete"
-          onClick={(e) => { e.stopPropagation(); onDelete() }}
-          title={t('common.delete')}
-        >
-          &times;
-        </button>
+        <p className="kanban-card-desc">
+          {task.description || t('kanban.noDescription')}
+        </p>
+        {task.isPrequalifying && (
+          <span className="kanban-card-prequalifying">{t('kanban.prequalifyRunning')}</span>
+        )}
+        {task.splitSuggestions && task.splitSuggestions.length > 0 && (
+          <span className="kanban-card-split-badge">{t('kanban.splitDetected')}</span>
+        )}
+        <div className="kanban-card-footer">
+          <span className="kanban-card-date">
+            {new Date(task.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'short' })}
+          </span>
+          {onGoToTerminal && (
+            <button
+              className="kanban-card-terminal-btn"
+              style={{ color: workingColor, background: `${workingColor}1a` }}
+              onClick={(e) => { e.stopPropagation(); onGoToTerminal() }}
+              title={t('kanban.goToTerminal')}
+            >
+              &#9002; {t('kanban.terminal')}
+            </button>
+          )}
+        </div>
       </div>
-      <span className="kanban-card-type-badge" style={{ color: typeConf.color, background: `${typeConf.color}1a` }}>
-        {locale === 'en' ? typeConf.labelEn : typeConf.labelFr}
-      </span>
-      <span className="kanban-card-date">
-        {new Date(task.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'short' })}
-        {', '}
-        {new Date(task.createdAt).toLocaleTimeString(locale === 'en' ? 'en-US' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}
-      </span>
-      {task.isPrequalifying && (
-        <span className="kanban-card-prequalifying">{t('kanban.prequalifyRunning')}</span>
-      )}
-      {task.splitSuggestions && task.splitSuggestions.length > 0 && (
-        <span className="kanban-card-split-badge">{t('kanban.splitDetected')}</span>
-      )}
-      <p className="kanban-card-desc">
-        {task.description || t('kanban.noDescription')}
-      </p>
-      {onGoToTerminal && (
-        <button
-          className="kanban-card-terminal-btn"
-          style={{ color: workingColor, background: `${workingColor}1a` }}
-          onClick={(e) => { e.stopPropagation(); onGoToTerminal() }}
-          title={t('kanban.goToTerminal')}
-        >
-          &#9002; {t('kanban.terminal')}
-        </button>
-      )}
     </div>
   )
 }
