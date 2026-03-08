@@ -653,15 +653,18 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
   let paUpdateAvailable = false
 
   if (pixelAgentsInstalled) {
-    paCurrentVersion = await getPixelAgentsVersion()
+    const baseVersion = await getPixelAgentsVersion()
     const [localCommit, remoteCommit] = await Promise.all([
       getLocalPixelAgentsCommit(),
       getRemotePixelAgentsCommit(),
     ])
 
+    // Show version with commit hash for clarity (e.g. "1.2.0 (abc1234)")
+    paCurrentVersion = localCommit ? `${baseVersion} (${localCommit})` : baseVersion
+
     if (localCommit && remoteCommit && localCommit !== remoteCommit) {
       paUpdateAvailable = true
-      paLatestVersion = `${paCurrentVersion}+${remoteCommit}`
+      paLatestVersion = `${baseVersion} (${remoteCommit})`
     } else {
       paLatestVersion = paCurrentVersion
     }
@@ -978,7 +981,9 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
                 
                 sendStatus('installing', 30)
                 if (fsSync.existsSync(path.join(sourcePath, '.git'))) {
-                  // Already cloned, just pull
+                  // Reset local modifications before pulling
+                  await crossExecFile('git', ['reset', '--hard', 'HEAD'], { cwd: sourcePath, timeout: 10000, env: enrichedEnv() })
+                  await crossExecFile('git', ['clean', '-fd'], { cwd: sourcePath, timeout: 10000, env: enrichedEnv() })
                   await crossExecFile('git', ['pull'], { cwd: sourcePath, timeout: 60000, env: enrichedEnv() })
                 } else {
                   // Clone for the first time
@@ -1015,6 +1020,9 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
               const parentDir = path.dirname(sourcePath)
               await fs.mkdir(parentDir, { recursive: true })
               if (fsSync.existsSync(path.join(sourcePath, '.git'))) {
+                // Reset local modifications (e.g. webview-ui/package-lock.json) before pulling
+                await crossExecFile('git', ['reset', '--hard', 'HEAD'], { cwd: sourcePath, timeout: 10000, env: enrichedEnv() })
+                await crossExecFile('git', ['clean', '-fd'], { cwd: sourcePath, timeout: 10000, env: enrichedEnv() })
                 await crossExecFile('git', ['pull'], { cwd: sourcePath, timeout: 60000, env: enrichedEnv() })
               } else {
                 await fs.rm(sourcePath, { recursive: true, force: true }).catch(() => {})

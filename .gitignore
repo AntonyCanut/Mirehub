@@ -74,3 +74,4 @@ embedded.provisionprofile
 .trivycache/
 .checkov/
 # End analysis tool reports
+.kanbai-worktrees/

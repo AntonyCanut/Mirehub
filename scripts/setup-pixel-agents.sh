@@ -14,8 +14,8 @@ if [ ! -d "$VENDOR_DIR" ]; then
   mkdir -p "$PROJECT_ROOT/vendor"
   git clone https://github.com/pablodelucca/pixel-agents.git "$VENDOR_DIR"
 else
-  echo "    pixel-agents already cloned, pulling latest..."
-  cd "$VENDOR_DIR" && git pull && cd "$PROJECT_ROOT"
+  echo "    pixel-agents already cloned, resetting local changes and pulling latest..."
+  cd "$VENDOR_DIR" && git reset --hard HEAD && git clean -fd && git pull && cd "$PROJECT_ROOT"
 fi
 
 # Build webview-ui

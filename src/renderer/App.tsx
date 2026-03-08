@@ -11,7 +11,6 @@ import { PackagesPanel } from './components/PackagesPanel'
 import { FileDiffViewer } from './components/FileDiffViewer'
 import { ClaudeSettingsPanel } from './components/claude-settings'
 import { SettingsPanel } from './components/SettingsPanel'
-import { SessionModal } from './components/SessionModal'
 import { CommandPalette } from './components/CommandPalette'
 import { GlobalSearch } from './components/GlobalSearch'
 import { TodoScanner } from './components/TodoScanner'
@@ -32,6 +31,7 @@ import { useClaudeStore } from './lib/stores/claudeStore'
 import { useKanbanStore } from './lib/stores/kanbanStore'
 import { useI18n } from './lib/i18n'
 import { useBackgroundKanbanSync } from './hooks/useBackgroundKanbanSync'
+import { AI_PROVIDERS, type AiProviderId } from '../shared/types/ai-provider'
 import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 
 const TUTORIAL_VIEWS = new Set([
@@ -44,8 +44,6 @@ export function App() {
   const { viewMode, setViewMode, availableMagicTabs, setAvailableMagicTabs } = useViewStore()
   const { activeProjectId, projects } = useWorkspaceStore()
   const { setLocale } = useI18n()
-  const [pendingSession, setPendingSession] = useState<SessionData | null>(null)
-  const [sessionChecked, setSessionChecked] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false)
   const [tutorialSection, setTutorialSection] = useState<string | null>(null)
@@ -66,13 +64,27 @@ export function App() {
     setAvailableMagicTabs(['packages'])
   }, [activeProject, setAvailableMagicTabs])
 
-  // Check for saved session on startup
+  // On startup: clear any saved session and create a default "AI + Terminal" tab
   useEffect(() => {
-    window.kanbai.session.load().then((session) => {
-      if (session && session.tabs.length > 0) {
-        setPendingSession(session)
-      }
-      setSessionChecked(true)
+    window.kanbai.session.clear()
+
+    const { activeWorkspaceId, workspaces, projects } = useWorkspaceStore.getState()
+    if (!activeWorkspaceId) return
+
+    const workspace = workspaces.find((w) => w.id === activeWorkspaceId)
+    if (!workspace) return
+
+    window.kanbai.settings.get().then(async (s: AppSettings) => {
+      const providerId = (s.defaultAiProvider || 'claude') as AiProviderId
+      const provider = AI_PROVIDERS[providerId]
+      const label = `${provider.displayName} + Terminal`
+
+      const envPath = await window.kanbai.workspaceEnv.getPath(workspace.name)
+      const cwd = envPath || projects.find((p) => p.workspaceId === activeWorkspaceId)?.path || ''
+      if (!cwd) return
+
+      const termStore = useTerminalTabStore.getState()
+      termStore.createSplitTab(activeWorkspaceId, cwd, label, provider.cliCommand, null)
     })
   }, [])
 
@@ -272,45 +284,6 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [setViewMode])
 
-  const handleResume = useCallback(() => {
-    if (!pendingSession) return
-
-    const { setActiveWorkspace, setActiveProject } = useWorkspaceStore.getState()
-    const termStore = useTerminalTabStore.getState()
-
-    // Restore tabs (skip pixel-agents tabs — they cannot be properly restored)
-    const PIXEL_AGENTS_LABELS = ['Pixel Agents', 'Claude + Pixel Agents']
-    for (const tab of pendingSession.tabs) {
-      if (PIXEL_AGENTS_LABELS.includes(tab.label)) continue
-      if (tab.isSplit) {
-        termStore.createSplitTab(tab.workspaceId, tab.cwd, tab.label, tab.leftCommand, tab.rightCommand)
-      } else {
-        termStore.createTab(tab.workspaceId, tab.cwd, tab.label, tab.leftCommand ?? undefined)
-      }
-    }
-
-    // Restore active workspace/project
-    if (pendingSession.activeWorkspaceId) {
-      setActiveWorkspace(pendingSession.activeWorkspaceId)
-    }
-    if (pendingSession.activeProjectId) {
-      setActiveProject(pendingSession.activeProjectId)
-    }
-
-    window.kanbai.session.clear()
-    setPendingSession(null)
-  }, [pendingSession])
-
-  const handleClear = useCallback(() => {
-    window.kanbai.session.clear()
-    setPendingSession(null)
-  }, [])
-
-  const handleDismiss = useCallback(() => {
-    // Keep session on disk for next time, just close the modal
-    setPendingSession(null)
-  }, [])
-
   const handleTutorialDone = useCallback(() => {
     if (tutorialSection === null) return
     const updated = [...tutorialSeenSections, tutorialSection]
@@ -457,14 +430,6 @@ export function App() {
           </div>
         </div>
       </div>
-      {sessionChecked && pendingSession && (
-        <SessionModal
-          session={pendingSession}
-          onResume={handleResume}
-          onClear={handleClear}
-          onDismiss={handleDismiss}
-        />
-      )}
       <CommandPalette
         open={commandPaletteOpen || quickSwitchOpen}
         onClose={() => { setCommandPaletteOpen(false); setQuickSwitchOpen(false) }}
