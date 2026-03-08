@@ -92,7 +92,7 @@
 }
 
 .terminal-search-close:hover {
-  background: rgba(243, 139, 168, 0.2);
+  background: var(--error-soft);
   color: var(--danger);
 }
 

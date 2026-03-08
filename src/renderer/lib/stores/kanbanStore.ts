@@ -367,7 +367,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
         const termStore = useTerminalTabStore.getState()
         if (newTask.status === 'DONE') {
-          termStore.setTabColor(tabId, '#a6e3a1')
+          termStore.setTabColor(tabId, '#3DD68C')
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id) // allow future re-launch
           tabsToAutoClose.push({ tabId, isCto: isCtoMode })
@@ -389,7 +389,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           pushNotification('success', wsName, `${ticketLabel} — ${body}`, { workspaceId: currentWorkspaceId!, tabId })
         }
         if (newTask.status === 'FAILED') {
-          termStore.setTabColor(tabId, '#f38ba8')
+          termStore.setTabColor(tabId, '#F47067')
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id) // allow future re-launch
 
@@ -408,7 +408,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             { workspaceId: currentWorkspaceId!, tabId })
         }
         if (newTask.status === 'PENDING') {
-          termStore.setTabColor(tabId, '#f9e2af')
+          termStore.setTabColor(tabId, '#fbbf24')
           termStore.setTabActivity(tabId, true)
           // PENDING does NOT trigger next task — the task is still "in progress"
         }
@@ -1023,7 +1023,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
         const termStore = useTerminalTabStore.getState()
         if (newTask.status === 'DONE') {
-          termStore.setTabColor(tabId, '#a6e3a1')
+          termStore.setTabColor(tabId, '#3DD68C')
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id)
           tabsToAutoClose.push({ tabId, isCto: isCtoMode })
@@ -1044,7 +1044,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           pushNotification('success', wsName, `${ticketLabel} — ${body}`, { workspaceId: wsId, tabId })
         }
         if (newTask.status === 'FAILED') {
-          termStore.setTabColor(tabId, '#f38ba8')
+          termStore.setTabColor(tabId, '#F47067')
           taskFinished = true
           relaunchedTaskIds.delete(newTask.id)
 
@@ -1062,7 +1062,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             { workspaceId: wsId, tabId })
         }
         if (newTask.status === 'PENDING') {
-          termStore.setTabColor(tabId, '#f9e2af')
+          termStore.setTabColor(tabId, '#fbbf24')
           termStore.setTabActivity(tabId, true)
         }
       }

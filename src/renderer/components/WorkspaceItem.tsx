@@ -9,11 +9,11 @@ import { ProjectItem } from './ProjectItem'
 import { ContextMenu, ContextMenuItem } from './ContextMenu'
 
 const ENV_TAG_COLORS: Record<DbEnvironmentTag, string> = {
-  local: '#a6e3a1',
-  dev: '#89b4fa',
-  int: '#fab387',
-  qua: '#cba6f7',
-  prd: '#f38ba8',
+  local: '#3DD68C',
+  dev: '#6C8CFF',
+  int: '#F5A623',
+  qua: '#a78bfa',
+  prd: '#F47067',
   custom: 'var(--text-muted)',
 }
 
@@ -32,14 +32,14 @@ interface WorkspaceItemProps {
 }
 
 const WORKSPACE_COLORS = [
-  '#89b4fa', // blue
-  '#a6e3a1', // green
-  '#f38ba8', // red
-  '#fab387', // peach
-  '#cba6f7', // mauve
-  '#f9e2af', // yellow
-  '#94e2d5', // teal
-  '#f5c2e7', // pink
+  '#6C8CFF', // blue
+  '#3DD68C', // green
+  '#F47067', // red
+  '#F5A623', // peach
+  '#a78bfa', // mauve
+  '#fbbf24', // yellow
+  '#22d3ee', // teal
+  '#ec4899', // pink
 ]
 
 const WORKSPACE_ICON_KEYS = [
@@ -335,9 +335,11 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
           </span>
         ) : (
           <span
-            className="workspace-item-color"
+            className="workspace-item-color-badge"
             style={{ backgroundColor: workspace.color }}
-          />
+          >
+            {workspace.name.charAt(0).toUpperCase()}
+          </span>
         )}
 
         {isRenaming ? (
@@ -480,7 +482,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
                   <span className="workspace-db-name">{conn.name}</span>
                   <span
                     className="workspace-db-tag"
-                    style={{ background: tagColor, color: '#1e1e2e' }}
+                    style={{ background: tagColor, color: '#0B0D0F' }}
                   >
                     {tagLabel}
                   </span>

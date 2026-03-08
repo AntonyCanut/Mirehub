@@ -112,7 +112,7 @@ export function TabBar() {
         const isRenaming = tab.id === renamingId
         const isDragging = index === dragIndex
         const isDropTarget = index === dropTarget
-        const isStreaming = tab.color === '#fab387' // Orange = active kanban AI session
+        const isStreaming = tab.color === '#F5A623' // Orange = active kanban AI session
 
         return (
           <div

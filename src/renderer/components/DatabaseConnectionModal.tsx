@@ -27,11 +27,11 @@ const ENGINE_OPTIONS: { value: DbEngine; label: string }[] = [
 ]
 
 const ENV_TAG_OPTIONS: { value: DbEnvironmentTag; labelKey: string; color: string }[] = [
-  { value: 'local', labelKey: 'db.envLocal', color: '#a6e3a1' },
-  { value: 'dev', labelKey: 'db.envDev', color: '#89b4fa' },
-  { value: 'int', labelKey: 'db.envInt', color: '#fab387' },
-  { value: 'qua', labelKey: 'db.envQua', color: '#cba6f7' },
-  { value: 'prd', labelKey: 'db.envPrd', color: '#f38ba8' },
+  { value: 'local', labelKey: 'db.envLocal', color: '#3DD68C' },
+  { value: 'dev', labelKey: 'db.envDev', color: '#6C8CFF' },
+  { value: 'int', labelKey: 'db.envInt', color: '#F5A623' },
+  { value: 'qua', labelKey: 'db.envQua', color: '#a78bfa' },
+  { value: 'prd', labelKey: 'db.envPrd', color: '#F47067' },
   { value: 'custom', labelKey: 'db.envCustom', color: 'var(--text-muted)' },
 ]
 

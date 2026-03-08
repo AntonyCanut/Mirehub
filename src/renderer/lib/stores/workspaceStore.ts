@@ -176,7 +176,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     const { activeNamespaceId } = get()
     const workspace = await window.kanbai.workspace.create({
       name,
-      color: color ?? '#89b4fa',
+      color: color ?? '#6C8CFF',
       namespaceId: activeNamespaceId ?? undefined,
     })
     if (workspace) {
@@ -198,7 +198,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       const folderName = dirPath.split(/[\\/]/).pop() || dirPath
       const workspace = await window.kanbai.workspace.create({
         name: folderName,
-        color: '#89b4fa',
+        color: '#6C8CFF',
       })
       if (!workspace) return null
 
@@ -283,7 +283,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       // Create workspace
       const workspace = await window.kanbai.workspace.create({
         name: projectName,
-        color: '#89b4fa',
+        color: '#6C8CFF',
       })
       if (!workspace) return null
 

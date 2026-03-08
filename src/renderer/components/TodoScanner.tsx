@@ -13,7 +13,7 @@ const TYPE_COLORS: Record<TodoType, string> = {
   FIXME: 'var(--danger)',
   HACK: 'var(--warning)',
   NOTE: 'var(--success)',
-  XXX: '#cba6f7',
+  XXX: '#a78bfa',
 }
 
 function todoKey(entry: TodoEntry): string {

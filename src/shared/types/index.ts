@@ -771,7 +771,7 @@ export interface McpHelpResult {
   error?: string
 }
 
-export type McpCategory = 'filesystem' | 'database' | 'web' | 'ai' | 'devtools' | 'cloud' | 'communication' | 'utilities'
+export type McpCategory = 'filesystem' | 'database' | 'web' | 'ai' | 'devtools' | 'cloud' | 'communication' | 'utilities' | 'design'
 
 export interface McpCatalogEntry {
   id: string
@@ -781,6 +781,7 @@ export interface McpCatalogEntry {
   args: string[]
   env?: Record<string, string>
   envPlaceholders?: Record<string, string>
+  argsPlaceholders?: Record<string, string>
   category: McpCategory
   features: string[]
   official: boolean
@@ -1109,6 +1110,8 @@ export const IPC_CHANNELS = {
 
   // MCP
   MCP_GET_HELP: 'mcp:getHelp',
+  MCP_WORKSPACE_READ: 'mcp:workspaceRead',
+  MCP_WORKSPACE_WRITE: 'mcp:workspaceWrite',
 
   // API Tester
   API_EXECUTE: 'api:execute',

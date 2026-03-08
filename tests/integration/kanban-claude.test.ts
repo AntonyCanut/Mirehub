@@ -116,7 +116,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -154,7 +154,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1', 'proj-2'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1', 'proj-2'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [
           { id: 'proj-1', name: 'Frontend', path: '/tmp/frontend', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() },
           { id: 'proj-2', name: 'Backend', path: '/tmp/backend', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() },
@@ -186,7 +186,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -213,7 +213,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -237,7 +237,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -270,7 +270,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -298,7 +298,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -318,7 +318,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
 
       // Simulate an existing tab for this task
       useTerminalTabStore.setState({
-        tabs: [{ id: 'tab-existing', label: '[IA] Fix bug', color: '#fab387', hasActivity: false, paneTree: { type: 'leaf', id: 'p1', sessionId: 'pty-1', initialCommand: null, externalSessionId: null }, activePaneId: 'p1', zoomedPaneId: null, workspaceId: 'ws-1', cwd: '/tmp/workspace-env', initialCommand: null }],
+        tabs: [{ id: 'tab-existing', label: '[IA] Fix bug', color: '#F5A623', hasActivity: false, paneTree: { type: 'leaf', id: 'p1', sessionId: 'pty-1', initialCommand: null, externalSessionId: null }, activePaneId: 'p1', zoomedPaneId: null, workspaceId: 'ws-1', cwd: '/tmp/workspace-env', initialCommand: null }],
         setActiveTab: mockSetActiveTab as ReturnType<typeof useTerminalTabStore.getState>['setActiveTab'],
         createTab: mockCreateTab as ReturnType<typeof useTerminalTabStore.getState>['createTab'],
         setTabColor: mockSetTabColor,
@@ -351,7 +351,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -372,7 +372,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -394,7 +394,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -422,7 +422,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
 
       await useKanbanStore.getState().syncTasksFromFile()
 
-      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#a6e3a1')
+      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#3DD68C')
     })
 
     it('ne ferme pas le terminal quand WORKING → DONE', async () => {
@@ -448,7 +448,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
 
       await useKanbanStore.getState().syncTasksFromFile()
 
-      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#f38ba8')
+      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#F47067')
     })
 
     it('ne ferme pas le terminal quand WORKING → FAILED', async () => {
@@ -474,7 +474,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
 
       await useKanbanStore.getState().syncTasksFromFile()
 
-      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#f9e2af')
+      expect(mockSetTabColor).toHaveBeenCalledWith('tab-abc', '#fbbf24')
       expect(mockSetTabActivity).toHaveBeenCalledWith('tab-abc', true)
     })
 
@@ -524,7 +524,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -553,7 +553,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -580,7 +580,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -607,7 +607,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -644,7 +644,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -706,7 +706,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -734,7 +734,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -808,7 +808,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -837,7 +837,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 
@@ -859,7 +859,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       const { useWorkspaceStore } = await import('../../src/renderer/lib/stores/workspaceStore')
       useWorkspaceStore.setState({
         activeWorkspaceId: 'ws-1',
-        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#89b4fa', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
+        workspaces: [{ id: 'ws-1', name: 'Test WS', color: '#6C8CFF', projectIds: ['proj-1'], createdAt: Date.now(), updatedAt: Date.now() }],
         projects: [{ id: 'proj-1', name: 'Project 1', path: '/tmp/project', hasClaude: true, workspaceId: 'ws-1', createdAt: Date.now() }],
       })
 

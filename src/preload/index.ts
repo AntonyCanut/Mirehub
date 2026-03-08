@@ -462,6 +462,10 @@ const api = {
   mcp: {
     getHelp: (name: string, config: McpServerConfig): Promise<McpHelpResult> =>
       ipcRenderer.invoke(IPC_CHANNELS.MCP_GET_HELP, { name, config }),
+    workspaceRead: (workspaceName: string): Promise<{ mcpServers: Record<string, McpServerConfig> }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.MCP_WORKSPACE_READ, { workspaceName }),
+    workspaceWrite: (workspaceName: string, mcpServers: Record<string, McpServerConfig>): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.MCP_WORKSPACE_WRITE, { workspaceName, mcpServers }),
   },
 
   // Claude defaults library

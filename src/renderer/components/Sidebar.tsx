@@ -284,7 +284,12 @@ export function Sidebar() {
           <button
             className="sidebar-namespace-trigger"
           >
-            {activeNamespace?.name ?? t('sidebar.title')}
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+              <path d="M2 3.5C2 2.67 2.67 2 3.5 2H6.29a1.5 1.5 0 011.06.44L8.41 3.5H12.5c.83 0 1.5.67 1.5 1.5V12c0 .83-.67 1.5-1.5 1.5h-9A1.5 1.5 0 012 12V3.5z" stroke="currentColor" strokeWidth="1.2" fill="none" />
+            </svg>
+            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {activeNamespace?.name ?? t('sidebar.title')}
+            </span>
             <span className={`namespace-chevron${showNamespaceDropdown ? ' namespace-chevron--open' : ''}`}>
               <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
                 <path d="M1 2.5L4 5.5L7 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -320,6 +325,9 @@ export function Sidebar() {
                           setShowNamespaceDropdown(false)
                         }}
                       >
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+                          <path d="M2 3.5C2 2.67 2.67 2 3.5 2H6.29a1.5 1.5 0 011.06.44L8.41 3.5H12.5c.83 0 1.5.67 1.5 1.5V12c0 .83-.67 1.5-1.5 1.5h-9A1.5 1.5 0 012 12V3.5z" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                        </svg>
                         <span className="namespace-item-name">{ns.name}</span>
                       </button>
                       {!ns.isDefault && (
@@ -632,6 +640,18 @@ export function Sidebar() {
           )}
         </div>
       )}
+
+      <div className="sidebar-footer">
+        <button
+          className="sidebar-new-workspace-btn"
+          onClick={() => setShowCreateMenu((prev) => !prev)}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          {t('sidebar.newWorkspace')}
+        </button>
+      </div>
     </aside>
   )
 }

@@ -59,18 +59,18 @@ export function ClaudeMdTab({ claudeMd, projectPath, onSave }: Props) {
               base: 'vs-dark',
               inherit: true,
               rules: [
-                { token: 'comment', foreground: '6c7086', fontStyle: 'italic' },
-                { token: 'keyword', foreground: 'cba6f7' },
-                { token: 'string', foreground: 'a6e3a1' },
+                { token: 'comment', foreground: '565C66', fontStyle: 'italic' },
+                { token: 'keyword', foreground: 'a78bfa' },
+                { token: 'string', foreground: '3DD68C' },
               ],
               colors: {
-                'editor.background': '#1e1e2e',
-                'editor.foreground': '#cdd6f4',
-                'editor.lineHighlightBackground': '#313244',
-                'editor.selectionBackground': '#45475a',
+                'editor.background': '#0B0D0F',
+                'editor.foreground': '#F0F2F4',
+                'editor.lineHighlightBackground': '#1A1D22',
+                'editor.selectionBackground': '#1F2328',
                 'editorCursor.foreground': '#f5e0dc',
-                'editorLineNumber.foreground': '#6c7086',
-                'editorLineNumber.activeForeground': '#cdd6f4',
+                'editorLineNumber.foreground': '#565C66',
+                'editorLineNumber.activeForeground': '#F0F2F4',
               },
             })
           }}

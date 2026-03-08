@@ -302,6 +302,7 @@ export function ClaudeSettingsPanel() {
                     settings={settings}
                     mcpServers={mcpServers}
                     projectPath={activeProject.path}
+                    workspaceName={activeWorkspace?.name}
                     claudeMd={claudeMd}
                     workflowDeployed={workflowDeployed}
                     onSettingsChange={writeSettings}

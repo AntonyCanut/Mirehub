@@ -9,6 +9,7 @@ export const MCP_CATEGORIES: { id: McpCategory; labelKey: string }[] = [
   { id: 'cloud', labelKey: 'claude.mcpCatCloud' },
   { id: 'communication', labelKey: 'claude.mcpCatCommunication' },
   { id: 'utilities', labelKey: 'claude.mcpCatUtilities' },
+  { id: 'design', labelKey: 'claude.mcpCatDesign' },
 ]
 
 export const MCP_CATEGORY_ICONS: Record<McpCategory, string> = {
@@ -20,6 +21,7 @@ export const MCP_CATEGORY_ICONS: Record<McpCategory, string> = {
   cloud: '\u2601\uFE0F',
   communication: '\uD83D\uDCAC',
   utilities: '\u2699\uFE0F',
+  design: '\uD83C\uDFA8',
 }
 
 export const MCP_CATALOG: McpCatalogEntry[] = [
@@ -29,7 +31,8 @@ export const MCP_CATALOG: McpCatalogEntry[] = [
     name: 'Filesystem',
     description: 'Secure file operations with configurable access controls',
     command: 'npx',
-    args: ['-y', '@modelcontextprotocol/server-filesystem', '/tmp'],
+    args: ['-y', '@modelcontextprotocol/server-filesystem', '{{ALLOWED_PATH}}'],
+    argsPlaceholders: { ALLOWED_PATH: '/tmp' },
     category: 'filesystem',
     features: ['read_file', 'write_file', 'list_directory', 'move_file', 'search_files', 'get_file_info'],
     official: true,
@@ -129,7 +132,8 @@ export const MCP_CATALOG: McpCatalogEntry[] = [
     name: 'SQLite',
     description: 'Database interaction and business intelligence for SQLite',
     command: 'npx',
-    args: ['-y', '@modelcontextprotocol/server-sqlite', '--db-path', '/path/to/db.sqlite'],
+    args: ['-y', '@modelcontextprotocol/server-sqlite', '--db-path', '{{DB_PATH}}'],
+    argsPlaceholders: { DB_PATH: '/path/to/db.sqlite' },
     category: 'database',
     features: ['read_query', 'write_query', 'create_table', 'list_tables', 'describe_table', 'append_insight'],
     official: true,
@@ -243,5 +247,20 @@ export const MCP_CATALOG: McpCatalogEntry[] = [
     category: 'utilities',
     features: ['echo', 'add', 'longRunningOperation', 'sampleLLM', 'getTinyImage'],
     official: true,
+  },
+
+  // === Design ===
+  {
+    id: 'pencil',
+    name: 'Pencil',
+    description: 'AI-powered design editor for web and mobile applications',
+    command: 'npx',
+    args: ['-y', '@nicepkg/pencil-mcp', '--app', '{{APP_TYPE}}'],
+    argsPlaceholders: { APP_TYPE: 'desktop' },
+    env: { PENCIL_API_KEY: '' },
+    envPlaceholders: { PENCIL_API_KEY: 'your-pencil-api-key' },
+    category: 'design',
+    features: ['batch_design', 'batch_get', 'get_screenshot', 'snapshot_layout', 'get_guidelines'],
+    official: false,
   },
 ]

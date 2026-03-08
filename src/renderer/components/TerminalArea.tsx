@@ -439,7 +439,7 @@ export function TerminalArea() {
             key={tab.id}
             className={`tab ${tab.id === activeTabId ? 'active' : ''} ${
               dragOverTabId === tab.id ? 'tab-drag-over' : ''
-            }${tab.color === '#fab387' ? ' tab--streaming' : ''}${tab.color ? ' tab--tinted' : ''}`}
+            }${tab.color === '#F5A623' ? ' tab--streaming' : ''}${tab.color ? ' tab--tinted' : ''}`}
             style={tab.color ? { '--tab-tint-color': tab.color } as React.CSSProperties : undefined}
             onClick={() => setActiveTab(tab.id)}
             onMouseDown={(e) => handleTabMouseDown(e, tab.id)}

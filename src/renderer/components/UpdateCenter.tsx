@@ -117,16 +117,16 @@ export function UpdateCenter() {
   return (
     <div className="notification-center" ref={containerRef}>
       <button
-        className="notification-bell"
+        className={`update-trigger${badgeCount > 0 ? ' update-trigger--has-updates' : ''}`}
         onClick={handleToggle}
         title={t('updates.updateCenterTooltip')}
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M2 4L8 1L14 4V12L8 15L2 12V4Z" stroke="currentColor" strokeWidth="1.2" fill="none" />
-          <path d="M2 4L8 7L14 4" stroke="currentColor" strokeWidth="1.2" />
-          <path d="M8 7V15" stroke="currentColor" strokeWidth="1.2" />
+          <path d="M3 5.5L8 3L13 5.5V10.5L8 13L3 10.5V5.5Z" stroke="currentColor" strokeWidth="1.2" fill="none" />
+          <path d="M3 5.5L8 8L13 5.5" stroke="currentColor" strokeWidth="1.2" />
+          <path d="M8 8V13" stroke="currentColor" strokeWidth="1.2" />
         </svg>
-        {badgeCount > 0 && <span className="notification-badge">{badgeCount}</span>}
+        {badgeCount > 0 && <span className="update-trigger-count">{badgeCount}</span>}
       </button>
 
       {isOpen && (

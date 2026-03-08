@@ -60,11 +60,11 @@ function formatTicketNumber(n?: number, type?: KanbanTaskType, isPrequalifying?:
 }
 
 const COLUMNS: { status: KanbanStatus; labelKey: string; color: string }[] = [
-  { status: 'TODO', labelKey: 'kanban.todo', color: '#89b4fa' },
-  { status: 'WORKING', labelKey: 'kanban.working', color: '#fab387' },
-  { status: 'PENDING', labelKey: 'kanban.pending', color: '#f9e2af' },
-  { status: 'DONE', labelKey: 'kanban.done', color: '#a6e3a1' },
-  { status: 'FAILED', labelKey: 'kanban.failed', color: '#f38ba8' },
+  { status: 'TODO', labelKey: 'kanban.todo', color: '#6C8CFF' },
+  { status: 'WORKING', labelKey: 'kanban.working', color: '#F5A623' },
+  { status: 'PENDING', labelKey: 'kanban.pending', color: '#fbbf24' },
+  { status: 'DONE', labelKey: 'kanban.done', color: '#3DD68C' },
+  { status: 'FAILED', labelKey: 'kanban.failed', color: '#F47067' },
 ]
 
 // Columns displayed in the main board (DONE is handled via archive)
@@ -75,12 +75,12 @@ const PRIORITIES = ['low', 'medium', 'high'] as const
 const TASK_TYPES: KanbanTaskType[] = ['bug', 'feature', 'test', 'doc', 'ia', 'refactor']
 
 const TYPE_CONFIG: Record<KanbanTaskType, { color: string; labelFr: string; labelEn: string }> = {
-  bug:      { color: '#f38ba8', labelFr: 'Bug',      labelEn: 'Bug' },
-  feature:  { color: '#89b4fa', labelFr: 'Feature',  labelEn: 'Feature' },
-  test:     { color: '#94e2d5', labelFr: 'Test',     labelEn: 'Test' },
-  doc:      { color: '#a6e3a1', labelFr: 'Doc',      labelEn: 'Doc' },
-  ia:       { color: '#cba6f7', labelFr: 'IA',       labelEn: 'AI' },
-  refactor: { color: '#f5c2e7', labelFr: 'Refactor', labelEn: 'Refactor' },
+  bug:      { color: '#F47067', labelFr: 'Bug',      labelEn: 'Bug' },
+  feature:  { color: '#6C8CFF', labelFr: 'Feature',  labelEn: 'Feature' },
+  test:     { color: '#22d3ee', labelFr: 'Test',     labelEn: 'Test' },
+  doc:      { color: '#3DD68C', labelFr: 'Doc',      labelEn: 'Doc' },
+  ia:       { color: '#a78bfa', labelFr: 'IA',       labelEn: 'AI' },
+  refactor: { color: '#ec4899', labelFr: 'Refactor', labelEn: 'Refactor' },
 }
 
 // --- Predefined task templates ---
@@ -651,9 +651,51 @@ export function KanbanBoard() {
   return (
     <div className="kanban">
       <div className="kanban-header">
-        <h2>{t('kanban.title')}</h2>
+        <div className="kanban-header-left">
+          <h2>{t('kanban.title')}</h2>
+          <div className="kanban-task-count-wrapper">
+            <span className="kanban-task-count">{filteredTasks.length} {t('kanban.tasksLabel')}</span>
+            <div className="kanban-task-count-tooltip">
+              {COLUMNS.map((col) => {
+                const count = filteredTasks.filter((tk) => tk.status === col.status).length
+                return (
+                  <div key={col.status} className="kanban-task-count-row">
+                    <span className="kanban-task-count-dot" style={{ background: col.color }} />
+                    <span className="kanban-task-count-label">{t(col.labelKey)}</span>
+                    <span className="kanban-task-count-value">{count}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+        <div className="kanban-header-filters">
+          <select className="kanban-filter-select" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
+            <option value="all">{t('kanban.allPriorities')}</option>
+            <option value="low">{t('kanban.low')}</option>
+            <option value="medium">{t('kanban.medium')}</option>
+            <option value="high">{t('kanban.high')}</option>
+          </select>
+          <select className="kanban-filter-select" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+            <option value="all">{t('kanban.allTypes')}</option>
+            {TASK_TYPES.map((tp) => (
+              <option key={tp} value={tp}>{t(`kanban.type.${tp}`)}</option>
+            ))}
+          </select>
+          <select className="kanban-filter-select" value={filterScope} onChange={(e) => setFilterScope(e.target.value)}>
+            <option value="all">{t('kanban.allScopes')}</option>
+            <option value="workspace">{t('kanban.workspaceOnly')}</option>
+            {workspaceProjects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          {hasActiveFilters && (
+            <button className="kanban-filter-clear" onClick={() => { setFilterPriority('all'); setFilterType('all'); setFilterScope('all'); setSearchQuery('') }}>
+              {t('kanban.clearFilters')}
+            </button>
+          )}
+        </div>
         <div className="kanban-header-actions">
-          {/* Search */}
           <input
             className="kanban-search-input"
             type="text"
@@ -661,9 +703,8 @@ export function KanbanBoard() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <span className="kanban-task-count">{t('kanban.taskCount', { count: String(filteredTasks.length) })}</span>
           <button className="kanban-add-btn" onClick={() => setShowCreateForm(!showCreateForm)}>
-            {t('kanban.newTask')}
+            + {t('kanban.newTask')}
           </button>
           <button
             className={`kanban-pause-btn${kanbanConfig?.paused ? ' kanban-pause-btn--active' : ''}`}
@@ -732,56 +773,6 @@ export function KanbanBoard() {
         </div>
       )}
 
-      {/* Filter bar */}
-      <div className="kanban-filter-bar">
-        <select
-          className="kanban-filter-select"
-          value={filterPriority}
-          onChange={(e) => setFilterPriority(e.target.value)}
-        >
-          <option value="all">{t('kanban.allPriorities')}</option>
-          <option value="low">{t('kanban.low')}</option>
-          <option value="medium">{t('kanban.medium')}</option>
-          <option value="high">{t('kanban.high')}</option>
-        </select>
-
-        <select
-          className="kanban-filter-select"
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-        >
-          <option value="all">{t('kanban.allTypes')}</option>
-          {TASK_TYPES.map((tp) => (
-            <option key={tp} value={tp}>{t(`kanban.type.${tp}`)}</option>
-          ))}
-        </select>
-
-        <select
-          className="kanban-filter-select"
-          value={filterScope}
-          onChange={(e) => setFilterScope(e.target.value)}
-        >
-          <option value="all">{t('kanban.allScopes')}</option>
-          <option value="workspace">{t('kanban.workspaceOnly')}</option>
-          {workspaceProjects.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-
-        {hasActiveFilters && (
-          <button
-            className="kanban-filter-clear"
-            onClick={() => {
-              setFilterPriority('all')
-              setFilterType('all')
-              setFilterScope('all')
-              setSearchQuery('')
-            }}
-          >
-            {t('kanban.clearFilters')}
-          </button>
-        )}
-      </div>
 
       {showCreateForm && (() => {
         const activeWs = workspaces.find((w) => w.id === activeWorkspaceId)
@@ -846,7 +837,7 @@ export function KanbanBoard() {
                   <span className="kanban-create-meta-label">{t('kanban.priority')}</span>
                   <div className="kanban-create-pill-row">
                     {PRIORITIES.map((p) => {
-                      const pColors: Record<string, string> = { low: '#6c7086', medium: '#89b4fa', high: '#fab387' }
+                      const pColors: Record<string, string> = { low: '#565C66', medium: '#6C8CFF', high: '#F5A623' }
                       const isActive = newPriority === p
                       return (
                         <button
@@ -1045,7 +1036,7 @@ export function KanbanBoard() {
                   <span className="kanban-create-meta-label">{t('kanban.priority')}</span>
                   <div className="kanban-create-pill-row">
                     {PRIORITIES.map((p) => {
-                      const pColors: Record<string, string> = { low: '#6c7086', medium: '#89b4fa', high: '#fab387' }
+                      const pColors: Record<string, string> = { low: '#565C66', medium: '#6C8CFF', high: '#F5A623' }
                       const isActive = editPriority === p
                       return (
                         <button
@@ -1173,8 +1164,8 @@ export function KanbanBoard() {
             onDragOver={handleDragOver}
             onDrop={() => handleDrop('DONE')}
           >
-            <div className="kanban-column-header" style={{ borderColor: '#a6e3a1' }}>
-              <span className="kanban-column-dot" style={{ backgroundColor: '#a6e3a1' }} />
+            <div className="kanban-column-header" style={{ borderColor: '#3DD68C' }}>
+              <span className="kanban-column-dot" style={{ backgroundColor: '#3DD68C' }} />
               <span className="kanban-column-title">{t('kanban.done')}</span>
               <span className="kanban-column-count">{doneTasks.length}</span>
             </div>
@@ -1286,9 +1277,9 @@ function PredefinedTaskCard({
   const { locale } = useI18n()
 
   const priorityColors: Record<string, string> = {
-    low: '#6c7086',
-    medium: '#89b4fa',
-    high: '#fab387',
+    low: '#565C66',
+    medium: '#6C8CFF',
+    high: '#F5A623',
   }
 
   const typeConf = TYPE_CONFIG[template.type] ?? TYPE_CONFIG.feature
@@ -1374,9 +1365,9 @@ function KanbanCard({
   }, [onDoubleClick])
 
   const priorityColors: Record<string, string> = {
-    low: '#6c7086',
-    medium: '#89b4fa',
-    high: '#fab387',
+    low: '#565C66',
+    medium: '#6C8CFF',
+    high: '#F5A623',
   }
 
   const isWorking = task.status === 'WORKING'
@@ -1608,9 +1599,9 @@ function TaskDetailPanel({
   }, [descValue, task.description, onUpdate])
 
   const priorityColors: Record<string, string> = {
-    low: '#6c7086',
-    medium: '#89b4fa',
-    high: '#fab387',
+    low: '#565C66',
+    medium: '#6C8CFF',
+    high: '#F5A623',
   }
 
   const priorityLabels: Record<string, string> = {
@@ -1793,12 +1784,12 @@ function TaskDetailPanel({
           <div className="kanban-split-suggestions">
             {task.splitSuggestions.map((s, i) => (
               <div key={i} className="kanban-split-suggestion-card">
-                <span className="kanban-split-suggestion-type" style={{ color: TYPE_CONFIG[s.type]?.color ?? '#cdd6f4' }}>
+                <span className="kanban-split-suggestion-type" style={{ color: TYPE_CONFIG[s.type]?.color ?? '#F0F2F4' }}>
                   {locale === 'en' ? (TYPE_CONFIG[s.type]?.labelEn ?? s.type) : (TYPE_CONFIG[s.type]?.labelFr ?? s.type)}
                 </span>
                 <span className="kanban-split-suggestion-title">{s.title}</span>
                 <span className="kanban-split-suggestion-desc">{s.description}</span>
-                <span className="kanban-split-suggestion-priority" style={{ color: priorityColors[s.priority] ?? '#6c7086' }}>
+                <span className="kanban-split-suggestion-priority" style={{ color: priorityColors[s.priority] ?? '#565C66' }}>
                   {priorityLabels[s.priority] ?? s.priority}
                 </span>
               </div>

@@ -323,6 +323,55 @@ export function registerWorkspaceEnvHandlers(ipcMain: IpcMain): void {
     },
   )
 
+  // Read workspace-level MCP servers from settings.local.json
+  ipcMain.handle(
+    IPC_CHANNELS.MCP_WORKSPACE_READ,
+    async (_event, { workspaceName }: { workspaceName: string }) => {
+      try {
+        const envDir = getEnvDir(workspaceName)
+        const settingsPath = path.join(envDir, '.claude', 'settings.local.json')
+        if (!fs.existsSync(settingsPath)) return { mcpServers: {} }
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
+        return { mcpServers: settings.mcpServers ?? {} }
+      } catch {
+        return { mcpServers: {} }
+      }
+    },
+  )
+
+  // Write workspace-level MCP servers to settings.local.json
+  ipcMain.handle(
+    IPC_CHANNELS.MCP_WORKSPACE_WRITE,
+    async (
+      _event,
+      { workspaceName, mcpServers }: { workspaceName: string; mcpServers: Record<string, unknown> },
+    ) => {
+      try {
+        const envDir = getEnvDir(workspaceName)
+        const claudeDir = path.join(envDir, '.claude')
+        if (!fs.existsSync(claudeDir)) {
+          fs.mkdirSync(claudeDir, { recursive: true })
+        }
+        const settingsPath = path.join(claudeDir, 'settings.local.json')
+        let settings: Record<string, unknown> = {}
+        if (fs.existsSync(settingsPath)) {
+          try {
+            settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
+          } catch { /* ignore corrupt file */ }
+        }
+        if (Object.keys(mcpServers).length > 0) {
+          settings.mcpServers = mcpServers
+        } else {
+          delete settings.mcpServers
+        }
+        fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
   // Delete workspace env directory
   ipcMain.handle(
     IPC_CHANNELS.WORKSPACE_ENV_DELETE,

@@ -36,11 +36,11 @@ interface TreeNode {
 }
 
 const ENV_TAG_COLORS: Record<DbEnvironmentTag, string> = {
-  local: '#a6e3a1',
-  dev: '#89b4fa',
-  int: '#fab387',
-  qua: '#cba6f7',
-  prd: '#f38ba8',
+  local: '#3DD68C',
+  dev: '#6C8CFF',
+  int: '#F5A623',
+  qua: '#a78bfa',
+  prd: '#F47067',
   custom: 'var(--text-muted)',
 }
 
@@ -544,7 +544,7 @@ export function DatabaseSidebar({
                   className="db-env-badge"
                   style={{
                     background: tagColor,
-                    color: '#1e1e2e',
+                    color: '#0B0D0F',
                   }}
                 >
                   {tagLabel}
@@ -657,7 +657,7 @@ export function DatabaseSidebar({
                         </span>
                         <span
                           className="db-env-badge db-env-badge--sm"
-                          style={{ background: entryTagColor, color: '#1e1e2e' }}
+                          style={{ background: entryTagColor, color: '#0B0D0F' }}
                         >
                           {entryTagLabel}
                         </span>

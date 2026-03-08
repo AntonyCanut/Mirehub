@@ -173,7 +173,7 @@
 .git-project-all--active { background: rgba(124, 58, 237, 0.08); color: var(--text-primary); }
 
 .git-project-node {
-  border-bottom: 1px solid rgba(69, 71, 90, 0.15);
+  border-bottom: 1px solid rgba(31, 35, 40, 0.15);
 }
 
 .git-project-header {
@@ -226,9 +226,9 @@
   font-weight: 600;
   padding: 1px 5px;
   border-radius: 3px;
-  background: rgba(166, 227, 161, 0.15);
-  color: #a6e3a1;
-  border: 1px solid rgba(166, 227, 161, 0.3);
+  background: rgba(61, 214, 140, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(61, 214, 140, 0.3);
   max-width: 80px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -240,7 +240,7 @@
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 3px;
-  background: rgba(250, 179, 135, 0.2);
+  background: rgba(245, 166, 35, 0.2);
   color: var(--warning);
   min-width: 16px;
   text-align: center;
@@ -314,9 +314,9 @@
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 3px;
-  background: rgba(166, 227, 161, 0.15);
-  color: #a6e3a1;
-  border: 1px solid rgba(166, 227, 161, 0.3);
+  background: rgba(61, 214, 140, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(61, 214, 140, 0.3);
   flex-shrink: 0;
 }
 
@@ -430,7 +430,7 @@
 
 /* Section (collapsible) */
 
-.git-sidebar-section { border-bottom: 1px solid rgba(69, 71, 90, 0.3); }
+.git-sidebar-section { border-bottom: 1px solid rgba(31, 35, 40, 0.3); }
 
 .git-sidebar-section-header {
   display: flex;
@@ -637,8 +637,8 @@
   transition: background 0.1s ease;
 }
 
-.git-graph-row:hover { background: rgba(69, 71, 90, 0.15); }
-.git-graph-row--selected { background: rgba(137, 180, 250, 0.1); }
+.git-graph-row:hover { background: rgba(31, 35, 40, 0.15); }
+.git-graph-row--selected { background: rgba(108, 140, 255, 0.1); }
 
 .git-graph-info {
   flex: 1;
@@ -675,27 +675,27 @@
 }
 
 .git-ref-badge--head {
-  background: rgba(243, 139, 168, 0.2);
-  color: #f38ba8;
-  border: 1px solid rgba(243, 139, 168, 0.3);
+  background: rgba(244, 112, 103, 0.2);
+  color: var(--danger);
+  border: 1px solid rgba(244, 112, 103, 0.3);
 }
 
 .git-ref-badge--branch {
-  background: rgba(166, 227, 161, 0.15);
-  color: #a6e3a1;
-  border: 1px solid rgba(166, 227, 161, 0.3);
+  background: rgba(61, 214, 140, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(61, 214, 140, 0.3);
 }
 
 .git-ref-badge--remote {
-  background: rgba(137, 180, 250, 0.15);
-  color: #89b4fa;
-  border: 1px solid rgba(137, 180, 250, 0.3);
+  background: rgba(108, 140, 255, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(108, 140, 255, 0.3);
 }
 
 .git-ref-badge--tag {
-  background: rgba(249, 226, 175, 0.15);
-  color: #f9e2af;
-  border: 1px solid rgba(249, 226, 175, 0.3);
+  background: rgba(245, 166, 35, 0.15);
+  color: var(--warning);
+  border: 1px solid rgba(245, 166, 35, 0.3);
 }
 
 .git-graph-author {
@@ -752,7 +752,7 @@
   font-family: 'Menlo', monospace;
   font-size: 11px;
   color: var(--accent);
-  background: rgba(137, 180, 250, 0.1);
+  background: rgba(108, 140, 255, 0.1);
   padding: 1px 6px;
   border-radius: 4px;
 }
@@ -789,7 +789,7 @@
   padding: 4px 12px;
   font-size: 11px;
   color: var(--text-muted);
-  border-bottom: 1px solid rgba(69, 71, 90, 0.3);
+  border-bottom: 1px solid rgba(31, 35, 40, 0.3);
   flex-shrink: 0;
 }
 
@@ -832,7 +832,7 @@
 }
 
 .git-commit-file--clickable:hover { background: var(--bg-surface); }
-.git-commit-file--selected { background: rgba(137, 180, 250, 0.15) !important; }
+.git-commit-file--selected { background: rgba(108, 140, 255, 0.15) !important; }
 
 .git-commit-file-name {
   font-family: 'Menlo', monospace;
@@ -855,12 +855,12 @@
   flex-shrink: 0;
 }
 
-.git-fstatus--added { background: rgba(166, 227, 161, 0.2); color: var(--success); }
-.git-fstatus--modified { background: rgba(250, 179, 135, 0.2); color: var(--warning); }
-.git-fstatus--deleted { background: rgba(243, 139, 168, 0.2); color: var(--danger); }
-.git-fstatus--renamed { background: rgba(137, 180, 250, 0.2); color: var(--accent); }
-.git-fstatus--copied { background: rgba(148, 226, 213, 0.2); color: #94e2d5; }
-.git-fstatus--untracked { background: rgba(108, 112, 134, 0.2); color: var(--text-muted); }
+.git-fstatus--added { background: rgba(61, 214, 140, 0.2); color: var(--success); }
+.git-fstatus--modified { background: rgba(245, 166, 35, 0.2); color: var(--warning); }
+.git-fstatus--deleted { background: rgba(244, 112, 103, 0.2); color: var(--danger); }
+.git-fstatus--renamed { background: rgba(108, 140, 255, 0.2); color: var(--accent); }
+.git-fstatus--copied { background: rgba(61, 214, 140, 0.15); color: var(--success); }
+.git-fstatus--untracked { background: rgba(86, 92, 102, 0.2); color: var(--text-muted); }
 
 .git-commit-diff-area {
   flex: 1;
@@ -882,7 +882,7 @@
 
 /* File groups */
 
-.git-file-group { border-bottom: 1px solid rgba(69, 71, 90, 0.3); }
+.git-file-group { border-bottom: 1px solid rgba(31, 35, 40, 0.3); }
 
 .git-file-group-header {
   display: flex;
@@ -912,7 +912,7 @@
   font-weight: 500;
 }
 
-.git-file-group-action:hover { background: rgba(137, 180, 250, 0.1); border-color: var(--accent); }
+.git-file-group-action:hover { background: rgba(108, 140, 255, 0.1); border-color: var(--accent); }
 
 .git-file {
   display: flex;
@@ -925,7 +925,7 @@
 }
 
 .git-file:hover { background: var(--bg-surface); }
-.git-file--selected { background: rgba(137, 180, 250, 0.1) !important; }
+.git-file--selected { background: rgba(108, 140, 255, 0.1) !important; }
 
 .git-file-badge {
   width: 16px;
@@ -939,9 +939,9 @@
   flex-shrink: 0;
 }
 
-.git-file-badge--staged { background: rgba(166, 227, 161, 0.2); color: var(--success); }
-.git-file-badge--modified { background: rgba(250, 179, 135, 0.2); color: var(--warning); }
-.git-file-badge--untracked { background: rgba(108, 112, 134, 0.2); color: var(--text-muted); }
+.git-file-badge--staged { background: rgba(61, 214, 140, 0.2); color: var(--success); }
+.git-file-badge--modified { background: rgba(245, 166, 35, 0.2); color: var(--warning); }
+.git-file-badge--untracked { background: rgba(86, 92, 102, 0.2); color: var(--text-muted); }
 
 .git-file-name {
   flex: 1;
@@ -1078,18 +1078,18 @@
 }
 
 .git-diff-line--add {
-  background: rgba(166, 227, 161, 0.1);
-  color: #a6e3a1;
+  background: rgba(61, 214, 140, 0.1);
+  color: var(--success);
 }
 
 .git-diff-line--del {
-  background: rgba(243, 139, 168, 0.1);
-  color: #f38ba8;
+  background: rgba(244, 112, 103, 0.1);
+  color: var(--danger);
 }
 
 .git-diff-line--hunk {
-  background: rgba(137, 180, 250, 0.08);
-  color: #89b4fa;
+  background: rgba(108, 140, 255, 0.08);
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -1152,7 +1152,7 @@
 
 .git-sidebar-tag-name {
   font-size: 12px;
-  color: #f9e2af;
+  color: var(--warning);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1320,7 +1320,7 @@
   display: flex;
   align-items: baseline;
   padding: 0 8px;
-  border-bottom: 1px solid rgba(69, 71, 90, 0.15);
+  border-bottom: 1px solid rgba(31, 35, 40, 0.15);
 }
 
 .git-blame-line:hover { background: var(--bg-surface); }

@@ -314,7 +314,7 @@ export const useTerminalTabStore = create<TerminalTabStore>((set, get) => ({
     const tab: TerminalTabData = {
       id,
       label,
-      color: '#fab387',
+      color: '#F5A623',
       hasActivity: false,
       paneTree: pane,
       activePaneId: pane.id,

@@ -12,6 +12,7 @@ interface Props {
   settings: Record<string, unknown>
   mcpServers: Record<string, McpServerConfig>
   projectPath: string
+  workspaceName?: string
   claudeMd: string
   workflowDeployed: boolean
   onSettingsChange: (settings: Record<string, unknown>) => void
@@ -24,6 +25,7 @@ export function IntegrationsTab({
   settings,
   mcpServers,
   projectPath,
+  workspaceName,
   claudeMd,
   workflowDeployed,
   onSettingsChange,
@@ -61,7 +63,7 @@ export function IntegrationsTab({
         </button>
         {expanded.has('mcp') && (
           <div className="cs-collapsible-content">
-            <McpPanel mcpServers={mcpServers} settings={settings} projectPath={projectPath} onServersChange={onMcpServersChange} />
+            <McpPanel mcpServers={mcpServers} settings={settings} projectPath={projectPath} workspaceName={workspaceName} onServersChange={onMcpServersChange} />
           </div>
         )}
       </div>

@@ -42,8 +42,8 @@ const TUTORIAL_VIEWS = new Set([
 
 export function App() {
   const { viewMode, setViewMode, availableMagicTabs, setAvailableMagicTabs } = useViewStore()
-  const { activeProjectId, projects, activeWorkspaceId, workspaces } = useWorkspaceStore()
-  const { t, setLocale } = useI18n()
+  const { activeProjectId, projects } = useWorkspaceStore()
+  const { setLocale } = useI18n()
   const [pendingSession, setPendingSession] = useState<SessionData | null>(null)
   const [sessionChecked, setSessionChecked] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
@@ -357,146 +357,18 @@ export function App() {
   return (
     <ErrorBoundary>
     <div className="app">
-      <TitleBar />
-      <div className="app-body">
-        <div className="sidebar-wrapper" style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
-          <ErrorBoundary>
-            <Sidebar />
-          </ErrorBoundary>
-        </div>
-        <div
-          className={`sidebar-resize-handle${isResizing ? ' sidebar-resize-handle--active' : ''}`}
-          onMouseDown={handleResizeStart}
-        />
+      <div className="sidebar-wrapper" style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
+        <ErrorBoundary>
+          <Sidebar />
+        </ErrorBoundary>
+      </div>
+      <div
+        className={`sidebar-resize-handle${isResizing ? ' sidebar-resize-handle--active' : ''}`}
+        onMouseDown={handleResizeStart}
+      />
+      <div className="app-right">
+        <TitleBar availableMagicTabs={availableMagicTabs} />
         <div className="main-content">
-          <div className="view-switcher">
-            {(() => {
-              const ws = workspaces.find((w) => w.id === activeWorkspaceId)
-              return ws ? (
-                <span
-                  className="workspace-badge"
-                  style={ws.color ? { borderColor: ws.color, color: ws.color } : undefined}
-                >
-                  {ws.name}
-                </span>
-              ) : null
-            })()}
-            <button
-              className={`view-btn${viewMode === 'kanban' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('kanban')}
-            >
-              {t('view.kanban')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'terminal' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('terminal')}
-            >
-              {t('view.terminal')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'database' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('database')}
-            >
-              {t('view.database')}
-            </button>
-            {availableMagicTabs.includes('packages') && (
-              <button
-                className={`view-btn${viewMode === 'packages' ? ' view-btn--active' : ''}`}
-                onClick={() => setViewMode('packages')}
-              >
-                {t('view.packages')}
-              </button>
-            )}
-            <button
-              className={`view-btn${viewMode === 'analysis' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('analysis')}
-            >
-              {t('view.analysis')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'todos' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('todos')}
-            >
-              {t('view.todos')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'stats' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('stats')}
-            >
-              {t('view.stats')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'prompts' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('prompts')}
-            >
-              {t('view.prompts')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'claude' || viewMode === 'ai' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('ai')}
-            >
-              {t('view.ai')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'api' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('api')}
-            >
-              {t('view.api')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'healthcheck' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('healthcheck')}
-            >
-              {t('view.healthcheck')}
-            </button>
-            <button
-              className={`view-btn${viewMode === 'git' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('git')}
-            >
-              {t('view.git')}
-            </button>
-            {viewMode === 'file' && (
-              <button className="view-btn view-btn--active">
-                {t('view.file')}
-              </button>
-            )}
-            {viewMode === 'diff' && (
-              <button className="view-btn view-btn--active">
-                {t('view.diff')}
-              </button>
-            )}
-            <button
-              className={`view-btn${viewMode === 'search' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('search')}
-              title={t('view.searchTooltip')}
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.2" />
-                <path d="M10.5 10.5L14 14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-              </svg>
-            </button>
-            <div style={{ flex: 1 }} />
-            <button
-              className={`view-btn${viewMode === 'shortcuts' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('shortcuts')}
-              title={t('view.shortcutsTooltip')}
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <rect x="1" y="4" width="14" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
-                <path d="M4 7h1M7.5 7h1M11 7h1M5 10h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-              </svg>
-            </button>
-            <button
-              className={`view-btn view-btn--settings${viewMode === 'settings' ? ' view-btn--active' : ''}`}
-              onClick={() => setViewMode('settings')}
-              title={t('view.settingsTooltip')}
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M8 10a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" strokeWidth="1.2" />
-                <path d="M13.5 8c0-.3-.2-.6-.4-.8l1-1.7-.9-.9-1.7 1c-.2-.2-.5-.4-.8-.4l-.5-1.8h-1.4l-.5 1.8c-.3 0-.6.2-.8.4l-1.7-1-.9.9 1 1.7c-.2.2-.4.5-.4.8l-1.8.5v1.4l1.8.5c0 .3.2.6.4.8l-1 1.7.9.9 1.7-1c.2.2.5.4.8.4l.5 1.8h1.4l.5-1.8c.3 0 .6-.2.8-.4l1.7 1 .9-.9-1-1.7c.2-.2.4-.5.4-.8l1.8-.5v-1.4l-1.8-.5z" stroke="currentColor" strokeWidth="1.2" />
-              </svg>
-            </button>
-          </div>
           <div className="view-content">
             <div className="view-panel" style={{ display: viewMode === 'terminal' ? 'flex' : 'none' }}>
               <TerminalArea />
