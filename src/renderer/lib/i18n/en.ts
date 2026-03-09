@@ -952,6 +952,7 @@ export const en = {
   'kanban.type.refactor': 'Refactor',
   'kanban.prequalify': 'Pre-qualify',
   'kanban.prequalifyRunning': 'Pre-qualifying...',
+  'kanban.prequalifyFailed': 'Pre-qualification failed',
   'kanban.prequalifySuggestions': 'AI Suggestions',
   'kanban.splitDetected': 'Split suggested',
   'kanban.splitDetectedHint': 'This ticket contains multiple distinct items. AI suggests splitting it:',

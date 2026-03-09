@@ -952,6 +952,7 @@ export const fr = {
   'kanban.type.refactor': 'Refactor',
   'kanban.prequalify': 'Pré-qualifier',
   'kanban.prequalifyRunning': 'Pré-qualification en cours...',
+  'kanban.prequalifyFailed': 'Pré-qualification échouée',
   'kanban.prequalifySuggestions': 'Suggestions IA',
   'kanban.splitDetected': 'Découpage suggéré',
   'kanban.splitDetectedHint': 'Ce ticket contient plusieurs éléments distincts. L\'IA propose de le découper :',

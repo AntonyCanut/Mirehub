@@ -497,6 +497,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     ;(async () => {
       try {
         const result = await window.kanbai.kanban.prequalify({ title, description })
+        if (!result) {
+          const t = useI18n.getState().t
+          const ticketLabel = formatTicketLabel(task)
+          pushNotification('error', ticketLabel, t('kanban.prequalifyFailed'))
+        }
         const updates: Partial<KanbanTask> = {}
         if (result) {
           if (result.suggestedType && result.suggestedType !== (type ?? 'feature')) {
@@ -562,11 +567,16 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             get().sendToAi(next, undefined, { activate: false })
           }
         }
-      } catch {
-        // On failure, clear prequalifying flag so the task becomes sendable
+      } catch (err) {
+        // On failure, clear prequalifying flag and store error on the task
+        const errorMessage = err instanceof Error ? err.message : String(err)
         set((state) => ({
           tasks: state.tasks.map((t) => (t.id === task.id ? { ...t, isPrequalifying: false } : t)),
         }))
+        const t = useI18n.getState().t
+        const ticketLabel = formatTicketLabel(task)
+        pushNotification('error', ticketLabel, t('kanban.prequalifyFailed'))
+        console.error('[kanban-prequalify] Error:', errorMessage)
         // Still try to auto-send on failure
         if (!workspacePaused) {
           const currentTasks = get().tasks
@@ -636,6 +646,10 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       priority: task.priority,
       type: task.type,
       dueDate: task.dueDate,
+      error: task.error,
+      result: task.result,
+      question: task.question,
+      comments: task.comments,
     })
     set((state) => ({ tasks: [...state.tasks, newTask] }))
   },
