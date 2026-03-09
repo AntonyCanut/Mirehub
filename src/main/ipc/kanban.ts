@@ -442,6 +442,10 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
         isCtoTicket?: boolean
         disabled?: boolean
         aiProvider?: string
+        error?: string
+        result?: string
+        question?: string
+        comments?: KanbanTask['comments']
       },
     ) => {
       const tasks = readKanbanTasks(data.workspaceId)
@@ -472,6 +476,10 @@ export function registerKanbanHandlers(ipcMain: IpcMain): void {
         isCtoTicket: data.isCtoTicket,
         disabled: data.disabled,
         aiProvider: data.aiProvider as KanbanTask['aiProvider'],
+        error: data.error,
+        result: data.result,
+        question: data.question,
+        comments: data.comments,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       }
