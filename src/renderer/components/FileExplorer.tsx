@@ -3,26 +3,10 @@ import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { ContextMenu } from './ContextMenu'
 import type { ContextMenuItem } from './ContextMenu'
 import type { FileEntry } from '../../shared/types'
+import { FolderIcon, getFileIcon } from './file-icons'
 import '../styles/fileexplorer.css'
 
 type SortField = 'name' | 'size' | 'date'
-
-function FolderIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-    </svg>
-  )
-}
-
-function FileIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#565C66" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-    </svg>
-  )
-}
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -217,7 +201,7 @@ function FileTreeNode({ entry, depth, sortField, onRename, onRefreshParent: _onR
           <span className="file-tree-chevron-spacer" />
         )}
         <span className="file-tree-icon">
-          {entry.isDirectory ? <FolderIcon /> : <FileIcon />}
+          {entry.isDirectory ? <FolderIcon /> : getFileIcon(entry.name)}
         </span>
         {isRenaming ? (
           <input
@@ -252,7 +236,7 @@ function FileTreeNode({ entry, depth, sortField, onRename, onRefreshParent: _onR
                   style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }}
                 >
                   <span className="file-tree-icon">
-                    {isCreating === 'folder' ? <FolderIcon /> : <FileIcon />}
+                    {isCreating === 'folder' ? <FolderIcon /> : getFileIcon(createValue)}
                   </span>
                   <input
                     className="file-tree-rename"
@@ -448,7 +432,7 @@ export function FileExplorer() {
             {isCreating && (
               <div className="file-tree-row file-tree-row--creating" style={{ paddingLeft: '8px' }}>
                 <span className="file-tree-icon">
-                  {isCreating === 'folder' ? <FolderIcon /> : <FileIcon />}
+                  {isCreating === 'folder' ? <FolderIcon /> : getFileIcon(createValue)}
                 </span>
                 <input
                   className="file-tree-rename"
