@@ -13,6 +13,10 @@
     html.className = 'lang-' + lang;
     html.setAttribute('lang', lang);
     localStorage.setItem(LANG_KEY, lang);
+    // Update screenshots with language variants
+    document.querySelectorAll('img[data-src-fr][data-src-en]').forEach(function(img) {
+      img.src = img.getAttribute('data-src-' + lang);
+    });
   }
 
   function initLang() {

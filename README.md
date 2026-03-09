@@ -26,7 +26,7 @@
 
 ---
 
-Kanbai combines a multi-tab terminal, project workspaces, a Kanban board, Git tools, a database explorer, and Claude AI sessions into a single native macOS application. It is built with Electron and designed to streamline the full development workflow without switching between tools.
+Kanbai combines a multi-tab terminal, project workspaces, a Kanban board, Git tools, a database explorer, and AI sessions into a single native macOS application. It is built with Electron and designed to streamline the full development workflow without switching between tools.
 
 ## Features
 
@@ -34,25 +34,42 @@ Kanbai combines a multi-tab terminal, project workspaces, a Kanban board, Git to
 
 Full-featured terminal emulator powered by xterm.js and node-pty. Supports multiple tabs with up to 4 split panes per tab, WebGL rendering, search, and Unicode.
 
-### Workspaces
+### Workspaces & Namespaces
 
-Isolated project environments managed via symlinks (`~/.kanbai/envs/{name}`). Each workspace maintains its own terminal tabs, open files, and session state.
+Isolated project environments managed via symlinks (`~/.kanbai/envs/{name}`). Each workspace maintains its own terminal tabs, open files, and session state. Namespaces allow grouping multiple workspaces (e.g., personal projects, work, open source) with quick switching via the sidebar dropdown.
 
 ### Git
 
-Comprehensive Git integration — status, branches, commits, diff, stash, merge, fetch, and config. All operations are available through a dedicated panel with 20+ IPC channels.
+Comprehensive Git integration — status, branches (local/remote), commits with graph visualization, diff, stash, tags, merge, fetch, push, and config. All operations are available through a dedicated panel with 20+ IPC channels.
+
+#### Git Worktrees
+
+Native git worktree support allows working on multiple branches simultaneously without stashing or switching context. Create, list, and manage worktrees directly from the Git panel. Each worktree gets its own isolated working directory while sharing the same repository history.
 
 ### Kanban Board
 
-5-column task board (TODO, WORKING, PENDING, DONE, FAILED) with built-in Claude AI integration for automated task execution and tracking.
+5-column task board (TODO, WORKING, PENDING, DONE, FAILED) with built-in AI integration for automated task execution and tracking. Features include:
 
-### Claude Code Sessions
+- Priority levels (Low, Medium, High, Critical)
+- Task types (Feature, Bug, Test, Doc)
+- Scope filtering (workspace, project)
+- Auto-prequalification and auto-prioritization of bugs
+- Task comments and history
 
-Run up to 4 concurrent Claude Code AI agents per project. Includes loop mode, session history, prompt templates, and a CLAUDE.md defaults library for consistent agent behavior.
+### AI Sessions (Multi-Provider)
+
+Run up to 4 concurrent AI agents per project with support for multiple providers:
+
+- **Claude Code** — full session management, loop mode, prompt templates, CLAUDE.md defaults library, memory and skills
+- **Codex** — OpenAI Codex integration with custom rules and memory
+- **Copilot** — GitHub Copilot integration with custom configuration and memory
+- **Gemini** — Google Gemini integration with agents, tools, and security configuration
+
+Each provider can be configured independently per feature (Kanban execution, package analysis, database queries). Switch the default AI provider from Settings.
 
 ### Database Explorer
 
-Connect to PostgreSQL, MySQL, MSSQL, SQLite, and MongoDB. Browse schemas, run queries, and interact with your data through a natural language chat interface.
+Connect to PostgreSQL, MySQL, MSSQL, SQLite, and MongoDB. Browse schemas, run queries, and interact with your data through a natural language AI chat interface.
 
 ### Code Editor
 
@@ -62,50 +79,78 @@ Monaco Editor with syntax highlighting, file diff viewer, and integrated file sa
 
 Visualize installed npm packages, check for outdated versions, and manage dependencies with an AI-assisted chat for package-related questions.
 
-### Code Analysis & Health Check
+### Code Analysis
 
-Static code analysis panel and application health monitoring dashboard.
+Static code analysis panel with file type breakdown, line counts, and codebase metrics.
+
+### Health Check
+
+Application health monitoring dashboard for checking service connectivity and endpoint availability.
 
 ### API Tester
 
 Built-in HTTP client for testing API endpoints directly from the application.
+
+### Pixel Agents
+
+Integrated visual AI agents for automated UI testing and interaction. Agents can capture screenshots, analyze visual state, and perform actions based on visual context.
 
 ### Additional Tools
 
 - **File Explorer** — navigable directory tree with multi-file diff support
 - **TODO Scanner** — finds and aggregates TODO/FIXME comments across the codebase
 - **MCP Server** — Model Context Protocol integration for extended tool support
+- **Prompt Templates** — reusable prompt library for AI sessions
 - **Command Palette** — quick access to all application commands
 - **Global Search** — search across files in the current workspace
 - **SSH Management** — manage SSH keys and connections
 - **Auto-Updater** — built-in update mechanism with release notes
 - **Notification Center** — in-app notifications and alerts
-- **Project Statistics** — lines of code, file counts, and project metrics
+- **Project Statistics** — lines of code, file type distribution, largest files, and project metrics
 - **Native macOS UI** — custom titlebar, vibrancy effects, system fonts
+- **Multi-language** — full French and English interface support
 
 ## Screenshots
 
 <p align="center">
-  <img src="website/screenshots/hero-terminal.png" alt="Terminal" width="800">
+  <img src="website/screenshots/hero-terminal-en.png" alt="Kanbai — Kanban Board" width="800">
 </p>
 
 <details>
-<summary><strong>More screenshots</strong></summary>
+<summary><strong>Screenshots (English)</strong></summary>
 
 | Feature | Preview |
 |---------|---------|
-| Git Panel | <img src="website/screenshots/screenshot-git.png" width="400"> |
-| Kanban Board | <img src="website/screenshots/screenshot-kanban.png" width="400"> |
-| Claude Sessions | <img src="website/screenshots/screenshot-claude.png" width="400"> |
-| Database Explorer | <img src="website/screenshots/screenshot-database.png" width="400"> |
-| Package Manager | <img src="website/screenshots/screenshot-npm.png" width="400"> |
-| Code Analysis | <img src="website/screenshots/screenshot-code-analysis.png" width="400"> |
-| Project Stats | <img src="website/screenshots/screenshot-stats.png" width="400"> |
-| API Tester | <img src="website/screenshots/screenshot-api.png" width="400"> |
-| Codex Config | <img src="website/screenshots/screenshot-codex.png" width="400"> |
-| Copilot Config | <img src="website/screenshots/screenshot-copilot.png" width="400"> |
-| Gemini Config | <img src="website/screenshots/screenshot-gemini.png" width="400"> |
-| Pixel Agents | <img src="website/screenshots/screenshot-pixel-agents.png" width="400"> |
+| Kanban Board | <img src="website/screenshots/screenshot-kanban-en.png" width="400"> |
+| Terminal | <img src="website/screenshots/screenshot-terminal-en.png" width="400"> |
+| Git Panel | <img src="website/screenshots/screenshot-git-en.png" width="400"> |
+| AI Configuration | <img src="website/screenshots/screenshot-claude-en.png" width="400"> |
+| Database Explorer | <img src="website/screenshots/screenshot-database-en.png" width="400"> |
+| Package Manager | <img src="website/screenshots/screenshot-packages-en.png" width="400"> |
+| Code Analysis | <img src="website/screenshots/screenshot-code-analysis-en.png" width="400"> |
+| Project Stats | <img src="website/screenshots/screenshot-stats-en.png" width="400"> |
+| API Tester | <img src="website/screenshots/screenshot-api-en.png" width="400"> |
+| Health Check | <img src="website/screenshots/screenshot-healthcheck-en.png" width="400"> |
+| Settings | <img src="website/screenshots/screenshot-settings-en.png" width="400"> |
+
+</details>
+
+<details>
+<summary><strong>Screenshots (Français)</strong></summary>
+
+| Feature | Preview |
+|---------|---------|
+| Tableau Kanban | <img src="website/screenshots/screenshot-kanban-fr.png" width="400"> |
+| Terminal | <img src="website/screenshots/screenshot-terminal-fr.png" width="400"> |
+| Panneau Git | <img src="website/screenshots/screenshot-git-fr.png" width="400"> |
+| Configuration I.A. | <img src="website/screenshots/screenshot-claude-fr.png" width="400"> |
+| Explorateur BDD | <img src="website/screenshots/screenshot-database-fr.png" width="400"> |
+| Gestionnaire Packages | <img src="website/screenshots/screenshot-packages-fr.png" width="400"> |
+| Analyse de Code | <img src="website/screenshots/screenshot-code-analysis-fr.png" width="400"> |
+| Statistiques Projet | <img src="website/screenshots/screenshot-stats-fr.png" width="400"> |
+| Testeur API | <img src="website/screenshots/screenshot-api-fr.png" width="400"> |
+| Health Check | <img src="website/screenshots/screenshot-healthcheck-fr.png" width="400"> |
+| Préférences | <img src="website/screenshots/screenshot-settings-fr.png" width="400"> |
 
 </details>
 

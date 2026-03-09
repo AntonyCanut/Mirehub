@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="lang-en">
+<html lang="fr" class="lang-fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,9 @@
   <meta property="og:type" content="website">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function(){var l=localStorage.getItem('kanbai-lang')||(navigator.language||'').slice(0,2);if(l!=='fr')l='en';var h=document.documentElement;h.className='lang-'+l;h.lang=l;window.__lang=l;if(l!=='fr'){document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('img[data-src-'+l+']').forEach(function(i){i.src=i.getAttribute('data-src-'+l);});});}})();
+  </script>
 </head>
 <body>
   <!-- Skip to content -->
@@ -127,7 +130,7 @@
         </div>
         <div class="hero-screenshot animate-in">
           <div class="hero-screenshot-glow"></div>
-          <img src="screenshots/screenshot-kanban.png" alt="Kanbai — Kanban AI : gerez vos tâches et laissez Claude les resoudre automatiquement" width="1200" height="750" loading="eager">
+          <img data-src-fr="screenshots/screenshot-kanban-fr.png" data-src-en="screenshots/screenshot-kanban-en.png" src="screenshots/screenshot-kanban-fr.png" alt="Kanbai — Kanban AI : gerez vos tâches et laissez Claude les resoudre automatiquement" width="1200" height="750" loading="eager">
         </div>
       </div>
     </section>
@@ -206,7 +209,7 @@
               </p>
             </div>
             <div class="feature-highlight-img">
-              <img src="screenshots/screenshot-kanban.png" alt="Kanban AI avec 5 colonnes et suivi en temps reel de Claude" loading="lazy">
+              <img data-src-fr="screenshots/screenshot-kanban-fr.png" data-src-en="screenshots/screenshot-kanban-en.png" src="screenshots/screenshot-kanban-fr.png" alt="Kanban AI avec 5 colonnes et suivi en temps reel de Claude" loading="lazy">
             </div>
           </div>
           <!-- Terminal -->
@@ -225,7 +228,7 @@
               </p>
             </div>
             <div class="feature-highlight-img">
-              <img src="screenshots/screenshot-terminal.png" alt="Terminal split avec Claude Code et shell" loading="lazy">
+              <img data-src-fr="screenshots/screenshot-terminal-fr.png" data-src-en="screenshots/screenshot-terminal-en.png" src="screenshots/screenshot-terminal-fr.png" alt="Terminal split avec Claude Code et shell" loading="lazy">
             </div>
           </div>
           <!-- Claude AI -->
@@ -247,7 +250,7 @@
               </p>
             </div>
             <div class="feature-highlight-img">
-              <img src="screenshots/screenshot-claude-profil.png" alt="Claude AI — Panneau de contrôle avec profils et permissions" loading="lazy">
+              <img src="screenshots/screenshot-claude-profil-fr.png" data-src-fr="screenshots/screenshot-claude-profil-fr.png" data-src-en="screenshots/screenshot-claude-profil-en.png" alt="Claude AI — Panneau de contrôle avec profils et permissions" loading="lazy">
             </div>
           </div>
         </div>
@@ -282,23 +285,6 @@
             <p>
               <span data-lang="fr">Gestionnaire multi-ecosystème (npm, Go, pip, Cargo, NuGet...) avec chat IA intégré. Analysez vos dépendances, détectéz les failles et mettez a jour en un clic — Claude vous assiste.</span>
               <span data-lang="en">Multi-ecosystem manager (npm, Go, pip, Cargo, NuGet...) with built-in AI chat. Analyze dependencies, detect vulnerabilities and update in one click — Claude assists you.</span>
-            </p>
-          </div>
-          <!-- TODOs -->
-          <div class="feature-card" data-screenshot="todos">
-            <div class="feature-icon feature-icon--warning">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-              </svg>
-            </div>
-            <h3>TODO Scanner</h3>
-            <p>
-              <span data-lang="fr">Vos TODO, FIXME et HACK ne se perdent plus dans le code. Scan automatique, filtres par type, clic direct vers la ligne source. La dette technique, enfin visible.</span>
-              <span data-lang="en">Your TODOs, FIXMEs and HACKs no longer get lost in code. Automatic scanning, type filters, direct jump to source line. Tech debt, finally visible.</span>
             </p>
           </div>
           <!-- Stats -->
@@ -412,7 +398,6 @@
             <span data-lang="en">Memory</span>
           </button>
           <button class="tab" data-tab="npm" role="tab" aria-selected="false">Packages</button>
-          <button class="tab" data-tab="todos" role="tab" aria-selected="false">TODOs</button>
           <button class="tab" data-tab="stats" role="tab" aria-selected="false">Stats</button>
           <button class="tab" data-tab="prompts" role="tab" aria-selected="false">Prompts</button>
           <button class="tab" data-tab="database" role="tab" aria-selected="false">Database</button>
@@ -423,98 +408,91 @@
         </div>
         <div class="screenshot-viewer animate-in">
           <div class="screenshot-panel active" id="tab-kanban" role="tabpanel">
-            <img src="screenshots/screenshot-kanban.png" alt="Vue Kanban" loading="lazy">
+            <img src="screenshots/screenshot-kanban-fr.png" data-src-fr="screenshots/screenshot-kanban-fr.png" data-src-en="screenshots/screenshot-kanban-en.png" alt="Vue Kanban" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Kanban propulsé par l'IA : ecrivez une tâche, Claude la résout. 5 colonnes (À faire, En cours, En attente, Échoué, Terminé), contexte complet par ticket, suivi en temps reel. Votre backlog se vide tout seul.</span>
               <span data-lang="en">AI-powered Kanban: write a task, Claude solves it. 5 columns (To Do, In Progress, Waiting, Failed, Done), full context per ticket, real-time tracking. Your backlog clears itself.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-terminal" role="tabpanel">
-            <img src="screenshots/screenshot-terminal.png" alt="Vue Terminal" loading="lazy">
+            <img src="screenshots/screenshot-terminal-fr.png" data-src-fr="screenshots/screenshot-terminal-fr.png" data-src-en="screenshots/screenshot-terminal-en.png" alt="Vue Terminal" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Terminal split : Claude Code a gauche, votre shell a droite. Scripts du projet en accès direct dans la barre. Changez d'onglet, pas d'application.</span>
               <span data-lang="en">Split terminal: Claude Code on the left, your shell on the right. Project scripts in the toolbar. Switch tabs, not applications.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-git" role="tabpanel">
-            <img src="screenshots/screenshot-git.png" alt="Vue Git" loading="lazy">
+            <img src="screenshots/screenshot-git-fr.png" data-src-fr="screenshots/screenshot-git-fr.png" data-src-en="screenshots/screenshot-git-en.png" alt="Vue Git" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Tout Git en une vue : branches locales, historique de commits, fichiers staged et modifiés, zone de commit intégrée. Fetch, Pull, Push, Stash — tout est la.</span>
               <span data-lang="en">All of Git in one view: local branches, commit history, staged and modified files, integrated commit area. Fetch, Pull, Push, Stash — it's all here.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-claude" role="tabpanel">
-            <img src="screenshots/screenshot-claude.png" alt="Vue Claude AI — Général" loading="lazy">
+            <img src="screenshots/screenshot-claude-fr.png" data-src-fr="screenshots/screenshot-claude-fr.png" data-src-en="screenshots/screenshot-claude-en.png" alt="Vue Claude AI — Général" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Tableau de bord IA unifié : Claude, Codex, Copilot et Gemini, chacun avec leur configuration dédiée (Général, Sécurité &amp; Sandbox, Agents &amp; Skills, Intégrations, Mémoire). Selection du modèle, permissions, fonctionnalités avancées et equipes d'agents. Le panneau IA le plus configurable du marche.</span>
               <span data-lang="en">Unified AI dashboard: Claude, Codex, Copilot and Gemini, each with their dedicated configuration (General, Security &amp; Sandbox, Agents &amp; Skills, Integrations, Memory). Model selection, permissions, advanced features and agent teams. The most configurable AI panel on the market.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-claude-memory" role="tabpanel">
-            <img src="screenshots/screenshot-claude-md.png" alt="Vue Mémoire Claude" loading="lazy">
+            <img src="screenshots/screenshot-claude-md-fr.png" data-src-fr="screenshots/screenshot-claude-md-fr.png" data-src-en="screenshots/screenshot-claude-md-en.png" alt="Vue Mémoire Claude" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Onglet Mémoire : gestionnaire de règles hierarchique, editeurs CLAUDE.md (projet, utilisateur, local) et mémoire geree. Toutes les instructions de Claude centralisees en un seul endroit.</span>
               <span data-lang="en">Memory tab: hierarchical rules manager, CLAUDE.md editors (project, user, local) and managed memory. All Claude instructions centralized in one place.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-npm" role="tabpanel">
-            <img src="screenshots/screenshot-npm.png" alt="Vue Packages" loading="lazy">
+            <img src="screenshots/screenshot-packages-fr.png" data-src-fr="screenshots/screenshot-packages-fr.png" data-src-en="screenshots/screenshot-packages-en.png" alt="Vue Packages" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Gestionnaire multi-ecosystème : npm, Go, pip, Cargo, NuGet et plus. Filtres intelligents, liens directs vers les registres, mises à jour en un clic, et chat IA pour analyser vos dépendances en profondeur.</span>
               <span data-lang="en">Multi-ecosystem manager: npm, Go, pip, Cargo, NuGet and more. Smart filters, direct registry links, one-click updates, and AI chat to analyze your dependencies in depth.</span>
             </p>
           </div>
-          <div class="screenshot-panel" id="tab-todos" role="tabpanel">
-            <img src="screenshots/screenshot-todos.png" alt="Vue TODOs" loading="lazy">
-            <p class="screenshot-caption">
-              <span data-lang="fr">TODO Scanner : tous les TODO, FIXME, HACK, NOTE et XXX de votre codebase, détectés automatiquement. Filtrez par type, cliquez pour naviguer directement dans le fichier source.</span>
-              <span data-lang="en">TODO Scanner: all TODOs, FIXMEs, HACKs, NOTEs and XXXs from your codebase, auto-detected. Filter by type, click to navigate directly to the source file.</span>
-            </p>
-          </div>
           <div class="screenshot-panel" id="tab-stats" role="tabpanel">
-            <img src="screenshots/screenshot-stats.png" alt="Vue Stats" loading="lazy">
+            <img src="screenshots/screenshot-stats-fr.png" data-src-fr="screenshots/screenshot-stats-fr.png" data-src-en="screenshots/screenshot-stats-en.png" alt="Vue Stats" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Vue d'ensemble de votre projet : nombre de fichiers, lignes totales, repartition par type, classement des fichiers les plus volumineux. Votre codebase n'a plus de secrets.</span>
               <span data-lang="en">Project overview: file count, total lines, distribution by type, largest files ranking. Your codebase has no more secrets.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-prompts" role="tabpanel">
-            <img src="screenshots/screenshot-prompts.png" alt="Vue Prompts" loading="lazy">
+            <img src="screenshots/screenshot-prompts-fr.png" data-src-fr="screenshots/screenshot-prompts-fr.png" data-src-en="screenshots/screenshot-prompts-en.png" alt="Vue Prompts" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Bibliothèque de prompts organises par catégorie : Développement, Qualité, Documentation, DevOps. Envoyéz-les directement a Claude ou transformez-les en tickets Kanban en un clic.</span>
               <span data-lang="en">Prompt library organized by category: Development, Quality, Documentation, DevOps. Send directly to Claude or turn into Kanban tickets with one click.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-database" role="tabpanel">
-            <img src="screenshots/screenshot-database.png" alt="Vue Database Explorer avec chat IA" loading="lazy">
+            <img src="screenshots/screenshot-database-fr.png" data-src-fr="screenshots/screenshot-database-fr.png" data-src-en="screenshots/screenshot-database-en.png" alt="Vue Database Explorer avec chat IA" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Database Explorer avec IA intégrée : interrogez vos bases en langage naturel, Claude généré le SQL et explique les résultats. Tags d'environnement, permissions NL granulaires, backup/restore et export CSV.</span>
               <span data-lang="en">Database Explorer with built-in AI: query databases in natural language, Claude generates SQL and explains results. Environment tags, granular NL permissions, backup/restore and CSV export.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-code-analysis" role="tabpanel">
-            <img src="screenshots/screenshot-code-analysis.png" alt="Vue Code Analysis" loading="lazy">
+            <img src="screenshots/screenshot-code-analysis-fr.png" data-src-fr="screenshots/screenshot-code-analysis-fr.png" data-src-en="screenshots/screenshot-code-analysis-en.png" alt="Vue Code Analysis" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Analyse de code : outils détectés automatiquement selon le langage, findings classes par sévérité, note globale du projet (A-F), et creation en masse de tickets Kanban pour corriger les problemes trouves.</span>
               <span data-lang="en">Code analysis: tools auto-detected by language, findings sorted by severity, project-wide grade (A-F), and bulk Kanban ticket creation to fix the issues found.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-api" role="tabpanel">
-            <img src="screenshots/screenshot-api.png" alt="Vue API Tester" loading="lazy">
+            <img src="screenshots/screenshot-api-fr.png" data-src-fr="screenshots/screenshot-api-fr.png" data-src-en="screenshots/screenshot-api-en.png" alt="Vue API Tester" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Client API complet : collections de requêtes organisees, environnements avec variables, assertions automatiques (status, JSON path, temps de réponse) et indicateurs visuels de réponse. Import/export pour partager vos tests avec l'equipe.</span>
               <span data-lang="en">Full API client: organized request collections, environments with variables, automated assertions (status, JSON path, response time) and visual response indicators. Import/export to share your tests with the team.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-healthcheck" role="tabpanel">
-            <img src="screenshots/screenshot-healthcheck.png" alt="Vue Health Checks" loading="lazy">
+            <img src="screenshots/screenshot-healthcheck-fr.png" data-src-fr="screenshots/screenshot-healthcheck-fr.png" data-src-en="screenshots/screenshot-healthcheck-en.png" alt="Vue Health Checks" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Moniteur de sante : checks dans la barre latérale avec indicateurs de statut en temps reel, scheduler configurable (secondes, minutes, heures), historique pagine des exécutions et détection automatique des incidents.</span>
               <span data-lang="en">Health monitor: checks in the sidebar with real-time status indicators, configurable scheduler (seconds, minutes, hours), paginated execution history and automatic incident detection.</span>
             </p>
           </div>
           <div class="screenshot-panel" id="tab-pixel-agents" role="tabpanel">
-            <img src="screenshots/screenshot-pixel-agents.png" alt="Vue Pixel Agents" loading="lazy">
+            <img src="screenshots/screenshot-pixel-agents-fr.png" data-src-fr="screenshots/screenshot-pixel-agents-fr.png" data-src-en="screenshots/screenshot-pixel-agents-en.png" alt="Vue Pixel Agents" loading="lazy">
             <p class="screenshot-caption">
               <span data-lang="fr">Pixel Agents : vos agents IA (Claude, Codex, Copilot, Gemini) visualisés comme des personnages pixel art dans un bureau virtuel. Ajoutez des agents, personnalisez le layout, et suivez leur activité de manière ludique.</span>
               <span data-lang="en">Pixel Agents: your AI agents (Claude, Codex, Copilot, Gemini) visualized as pixel art characters in a virtual office. Add agents, customize the layout, and track their activity in a fun way.</span>
@@ -561,7 +539,7 @@
             </ul>
           </div>
           <div class="workspace-img">
-            <img src="screenshots/screenshot-workspace.png" alt="Multi-workspace avec arborescence et fichiers récents" loading="lazy">
+            <img src="screenshots/screenshot-workspace-fr.png" data-src-fr="screenshots/screenshot-workspace-fr.png" data-src-en="screenshots/screenshot-workspace-en.png" alt="Multi-workspace avec arborescence et fichiers récents" loading="lazy">
           </div>
         </div>
       </div>
@@ -576,8 +554,8 @@
             <span data-lang="en">Built by a dev, for devs</span>
           </h2>
           <p>
-            <span data-lang="fr">Kanbai est ne d'une frustration simple : pourquoi faut-il 11 apps pour faire le travail d'une seule ? Terminal, gestionnaire Git, Kanban avec Mode CTO, gestionnaire de packages multi-ecosystème avec IA, scanner TODO, statistiques, editeur de prompts, panneau IA unifié (Claude, Codex, Copilot) avec MCP et workflows, explorateur de bases de données avec chat IA, testeur d'API, analyse de code — tout est la, dans une app native rapide et elegante, sur macOS et Windows. Mises à jour automatiques, open source, gratuit, sans tracking.</span>
-            <span data-lang="en">Kanbai was born from a simple frustration: why do we need 11 apps to do the job of one? Terminal, Git manager, Kanban with CTO Mode, multi-ecosystem package manager with AI, TODO scanner, statistics, prompt editor, unified AI panel (Claude, Codex, Copilot) with MCP and workflows, database explorer with AI chat, API tester, code analysis — it's all here, in a fast and elegant native app on macOS and Windows. Auto-updates, open source, free, no tracking.</span>
+            <span data-lang="fr">Kanbai est ne d'une frustration simple : pourquoi faut-il 11 apps pour faire le travail d'une seule ? Terminal, gestionnaire Git, Kanban avec Mode CTO, gestionnaire de packages multi-ecosystème avec IA, statistiques, editeur de prompts, panneau IA unifié (Claude, Codex, Copilot) avec MCP et workflows, explorateur de bases de données avec chat IA, testeur d'API, analyse de code — tout est la, dans une app native rapide et elegante, sur macOS et Windows. Mises à jour automatiques, open source, gratuit, sans tracking.</span>
+            <span data-lang="en">Kanbai was born from a simple frustration: why do we need 11 apps to do the job of one? Terminal, Git manager, Kanban with CTO Mode, multi-ecosystem package manager with AI, statistics, prompt editor, unified AI panel (Claude, Codex, Copilot) with MCP and workflows, database explorer with AI chat, API tester, code analysis — it's all here, in a fast and elegant native app on macOS and Windows. Auto-updates, open source, free, no tracking.</span>
           </p>
           <div class="dev-features">
             <div class="dev-feature">

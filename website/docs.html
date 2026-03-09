@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" class="lang-en">
+<html lang="fr" class="lang-fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kanbai — Documentation</title>
-  <meta name="description" content="Documentation complète de Kanbai : Terminal, Claude AI, Codex, Copilot, Gemini, Pixel Agents, Git, Kanban avec Mode CTO, Packages multi-ecosystème avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester, Health Checks. Guide d'utilisation avec screenshots.">
+  <meta name="description" content="Documentation complète de Kanbai : Terminal, Claude AI, Codex, Copilot, Gemini, Pixel Agents, Git, Kanban avec Mode CTO, Packages multi-ecosystème avec IA, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester, Health Checks. Guide d'utilisation avec screenshots.">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function(){var l=localStorage.getItem('kanbai-lang')||(navigator.language||'').slice(0,2);if(l!=='fr')l='en';var h=document.documentElement;h.className='lang-'+l;h.lang=l;window.__lang=l;if(l!=='fr'){document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('img[data-src-'+l+']').forEach(function(i){i.src=i.getAttribute('data-src-'+l);});});}})();
+  </script>
 </head>
 <body>
   <!-- Skip to content -->
@@ -70,10 +73,13 @@
               <span data-lang="fr">Démarrage rapide</span>
               <span data-lang="en">Getting started</span>
             </a>
-            <a href="#workspace" class="docs-nav-link">
-              <span data-lang="fr">Workspaces</span>
-              <span data-lang="en">Workspaces</span>
-            </a>
+            <div class="docs-nav-group">
+              <a href="#workspace" class="docs-nav-group-title">
+                <span data-lang="fr">Workspaces</span>
+                <span data-lang="en">Workspaces</span>
+              </a>
+              <a href="#namespaces" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Namespaces</a>
+            </div>
             <a href="#terminal" class="docs-nav-link">Terminal</a>
             <a href="#file-viewer" class="docs-nav-link">
               <span data-lang="fr">Visualiseur de fichiers</span>
@@ -155,7 +161,10 @@
               <a href="#gemini-skills" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Skills</a>
             </div>
             <a href="#pixel-agents" class="docs-nav-link">Pixel Agents</a>
-            <a href="#git" class="docs-nav-link">Git</a>
+            <div class="docs-nav-group">
+              <a href="#git" class="docs-nav-group-title">Git</a>
+              <a href="#git-worktrees" class="docs-nav-link" style="padding-left:28px;font-size:13px;">Worktrees</a>
+            </div>
             <div class="docs-nav-group">
               <a href="#kanban" class="docs-nav-group-title">Kanban</a>
               <a href="#cto-mode" class="docs-nav-link" style="padding-left:28px;font-size:13px;">
@@ -164,7 +173,6 @@
               </a>
             </div>
             <a href="#packages" class="docs-nav-link">Packages</a>
-            <a href="#todos" class="docs-nav-link">TODO Scanner</a>
             <a href="#stats" class="docs-nav-link">
               <span data-lang="fr">Statistiques</span>
               <span data-lang="en">Statistics</span>
@@ -174,6 +182,22 @@
             <a href="#code-analysis" class="docs-nav-link">Code Analysis</a>
             <a href="#api-tester" class="docs-nav-link">API Tester</a>
             <a href="#health-checks" class="docs-nav-link">Health Checks</a>
+            <a href="#mcp-servers" class="docs-nav-link">MCP Servers</a>
+            <a href="#global-search" class="docs-nav-link">
+              <span data-lang="fr">Recherche globale</span>
+              <span data-lang="en">Global Search</span>
+            </a>
+            <a href="#command-palette" class="docs-nav-link">
+              <span data-lang="fr">Palette de commandes</span>
+              <span data-lang="en">Command Palette</span>
+            </a>
+            <div class="docs-nav-group">
+              <a href="#settings" class="docs-nav-group-title">
+                <span data-lang="fr">Préférences</span>
+                <span data-lang="en">Settings</span>
+              </a>
+              <a href="#settings-ssh" class="docs-nav-link" style="padding-left:28px;font-size:13px;">SSH</a>
+            </div>
             <a href="#updates" class="docs-nav-link">
               <span data-lang="fr">Mises à jour</span>
               <span data-lang="en">Updates</span>
@@ -220,8 +244,8 @@
           </h2>
           <div class="docs-text">
             <p>
-              <span data-lang="fr">Kanbai est un IDE natif (macOS &amp; Windows) qui reunit plus de 15 outils de développement dans une seule fenêtre : Terminal, Claude AI, Codex, Copilot, Gemini, Git, Kanban avec Mode CTO, Packages multi-ecosystème avec IA, TODO Scanner, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester, et bien plus encore. Aucune configuration n'est nécessaire. Les mises à jour sont automatiques.</span>
-              <span data-lang="en">Kanbai is a native IDE (macOS &amp; Windows) that combines over 15 development tools in a single window: Terminal, Claude AI, Codex, Copilot, Gemini, Git, Kanban with CTO Mode, multi-ecosystem Packages with AI, TODO Scanner, Statistics, Prompts, Database Explorer with AI chat, Code Analysis, API Tester, and much more. No configuration needed. Updates are automatic.</span>
+              <span data-lang="fr">Kanbai est un IDE natif (macOS &amp; Windows) qui reunit plus de 15 outils de développement dans une seule fenêtre : Terminal, Claude AI, Codex, Copilot, Gemini, Git, Kanban avec Mode CTO, Packages multi-ecosystème avec IA, Statistiques, Prompts, Database Explorer avec chat IA, Code Analysis, API Tester, et bien plus encore. Aucune configuration n'est nécessaire. Les mises à jour sont automatiques.</span>
+              <span data-lang="en">Kanbai is a native IDE (macOS &amp; Windows) that combines over 15 development tools in a single window: Terminal, Claude AI, Codex, Copilot, Gemini, Git, Kanban with CTO Mode, multi-ecosystem Packages with AI, Statistics, Prompts, Database Explorer with AI chat, Code Analysis, API Tester, and much more. No configuration needed. Updates are automatic.</span>
             </p>
           </div>
 
@@ -319,7 +343,7 @@
             </ul>
           </div>
           <div class="docs-screenshot">
-            <img src="screenshots/hero-terminal.png" alt="Kanbai — Vue d'ensemble de l'interface" width="1200" height="750" loading="lazy">
+            <img src="screenshots/hero-terminal-fr.png" data-src-fr="screenshots/hero-terminal-fr.png" data-src-en="screenshots/hero-terminal-en.png" alt="Kanbai — Vue d'ensemble de l'interface" width="1200" height="750" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Vue d'ensemble : barre latérale avec workspaces, onglets de navigation, terminal split avec Claude Code et scripts NPM rapides.</span>
               <span data-lang="en">Overview: sidebar with workspaces, navigation tabs, split terminal with Claude Code and quick NPM scripts.</span>
@@ -537,8 +561,83 @@
             </div>
           </div>
 
+          <hr class="docs-separator">
+
+          <div id="namespaces">
+            <h3>Namespaces</h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">Les namespaces permettent de regrouper vos workspaces par contexte : projets personnels, travail, open source, clients. Chaque namespace peut avoir sa propre configuration Git (nom, email) appliquee automatiquement a tous les projets qu'il contient.</span>
+                <span data-lang="en">Namespaces let you group your workspaces by context: personal projects, work, open source, clients. Each namespace can have its own Git configuration (name, email) automatically applied to all projects it contains.</span>
+              </p>
+            </div>
+
+            <div class="docs-text">
+              <h4>
+                <span data-lang="fr">Fonctionnalités</span>
+                <span data-lang="en">Features</span>
+              </h4>
+            </div>
+            <div class="docs-feature-overview">
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Regroupement logique</span><span data-lang="en">Logical grouping</span></strong>
+                  <span data-lang="fr">Organisez vos workspaces par contexte (personnel, entreprise, open source)</span><span data-lang="en">Organize your workspaces by context (personal, company, open source)</span>
+                </div>
+              </div>
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Profils Git par namespace</span><span data-lang="en">Git profiles per namespace</span></strong>
+                  <span data-lang="fr">Configurez un <code>user.name</code> et <code>user.email</code> differents pour chaque namespace. Kanbai les applique automatiquement lors des operations Git</span><span data-lang="en">Configure a different <code>user.name</code> and <code>user.email</code> for each namespace. Kanbai applies them automatically during Git operations</span>
+                </div>
+              </div>
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Couleur personnalisee</span><span data-lang="en">Custom color</span></strong>
+                  <span data-lang="fr">Assignez une couleur a chaque namespace pour le distinguer visuellement dans la barre laterale</span><span data-lang="en">Assign a color to each namespace to visually distinguish it in the sidebar</span>
+                </div>
+              </div>
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Basculement rapide</span><span data-lang="en">Quick switching</span></strong>
+                  <span data-lang="fr">Survolez le nom du namespace dans la barre laterale pour voir le menu deroulant et changer de contexte instantanement</span><span data-lang="en">Hover over the namespace name in the sidebar to see the dropdown and switch context instantly</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="docs-text">
+              <h4>
+                <span data-lang="fr">Cas d'usage typique</span>
+                <span data-lang="en">Typical use case</span>
+              </h4>
+              <p>
+                <span data-lang="fr">Vous travaillez sur des projets personnels avec votre email GitHub, et sur des projets professionnels avec votre email d'entreprise. Creez deux namespaces :</span>
+                <span data-lang="en">You work on personal projects with your GitHub email, and on professional projects with your company email. Create two namespaces:</span>
+              </p>
+              <ul>
+                <li><span data-lang="fr"><strong>Personnel</strong> — <code>user.name: "John"</code>, <code>user.email: "john@github.io"</code></span><span data-lang="en"><strong>Personal</strong> — <code>user.name: "John"</code>, <code>user.email: "john@github.io"</code></span></li>
+                <li><span data-lang="fr"><strong>Entreprise</strong> — <code>user.name: "John D."</code>, <code>user.email: "john@company.com"</code></span><span data-lang="en"><strong>Company</strong> — <code>user.name: "John D."</code>, <code>user.email: "john@company.com"</code></span></li>
+              </ul>
+              <p>
+                <span data-lang="fr">Kanbai appliquera automatiquement le bon profil Git selon le namespace actif. Plus jamais de commit avec le mauvais email.</span>
+                <span data-lang="en">Kanbai will automatically apply the correct Git profile based on the active namespace. Never commit with the wrong email again.</span>
+              </p>
+            </div>
+
+            <div class="docs-callout docs-callout--tip">
+              <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <div class="docs-callout-content">
+                <p><span data-lang="fr">Les profils Git des namespaces sont configurables dans les Preferences (onglet Git). Le namespace "Default" utilise la configuration Git globale de votre systeme.</span><span data-lang="en">Namespace Git profiles are configurable in Settings (Git tab). The "Default" namespace uses your system's global Git configuration.</span></p>
+              </div>
+            </div>
+          </div>
+
 <div class="docs-screenshot">
-            <img src="screenshots/screenshot-workspace.png" alt="Workspaces — Arborescence et fichiers récents" loading="lazy">
+            <img src="screenshots/screenshot-workspace-fr.png" data-src-fr="screenshots/screenshot-workspace-fr.png" data-src-en="screenshots/screenshot-workspace-en.png" alt="Workspaces — Arborescence et fichiers récents" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Barre latérale avec arborescence de fichiers, détection automatique des configurations projet, et fichiers récents en bas.</span>
               <span data-lang="en">Sidebar with file tree, automatic project configuration detection, and recent files at the bottom.</span>
@@ -661,7 +760,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-terminal-menu.png" alt="Terminal — Tab type menu" loading="lazy">
+            <img src="screenshots/screenshot-terminal-menu-fr.png" data-src-fr="screenshots/screenshot-terminal-menu-fr.png" data-src-en="screenshots/screenshot-terminal-menu-en.png" alt="Terminal — Tab type menu" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Terminal — Menu de création d'onglets avec les 6 types disponibles</span>
               <span data-lang="en">Terminal — Tab creation menu with all 6 available types</span>
@@ -739,7 +838,7 @@
           </div>
 
 <div class="docs-screenshot">
-            <img src="screenshots/screenshot-terminal.png" alt="Terminal — Split pane avec Claude Code" loading="lazy">
+            <img src="screenshots/screenshot-terminal-fr.png" data-src-fr="screenshots/screenshot-terminal-fr.png" data-src-en="screenshots/screenshot-terminal-en.png" alt="Terminal — Split pane avec Claude Code" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Terminal split : Claude Code a gauche, shell classique a droite. La barre d'outils affiche la branche Git active et tous les scripts NPM du projet.</span>
               <span data-lang="en">Split terminal: Claude Code on the left, regular shell on the right. The toolbar shows the active Git branch and all project NPM scripts.</span>
@@ -747,7 +846,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-claude.png" alt="Claude Code dans un terminal split" loading="lazy">
+            <img src="screenshots/screenshot-claude-fr.png" data-src-fr="screenshots/screenshot-claude-fr.png" data-src-en="screenshots/screenshot-claude-en.png" alt="Claude Code dans un terminal split" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Session Claude Code active dans un pane terminal dédié, avec contrôle complet des permissions et du comportement de l'agent.</span>
               <span data-lang="en">Active Claude Code session in a dedicated terminal pane, with full control over agent permissions and behavior.</span>
@@ -967,7 +1066,7 @@
             </div>
 
             <div class="docs-screenshot">
-              <img src="screenshots/screenshot-claude.png" alt="Claude AI — Onglet Général" loading="lazy">
+              <img src="screenshots/screenshot-claude-fr.png" data-src-fr="screenshots/screenshot-claude-fr.png" data-src-en="screenshots/screenshot-claude-en.png" alt="Claude AI — Onglet Général" loading="lazy">
               <p class="docs-screenshot-caption">
                 <span data-lang="fr">Onglet Général : hooks d'activite, mode de permission, selection du modèle d'IA (Sonnet, Opus, Haiku, Sonnet 1M), fonctionnalités avancées (Extended Thinking, Fast Mode, Prompt Caching, Extended Context 1M, Auto Memory), curseurs de tokens et configuration des équipes d'agents.</span>
                 <span data-lang="en">General tab: activity hooks, permission mode, AI model selection (Sonnet, Opus, Haiku, Sonnet 1M), advanced features (Extended Thinking, Fast Mode, Prompt Caching, Extended Context 1M, Auto Memory), token sliders and agent teams configuration.</span>
@@ -1127,7 +1226,7 @@
             </div>
 
             <div class="docs-screenshot">
-              <img src="screenshots/screenshot-claude-profil.png" alt="Claude AI — Agents et Skills" loading="lazy">
+              <img src="screenshots/screenshot-claude-profil-fr.png" data-src-fr="screenshots/screenshot-claude-profil-fr.png" data-src-en="screenshots/screenshot-claude-profil-en.png" alt="Claude AI — Agents et Skills" loading="lazy">
               <p class="docs-screenshot-caption">
                 <span data-lang="fr">Onglet Agents &amp; Skills : agents par défaut et personnalisés, skills (slash commands) deployables en un clic. Creation, édition, duplication et activation/desactivation depuis une interface unifiée.</span>
                 <span data-lang="en">Agents &amp; Skills tab: default and custom agents, skills (slash commands) deployable in one click. Creation, editing, duplication and enable/disable from a unified interface.</span>
@@ -1320,7 +1419,7 @@
             </div>
 
             <div class="docs-screenshot">
-              <img src="screenshots/screenshot-claude-md.png" alt="Claude AI — Onglet Mémoire" loading="lazy">
+              <img src="screenshots/screenshot-claude-md-fr.png" data-src-fr="screenshots/screenshot-claude-md-fr.png" data-src-en="screenshots/screenshot-claude-md-en.png" alt="Claude AI — Onglet Mémoire" loading="lazy">
               <p class="docs-screenshot-caption">
                 <span data-lang="fr">Onglet Mémoire : gestionnaire de règles hierarchique, editeur CLAUDE.md intégré (projet, utilisateur, local), mémoire geree en lecture seule. Toutes les instructions de Claude centralisees en un seul endroit.</span>
                 <span data-lang="en">Memory tab: hierarchical rules manager, built-in CLAUDE.md editor (project, user, local), read-only managed memory. All Claude instructions centralized in one place.</span>
@@ -1567,7 +1666,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-codex.png" alt="Codex — Configuration dashboard" loading="lazy">
+            <img src="screenshots/screenshot-codex-fr.png" data-src-fr="screenshots/screenshot-codex-fr.png" data-src-en="screenshots/screenshot-codex-en.png" alt="Codex — Configuration dashboard" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Codex — Tableau de bord de configuration avec modèles GPT-5.3/5.2/5.1, politique d'approbation et paramètres sandbox</span>
               <span data-lang="en">Codex — Configuration dashboard with GPT-5.3/5.2/5.1 models, approval policy and sandbox settings</span>
@@ -1716,7 +1815,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-copilot.png" alt="Copilot — Configuration dashboard" loading="lazy">
+            <img src="screenshots/screenshot-copilot-fr.png" data-src-fr="screenshots/screenshot-copilot-fr.png" data-src-en="screenshots/screenshot-copilot-en.png" alt="Copilot — Configuration dashboard" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Copilot — Tableau de bord avec sélection de modèles (Claude Sonnet 4.5, Opus 4.5, GPT-5.2, o4-mini) et modes d'approbation</span>
               <span data-lang="en">Copilot — Dashboard with model selection (Claude Sonnet 4.5, Opus 4.5, GPT-5.2, o4-mini) and approval modes</span>
@@ -1901,7 +2000,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-gemini-interface.png" alt="Gemini — Interface settings" loading="lazy">
+            <img src="screenshots/screenshot-gemini-interface-fr.png" data-src-fr="screenshots/screenshot-gemini-interface-fr.png" data-src-en="screenshots/screenshot-gemini-interface-en.png" alt="Gemini — Interface settings" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Gemini — Paramètres d'interface : mode de réflexion, affichage et visibilité</span>
               <span data-lang="en">Gemini — Interface settings: thinking mode, display and visibility</span>
@@ -2120,7 +2219,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-gemini-agents.png" alt="Gemini — Agents settings" loading="lazy">
+            <img src="screenshots/screenshot-gemini-agents-fr.png" data-src-fr="screenshots/screenshot-gemini-agents-fr.png" data-src-en="screenshots/screenshot-gemini-agents-en.png" alt="Gemini — Agents settings" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Gemini — Agents : fonctionnalités expérimentales, sous-agents, presse-papiers et agents personnalisés</span>
               <span data-lang="en">Gemini — Agents: experimental features, sub-agents, clipboard and custom agents</span>
@@ -2170,7 +2269,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-gemini.png" alt="Gemini — General configuration" loading="lazy">
+            <img src="screenshots/screenshot-gemini-fr.png" data-src-fr="screenshots/screenshot-gemini-fr.png" data-src-en="screenshots/screenshot-gemini-en.png" alt="Gemini — General configuration" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Gemini — Configuration générale avec modèles 2.5 Pro/Flash et 3 Pro/Flash, paramètres de session et mode d'approbation</span>
               <span data-lang="en">Gemini — General configuration with 2.5 Pro/Flash and 3 Pro/Flash models, session parameters and approval mode</span>
@@ -2178,7 +2277,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-gemini-outils.png" alt="Gemini — Tools and sandbox" loading="lazy">
+            <img src="screenshots/screenshot-gemini-outils-fr.png" data-src-fr="screenshots/screenshot-gemini-outils-fr.png" data-src-en="screenshots/screenshot-gemini-outils-en.png" alt="Gemini — Tools and sandbox" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Gemini — Outils et sandbox (Off/Auto/Seatbelt/Docker/Podman), configuration shell et outils disponibles</span>
               <span data-lang="en">Gemini — Tools and sandbox (Off/Auto/Seatbelt/Docker/Podman), shell configuration and available tools</span>
@@ -2186,7 +2285,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-gemini-securite.png" alt="Gemini — Security settings" loading="lazy">
+            <img src="screenshots/screenshot-gemini-securite-fr.png" data-src-fr="screenshots/screenshot-gemini-securite-fr.png" data-src-en="screenshots/screenshot-gemini-securite-en.png" alt="Gemini — Security settings" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Gemini — Sécurité : mode YOLO, extensions, niveaux de confiance et vie privée</span>
               <span data-lang="en">Gemini — Security: YOLO mode, extensions, trust levels and privacy</span>
@@ -2245,7 +2344,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-terminal-menu.png" alt="Terminal — Menu with Pixel Agents options" loading="lazy">
+            <img src="screenshots/screenshot-terminal-menu-fr.png" data-src-fr="screenshots/screenshot-terminal-menu-fr.png" data-src-en="screenshots/screenshot-terminal-menu-en.png" alt="Terminal — Menu with Pixel Agents options" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Terminal — Menu de création d'onglet affichant toutes les options : Terminal, Claude, Codex, Copilot et Pixel Agents</span>
               <span data-lang="en">Terminal — Tab creation menu showing all options: Terminal, Claude, Codex, Copilot and Pixel Agents</span>
@@ -2253,7 +2352,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-pixel-agents.png" alt="Pixel Agents — Virtual office with AI agents" loading="lazy">
+            <img src="screenshots/screenshot-pixel-agents-fr.png" data-src-fr="screenshots/screenshot-pixel-agents-fr.png" data-src-en="screenshots/screenshot-pixel-agents-en.png" alt="Pixel Agents — Virtual office with AI agents" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Pixel Agents — Bureau virtuel pixel art avec agents IA animés, bureaux, bibliothèques et décorations personnalisables</span>
               <span data-lang="en">Pixel Agents — Pixel art virtual office with animated AI agents, desks, bookshelves and customizable decorations</span>
@@ -2418,11 +2517,86 @@
           </div>
 
 <div class="docs-screenshot">
-            <img src="screenshots/screenshot-git.png" alt="Git — Interface visuelle" loading="lazy">
+            <img src="screenshots/screenshot-git-fr.png" data-src-fr="screenshots/screenshot-git-fr.png" data-src-en="screenshots/screenshot-git-en.png" alt="Git — Interface visuelle" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Vue Git : branches locales, historique de commits, zone de staging avec fichiers modifiés et stages, et zone de commit intégrée.</span>
               <span data-lang="en">Git view: local branches, commit history, staging area with modified and staged files, and integrated commit area.</span>
             </p>
+          </div>
+
+          <hr class="docs-separator">
+
+          <div id="git-worktrees">
+            <h3>Git Worktrees</h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">Les git worktrees permettent de travailler sur plusieurs branches simultanement sans stasher ni changer de branche. Kanbai cree un repertoire de travail isole pour chaque branche, partageant le meme historique du depot.</span>
+                <span data-lang="en">Git worktrees let you work on multiple branches simultaneously without stashing or switching branches. Kanbai creates an isolated working directory for each branch, sharing the same repository history.</span>
+              </p>
+            </div>
+
+            <div class="docs-text">
+              <h4>
+                <span data-lang="fr">Integration avec le Kanban</span>
+                <span data-lang="en">Kanban integration</span>
+              </h4>
+              <p>
+                <span data-lang="fr">L'integration la plus puissante des worktrees est avec le Kanban. Quand l'option <strong>Worktrees</strong> est activee dans la configuration du Kanban, chaque ticket envoye a Claude cree automatiquement un worktree dedie avec sa propre branche. Cela permet :</span>
+                <span data-lang="en">The most powerful worktree integration is with the Kanban. When the <strong>Worktrees</strong> option is enabled in the Kanban configuration, every ticket sent to Claude automatically creates a dedicated worktree with its own branch. This enables:</span>
+              </p>
+              <ul>
+                <li>
+                  <span data-lang="fr"><strong>Parallelisme total</strong> — Plusieurs agents Claude peuvent travailler sur differents tickets en meme temps, chacun dans son propre worktree</span>
+                  <span data-lang="en"><strong>Full parallelism</strong> — Multiple Claude agents can work on different tickets at the same time, each in its own worktree</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Isolation des changements</strong> — Les modifications d'un ticket ne perturbent pas un autre ticket en cours</span>
+                  <span data-lang="en"><strong>Change isolation</strong> — Changes from one ticket don't interfere with another ticket in progress</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Branches automatiques</strong> — Kanbai cree une branche nommee d'apres le ticket (ex: <code>kanban/T-42-fix-auth</code>)</span>
+                  <span data-lang="en"><strong>Automatic branches</strong> — Kanbai creates a branch named after the ticket (e.g., <code>kanban/T-42-fix-auth</code>)</span>
+                </li>
+                <li>
+                  <span data-lang="fr"><strong>Nettoyage automatique</strong> — Les worktrees sont stockes dans <code>.kanbai-worktrees/</code> (ajoute automatiquement au <code>.gitignore</code>)</span>
+                  <span data-lang="en"><strong>Automatic cleanup</strong> — Worktrees are stored in <code>.kanbai-worktrees/</code> (automatically added to <code>.gitignore</code>)</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="docs-text">
+              <h4>
+                <span data-lang="fr">Configuration</span>
+                <span data-lang="en">Configuration</span>
+              </h4>
+              <p>
+                <span data-lang="fr">Dans la configuration du Kanban, activez l'option <strong>Worktrees</strong> et definissez le nombre maximum de worktrees concurrents (1 a 10). Chaque worktree consomme de l'espace disque mais partage l'historique du depot.</span>
+                <span data-lang="en">In the Kanban configuration, enable the <strong>Worktrees</strong> option and set the maximum number of concurrent worktrees (1 to 10). Each worktree uses disk space but shares the repository history.</span>
+              </p>
+            </div>
+
+            <div class="docs-text">
+              <h4>
+                <span data-lang="fr">Operations manuelles</span>
+                <span data-lang="en">Manual operations</span>
+              </h4>
+              <p>
+                <span data-lang="fr">Les worktrees sont egalement accessibles depuis le panneau Git :</span>
+                <span data-lang="en">Worktrees are also accessible from the Git panel:</span>
+              </p>
+              <ul>
+                <li><span data-lang="fr"><strong>Creer</strong> — Cree un nouveau worktree avec une branche associee</span><span data-lang="en"><strong>Create</strong> — Create a new worktree with an associated branch</span></li>
+                <li><span data-lang="fr"><strong>Lister</strong> — Voir tous les worktrees actifs avec leur branche et leur chemin</span><span data-lang="en"><strong>List</strong> — View all active worktrees with their branch and path</span></li>
+                <li><span data-lang="fr"><strong>Supprimer</strong> — Supprimer un worktree (avec option force si des changements non commites existent)</span><span data-lang="en"><strong>Remove</strong> — Delete a worktree (with force option if uncommitted changes exist)</span></li>
+              </ul>
+            </div>
+
+            <div class="docs-callout docs-callout--note">
+              <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <div class="docs-callout-content">
+                <p><span data-lang="fr">Les git worktrees necessitent au moins un commit initial dans le depot. Si votre depot est vide, creez un premier commit avant d'utiliser les worktrees.</span><span data-lang="en">Git worktrees require at least one initial commit in the repository. If your repo is empty, create an initial commit before using worktrees.</span></p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -2765,7 +2939,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-kanban.png" alt="Kanban — Tableau de tâches propulsé par l'IA avec Mode CTO" loading="lazy">
+            <img src="screenshots/screenshot-kanban-fr.png" data-src-fr="screenshots/screenshot-kanban-fr.png" data-src-en="screenshots/screenshot-kanban-en.png" alt="Kanban — Tableau de tâches propulsé par l'IA avec Mode CTO" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Kanban propulsé par l'IA : 5 colonnes, envoi direct de tickets a Claude AI, Mode CTO pour l'amélioration continue, mise à jour en temps reel, filtres par tags et scopes.</span>
               <span data-lang="en">AI-powered Kanban: 5 columns, direct ticket dispatch to Claude AI, CTO Mode for continuous improvement, real-time updates, tag and scope filters.</span>
@@ -2902,7 +3076,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-npm.png" alt="Packages — Gestionnaire multi-ecosystème avec chat IA" loading="lazy">
+            <img src="screenshots/screenshot-packages-fr.png" data-src-fr="screenshots/screenshot-packages-fr.png" data-src-en="screenshots/screenshot-packages-en.png" alt="Packages — Gestionnaire multi-ecosystème avec chat IA" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Vue Packages : gestionnaire multi-ecosystème avec filtres intelligents, liens directs vers les registres, mises à jour en un clic et chat IA pour l'analyse de dépendances.</span>
               <span data-lang="en">Packages view: multi-ecosystem manager with smart filters, direct registry links, one-click updates and AI chat for dependency analysis.</span>
@@ -2910,75 +3084,10 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-packages-updates.png" alt="Packages — Available updates with batch update" loading="lazy">
+            <img src="screenshots/screenshot-packages-updates-fr.png" data-src-fr="screenshots/screenshot-packages-updates-fr.png" data-src-en="screenshots/screenshot-packages-updates-en.png" alt="Packages — Available updates with batch update" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Mises à jour disponibles : 5 packages avec nouvelles versions détectées (react, zustand, zod...), bouton « Tout mettre à jour » pour mise à jour groupée en un clic.</span>
               <span data-lang="en">Available updates: 5 packages with new versions detected (react, zustand, zod...), "Update all" button for one-click batch updates.</span>
-            </p>
-          </div>
-        </section>
-
-        <!-- ============================================ -->
-        <!-- TODO SCANNER                                 -->
-        <!-- ============================================ -->
-        <section class="docs-section" id="todos">
-          <h2>TODO Scanner</h2>
-          <div class="docs-text">
-            <p>
-              <span data-lang="fr">Le TODO Scanner parcourt automatiquement votre codebase pour trouver tous les marqueurs de dette technique : <code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, <code>NOTE</code>, <code>XXX</code>. Fini les commentaires oublies dans le code.</span>
-              <span data-lang="en">The TODO Scanner automatically scans your codebase for all technical debt markers: <code>TODO</code>, <code>FIXME</code>, <code>HACK</code>, <code>NOTE</code>, <code>XXX</code>. No more forgotten comments in code.</span>
-            </p>
-          </div>
-
-          <div class="docs-text">
-            <h3>
-              <span data-lang="fr">Fonctionnalités</span>
-              <span data-lang="en">Features</span>
-            </h3>
-          </div>
-          <div class="docs-feature-overview">
-            <div class="docs-feature-item">
-              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <div>
-                <strong><span data-lang="fr">Scan automatique</span><span data-lang="en">Automatic scan</span></strong>
-                <span data-lang="fr">Scanne l'ensemble du projet à l'ouverture et à chaque modification</span><span data-lang="en">Scans the entire project on open and on each modification</span>
-              </div>
-            </div>
-            <div class="docs-feature-item">
-              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <div>
-                <strong><span data-lang="fr">Filtres par type</span><span data-lang="en">Filter by type</span></strong>
-                <span data-lang="fr">Filtrez par TODO, FIXME, HACK, NOTE ou XXX pour cibler vos recherches</span><span data-lang="en">Filter by TODO, FIXME, HACK, NOTE or XXX to target your searches</span>
-              </div>
-            </div>
-            <div class="docs-feature-item">
-              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <div>
-                <strong><span data-lang="fr">Navigation directe</span><span data-lang="en">Direct navigation</span></strong>
-                <span data-lang="fr">Cliquez sur un résultat pour ouvrir le fichier à la ligne exacte</span><span data-lang="en">Click a result to open the file at the exact line</span>
-              </div>
-            </div>
-            <div class="docs-feature-item">
-              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <div>
-                <strong><span data-lang="fr">Compteurs</span><span data-lang="en">Counters</span></strong>
-                <span data-lang="fr">Compteurs par type pour mesurer et suivre la dette technique</span><span data-lang="en">Per-type counters to measure and track technical debt</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="docs-callout docs-callout--tip">
-            <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            <div class="docs-callout-content">
-              <p><span data-lang="fr">Utilisez les compteurs du TODO Scanner comme indicateur de sante du projet. Un nombre eleve de FIXME ou HACK signale une dette technique a traiter. Combinez avec le Kanban pour créer des tickets directement depuis les findings.</span><span data-lang="en">Use the TODO Scanner counters as a project health indicator. A high number of FIXME or HACK signals technical debt to address. Combine with Kanban to create tickets directly from findings.</span></p>
-            </div>
-          </div>
-
-          <div class="docs-screenshot">
-            <img src="screenshots/screenshot-todos.png" alt="TODO Scanner — Détection de dette technique" loading="lazy">
-            <p class="docs-screenshot-caption">
-              <span data-lang="fr">Vue TODO Scanner : scan automatique de toute la codebase, filtres par type (TODO, FIXME, HACK, NOTE, XXX), avec lien direct vers le fichier source.</span>
-              <span data-lang="en">TODO Scanner view: automatic full-codebase scan, filter by type (TODO, FIXME, HACK, NOTE, XXX), with direct link to source file.</span>
             </p>
           </div>
         </section>
@@ -3043,7 +3152,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-stats.png" alt="Statistiques — Analyse du projet" loading="lazy">
+            <img src="screenshots/screenshot-stats-fr.png" data-src-fr="screenshots/screenshot-stats-fr.png" data-src-en="screenshots/screenshot-stats-en.png" alt="Statistiques — Analyse du projet" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Vue Statistiques : nombre total de fichiers et lignes, repartition par type de fichier avec graphes, et classement des fichiers les plus volumineux.</span>
               <span data-lang="en">Statistics view: total files and lines count, distribution by file type with graphs, and largest files ranking.</span>
@@ -3123,7 +3232,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-prompts.png" alt="Prompts — Bibliothèque de templates" loading="lazy">
+            <img src="screenshots/screenshot-prompts-fr.png" data-src-fr="screenshots/screenshot-prompts-fr.png" data-src-en="screenshots/screenshot-prompts-en.png" alt="Prompts — Bibliothèque de templates" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Vue Prompts : bibliothèque de templates organises par catégorie, avec envoi direct a Claude ou creation de ticket Kanban.</span>
               <span data-lang="en">Prompts view: template library organized by category, with direct send to Claude or Kanban ticket creation.</span>
@@ -3336,7 +3445,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-database.png" alt="Database Explorer — Interface trois panneaux avec chat IA" loading="lazy">
+            <img src="screenshots/screenshot-database-fr.png" data-src-fr="screenshots/screenshot-database-fr.png" data-src-en="screenshots/screenshot-database-en.png" alt="Database Explorer — Interface trois panneaux avec chat IA" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Database Explorer : interface trois panneaux avec barre latérale de connexions, editeur de requêtes Monaco, et chat IA pour interroger vos données en langage naturel.</span>
               <span data-lang="en">Database Explorer: three-panel interface with connection sidebar, Monaco query editor, and AI chat to query your data in natural language.</span>
@@ -3526,7 +3635,7 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-code-analysis.png" alt="Code Analysis — Audit qualité et sécurité" loading="lazy">
+            <img src="screenshots/screenshot-code-analysis-fr.png" data-src-fr="screenshots/screenshot-code-analysis-fr.png" data-src-en="screenshots/screenshot-code-analysis-en.png" alt="Code Analysis — Audit qualité et sécurité" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Panneau Code Analysis : outils détectés automatiquement, findings classes par sévérité avec extraits de code, note globale du projet (A-F), et creation de tickets Kanban en masse.</span>
               <span data-lang="en">Code Analysis panel: auto-detected tools, findings sorted by severity with code snippets, project-wide grade (A-F), and bulk Kanban ticket creation.</span>
@@ -3730,7 +3839,7 @@
           </div>
 
 <div class="docs-screenshot">
-            <img src="screenshots/screenshot-api.png" alt="API Tester — Client API complet" loading="lazy">
+            <img src="screenshots/screenshot-api-fr.png" data-src-fr="screenshots/screenshot-api-fr.png" data-src-en="screenshots/screenshot-api-en.png" alt="API Tester — Client API complet" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Client API intégré : collections de requêtes dans la barre latérale, configuration des headers et body, réponses JSON formatees avec assertions automatiques et environnements multiples.</span>
               <span data-lang="en">Built-in API client: request collections in the sidebar, header and body configuration, formatted JSON responses with automated assertions and multiple environments.</span>
@@ -3894,11 +4003,342 @@
           </div>
 
           <div class="docs-screenshot">
-            <img src="screenshots/screenshot-healthcheck.png" alt="Health Checks — Moniteur de sante" loading="lazy">
+            <img src="screenshots/screenshot-healthcheck-fr.png" data-src-fr="screenshots/screenshot-healthcheck-fr.png" data-src-en="screenshots/screenshot-healthcheck-en.png" alt="Health Checks — Moniteur de sante" loading="lazy">
             <p class="docs-screenshot-caption">
               <span data-lang="fr">Moniteur de sante intégré : liste des checks dans la barre latérale avec indicateurs de statut, scheduler configurable, historique des exécutions et détection automatique des incidents.</span>
               <span data-lang="en">Built-in health monitor: check list in the sidebar with status indicators, configurable scheduler, execution history and automatic incident detection.</span>
             </p>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- MCP SERVERS                                   -->
+        <!-- ============================================ -->
+        <section class="docs-section" id="mcp-servers">
+          <h2>MCP Servers</h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Kanbai integre le protocole MCP (Model Context Protocol) pour etendre les capacites de vos agents IA. Configurez des serveurs MCP qui ajoutent des outils supplementaires a Claude, Codex, Copilot ou Gemini — acces a des bases de donnees, APIs externes, systemes de fichiers, et plus encore.</span>
+              <span data-lang="en">Kanbai integrates the MCP (Model Context Protocol) to extend your AI agents' capabilities. Configure MCP servers that add additional tools to Claude, Codex, Copilot or Gemini — database access, external APIs, file systems, and more.</span>
+            </p>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Fonctionnalites</span>
+              <span data-lang="en">Features</span>
+            </h3>
+          </div>
+          <div class="docs-feature-overview">
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Catalogue integre</span><span data-lang="en">Built-in catalog</span></strong>
+                <span data-lang="fr">Catalogue de serveurs MCP pre-configures classes par categorie (dev tools, productivite, integrations)</span><span data-lang="en">Pre-configured MCP server catalog organized by category (dev tools, productivity, integrations)</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Deux types de transport</span><span data-lang="en">Two transport types</span></strong>
+                <span data-lang="fr"><code>stdio</code> (commande + args + variables d'env) et <code>http</code> (URL + headers)</span><span data-lang="en"><code>stdio</code> (command + args + env vars) and <code>http</code> (URL + headers)</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Deux niveaux de scope</span><span data-lang="en">Two scope levels</span></strong>
+                <span data-lang="fr">Configuration au niveau projet (<code>.mcp.json</code>) ou workspace</span><span data-lang="en">Configuration at project level (<code>.mcp.json</code>) or workspace level</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Installation guidee</span><span data-lang="en">Guided installation</span></strong>
+                <span data-lang="fr">Modale de configuration avec placeholders pour les cles API et parametres personnalises</span><span data-lang="en">Configuration modal with placeholders for API keys and custom parameters</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Ajouter un serveur MCP</span>
+              <span data-lang="en">Adding an MCP server</span>
+            </h3>
+            <ol class="docs-steps">
+              <li>
+                <span data-lang="fr">Ouvrez la configuration IA de votre provider (Claude, Codex, etc.) et naviguez vers l'onglet Integrations</span>
+                <span data-lang="en">Open your AI provider configuration (Claude, Codex, etc.) and navigate to the Integrations tab</span>
+              </li>
+              <li>
+                <span data-lang="fr">Cliquez sur <strong>Ajouter un serveur</strong> ou parcourez le catalogue</span>
+                <span data-lang="en">Click <strong>Add a server</strong> or browse the catalog</span>
+              </li>
+              <li>
+                <span data-lang="fr">Configurez les parametres (commande, arguments, variables d'environnement ou URL)</span>
+                <span data-lang="en">Configure the parameters (command, arguments, environment variables or URL)</span>
+              </li>
+              <li>
+                <span data-lang="fr">Le serveur est immediatement disponible pour vos sessions IA</span>
+                <span data-lang="en">The server is immediately available for your AI sessions</span>
+              </li>
+            </ol>
+          </div>
+
+          <div class="docs-callout docs-callout--tip">
+            <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <div class="docs-callout-content">
+              <p><span data-lang="fr">Les serveurs MCP du catalogue sont pre-configures avec les bonnes commandes et arguments. Vous n'avez qu'a fournir vos cles API ou tokens d'acces pour les activer.</span><span data-lang="en">Catalog MCP servers come pre-configured with the right commands and arguments. You only need to provide your API keys or access tokens to activate them.</span></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- GLOBAL SEARCH                                 -->
+        <!-- ============================================ -->
+        <section class="docs-section" id="global-search">
+          <h2>
+            <span data-lang="fr">Recherche globale</span>
+            <span data-lang="en">Global Search</span>
+          </h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">La recherche globale permet de trouver du texte dans tous les fichiers de votre projet. Tapez au moins 2 caracteres et Kanbai affiche les resultats groupes par fichier avec les numeros de ligne.</span>
+              <span data-lang="en">Global search lets you find text across all files in your project. Type at least 2 characters and Kanbai shows results grouped by file with line numbers.</span>
+            </p>
+          </div>
+
+          <div class="docs-feature-overview">
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Recherche en temps reel</span><span data-lang="en">Real-time search</span></strong>
+                <span data-lang="fr">Resultats instantanes avec debounce de 300ms pour la performance</span><span data-lang="en">Instant results with 300ms debounce for performance</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Sensibilite a la casse</span><span data-lang="en">Case sensitivity</span></strong>
+                <span data-lang="fr">Bouton toggle pour activer/desactiver la recherche sensible a la casse</span><span data-lang="en">Toggle button to enable/disable case-sensitive search</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Resultats groupes</span><span data-lang="en">Grouped results</span></strong>
+                <span data-lang="fr">Resultats groupes par fichier avec sections depliables, numeros de ligne et extraits de texte</span><span data-lang="en">Results grouped by file with expandable sections, line numbers and text snippets</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Navigation directe</span><span data-lang="en">Direct navigation</span></strong>
+                <span data-lang="fr">Cliquez sur un resultat pour ouvrir le fichier dans l'editeur a la bonne ligne</span><span data-lang="en">Click a result to open the file in the editor at the right line</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="docs-callout docs-callout--tip">
+            <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <div class="docs-callout-content">
+              <p><span data-lang="fr">Accedez a la recherche globale avec <kbd>Cmd+Shift+F</kbd> ou depuis le menu Projet dans la barre de titre. Le compteur en haut affiche le nombre de correspondances et de fichiers trouves.</span><span data-lang="en">Access global search with <kbd>Cmd+Shift+F</kbd> or from the Project menu in the titlebar. The counter at the top shows the number of matches and files found.</span></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- COMMAND PALETTE                               -->
+        <!-- ============================================ -->
+        <section class="docs-section" id="command-palette">
+          <h2>
+            <span data-lang="fr">Palette de commandes</span>
+            <span data-lang="en">Command Palette</span>
+          </h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">La palette de commandes offre un acces rapide a toutes les actions de Kanbai via le clavier. Ouvrez-la avec <kbd>Cmd+K</kbd> et commencez a taper pour filtrer les commandes disponibles.</span>
+              <span data-lang="en">The command palette provides quick keyboard-driven access to all Kanbai actions. Open it with <kbd>Cmd+K</kbd> and start typing to filter available commands.</span>
+            </p>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Commandes disponibles</span>
+              <span data-lang="en">Available commands</span>
+            </h3>
+            <ul>
+              <li>
+                <span data-lang="fr"><strong>Vues</strong> — Basculer vers n'importe quelle vue (Terminal, Git, Kanban, Database, etc.)</span>
+                <span data-lang="en"><strong>Views</strong> — Switch to any view (Terminal, Git, Kanban, Database, etc.)</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Git</strong> — Commit, Push, Pull, Stash, Fetch en une seule action</span>
+                <span data-lang="en"><strong>Git</strong> — Commit, Push, Pull, Stash, Fetch in a single action</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Terminal</strong> — Nouvel onglet, split pane</span>
+                <span data-lang="en"><strong>Terminal</strong> — New tab, split pane</span>
+              </li>
+              <li>
+                <span data-lang="fr"><strong>Projets</strong> — Basculer rapidement entre les projets du workspace</span>
+                <span data-lang="en"><strong>Projects</strong> — Quickly switch between workspace projects</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Navigation au clavier</span>
+              <span data-lang="en">Keyboard navigation</span>
+            </h3>
+            <ul>
+              <li><kbd>&uarr;</kbd> <kbd>&darr;</kbd> — <span data-lang="fr">Naviguer entre les commandes</span><span data-lang="en">Navigate between commands</span></li>
+              <li><kbd>Enter</kbd> — <span data-lang="fr">Executer la commande selectionnee</span><span data-lang="en">Execute the selected command</span></li>
+              <li><kbd>Escape</kbd> — <span data-lang="fr">Fermer la palette</span><span data-lang="en">Close the palette</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- SETTINGS                                      -->
+        <!-- ============================================ -->
+        <section class="docs-section" id="settings">
+          <h2>
+            <span data-lang="fr">Preferences</span>
+            <span data-lang="en">Settings</span>
+          </h2>
+          <div class="docs-text">
+            <p>
+              <span data-lang="fr">Le panneau de preferences centralise toute la configuration de Kanbai. Accedez-y en cliquant sur l'icone engrenage dans la barre de titre ou via la palette de commandes.</span>
+              <span data-lang="en">The settings panel centralizes all Kanbai configuration. Access it by clicking the gear icon in the titlebar or via the command palette.</span>
+            </p>
+          </div>
+
+          <div class="docs-text">
+            <h3>
+              <span data-lang="fr">Onglets de configuration</span>
+              <span data-lang="en">Configuration tabs</span>
+            </h3>
+          </div>
+          <div class="docs-feature-overview">
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">General</span><span data-lang="en">General</span></strong>
+                <span data-lang="fr">Provider IA par defaut, langue de l'interface (francais/anglais)</span><span data-lang="en">Default AI provider, interface language (French/English)</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Apparence</span><span data-lang="en">Appearance</span></strong>
+                <span data-lang="fr">Theme (sombre, clair, terracotta, systeme), famille de police, taille de police</span><span data-lang="en">Theme (dark, light, terracotta, system), font family, font size</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong>Terminal</strong>
+                <span data-lang="fr">Shell par defaut (zsh, bash, fish), nombre de lignes de scrollback</span><span data-lang="en">Default shell (zsh, bash, fish), scrollback lines count</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong>Git</strong>
+                <span data-lang="fr">Profils Git par namespace (<code>user.name</code>, <code>user.email</code>)</span><span data-lang="en">Git profiles per namespace (<code>user.name</code>, <code>user.email</code>)</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong>SSH</strong>
+                <span data-lang="fr">Gestion des cles SSH (voir section dediee ci-dessous)</span><span data-lang="en">SSH key management (see dedicated section below)</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong>Notifications</strong>
+                <span data-lang="fr">Sons de notification et badge dock macOS</span><span data-lang="en">Notification sounds and macOS dock badge</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">Outils</span><span data-lang="en">Tools</span></strong>
+                <span data-lang="fr">Mise a jour des outils vendeur (Pixel Agents, RTK)</span><span data-lang="en">Vendor tools updates (Pixel Agents, RTK)</span>
+              </div>
+            </div>
+            <div class="docs-feature-item">
+              <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong><span data-lang="fr">A propos</span><span data-lang="en">About</span></strong>
+                <span data-lang="fr">Version de l'application, verifications de mises a jour</span><span data-lang="en">Application version, update checks</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="docs-screenshot">
+            <img src="screenshots/screenshot-settings-fr.png" data-src-fr="screenshots/screenshot-settings-fr.png" data-src-en="screenshots/screenshot-settings-en.png" alt="Settings — Preferences panel" loading="lazy">
+            <p class="docs-screenshot-caption">
+              <span data-lang="fr">Panneau de preferences avec les onglets de configuration : General, Apparence, Terminal, Git, SSH, Notifications, Outils et A propos.</span>
+              <span data-lang="en">Settings panel with configuration tabs: General, Appearance, Terminal, Git, SSH, Notifications, Tools and About.</span>
+            </p>
+          </div>
+
+          <hr class="docs-separator">
+
+          <div id="settings-ssh">
+            <h3>
+              <span data-lang="fr">Gestion SSH</span>
+              <span data-lang="en">SSH Management</span>
+            </h3>
+            <div class="docs-text">
+              <p>
+                <span data-lang="fr">L'onglet SSH des preferences offre une interface graphique complete pour gerer vos cles SSH sans quitter Kanbai.</span>
+                <span data-lang="en">The SSH tab in settings provides a complete GUI for managing your SSH keys without leaving Kanbai.</span>
+              </p>
+            </div>
+
+            <div class="docs-feature-overview">
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Liste des cles</span><span data-lang="en">Key listing</span></strong>
+                  <span data-lang="fr">Toutes les cles de <code>~/.ssh</code> avec type (ed25519, RSA, ECDSA), empreinte et commentaire</span><span data-lang="en">All keys from <code>~/.ssh</code> with type (ed25519, RSA, ECDSA), fingerprint and comment</span>
+                </div>
+              </div>
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Generation de cles</span><span data-lang="en">Key generation</span></strong>
+                  <span data-lang="fr">Generez de nouvelles cles SSH (ed25519, RSA, ECDSA) directement depuis l'interface</span><span data-lang="en">Generate new SSH keys (ed25519, RSA, ECDSA) directly from the interface</span>
+                </div>
+              </div>
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Import et export</span><span data-lang="en">Import and export</span></strong>
+                  <span data-lang="fr">Importez des paires de cles existantes ou copiez la cle publique en un clic</span><span data-lang="en">Import existing key pairs or copy the public key in one click</span>
+                </div>
+              </div>
+              <div class="docs-feature-item">
+                <svg class="docs-feature-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <div>
+                  <strong><span data-lang="fr">Acces au repertoire</span><span data-lang="en">Directory access</span></strong>
+                  <span data-lang="fr">Ouvrez <code>~/.ssh</code> directement dans le Finder pour une gestion avancee</span><span data-lang="en">Open <code>~/.ssh</code> directly in Finder for advanced management</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="docs-callout docs-callout--note">
+              <svg class="docs-callout-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <div class="docs-callout-content">
+                <p><span data-lang="fr">Les cles privees sont creees avec les permissions 600 et les cles publiques avec 644, conformement aux bonnes pratiques SSH. Le repertoire <code>~/.ssh</code> est cree automatiquement s'il n'existe pas.</span><span data-lang="en">Private keys are created with 600 permissions and public keys with 644, following SSH best practices. The <code>~/.ssh</code> directory is automatically created if it doesn't exist.</span></p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -4175,8 +4615,8 @@
               <span data-lang="en">Does Kanbai work offline?</span>
             </h3>
             <p>
-              <span data-lang="fr">Oui, la plupart des fonctionnalités fonctionnent hors ligne : Terminal, Git (operations locales), Kanban, File Viewer, TODO Scanner, Statistiques et Code Analysis. Les fonctionnalités qui nécessitent une connexion sont : Claude AI (API Anthropic), Codex (API OpenAI), Copilot (API GitHub), Gemini (API Google), les mises à jour de l'application, les health checks de l'API Tester, et les connexions à des bases de données distantes.</span>
-              <span data-lang="en">Yes, most features work offline: Terminal, Git (local operations), Kanban, File Viewer, TODO Scanner, Statistics and Code Analysis. Features that require a connection are: Claude AI (Anthropic API), Codex (OpenAI API), Copilot (GitHub API), Gemini (Google API), application updates, API Tester health checks, and remote database connections.</span>
+              <span data-lang="fr">Oui, la plupart des fonctionnalités fonctionnent hors ligne : Terminal, Git (operations locales), Kanban, File Viewer, Statistiques et Code Analysis. Les fonctionnalités qui nécessitent une connexion sont : Claude AI (API Anthropic), Codex (API OpenAI), Copilot (API GitHub), Gemini (API Google), les mises à jour de l'application, les health checks de l'API Tester, et les connexions à des bases de données distantes.</span>
+              <span data-lang="en">Yes, most features work offline: Terminal, Git (local operations), Kanban, File Viewer, Statistics and Code Analysis. Features that require a connection are: Claude AI (Anthropic API), Codex (OpenAI API), Copilot (GitHub API), Gemini (Google API), application updates, API Tester health checks, and remote database connections.</span>
             </p>
           </div>
 
