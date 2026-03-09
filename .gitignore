@@ -37,9 +37,9 @@ npm-debug.log*
 .claude/plans/
 .claude/plan-documentation.md
 
-# AI tools — local configs, not project shared
-.codex/
-.copilot/
+# AI tools — track config files, ignore local state
+.codex/*.local.*
+.copilot/*.local.*
 
 # Legacy tooling — replaced by current systems
 .mirehub/

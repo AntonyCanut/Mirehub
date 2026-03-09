@@ -1,0 +1,15 @@
+{
+  "approval_mode": "suggest",
+  "features": {
+    "web_search": true,
+    "plan_mode": true,
+    "delegation": true
+  },
+  "hooks": {
+    "notify": [
+      "bash",
+      "/Users/akc/.kanbai/hooks/kanbai-activity.sh",
+      "working"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+[features]
+web_search = "live"
+multi_agent = true
+
+[history]
+persistence = "save-all"
+notify = ["bash", "/Users/akc/.kanbai/hooks/kanbai-activity.sh", "working"]
