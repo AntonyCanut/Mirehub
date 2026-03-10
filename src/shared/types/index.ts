@@ -929,6 +929,7 @@ export interface PipelineDefinition {
 export interface DevOpsFile {
   version: 1
   connections: DevOpsConnection[]
+  pipelineOrder?: Record<string, number[]>
 }
 
 // IPC Channel types
