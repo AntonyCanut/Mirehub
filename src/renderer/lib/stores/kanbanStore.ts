@@ -1208,6 +1208,18 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         workspaceId: currentWorkspaceId,
       }).catch(() => { /* best-effort */ })
     }
+
+    // Cleanup worktree if its branch has been merged into the current working branch
+    if (task?.worktreePath && task.worktreeBranch) {
+      const repoPath = repoPathFromWorktree(task.worktreePath)
+      const worktreePath = task.worktreePath
+      const worktreeBranch = task.worktreeBranch
+      window.kanbai.git.branchIsMerged(repoPath, worktreeBranch).then(async (merged) => {
+        if (!merged) return
+        await window.kanbai.git.worktreeRemove(repoPath, worktreePath, true).catch(() => { /* best-effort */ })
+        await window.kanbai.git.deleteBranch(repoPath, worktreeBranch).catch(() => { /* best-effort */ })
+      }).catch(() => { /* best-effort */ })
+    }
   },
 
   reactivateIfDone: (tabId: string, message?: string) => {

@@ -202,6 +202,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.GIT_WORKTREE_FINALIZE, { worktreePath, ticketLabel }),
     worktreeMergeAndCleanup: (repoPath: string, worktreePath: string, worktreeBranch: string, ticketLabel: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.GIT_WORKTREE_MERGE_AND_CLEANUP, { repoPath, worktreePath, worktreeBranch, ticketLabel }),
+    branchIsMerged: (cwd: string, branch: string): Promise<boolean> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_BRANCH_IS_MERGED, { cwd, branch }),
   },
 
   // Claude

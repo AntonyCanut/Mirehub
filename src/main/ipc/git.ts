@@ -798,4 +798,20 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       }
     },
   )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_BRANCH_IS_MERGED,
+    async (
+      _event,
+      { cwd, branch }: { cwd: string; branch: string },
+    ) => {
+      try {
+        // Check if the branch tip is an ancestor of the current HEAD
+        execGit(['merge-base', '--is-ancestor', validateRef(branch), 'HEAD'], cwd)
+        return true
+      } catch {
+        return false
+      }
+    },
+  )
 }
