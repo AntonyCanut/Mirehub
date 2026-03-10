@@ -238,20 +238,6 @@ auto_commit_worktree() {
   git commit -m "chore(kanban): auto-commit \${ticket_label} worktree changes" 2>/dev/null
 }
 
-# Merge worktree branch into main and clean up
-merge_and_cleanup_worktree() {
-  local wt_path="$1" wt_branch="$2" repo_path="$3"
-  [ -z "$wt_path" ] || [ -z "$wt_branch" ] || [ -z "$repo_path" ] && return 0
-  local main_branch
-  main_branch=$(git -C "$repo_path" rev-parse --abbrev-ref HEAD 2>/dev/null) || return 0
-  git -C "$repo_path" merge "$wt_branch" -m "Merge branch '$wt_branch'" 2>/dev/null || return 0
-  git -C "$repo_path" worktree remove --force "$wt_path" 2>/dev/null || {
-    rm -rf "$wt_path" 2>/dev/null
-    git -C "$repo_path" worktree prune 2>/dev/null
-  }
-  git -C "$repo_path" branch -d "$wt_branch" 2>/dev/null
-}
-
 # Read ticket status, isCtoTicket flag, worktree info, and autoMerge config
 # Use tab separator to handle paths with spaces correctly
 IFS=$'\\t' read -r TICKET_STATUS IS_CTO WORKTREE_PATH WORKTREE_BRANCH AUTO_MERGE <<< $(node -e "
@@ -287,17 +273,11 @@ try {
 } catch(e) { /* ignore */ }
 ")
 
-REPO_PATH=""
-if [ -n "$WORKTREE_PATH" ]; then
-  REPO_PATH=$(echo "$WORKTREE_PATH" | sed 's|/\\.kanbai-worktrees/[^/]*$||')
-fi
-
 case "$TICKET_STATUS" in
   DONE)
     auto_commit_worktree
-    if [ "$AUTO_MERGE" = "true" ] && [ -n "$WORKTREE_PATH" ] && [ -n "$WORKTREE_BRANCH" ]; then
-      merge_and_cleanup_worktree "$WORKTREE_PATH" "$WORKTREE_BRANCH" "$REPO_PATH"
-    fi
+    # Worktree merge/cleanup is deferred to the renderer (handleTabClosed)
+    # to prevent deleting the worktree while Claude's process is still running.
     ;;
   PENDING)
     if [ "$IS_CTO" = "true" ]; then

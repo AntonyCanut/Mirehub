@@ -11,6 +11,27 @@ import { StorageService } from '../services/storage'
 // guard against git option/argument injection from IPC inputs.
 // ---------------------------------------------------------------------------
 
+const WORKTREE_LOCK_FILE = '.kanbai-session.lock'
+const WORKTREE_LOCK_STALE_MS = 4 * 60 * 60 * 1000 // 4 hours
+
+/** Check if a worktree has an active session lock. Returns true if locked and not stale. */
+function isWorktreeLocked(worktreePath: string): boolean {
+  const lockPath = path.join(worktreePath, WORKTREE_LOCK_FILE)
+  try {
+    if (!fs.existsSync(lockPath)) return false
+    const content = JSON.parse(fs.readFileSync(lockPath, 'utf-8'))
+    const age = Date.now() - (content.timestamp ?? 0)
+    if (age > WORKTREE_LOCK_STALE_MS) {
+      // Stale lock — remove it
+      fs.unlinkSync(lockPath)
+      return false
+    }
+    return true
+  } catch {
+    return false
+  }
+}
+
 /** Validate a git ref (branch, tag, remote name) — rejects option injection. */
 function validateRef(ref: string): string {
   if (!ref || ref.startsWith('-')) {
@@ -687,6 +708,10 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       { cwd, worktreePath, force }: { cwd: string; worktreePath: string; force?: boolean },
     ) => {
       try {
+        // Prevent removal of worktrees with active Claude sessions
+        if (isWorktreeLocked(worktreePath)) {
+          return { success: false, locked: true, error: 'Worktree has an active session' }
+        }
         const args = ['worktree', 'remove']
         if (force) args.push('--force')
         args.push(worktreePath)
@@ -740,6 +765,11 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       },
     ) => {
       try {
+        // Prevent merge/cleanup of worktrees with active Claude sessions
+        if (isWorktreeLocked(worktreePath)) {
+          return { success: false, merged: false, locked: true, error: 'Worktree has an active session — cleanup deferred' }
+        }
+
         const mainBranch = execGit(['rev-parse', '--abbrev-ref', 'HEAD'], repoPath).trim()
         const worktreeExists = fs.existsSync(worktreePath)
 
@@ -834,6 +864,53 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       } catch {
         return []
       }
+    },
+  )
+
+  // --- Worktree session lock management ---
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_WORKTREE_LOCK,
+    async (
+      _event,
+      { worktreePath, taskId, tabId }: { worktreePath: string; taskId: string; tabId: string },
+    ) => {
+      try {
+        const lockPath = path.join(worktreePath, WORKTREE_LOCK_FILE)
+        const lockData = { taskId, tabId, timestamp: Date.now() }
+        fs.writeFileSync(lockPath, JSON.stringify(lockData, null, 2), 'utf-8')
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_WORKTREE_UNLOCK,
+    async (
+      _event,
+      { worktreePath }: { worktreePath: string },
+    ) => {
+      try {
+        const lockPath = path.join(worktreePath, WORKTREE_LOCK_FILE)
+        if (fs.existsSync(lockPath)) {
+          fs.unlinkSync(lockPath)
+        }
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.GIT_WORKTREE_IS_LOCKED,
+    async (
+      _event,
+      { worktreePath }: { worktreePath: string },
+    ) => {
+      return isWorktreeLocked(worktreePath)
     },
   )
 

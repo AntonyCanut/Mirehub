@@ -202,6 +202,12 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.GIT_WORKTREE_FINALIZE, { worktreePath, ticketLabel }),
     worktreeMergeAndCleanup: (repoPath: string, worktreePath: string, worktreeBranch: string, ticketLabel: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.GIT_WORKTREE_MERGE_AND_CLEANUP, { repoPath, worktreePath, worktreeBranch, ticketLabel }),
+    worktreeLock: (worktreePath: string, taskId: string, tabId: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_WORKTREE_LOCK, { worktreePath, taskId, tabId }),
+    worktreeUnlock: (worktreePath: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_WORKTREE_UNLOCK, { worktreePath }),
+    worktreeIsLocked: (worktreePath: string): Promise<boolean> =>
+      ipcRenderer.invoke(IPC_CHANNELS.GIT_WORKTREE_IS_LOCKED, { worktreePath }),
     branchIsMerged: (cwd: string, branch: string): Promise<boolean> =>
       ipcRenderer.invoke(IPC_CHANNELS.GIT_BRANCH_IS_MERGED, { cwd, branch }),
   },

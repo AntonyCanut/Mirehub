@@ -1107,6 +1107,9 @@ export const IPC_CHANNELS = {
   GIT_WORKTREE_LIST: 'git:worktreeList',
   GIT_WORKTREE_FINALIZE: 'git:worktreeFinalize',
   GIT_WORKTREE_MERGE_AND_CLEANUP: 'git:worktreeMergeAndCleanup',
+  GIT_WORKTREE_LOCK: 'git:worktreeLock',
+  GIT_WORKTREE_UNLOCK: 'git:worktreeUnlock',
+  GIT_WORKTREE_IS_LOCKED: 'git:worktreeIsLocked',
   GIT_BRANCH_IS_MERGED: 'git:branchIsMerged',
 
   // Workspace storage (.workspaces dir)

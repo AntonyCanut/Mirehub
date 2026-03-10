@@ -416,10 +416,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             window.kanbai.kanban.cleanupPrompt(promptCwd, newTask.id).catch(() => { /* best-effort */ })
           }
 
-          // Auto-merge worktree branch into main if enabled
-          if (currentWorkspaceId && newTask.worktreePath) {
-            autoMergeWorktree(newTask, currentWorkspaceId).catch(() => { /* best-effort */ })
-          }
+          // Auto-merge is deferred to handleTabClosed to avoid deleting the
+          // worktree while Claude's process is still running in it.
 
           // Push notification
           const t = useI18n.getState().t
@@ -1006,6 +1004,12 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     } catch { /* file update is best-effort */ }
     launchingTaskIds.delete(task.id)
 
+    // Lock the worktree to prevent deletion while the session is active
+    const currentWorktreePath = task.worktreePath ?? get().tasks.find((t) => t.id === task.id)?.worktreePath
+    if (currentWorktreePath && tabId) {
+      window.kanbai.git.worktreeLock(currentWorktreePath, task.id, tabId).catch(() => { /* best-effort */ })
+    }
+
     // Store prompt cwd for cleanup when the task finishes (DONE/FAILED).
     // We do NOT clean up on a timer — Claude Code can take arbitrarily long
     // to initialize, and deleting the prompt file before it's read causes the
@@ -1100,10 +1104,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             window.kanbai.kanban.cleanupPrompt(promptCwd, newTask.id).catch(() => { /* best-effort */ })
           }
 
-          // Auto-merge worktree branch into main if enabled
-          if (newTask.worktreePath) {
-            autoMergeWorktree(newTask, wsId).catch(() => { /* best-effort */ })
-          }
+          // Auto-merge is deferred to handleTabClosed to avoid deleting the
+          // worktree while Claude's process is still running in it.
 
           const t = useI18n.getState().t
           const ticketLabel = formatTicketLabel(newTask)
@@ -1209,8 +1211,16 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       }).catch(() => { /* best-effort */ })
     }
 
-    // Cleanup worktree if its branch has been merged into the current working branch
-    if (task?.worktreePath && task.worktreeBranch) {
+    // Unlock the worktree session lock now that the terminal process has exited
+    if (task?.worktreePath) {
+      window.kanbai.git.worktreeUnlock(task.worktreePath).catch(() => { /* best-effort */ })
+    }
+
+    // Auto-merge worktree if the task is DONE (deferred from status change detection)
+    if (task?.worktreePath && task.worktreeBranch && task.status === 'DONE' && currentWorkspaceId) {
+      autoMergeWorktree(task, currentWorkspaceId).catch(() => { /* best-effort */ })
+    } else if (task?.worktreePath && task.worktreeBranch) {
+      // Cleanup worktree if its branch has been merged into the current working branch
       const repoPath = repoPathFromWorktree(task.worktreePath)
       const worktreePath = task.worktreePath
       const worktreeBranch = task.worktreeBranch
