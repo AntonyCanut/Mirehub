@@ -441,6 +441,7 @@ describe('DevOps IPC Handlers', () => {
   // --- DEVOPS_GET_BUILD_TIMELINE ---
 
   it('devops:getBuildTimeline retourne les stages et jobs d un build', async () => {
+    // Azure DevOps timeline hierarchy: Stage → Phase → Job → Task
     const azureResponse = {
       records: [
         {
@@ -460,8 +461,24 @@ describe('DevOps IPC Handlers', () => {
           log: null,
         },
         {
-          id: 'job-1',
+          id: 'phase-1',
           parentId: 'stage-1',
+          type: 'Phase',
+          name: 'Build',
+          order: 1,
+          state: 'completed',
+          result: 'succeeded',
+          startTime: '2024-01-15T14:00:00Z',
+          finishTime: '2024-01-15T14:05:00Z',
+          workerName: null,
+          errorCount: 0,
+          warningCount: 0,
+          issues: null,
+          log: null,
+        },
+        {
+          id: 'job-1',
+          parentId: 'phase-1',
           type: 'Job',
           name: 'Build Job',
           order: 1,
@@ -508,8 +525,24 @@ describe('DevOps IPC Handlers', () => {
           log: null,
         },
         {
-          id: 'job-2',
+          id: 'phase-2',
           parentId: 'stage-2',
+          type: 'Phase',
+          name: 'Deploy',
+          order: 1,
+          state: 'inProgress',
+          result: null,
+          startTime: '2024-01-15T14:05:00Z',
+          finishTime: null,
+          workerName: null,
+          errorCount: 0,
+          warningCount: 0,
+          issues: null,
+          log: null,
+        },
+        {
+          id: 'job-2',
+          parentId: 'phase-2',
           type: 'Job',
           name: 'Deploy Job',
           order: 1,
@@ -592,8 +625,24 @@ describe('DevOps IPC Handlers', () => {
           log: null,
         },
         {
-          id: 'job-1',
+          id: 'phase-1',
           parentId: 'stage-1',
+          type: 'Phase',
+          name: 'Test',
+          order: 1,
+          state: 'completed',
+          result: 'failed',
+          startTime: '2024-01-15T14:00:00Z',
+          finishTime: '2024-01-15T14:10:00Z',
+          workerName: null,
+          errorCount: 0,
+          warningCount: 0,
+          issues: null,
+          log: null,
+        },
+        {
+          id: 'job-1',
+          parentId: 'phase-1',
           type: 'Job',
           name: 'Unit Tests',
           order: 1,

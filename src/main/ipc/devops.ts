@@ -227,13 +227,24 @@ function collectJobIssues(
 
 function mapTimelineToStages(records: AzureTimelineRecord[]): PipelineStage[] {
   const stages = records.filter((r) => r.type === 'Stage')
+  const phases = records.filter((r) => r.type === 'Phase')
   const jobs = records.filter((r) => r.type === 'Job')
+
+  // Build a set of Phase IDs that belong to each Stage (Stage → Phase → Job)
+  const phaseIdsByStage = new Map<string, Set<string>>()
+  for (const stage of stages) {
+    const stagePhaseIds = new Set(
+      phases.filter((p) => p.parentId === stage.id).map((p) => p.id),
+    )
+    phaseIdsByStage.set(stage.id, stagePhaseIds)
+  }
 
   return stages
     .sort((a, b) => a.order - b.order)
     .map((stage): PipelineStage => {
+      const stagePhaseIds = phaseIdsByStage.get(stage.id) ?? new Set<string>()
       const stageJobs: PipelineJob[] = jobs
-        .filter((j) => j.parentId === stage.id)
+        .filter((j) => j.parentId === stage.id || stagePhaseIds.has(j.parentId ?? ''))
         .sort((a, b) => a.order - b.order)
         .map((job): PipelineJob => {
           const jobIssues = [
