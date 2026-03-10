@@ -184,6 +184,7 @@ export interface KanbanConfig {
   autoPrequalifyTickets: boolean
   autoPrioritizeBugs: boolean
   useWorktrees: boolean
+  autoMergeWorktrees: boolean
   maxConcurrentWorktrees: number
   paused: boolean
 }
@@ -1050,6 +1051,7 @@ export const IPC_CHANNELS = {
   GIT_WORKTREE_REMOVE: 'git:worktreeRemove',
   GIT_WORKTREE_LIST: 'git:worktreeList',
   GIT_WORKTREE_FINALIZE: 'git:worktreeFinalize',
+  GIT_WORKTREE_MERGE_AND_CLEANUP: 'git:worktreeMergeAndCleanup',
 
   // Workspace storage (.workspaces dir)
   WORKSPACE_INIT_DIR: 'workspace:initDir',

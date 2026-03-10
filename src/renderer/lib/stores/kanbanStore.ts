@@ -27,6 +27,44 @@ const reactivatingTaskIds = new Set<string>()
 // Track tasks currently being launched to prevent duplicate sendToAi calls
 const launchingTaskIds = new Set<string>()
 
+/** Derive the git repo root from a worktree path (removes /.kanbai-worktrees/{id}). */
+function repoPathFromWorktree(worktreePath: string): string {
+  const worktreesDir = '/.kanbai-worktrees/'
+  const idx = worktreePath.lastIndexOf(worktreesDir)
+  if (idx === -1) return worktreePath
+  return worktreePath.slice(0, idx)
+}
+
+/**
+ * Auto-merge a completed task's worktree branch into the main branch,
+ * then remove the worktree and delete the branch.
+ * Only runs if the task has worktree info and autoMergeWorktrees is enabled.
+ */
+async function autoMergeWorktree(
+  task: KanbanTask,
+  workspaceId: string,
+): Promise<void> {
+  if (!task.worktreePath || !task.worktreeBranch) return
+  try {
+    const kanbanConfig = await window.kanbai.kanban.getConfig(workspaceId)
+    if (!kanbanConfig?.autoMergeWorktrees) return
+    const repoPath = repoPathFromWorktree(task.worktreePath)
+    const ticketLabel = formatTicketLabel(task)
+    const result = await window.kanbai.git.worktreeMergeAndCleanup(
+      repoPath,
+      task.worktreePath,
+      task.worktreeBranch,
+      ticketLabel,
+    )
+    if (!result?.success) {
+      // eslint-disable-next-line no-console
+      console.warn(`Auto-merge failed for ${ticketLabel}:`, result?.error)
+    }
+  } catch {
+    // Auto-merge is best-effort — do not block task completion
+  }
+}
+
 export function pickNextTask(tasks: KanbanTask[]): KanbanTask | null {
   const todo = tasks.filter((t) => t.status === 'TODO' && !t.disabled && !t.isPrequalifying && !launchingTaskIds.has(t.id))
   if (!todo.length) return null
@@ -376,6 +414,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           const promptCwd = kanbanPromptCwds[newTask.id]
           if (promptCwd) {
             window.kanbai.kanban.cleanupPrompt(promptCwd, newTask.id).catch(() => { /* best-effort */ })
+          }
+
+          // Auto-merge worktree branch into main if enabled
+          if (currentWorkspaceId && newTask.worktreePath) {
+            autoMergeWorktree(newTask, currentWorkspaceId).catch(() => { /* best-effort */ })
           }
 
           // Push notification
@@ -1045,7 +1088,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           relaunchedTaskIds.delete(newTask.id)
           tabsToAutoClose.push({ tabId, isCto: isCtoMode })
 
-          // Auto-commit any uncommitted worktree changes (safety net)
+          // Auto-commit any uncommitted worktree changes (safety net — covered by merge handler too)
           if (newTask.worktreePath) {
             const ticketLabel = formatTicketLabel(newTask)
             window.kanbai.git.worktreeFinalize(newTask.worktreePath, ticketLabel).catch(() => { /* best-effort */ })
@@ -1055,6 +1098,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           const promptCwd = kanbanPromptCwds[newTask.id]
           if (promptCwd) {
             window.kanbai.kanban.cleanupPrompt(promptCwd, newTask.id).catch(() => { /* best-effort */ })
+          }
+
+          // Auto-merge worktree branch into main if enabled
+          if (newTask.worktreePath) {
+            autoMergeWorktree(newTask, wsId).catch(() => { /* best-effort */ })
           }
 
           const t = useI18n.getState().t

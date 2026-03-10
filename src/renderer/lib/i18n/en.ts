@@ -977,6 +977,8 @@ export const en = {
   'kanban.autoPrioritizeBugsHint': 'Bug type tickets are automatically set to high priority',
   'kanban.useWorktrees': 'Git Worktrees',
   'kanban.useWorktreesHint': 'Creates a distinct git worktree per ticket to work in parallel without branch switching',
+  'kanban.autoMergeWorktrees': 'Auto-merge worktrees',
+  'kanban.autoMergeWorktreesHint': 'Automatically merges the worktree branch into the main branch when a ticket is done (DONE)',
   'kanban.maxConcurrentWorktrees': 'Max concurrent tickets',
   'kanban.maxConcurrentWorktreesHint': 'Maximum number of tickets that can be processed in parallel with worktrees (1-10)',
   'kanban.pause': 'Pause',

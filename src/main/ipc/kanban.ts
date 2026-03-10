@@ -20,6 +20,7 @@ const DEFAULT_KANBAN_CONFIG: KanbanConfig = {
   autoPrequalifyTickets: false,
   autoPrioritizeBugs: true,
   useWorktrees: false,
+  autoMergeWorktrees: false,
   maxConcurrentWorktrees: 1,
   paused: false,
 }
@@ -52,6 +53,7 @@ function readKanbanConfig(workspaceId: string): KanbanConfig {
           autoPrequalifyTickets: s.kanbanSettings?.autoPrequalifyTickets ?? DEFAULT_KANBAN_CONFIG.autoPrequalifyTickets,
           autoPrioritizeBugs: s.kanbanSettings?.autoPrioritizeBugs ?? DEFAULT_KANBAN_CONFIG.autoPrioritizeBugs,
           useWorktrees: DEFAULT_KANBAN_CONFIG.useWorktrees,
+          autoMergeWorktrees: DEFAULT_KANBAN_CONFIG.autoMergeWorktrees,
           maxConcurrentWorktrees: DEFAULT_KANBAN_CONFIG.maxConcurrentWorktrees,
           paused: DEFAULT_KANBAN_CONFIG.paused,
         }

@@ -709,6 +709,65 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
   )
 
   ipcMain.handle(
+    IPC_CHANNELS.GIT_WORKTREE_MERGE_AND_CLEANUP,
+    async (
+      _event,
+      {
+        repoPath,
+        worktreePath,
+        worktreeBranch,
+        ticketLabel,
+      }: {
+        repoPath: string
+        worktreePath: string
+        worktreeBranch: string
+        ticketLabel: string
+      },
+    ) => {
+      try {
+        // Step 1: Finalize — auto-commit any uncommitted changes in the worktree
+        const status = execGit(['status', '--porcelain'], worktreePath).trim()
+        if (status) {
+          execGit(['add', '-A'], worktreePath)
+          const commitMessage = `chore(kanban): auto-commit ${ticketLabel} worktree changes`
+          execGit(['commit', '-m', commitMessage], worktreePath)
+        }
+
+        // Step 2: Determine the main branch of the repo
+        const mainBranch = execGit(['rev-parse', '--abbrev-ref', 'HEAD'], repoPath).trim()
+
+        // Step 3: Merge the worktree branch into the main branch
+        execGit(['merge', validateRef(worktreeBranch)], repoPath)
+
+        // Step 4: Remove the worktree
+        try {
+          execGit(['worktree', 'remove', '--force', worktreePath], repoPath)
+        } catch {
+          // If git worktree remove fails, try manual cleanup
+          fs.rmSync(worktreePath, { recursive: true, force: true })
+          execGit(['worktree', 'prune'], repoPath)
+        }
+
+        // Step 5: Delete the worktree branch (it's merged now)
+        try {
+          execGit(['branch', '-d', validateRef(worktreeBranch)], repoPath)
+        } catch {
+          // Branch deletion is best-effort — may already be gone
+        }
+
+        return {
+          success: true,
+          merged: true,
+          mainBranch,
+          message: `Merged ${worktreeBranch} into ${mainBranch} and cleaned up worktree`,
+        }
+      } catch (err) {
+        return { success: false, merged: false, error: String(err) }
+      }
+    },
+  )
+
+  ipcMain.handle(
     IPC_CHANNELS.GIT_WORKTREE_LIST,
     async (_event, { cwd }: { cwd: string }) => {
       try {

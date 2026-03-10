@@ -751,7 +751,19 @@ export function KanbanBoard() {
               </button>
             </div>
           ))}
-          {kanbanConfig.useWorktrees && (
+          {kanbanConfig.useWorktrees && (<>
+            <div className="kanban-settings-row">
+              <div className="kanban-settings-row-info">
+                <span className="kanban-settings-label">{t('kanban.autoMergeWorktrees')}</span>
+                <span className="kanban-settings-hint">{t('kanban.autoMergeWorktreesHint')}</span>
+              </div>
+              <button
+                className={`settings-toggle${kanbanConfig.autoMergeWorktrees ? ' settings-toggle--active' : ''}`}
+                onClick={() => updateKanbanConfig('autoMergeWorktrees', !kanbanConfig.autoMergeWorktrees)}
+              >
+                <span className="settings-toggle-knob" />
+              </button>
+            </div>
             <div className="kanban-settings-row">
               <div className="kanban-settings-row-info">
                 <span className="kanban-settings-label">{t('kanban.maxConcurrentWorktrees')}</span>
@@ -769,7 +781,7 @@ export function KanbanBoard() {
                 }}
               />
             </div>
-          )}
+          </>)}
         </div>
       )}
 
