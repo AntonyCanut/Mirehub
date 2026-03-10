@@ -9,6 +9,8 @@ import type {
   PipelineDefinition,
   PipelineRun,
   PipelineStatus,
+  StageStatus,
+  PipelineApproval,
 } from '../../shared/types'
 import '../styles/devops.css'
 
@@ -33,6 +35,18 @@ function statusIcon(status: PipelineStatus): string {
     case 'canceled': return '\u26D4'
     case 'running': return '\u23F3'
     case 'notStarted': return '\u23F8\uFE0F'
+    default: return '\u2753'
+  }
+}
+
+function stageStatusIcon(status: StageStatus): string {
+  switch (status) {
+    case 'succeeded': return '\u2705'
+    case 'failed': return '\u274C'
+    case 'canceled': return '\u26D4'
+    case 'running': return '\u23F3'
+    case 'pending': return '\u23F8\uFE0F'
+    case 'notStarted': return '\u2B58'
     default: return '\u2753'
   }
 }
@@ -366,12 +380,42 @@ function PipelineRunsDetail({
   runs,
   loading,
   pipelineName,
+  activeConnection,
 }: {
   runs: PipelineRun[]
   loading: boolean
   pipelineName: string
+  activeConnection: DevOpsConnection | null
 }) {
   const { t } = useI18n()
+  const {
+    expandedRunId,
+    runStages,
+    stagesLoading,
+    runApprovals,
+    approvalsLoading,
+    approving,
+    expandRun,
+    collapseRun,
+    approveRun,
+  } = useDevOpsStore()
+
+  const [approvalComment, setApprovalComment] = useState('')
+
+  const handleToggleRun = useCallback((buildId: number) => {
+    if (!activeConnection) return
+    if (expandedRunId === buildId) {
+      collapseRun()
+    } else {
+      expandRun(activeConnection, buildId)
+    }
+  }, [activeConnection, expandedRunId, expandRun, collapseRun])
+
+  const handleApprove = useCallback(async (approvalId: string, status: 'approved' | 'rejected') => {
+    if (!activeConnection) return
+    await approveRun(activeConnection, approvalId, status, approvalComment || undefined)
+    setApprovalComment('')
+  }, [activeConnection, approveRun, approvalComment])
 
   if (loading) {
     return <div className="devops-runs-loading">{t('devops.loadingRuns')}</div>
@@ -381,28 +425,127 @@ function PipelineRunsDetail({
     return <div className="devops-runs-empty">{t('devops.noRuns')}</div>
   }
 
+  const pendingApprovalsByBuild = new Map<number, PipelineApproval[]>()
+  for (const approval of runApprovals) {
+    if (approval.status === 'pending') {
+      const existing = pendingApprovalsByBuild.get(approval.buildId) ?? []
+      existing.push(approval)
+      pendingApprovalsByBuild.set(approval.buildId, existing)
+    }
+  }
+
   return (
     <div className="devops-runs-detail">
       <h4>{pipelineName} - {t('devops.recentRuns')}</h4>
       <div className="devops-runs-list">
-        {runs.map((run) => (
-          <div key={run.id} className="devops-run-row">
-            <span className={statusClassName(run.status)}>{statusIcon(run.status)}</span>
-            <span className="devops-run-name">#{run.name}</span>
-            <span className="devops-run-branch">{run.sourceBranch}</span>
-            <span className="devops-run-time">{formatRelativeTime(run.finishTime ?? run.startTime)}</span>
-            <span className="devops-run-by">{run.requestedBy}</span>
-            {run.url && (
-              <button
-                className="devops-btn devops-btn--small"
-                onClick={() => window.kanbai.shell.openExternal(run.url)}
-                title="Open in browser"
+        {runs.map((run) => {
+          const isExpanded = expandedRunId === run.id
+          const pendingApprovals = pendingApprovalsByBuild.get(run.id) ?? []
+
+          return (
+            <div key={run.id} className="devops-run-item">
+              <div
+                className={`devops-run-row devops-run-row--expandable${isExpanded ? ' devops-run-row--expanded' : ''}`}
+                onClick={() => handleToggleRun(run.id)}
               >
-                {'\u2197'}
-              </button>
-            )}
-          </div>
-        ))}
+                <span className={`devops-run-expand-icon${isExpanded ? ' devops-run-expand-icon--open' : ''}`}>{'\u25B6'}</span>
+                <span className={statusClassName(run.status)}>{statusIcon(run.status)}</span>
+                <span className="devops-run-name">#{run.name}</span>
+                <span className="devops-run-branch">{run.sourceBranch}</span>
+                <span className="devops-run-time">{formatRelativeTime(run.finishTime ?? run.startTime)}</span>
+                <span className="devops-run-by">{run.requestedBy}</span>
+                {isExpanded && pendingApprovals.length > 0 && (
+                  <span className="devops-run-approval-badge">{t('devops.pendingApproval')}</span>
+                )}
+                {run.url && (
+                  <button
+                    className="devops-btn devops-btn--small"
+                    onClick={(e) => { e.stopPropagation(); window.kanbai.shell.openExternal(run.url) }}
+                    title="Open in browser"
+                  >
+                    {'\u2197'}
+                  </button>
+                )}
+              </div>
+
+              {isExpanded && (
+                <div className="devops-run-expanded">
+                  {/* Stages */}
+                  <div className="devops-stages-section">
+                    <h5>{t('devops.stages')}</h5>
+                    {stagesLoading ? (
+                      <div className="devops-stages-loading">{t('devops.loadingStages')}</div>
+                    ) : runStages.length === 0 ? (
+                      <div className="devops-stages-empty">{t('devops.noStages')}</div>
+                    ) : (
+                      <div className="devops-stages-list">
+                        {runStages.map((stage) => (
+                          <div key={stage.id} className="devops-stage-row">
+                            <span className={`devops-status devops-status--${stage.status}`}>
+                              {stageStatusIcon(stage.status)}
+                            </span>
+                            <span className="devops-stage-name">{stage.name}</span>
+                            {stage.startTime && (
+                              <span className="devops-stage-time">
+                                {formatRelativeTime(stage.finishTime ?? stage.startTime)}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Approvals */}
+                  {!approvalsLoading && pendingApprovals.length > 0 && (
+                    <div className="devops-approvals-section">
+                      <h5>{t('devops.approvals')}</h5>
+                      {pendingApprovals.map((approval) => (
+                        <div key={approval.id} className="devops-approval-card">
+                          {approval.instructions && (
+                            <p className="devops-approval-instructions">{approval.instructions}</p>
+                          )}
+                          <div className="devops-approval-assignees">
+                            {approval.steps.map((step, idx) => (
+                              <span key={idx} className={`devops-approval-assignee devops-approval-assignee--${step.status}`}>
+                                {step.assignedApprover}
+                                {step.status !== 'pending' && ` (${step.status})`}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="devops-approval-actions">
+                            <input
+                              className="devops-approval-comment"
+                              type="text"
+                              placeholder={t('devops.approvalComment')}
+                              value={approvalComment}
+                              onChange={(e) => setApprovalComment(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <button
+                              className="devops-btn devops-btn--approve"
+                              disabled={approving === approval.id}
+                              onClick={(e) => { e.stopPropagation(); handleApprove(approval.id, 'approved') }}
+                            >
+                              {approving === approval.id ? '...' : t('devops.approve')}
+                            </button>
+                            <button
+                              className="devops-btn devops-btn--reject"
+                              disabled={approving === approval.id}
+                              onClick={(e) => { e.stopPropagation(); handleApprove(approval.id, 'rejected') }}
+                            >
+                              {t('devops.reject')}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -652,6 +795,7 @@ export function DevOpsPanel() {
                 runs={pipelineRuns}
                 loading={runsLoading}
                 pipelineName={selectedPipeline.name}
+                activeConnection={activeConnection}
               />
             ) : (
               <div className="devops-empty">{t('devops.selectPipeline')}</div>

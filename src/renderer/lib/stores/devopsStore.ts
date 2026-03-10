@@ -4,6 +4,8 @@ import type {
   DevOpsConnection,
   PipelineDefinition,
   PipelineRun,
+  PipelineStage,
+  PipelineApproval,
 } from '../../../shared/types'
 
 interface DevOpsState {
@@ -16,6 +18,12 @@ interface DevOpsState {
   selectedPipelineId: number | null
   pipelineRuns: PipelineRun[]
   runsLoading: boolean
+  expandedRunId: number | null
+  runStages: PipelineStage[]
+  stagesLoading: boolean
+  runApprovals: PipelineApproval[]
+  approvalsLoading: boolean
+  approving: string | null
 
   loadData: (projectPath: string) => Promise<void>
   saveData: (projectPath: string) => Promise<void>
@@ -28,6 +36,9 @@ interface DevOpsState {
   selectPipeline: (pipelineId: number | null) => void
   loadPipelineRuns: (connection: DevOpsConnection, pipelineId: number) => Promise<void>
   runPipeline: (connection: DevOpsConnection, pipelineId: number, branch?: string) => Promise<{ success: boolean; error?: string }>
+  expandRun: (connection: DevOpsConnection, buildId: number) => Promise<void>
+  collapseRun: () => void
+  approveRun: (connection: DevOpsConnection, approvalId: string, status: 'approved' | 'rejected', comment?: string) => Promise<{ success: boolean; error?: string }>
 }
 
 function generateId(): string {
@@ -44,6 +55,12 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
   selectedPipelineId: null,
   pipelineRuns: [],
   runsLoading: false,
+  expandedRunId: null,
+  runStages: [],
+  stagesLoading: false,
+  runApprovals: [],
+  approvalsLoading: false,
+  approving: null,
 
   loadData: async (projectPath) => {
     set({ loading: true })
@@ -144,6 +161,40 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
       // Refresh pipeline runs after triggering
       const { loadPipelineRuns } = get()
       await loadPipelineRuns(connection, pipelineId)
+    }
+    return { success: result.success, error: result.error }
+  },
+
+  expandRun: async (connection, buildId) => {
+    set({ expandedRunId: buildId, stagesLoading: true, approvalsLoading: true, runStages: [], runApprovals: [] })
+
+    const [timelineResult, approvalsResult] = await Promise.all([
+      window.kanbai.devops.getBuildTimeline(connection, buildId),
+      window.kanbai.devops.getApprovals(connection, [buildId]),
+    ])
+
+    set({
+      runStages: timelineResult.success ? timelineResult.stages : [],
+      stagesLoading: false,
+      runApprovals: approvalsResult.success ? approvalsResult.approvals : [],
+      approvalsLoading: false,
+    })
+  },
+
+  collapseRun: () => {
+    set({ expandedRunId: null, runStages: [], runApprovals: [] })
+  },
+
+  approveRun: async (connection, approvalId, status, comment) => {
+    set({ approving: approvalId })
+    const result = await window.kanbai.devops.approve(connection, approvalId, status, comment)
+    set({ approving: null })
+
+    if (result.success) {
+      const { expandedRunId, expandRun } = get()
+      if (expandedRunId) {
+        await expandRun(connection, expandedRunId)
+      }
     }
     return { success: result.success, error: result.error }
   },

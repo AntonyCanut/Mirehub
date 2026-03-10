@@ -1809,6 +1809,14 @@ export const en = {
   'devops.loadingRuns': 'Loading runs...',
   'devops.noRuns': 'No runs found for this pipeline.',
   'devops.recentRuns': 'Recent Runs',
+  'devops.stages': 'Stages',
+  'devops.loadingStages': 'Loading stages...',
+  'devops.noStages': 'No stages found.',
+  'devops.approvals': 'Approvals',
+  'devops.pendingApproval': 'Pending',
+  'devops.approve': 'Approve',
+  'devops.reject': 'Reject',
+  'devops.approvalComment': 'Comment (optional)',
 
   // Namespace
   'namespace.create': 'New namespace',

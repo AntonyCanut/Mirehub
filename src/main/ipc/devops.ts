@@ -9,6 +9,10 @@ import {
   PipelineDefinition,
   PipelineRun,
   PipelineStatus,
+  PipelineStage,
+  StageStatus,
+  PipelineApproval,
+  ApprovalStatus,
 } from '../../shared/types'
 
 function defaultDevOpsFile(): DevOpsFile {
@@ -84,6 +88,80 @@ async function azureDevOpsRequest<T>(
   }
 
   return response.json() as Promise<T>
+}
+
+async function azureDevOpsPatch<T>(
+  auth: DevOpsAuth,
+  url: string,
+  body: unknown,
+): Promise<T> {
+  const authHeader = await getAuthHeader(auth)
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      Authorization: authHeader,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Azure DevOps API error: ${response.status} - ${errorText}`)
+  }
+
+  return response.json() as Promise<T>
+}
+
+function mapStageStatus(state: string, result: string): StageStatus {
+  if (state === 'inProgress') return 'running'
+  if (state === 'pending') return 'pending'
+  if (state === 'completed') {
+    if (result === 'succeeded') return 'succeeded'
+    if (result === 'failed') return 'failed'
+    if (result === 'canceled') return 'canceled'
+    return 'succeeded'
+  }
+  return 'notStarted'
+}
+
+function mapApprovalStatus(status: string): ApprovalStatus {
+  const mapping: Record<string, ApprovalStatus> = {
+    pending: 'pending',
+    approved: 'approved',
+    rejected: 'rejected',
+    canceled: 'canceled',
+    skipped: 'skipped',
+    undefined: 'undefined',
+  }
+  return mapping[status] ?? 'pending'
+}
+
+interface AzureTimelineRecord {
+  id: string
+  name: string
+  type: string
+  order: number
+  state: string
+  result: string
+  startTime: string | null
+  finishTime: string | null
+}
+
+interface AzureApproval {
+  id: string
+  status: string
+  createdOn: string
+  instructions: string
+  minRequiredApprovers: number
+  steps: Array<{
+    assignedApprover: { displayName: string }
+    status: string
+    comment: string
+  }>
+  _links?: {
+    build?: { href?: string }
+  }
 }
 
 function mapPipelineStatus(status: string, result: string): PipelineStatus {
@@ -249,4 +327,82 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
       }
     },
   )
+
+  // Get build timeline (stages)
+  ipcMain.handle(
+    IPC_CHANNELS.DEVOPS_GET_BUILD_TIMELINE,
+    async (_event, { connection, buildId }: { connection: DevOpsConnection; buildId: number }) => {
+      try {
+        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds/${buildId}/Timeline?api-version=7.1`
+        const result = await azureDevOpsRequest<{ records: AzureTimelineRecord[] }>(connection.auth, url)
+
+        const stages: PipelineStage[] = result.records
+          .filter((r) => r.type === 'Stage')
+          .sort((a, b) => a.order - b.order)
+          .map((r) => ({
+            id: r.id,
+            name: r.name,
+            order: r.order,
+            status: mapStageStatus(r.state, r.result),
+            startTime: r.startTime ?? null,
+            finishTime: r.finishTime ?? null,
+          }))
+
+        return { success: true, stages }
+      } catch (err) {
+        return { success: false, stages: [], error: String(err) }
+      }
+    },
+  )
+
+  // Get pending approvals for a build
+  ipcMain.handle(
+    IPC_CHANNELS.DEVOPS_GET_APPROVALS,
+    async (_event, { connection, buildIds }: { connection: DevOpsConnection; buildIds: number[] }) => {
+      try {
+        const idsParam = buildIds.join(',')
+        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1&buildIds=${idsParam}`
+        const result = await azureDevOpsRequest<{ value: AzureApproval[] }>(connection.auth, url)
+
+        const approvals: PipelineApproval[] = result.value.map((a) => ({
+          id: a.id,
+          buildId: extractBuildIdFromApproval(a),
+          status: mapApprovalStatus(a.status),
+          createdOn: a.createdOn,
+          instructions: a.instructions || '',
+          minRequiredApprovers: a.minRequiredApprovers,
+          steps: a.steps.map((s) => ({
+            assignedApprover: s.assignedApprover.displayName,
+            status: mapApprovalStatus(s.status),
+            comment: s.comment || '',
+          })),
+        }))
+
+        return { success: true, approvals }
+      } catch (err) {
+        return { success: false, approvals: [], error: String(err) }
+      }
+    },
+  )
+
+  // Approve or reject
+  ipcMain.handle(
+    IPC_CHANNELS.DEVOPS_APPROVE,
+    async (_event, { connection, approvalId, status, comment }: { connection: DevOpsConnection; approvalId: string; status: 'approved' | 'rejected'; comment?: string }) => {
+      try {
+        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1`
+        const body = [{ approvalId, status, comment: comment || '' }]
+        await azureDevOpsPatch(connection.auth, url, body)
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: String(err) }
+      }
+    },
+  )
+}
+
+function extractBuildIdFromApproval(approval: AzureApproval): number {
+  const buildHref = approval._links?.build?.href ?? ''
+  const match = buildHref.match(/builds\/(\d+)/)
+  return match ? parseInt(match[1]!, 10) : 0
 }
