@@ -364,9 +364,9 @@ function generateGitHubAppJwt(appId: string, privateKey: string): string {
   const now = Math.floor(Date.now() / 1000)
   const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url')
   const payload = Buffer.from(JSON.stringify({
-    iat: now - 60,
-    exp: now + 10 * 60,
-    iss: appId,
+    iat: now - 30,
+    exp: now + 5 * 60,
+    iss: parseInt(appId, 10),
   })).toString('base64url')
 
   const signature = crypto.sign('SHA256', Buffer.from(`${header}.${payload}`), privateKey)
