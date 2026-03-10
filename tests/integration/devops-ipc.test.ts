@@ -278,6 +278,71 @@ describe('DevOps IPC Handlers', () => {
     expect(pipeline2.latestRun).toBeNull()
   })
 
+  it('devops:listPipelines utilise latestCompletedBuild comme fallback quand latestBuild est absent', async () => {
+    const azureResponse = {
+      value: [
+        {
+          id: 50,
+          name: 'Front-CI',
+          path: '\\',
+          revision: 1,
+          latestBuild: null,
+          latestCompletedBuild: {
+            id: 300,
+            buildNumber: '20240201.1',
+            status: 'completed',
+            result: 'succeeded',
+            startTime: '2024-02-01T10:00:00Z',
+            finishTime: '2024-02-01T10:10:00Z',
+            sourceBranch: 'refs/heads/main',
+            sourceVersion: 'aabbccdd',
+            requestedFor: { displayName: 'Alice' },
+          },
+        },
+      ],
+    }
+    mockFetch.mockResolvedValueOnce(createFetchResponse(azureResponse))
+
+    const connection = createTestConnection()
+    const result = await mockIpcMain._invoke('devops:listPipelines', { connection })
+
+    expect(result.success).toBe(true)
+    expect(result.pipelines[0].latestRun).not.toBeNull()
+    expect(result.pipelines[0].latestRun.id).toBe(300)
+    expect(result.pipelines[0].latestRun.status).toBe('succeeded')
+  })
+
+  it('devops:listPipelines mappe partiallySucceeded vers succeeded', async () => {
+    const azureResponse = {
+      value: [
+        {
+          id: 51,
+          name: 'Back-CI',
+          path: '\\',
+          revision: 1,
+          latestBuild: {
+            id: 301,
+            buildNumber: '20240201.2',
+            status: 'completed',
+            result: 'partiallySucceeded',
+            startTime: '2024-02-01T11:00:00Z',
+            finishTime: '2024-02-01T11:10:00Z',
+            sourceBranch: 'refs/heads/develop',
+            sourceVersion: 'eeff0011',
+            requestedFor: { displayName: 'Bob' },
+          },
+        },
+      ],
+    }
+    mockFetch.mockResolvedValueOnce(createFetchResponse(azureResponse))
+
+    const connection = createTestConnection()
+    const result = await mockIpcMain._invoke('devops:listPipelines', { connection })
+
+    expect(result.success).toBe(true)
+    expect(result.pipelines[0].latestRun.status).toBe('succeeded')
+  })
+
   it('devops:listPipelines retourne une erreur quand l API echoue', async () => {
     mockFetch.mockResolvedValueOnce(createFetchResponse('Server Error', { ok: false, status: 500 }))
 
@@ -340,7 +405,7 @@ describe('DevOps IPC Handlers', () => {
     expect(result.runs[1].sourceVersion).toBe('cafebabe')
   })
 
-  it('devops:getPipelineRuns utilise le count par defaut de 10', async () => {
+  it('devops:getPipelineRuns utilise le count par defaut de 20 et queryOrder queueTimeDescending', async () => {
     mockFetch.mockResolvedValueOnce(createFetchResponse({ value: [] }))
 
     const connection = createTestConnection()
@@ -350,7 +415,8 @@ describe('DevOps IPC Handlers', () => {
     })
 
     const callUrl = mockFetch.mock.calls[0][0] as string
-    expect(callUrl).toContain('$top=10')
+    expect(callUrl).toContain('$top=20')
+    expect(callUrl).toContain('queryOrder=queueTimeDescending')
   })
 
   it('devops:getPipelineRuns retourne une erreur quand l API echoue', async () => {

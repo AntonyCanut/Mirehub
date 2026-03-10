@@ -154,7 +154,7 @@ interface AzureApproval {
 function mapPipelineStatus(status: string, result: string): PipelineStatus {
   if (status === 'inProgress' || status === 'cancelling') return 'running'
   if (status === 'notStarted' || status === 'postponed') return 'notStarted'
-  if (result === 'succeeded') return 'succeeded'
+  if (result === 'succeeded' || result === 'partiallySucceeded') return 'succeeded'
   if (result === 'failed') return 'failed'
   if (result === 'canceled') return 'canceled'
   return 'unknown'
@@ -167,6 +167,7 @@ interface AzureBuildDef {
   revision: number
   _links?: { web?: { href?: string } }
   latestBuild?: AzureBuildRun
+  latestCompletedBuild?: AzureBuildRun
 }
 
 interface AzureBuildRun {
@@ -208,7 +209,7 @@ function mapTimelineStatus(state: string, result: string | null): PipelineStatus
   if (state === 'inProgress') return 'running'
   if (state === 'pending') return 'notStarted'
   if (state === 'completed' || result) {
-    if (result === 'succeeded') return 'succeeded'
+    if (result === 'succeeded' || result === 'partiallySucceeded') return 'succeeded'
     if (result === 'failed') return 'failed'
     if (result === 'canceled' || result === 'cancelled') return 'canceled'
     if (result === 'skipped') return 'canceled'
@@ -401,14 +402,17 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/definitions?api-version=7.1&includeLatestBuilds=true`
         const result = await azureDevOpsRequest<{ value: AzureBuildDef[] }>(connection.auth, url)
 
-        const pipelines: PipelineDefinition[] = result.value.map((def) => ({
-          id: def.id,
-          name: def.name,
-          folder: def.path || '\\',
-          revision: def.revision,
-          url: def._links?.web?.href ?? '',
-          latestRun: def.latestBuild ? mapBuildRun(def.latestBuild) : null,
-        }))
+        const pipelines: PipelineDefinition[] = result.value.map((def) => {
+          const latestBuild = def.latestBuild ?? def.latestCompletedBuild ?? null
+          return {
+            id: def.id,
+            name: def.name,
+            folder: def.path || '\\',
+            revision: def.revision,
+            url: def._links?.web?.href ?? '',
+            latestRun: latestBuild ? mapBuildRun(latestBuild) : null,
+          }
+        })
 
         return { success: true, pipelines }
       } catch (err) {
@@ -422,8 +426,8 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.DEVOPS_GET_PIPELINE_RUNS,
     async (_event, { connection, pipelineId, count }: { connection: DevOpsConnection; pipelineId: number; count?: number }) => {
       try {
-        const top = count || 10
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1&definitions=${pipelineId}&$top=${top}`
+        const top = count || 20
+        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1&definitions=${pipelineId}&$top=${top}&queryOrder=queueTimeDescending`
         const result = await azureDevOpsRequest<{ value: AzureBuildRun[] }>(connection.auth, url)
 
         const runs: PipelineRun[] = result.value.map(mapBuildRun)
