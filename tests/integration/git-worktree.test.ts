@@ -186,7 +186,7 @@ describe('Git Worktree IPC Handlers', () => {
       expect(content.hooks).toBeDefined()
     })
 
-    it('adds .kanbai-worktrees/ to .gitignore', async () => {
+    it('adds .kanbai-worktrees/ and .kanbai-session.lock to .gitignore', async () => {
       const worktreePath = path.join(repoDir, '.kanbai-worktrees', 'test-task-6')
 
       await mockIpcMain._invoke('git:worktreeAdd', {
@@ -197,6 +197,7 @@ describe('Git Worktree IPC Handlers', () => {
 
       const gitignore = fs.readFileSync(path.join(repoDir, '.gitignore'), 'utf-8')
       expect(gitignore).toContain('.kanbai-worktrees/')
+      expect(gitignore).toContain('.kanbai-session.lock')
     })
   })
 
