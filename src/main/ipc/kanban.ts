@@ -113,7 +113,7 @@ function ensureKanbanHook(projectPath: string): void {
   const hookScript = `#!/bin/bash
 # Kanbai - Kanban task completion hook (auto-generated)
 # Checks the kanban ticket status and writes the appropriate activity status.
-# DONE/FAILED → auto-commit uncommitted worktree changes, then activity signal
+# DONE/FAILED → auto-commit uncommitted worktree changes, then merge if enabled
 # PENDING + CTO → auto-approve: revert to TODO (unblock CTO cycle)
 # PENDING + regular → activity "waiting" (double bell in Electron)
 # WORKING → block Claude from stopping and remind ticket update
@@ -136,21 +136,69 @@ auto_commit_worktree() {
   git commit -m "chore(kanban): auto-commit \${ticket_label} worktree changes" 2>/dev/null
 }
 
-# Read ticket status and isCtoTicket flag
-read -r TICKET_STATUS IS_CTO <<< $(node -e "
+# Merge worktree branch into main and clean up
+# Arguments: $1=worktreePath $2=worktreeBranch $3=repoPath
+merge_and_cleanup_worktree() {
+  local wt_path="$1" wt_branch="$2" repo_path="$3"
+  [ -z "$wt_path" ] || [ -z "$wt_branch" ] || [ -z "$repo_path" ] && return 0
+
+  # Merge the worktree branch into the main branch
+  local main_branch
+  main_branch=$(git -C "$repo_path" rev-parse --abbrev-ref HEAD 2>/dev/null) || return 0
+  git -C "$repo_path" merge "$wt_branch" -m "Merge branch '$wt_branch'" 2>/dev/null || return 0
+
+  # Remove the worktree
+  git -C "$repo_path" worktree remove --force "$wt_path" 2>/dev/null || {
+    rm -rf "$wt_path" 2>/dev/null
+    git -C "$repo_path" worktree prune 2>/dev/null
+  }
+
+  # Delete the branch (best-effort)
+  git -C "$repo_path" branch -d "$wt_branch" 2>/dev/null
+}
+
+# Read ticket status, isCtoTicket flag, worktree info, and autoMerge config
+read -r TICKET_STATUS IS_CTO WORKTREE_PATH WORKTREE_BRANCH AUTO_MERGE <<< $(node -e "
 const fs = require('fs');
+const path = require('path');
+const os = require('os');
 const file = process.env.KANBAI_KANBAN_FILE;
 const taskId = process.env.KANBAI_KANBAN_TASK_ID;
+const wsId = process.env.KANBAI_WORKSPACE_ID || '';
 try {
   const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
   const task = tasks.find(t => t.id === taskId);
-  if (task) process.stdout.write(task.status + ' ' + (task.isCtoTicket ? 'true' : 'false'));
+  if (task) {
+    const isCto = task.isCtoTicket ? 'true' : 'false';
+    const wtPath = task.worktreePath || '';
+    const wtBranch = task.worktreeBranch || '';
+    let autoMerge = 'false';
+    if (wsId) {
+      try {
+        const cfgPath = path.join(os.homedir(), '.kanbai', 'kanban', wsId + '-config.json');
+        if (fs.existsSync(cfgPath)) {
+          const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf-8'));
+          if (cfg.autoMergeWorktrees) autoMerge = 'true';
+        }
+      } catch(e2) { /* ignore */ }
+    }
+    process.stdout.write(task.status + ' ' + isCto + ' ' + wtPath + ' ' + wtBranch + ' ' + autoMerge);
+  }
 } catch(e) { /* ignore */ }
 ")
+
+# Derive repo path from worktree path (strip .kanbai-worktrees/<id>)
+REPO_PATH=""
+if [ -n "$WORKTREE_PATH" ]; then
+  REPO_PATH=$(echo "$WORKTREE_PATH" | sed 's|/\\.kanbai-worktrees/[^/]*$||')
+fi
 
 case "$TICKET_STATUS" in
   DONE)
     auto_commit_worktree
+    if [ "$AUTO_MERGE" = "true" ] && [ -n "$WORKTREE_PATH" ] && [ -n "$WORKTREE_BRANCH" ]; then
+      merge_and_cleanup_worktree "$WORKTREE_PATH" "$WORKTREE_BRANCH" "$REPO_PATH"
+    fi
     ;;
   FAILED)
     auto_commit_worktree
