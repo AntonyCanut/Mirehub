@@ -186,7 +186,7 @@ describe('Git Worktree IPC Handlers', () => {
       expect(content.hooks).toBeDefined()
     })
 
-    it('adds .kanbai-worktrees/ and .kanbai-session.lock to .gitignore', async () => {
+    it('adds .kanbai-worktrees/ to .gitignore', async () => {
       const worktreePath = path.join(repoDir, '.kanbai-worktrees', 'test-task-6')
 
       await mockIpcMain._invoke('git:worktreeAdd', {
@@ -197,7 +197,27 @@ describe('Git Worktree IPC Handlers', () => {
 
       const gitignore = fs.readFileSync(path.join(repoDir, '.gitignore'), 'utf-8')
       expect(gitignore).toContain('.kanbai-worktrees/')
-      expect(gitignore).toContain('.kanbai-session.lock')
+    })
+
+    it('excludes .kanbai-session.lock via worktree info/exclude', async () => {
+      const worktreePath = path.join(repoDir, '.kanbai-worktrees', 'test-task-7')
+
+      await mockIpcMain._invoke('git:worktreeAdd', {
+        cwd: repoDir,
+        worktreePath,
+        branch: 'kanban/t-7',
+      })
+
+      // Read the worktree's .git file to find the gitdir
+      const dotGit = fs.readFileSync(path.join(worktreePath, '.git'), 'utf-8').trim()
+      const gitDirMatch = dotGit.match(/^gitdir:\s*(.+)$/)
+      expect(gitDirMatch?.[1]).toBeDefined()
+      const gitDir = path.isAbsolute(gitDirMatch![1]!)
+        ? gitDirMatch![1]!
+        : path.resolve(worktreePath, gitDirMatch![1]!)
+      const excludePath = path.join(gitDir, 'info', 'exclude')
+      const excludeContent = fs.readFileSync(excludePath, 'utf-8')
+      expect(excludeContent).toContain('.kanbai-session.lock')
     })
   })
 
