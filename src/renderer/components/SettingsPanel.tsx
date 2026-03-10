@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { AppSettings, SshKeyInfo, SshKeyType, Namespace } from '../../shared/types'
+import type { AppSettings, SshKeyInfo, SshKeyType, Namespace, KanbanConfig } from '../../shared/types'
 import { useI18n } from '../lib/i18n'
 import { useAppUpdateStore } from '../lib/stores/appUpdateStore'
+import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useUpdateStore } from '../lib/stores/updateStore'
 
 const FONT_FAMILIES = [
@@ -53,12 +54,13 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoCreateAiMemoryRefactorTickets: true,
 }
 
-type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'ai' | 'tools' | 'notifications' | 'about'
+type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'ai' | 'kanban' | 'tools' | 'notifications' | 'about'
 
 const SECTIONS: { id: SettingsSection; icon: string }[] = [
   { id: 'general', icon: '⚙' },
   { id: 'appearance', icon: '🎨' },
   { id: 'terminal', icon: '▸' },
+  { id: 'kanban', icon: '▦' },
   { id: 'git', icon: '⎇' },
   { id: 'ssh', icon: '🔑' },
   { id: 'ai', icon: '✦' },
@@ -96,6 +98,16 @@ export function SettingsPanel() {
   const [loading, setLoading] = useState(true)
   const [appVersion, setAppVersion] = useState<{ version: string; name: string; isElevated?: boolean } | null>(null)
   const [activeSection, setActiveSection] = useState<SettingsSection>('general')
+
+  // Workspace store for kanban config
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
+  const workspaces = useWorkspaceStore((s) => s.workspaces)
+  const activeWorkspaceName = workspaces.find((w) => w.id === activeWorkspaceId)?.name ?? ''
+
+  // Kanban config state
+  const [kanbanDefaultConfig, setKanbanDefaultConfig] = useState<KanbanConfig | null>(null)
+  const [kanbanProjectConfig, setKanbanProjectConfig] = useState<KanbanConfig | null>(null)
+  const [kanbanProjectLoading, setKanbanProjectLoading] = useState(false)
 
   // Git config state
   const [namespaces, setNamespaces] = useState<Namespace[]>([])
@@ -342,6 +354,19 @@ export function SettingsPanel() {
   }, [])
 
   useEffect(() => {
+    if (activeSection !== 'kanban') return
+    window.kanbai.kanban.getDefaultConfig().then(setKanbanDefaultConfig).catch(() => {})
+    if (activeWorkspaceId) {
+      setKanbanProjectLoading(true)
+      window.kanbai.kanban.getConfig(activeWorkspaceId).then(setKanbanProjectConfig).catch(() => {
+        setKanbanProjectConfig(null)
+      }).finally(() => {
+        setKanbanProjectLoading(false)
+      })
+    }
+  }, [activeSection, activeWorkspaceId])
+
+  useEffect(() => {
     if (activeSection !== 'tools') return
     if (toolUpdates.length > 0) return
     checkToolUpdates()
@@ -374,6 +399,7 @@ export function SettingsPanel() {
       ssh: t('settings.ssh'),
       claude: t('settings.claude'),
       ai: t('settings.ai') ?? t('settings.claude'),
+      kanban: t('settings.kanban'),
       tools: t('settings.tools'),
       notifications: t('settings.notifications'),
       about: t('settings.about'),
@@ -824,6 +850,145 @@ export function SettingsPanel() {
             </div>
           )}
 
+          {/* Kanban */}
+          {activeSection === 'kanban' && (
+            <div className="settings-section">
+              {/* Default config (editable) */}
+              <h4 className="settings-section-subtitle">{t('settings.kanbanDefaultConfig')}</h4>
+              <p className="settings-section-hint">{t('settings.kanbanDefaultConfigHint')}</p>
+              {kanbanDefaultConfig && (
+                <div className="settings-card">
+                  {([
+                    { key: 'autoCloseCompletedTerminals' as const, label: t('kanban.autoCloseCompletedTerminals'), hint: t('kanban.autoCloseCompletedTerminalsHint') },
+                    { key: 'autoCloseCtoTerminals' as const, label: t('kanban.autoCloseCtoTerminals'), hint: t('kanban.autoCloseCtoTerminalsHint') },
+                    { key: 'autoCreateAiMemoryRefactorTickets' as const, label: t('kanban.autoCreateAiMemoryRefactorTickets'), hint: t('kanban.autoCreateAiMemoryRefactorTicketsHint') },
+                    { key: 'autoPrequalifyTickets' as const, label: t('kanban.autoPrequalifyTickets'), hint: t('kanban.autoPrequalifyTicketsHint') },
+                    { key: 'autoPrioritizeBugs' as const, label: t('kanban.autoPrioritizeBugs'), hint: t('kanban.autoPrioritizeBugsHint') },
+                    { key: 'useWorktrees' as const, label: t('kanban.useWorktrees'), hint: t('kanban.useWorktreesHint') },
+                  ]).map(({ key, label, hint }) => (
+                    <div key={key} className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{label}</label>
+                        <span className="settings-hint">{hint}</span>
+                      </div>
+                      <button
+                        className={`settings-toggle${kanbanDefaultConfig[key] ? ' settings-toggle--active' : ''}`}
+                        onClick={async () => {
+                          const updated = await window.kanbai.kanban.setDefaultConfig({ [key]: !kanbanDefaultConfig[key] })
+                          setKanbanDefaultConfig(updated)
+                        }}
+                      >
+                        <span className="settings-toggle-knob" />
+                      </button>
+                    </div>
+                  ))}
+                  {kanbanDefaultConfig.useWorktrees && (
+                    <div className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{t('kanban.maxConcurrentWorktrees')}</label>
+                        <span className="settings-hint">{t('kanban.maxConcurrentWorktreesHint')}</span>
+                      </div>
+                      <input
+                        type="number"
+                        className="kanban-settings-number-input"
+                        min={1}
+                        max={10}
+                        value={kanbanDefaultConfig.maxConcurrentWorktrees}
+                        onChange={async (e) => {
+                          const val = Math.max(1, Math.min(10, parseInt(e.target.value, 10) || 1))
+                          const updated = await window.kanbai.kanban.setDefaultConfig({ maxConcurrentWorktrees: val })
+                          setKanbanDefaultConfig(updated)
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Workspace-specific config (editable) */}
+              <h4 className="settings-section-subtitle" style={{ marginTop: 24 }}>
+                {t('settings.kanbanWorkspaceConfig')}
+                {activeWorkspaceName && <span className="settings-section-subtitle-badge">{activeWorkspaceName}</span>}
+              </h4>
+              <p className="settings-section-hint">{t('settings.kanbanWorkspaceConfigHint')}</p>
+              {!activeWorkspaceId && (
+                <div className="settings-card">
+                  <div className="settings-row">
+                    <span className="settings-hint">{t('settings.kanbanNoWorkspace')}</span>
+                  </div>
+                </div>
+              )}
+              {activeWorkspaceId && kanbanProjectLoading && (
+                <div className="settings-card">
+                  <div className="settings-row">
+                    <span className="settings-hint">{t('common.loading')}</span>
+                  </div>
+                </div>
+              )}
+              {activeWorkspaceId && kanbanProjectConfig && !kanbanProjectLoading && (
+                <div className="settings-card">
+                  {([
+                    { key: 'autoCloseCompletedTerminals' as const, label: t('kanban.autoCloseCompletedTerminals'), hint: t('kanban.autoCloseCompletedTerminalsHint') },
+                    { key: 'autoCloseCtoTerminals' as const, label: t('kanban.autoCloseCtoTerminals'), hint: t('kanban.autoCloseCtoTerminalsHint') },
+                    { key: 'autoCreateAiMemoryRefactorTickets' as const, label: t('kanban.autoCreateAiMemoryRefactorTickets'), hint: t('kanban.autoCreateAiMemoryRefactorTicketsHint') },
+                    { key: 'autoPrequalifyTickets' as const, label: t('kanban.autoPrequalifyTickets'), hint: t('kanban.autoPrequalifyTicketsHint') },
+                    { key: 'autoPrioritizeBugs' as const, label: t('kanban.autoPrioritizeBugs'), hint: t('kanban.autoPrioritizeBugsHint') },
+                    { key: 'useWorktrees' as const, label: t('kanban.useWorktrees'), hint: t('kanban.useWorktreesHint') },
+                  ]).map(({ key, label, hint }) => (
+                    <div key={key} className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{label}</label>
+                        <span className="settings-hint">{hint}</span>
+                      </div>
+                      <button
+                        className={`settings-toggle${kanbanProjectConfig[key] ? ' settings-toggle--active' : ''}`}
+                        onClick={async () => {
+                          const updated = await window.kanbai.kanban.setConfig(activeWorkspaceId, { [key]: !kanbanProjectConfig[key] })
+                          setKanbanProjectConfig(updated)
+                        }}
+                      >
+                        <span className="settings-toggle-knob" />
+                      </button>
+                    </div>
+                  ))}
+                  {kanbanProjectConfig.useWorktrees && (
+                    <div className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{t('kanban.maxConcurrentWorktrees')}</label>
+                        <span className="settings-hint">{t('kanban.maxConcurrentWorktreesHint')}</span>
+                      </div>
+                      <input
+                        type="number"
+                        className="kanban-settings-number-input"
+                        min={1}
+                        max={10}
+                        value={kanbanProjectConfig.maxConcurrentWorktrees}
+                        onChange={async (e) => {
+                          const val = Math.max(1, Math.min(10, parseInt(e.target.value, 10) || 1))
+                          const updated = await window.kanbai.kanban.setConfig(activeWorkspaceId, { maxConcurrentWorktrees: val })
+                          setKanbanProjectConfig(updated)
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="settings-row" style={{ justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+                    <button
+                      className="settings-btn"
+                      onClick={async () => {
+                        if (!confirm(t('settings.kanbanResetConfirm'))) return
+                        const defaults = await window.kanbai.kanban.getDefaultConfig()
+                        const updated = await window.kanbai.kanban.setConfig(activeWorkspaceId, defaults)
+                        setKanbanProjectConfig(updated)
+                      }}
+                    >
+                      {t('settings.kanbanResetToDefaults')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* AI */}
           {activeSection === 'ai' && (
             <div className="settings-section">
@@ -905,6 +1070,145 @@ export function SettingsPanel() {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Kanban */}
+          {activeSection === 'kanban' && (
+            <div className="settings-section">
+              {/* Default config */}
+              <h4 className="settings-section-subtitle">{t('settings.kanbanDefaultConfig')}</h4>
+              <p className="settings-section-hint">{t('settings.kanbanDefaultConfigHint')}</p>
+              {kanbanDefaultConfig && (
+                <div className="settings-card">
+                  {([
+                    { key: 'autoCloseCompletedTerminals' as const, label: t('kanban.autoCloseCompletedTerminals'), hint: t('kanban.autoCloseCompletedTerminalsHint') },
+                    { key: 'autoCloseCtoTerminals' as const, label: t('kanban.autoCloseCtoTerminals'), hint: t('kanban.autoCloseCtoTerminalsHint') },
+                    { key: 'autoCreateAiMemoryRefactorTickets' as const, label: t('kanban.autoCreateAiMemoryRefactorTickets'), hint: t('kanban.autoCreateAiMemoryRefactorTicketsHint') },
+                    { key: 'autoPrequalifyTickets' as const, label: t('kanban.autoPrequalifyTickets'), hint: t('kanban.autoPrequalifyTicketsHint') },
+                    { key: 'autoPrioritizeBugs' as const, label: t('kanban.autoPrioritizeBugs'), hint: t('kanban.autoPrioritizeBugsHint') },
+                    { key: 'useWorktrees' as const, label: t('kanban.useWorktrees'), hint: t('kanban.useWorktreesHint') },
+                  ]).map(({ key, label, hint }) => (
+                    <div key={key} className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{label}</label>
+                        <span className="settings-hint">{hint}</span>
+                      </div>
+                      <button
+                        className={`settings-toggle${kanbanDefaultConfig[key] ? ' settings-toggle--active' : ''}`}
+                        onClick={async () => {
+                          const updated = await window.kanbai.kanban.setDefaultConfig({ [key]: !kanbanDefaultConfig[key] })
+                          setKanbanDefaultConfig(updated)
+                        }}
+                      >
+                        <span className="settings-toggle-knob" />
+                      </button>
+                    </div>
+                  ))}
+                  {kanbanDefaultConfig.useWorktrees && (
+                    <div className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{t('kanban.maxConcurrentWorktrees')}</label>
+                        <span className="settings-hint">{t('kanban.maxConcurrentWorktreesHint')}</span>
+                      </div>
+                      <input
+                        type="number"
+                        className="kanban-settings-number-input"
+                        min={1}
+                        max={10}
+                        value={kanbanDefaultConfig.maxConcurrentWorktrees}
+                        onChange={async (e) => {
+                          const val = Math.max(1, Math.min(10, parseInt(e.target.value, 10) || 1))
+                          const updated = await window.kanbai.kanban.setDefaultConfig({ maxConcurrentWorktrees: val })
+                          setKanbanDefaultConfig(updated)
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Workspace-specific config */}
+              <h4 className="settings-section-subtitle" style={{ marginTop: 24 }}>
+                {t('settings.kanbanWorkspaceConfig')}
+                {activeWorkspaceName && <span className="settings-section-subtitle-badge">{activeWorkspaceName}</span>}
+              </h4>
+              <p className="settings-section-hint">{t('settings.kanbanWorkspaceConfigHint')}</p>
+              {!activeWorkspaceId && (
+                <div className="settings-card">
+                  <div className="settings-row">
+                    <span className="settings-hint">{t('settings.kanbanNoWorkspace')}</span>
+                  </div>
+                </div>
+              )}
+              {activeWorkspaceId && kanbanProjectLoading && (
+                <div className="settings-card">
+                  <div className="settings-row">
+                    <span className="settings-hint">{t('common.loading')}</span>
+                  </div>
+                </div>
+              )}
+              {activeWorkspaceId && kanbanProjectConfig && !kanbanProjectLoading && (
+                <div className="settings-card">
+                  {([
+                    { key: 'autoCloseCompletedTerminals' as const, label: t('kanban.autoCloseCompletedTerminals'), hint: t('kanban.autoCloseCompletedTerminalsHint') },
+                    { key: 'autoCloseCtoTerminals' as const, label: t('kanban.autoCloseCtoTerminals'), hint: t('kanban.autoCloseCtoTerminalsHint') },
+                    { key: 'autoCreateAiMemoryRefactorTickets' as const, label: t('kanban.autoCreateAiMemoryRefactorTickets'), hint: t('kanban.autoCreateAiMemoryRefactorTicketsHint') },
+                    { key: 'autoPrequalifyTickets' as const, label: t('kanban.autoPrequalifyTickets'), hint: t('kanban.autoPrequalifyTicketsHint') },
+                    { key: 'autoPrioritizeBugs' as const, label: t('kanban.autoPrioritizeBugs'), hint: t('kanban.autoPrioritizeBugsHint') },
+                    { key: 'useWorktrees' as const, label: t('kanban.useWorktrees'), hint: t('kanban.useWorktreesHint') },
+                  ]).map(({ key, label, hint }) => (
+                    <div key={key} className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{label}</label>
+                        <span className="settings-hint">{hint}</span>
+                      </div>
+                      <button
+                        className={`settings-toggle${kanbanProjectConfig[key] ? ' settings-toggle--active' : ''}`}
+                        onClick={async () => {
+                          const updated = await window.kanbai.kanban.setConfig(activeWorkspaceId, { [key]: !kanbanProjectConfig[key] })
+                          setKanbanProjectConfig(updated)
+                        }}
+                      >
+                        <span className="settings-toggle-knob" />
+                      </button>
+                    </div>
+                  ))}
+                  {kanbanProjectConfig.useWorktrees && (
+                    <div className="settings-row">
+                      <div className="settings-row-info">
+                        <label className="settings-label">{t('kanban.maxConcurrentWorktrees')}</label>
+                        <span className="settings-hint">{t('kanban.maxConcurrentWorktreesHint')}</span>
+                      </div>
+                      <input
+                        type="number"
+                        className="kanban-settings-number-input"
+                        min={1}
+                        max={10}
+                        value={kanbanProjectConfig.maxConcurrentWorktrees}
+                        onChange={async (e) => {
+                          const val = Math.max(1, Math.min(10, parseInt(e.target.value, 10) || 1))
+                          const updated = await window.kanbai.kanban.setConfig(activeWorkspaceId, { maxConcurrentWorktrees: val })
+                          setKanbanProjectConfig(updated)
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="settings-row" style={{ justifyContent: 'flex-end', borderTop: '1px solid var(--border-color)', paddingTop: 12 }}>
+                    <button
+                      className="settings-btn"
+                      onClick={async () => {
+                        if (!confirm(t('settings.kanbanResetConfirm'))) return
+                        const defaults = await window.kanbai.kanban.getDefaultConfig()
+                        const updated = await window.kanbai.kanban.setConfig(activeWorkspaceId, defaults)
+                        setKanbanProjectConfig(updated)
+                      }}
+                    >
+                      {t('settings.kanbanResetToDefaults')}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -347,6 +347,10 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_GET_CONFIG, { workspaceId }),
     setConfig: (workspaceId: string, config: Record<string, boolean | number>) =>
       ipcRenderer.invoke(IPC_CHANNELS.KANBAN_SET_CONFIG, { workspaceId, config }),
+    getDefaultConfig: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_GET_DEFAULT_CONFIG),
+    setDefaultConfig: (config: Record<string, boolean | number>) =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_SET_DEFAULT_CONFIG, { config }),
     onFileChanged: (callback: (data: { workspaceId: string }) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, payload: { workspaceId: string }) =>
         callback(payload)

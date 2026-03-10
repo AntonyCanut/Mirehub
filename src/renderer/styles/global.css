@@ -6046,6 +6046,31 @@ body {
   max-width: 600px;
 }
 
+.settings-section-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-section-subtitle-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.settings-section-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 4px 0;
+}
+
 .settings-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
