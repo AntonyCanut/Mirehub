@@ -2,23 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import type { FileEntry } from '../../shared/types'
 import { useViewStore } from '../lib/stores/viewStore'
 import { ContextMenu, ContextMenuItem } from './ContextMenu'
-
-function FolderIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-    </svg>
-  )
-}
-
-function FileIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#565C66" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-    </svg>
-  )
-}
+import { FolderIcon, getFileIcon } from './file-icons'
 
 interface SidebarFileTreeProps {
   projectPath: string
@@ -230,7 +214,7 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
           <span className="sidebar-ft-chevron-spacer" />
         )}
         <span className="sidebar-ft-icon">
-          {entry.isDirectory ? <FolderIcon /> : <FileIcon />}
+          {entry.isDirectory ? <FolderIcon /> : getFileIcon(entry.name)}
         </span>
         {isRenaming ? (
           <input
