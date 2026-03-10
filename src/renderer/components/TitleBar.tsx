@@ -3,6 +3,7 @@ import { NotificationCenter } from './NotificationCenter'
 import { UpdateCenter } from './UpdateCenter'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useViewStore, type ViewMode } from '../lib/stores/viewStore'
+import { useShallow } from 'zustand/react/shallow'
 import { useDevOpsStore, selectGlobalPipelineStatus } from '../lib/stores/devopsStore'
 import { useI18n } from '../lib/i18n'
 
@@ -142,7 +143,7 @@ function TabDropdown({
 }
 
 function useDevOpsStatusDotClass(): string | undefined {
-  const globalStatus = useDevOpsStore(selectGlobalPipelineStatus)
+  const globalStatus = useDevOpsStore(useShallow(selectGlobalPipelineStatus))
   if (!globalStatus) return undefined
   return `titlebar-status-dot--${globalStatus.status}`
 }

@@ -11,7 +11,6 @@ import {
   PipelineStage,
   PipelineJob,
   PipelineStatus,
-  StageStatus,
   PipelineApproval,
   ApprovalStatus,
 } from '../../shared/types'
@@ -112,18 +111,6 @@ async function azureDevOpsPatch<T>(
   }
 
   return response.json() as Promise<T>
-}
-
-function mapStageStatus(state: string, result: string): StageStatus {
-  if (state === 'inProgress') return 'running'
-  if (state === 'pending') return 'pending'
-  if (state === 'completed') {
-    if (result === 'succeeded') return 'succeeded'
-    if (result === 'failed') return 'failed'
-    if (result === 'canceled') return 'canceled'
-    return 'succeeded'
-  }
-  return 'notStarted'
 }
 
 function mapApprovalStatus(status: string): ApprovalStatus {

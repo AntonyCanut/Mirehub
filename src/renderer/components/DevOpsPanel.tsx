@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useState, useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { useDevOpsStore, selectGlobalPipelineStatus } from '../lib/stores/devopsStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useI18n } from '../lib/i18n'
@@ -467,14 +468,12 @@ function PipelineRunsDetail({
   loading,
   pipelineName,
   selectedRunId,
-  onSelectRun,
   activeConnection,
 }: {
   runs: PipelineRun[]
   loading: boolean
   pipelineName: string
   selectedRunId: number | null
-  onSelectRun: (runId: number) => void
   activeConnection: DevOpsConnection | null
 }) {
   const { t } = useI18n()
@@ -732,13 +731,6 @@ export function DevOpsPanel() {
     loadRunStages(activeConnection, selectedRunId)
   }, [activeConnection, selectedRunId, loadRunStages])
 
-  const handleSelectRun = useCallback(
-    (runId: number) => {
-      selectRun(runId)
-    },
-    [selectRun],
-  )
-
   const handleBackToRuns = useCallback(() => {
     selectRun(null)
   }, [selectRun])
@@ -802,7 +794,7 @@ export function DevOpsPanel() {
     [],
   )
 
-  const globalStatus = useDevOpsStore(selectGlobalPipelineStatus)
+  const globalStatus = useDevOpsStore(useShallow(selectGlobalPipelineStatus))
 
   const handleRefresh = useCallback(() => {
     if (!activeConnection) return
@@ -933,7 +925,6 @@ export function DevOpsPanel() {
                   loading={runsLoading}
                   pipelineName={selectedPipeline.name}
                   selectedRunId={selectedRunId}
-                  onSelectRun={handleSelectRun}
                   activeConnection={activeConnection}
                 />
               )
