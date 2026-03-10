@@ -29,12 +29,37 @@ function getKanbanConfigPath(workspaceId: string): string {
   return path.join(kanbanDir, `${workspaceId}-config.json`)
 }
 
-function readKanbanConfig(workspaceId: string): KanbanConfig {
-  const configPath = getKanbanConfigPath(workspaceId)
+function getDefaultKanbanConfigPath(): string {
+  return path.join(os.homedir(), '.kanbai', 'kanban', 'default-config.json')
+}
+
+function readDefaultKanbanConfig(): KanbanConfig {
+  const configPath = getDefaultKanbanConfigPath()
   try {
     if (fs.existsSync(configPath)) {
       const raw = fs.readFileSync(configPath, 'utf-8')
       return { ...DEFAULT_KANBAN_CONFIG, ...JSON.parse(raw) }
+    }
+  } catch { /* fallback to defaults */ }
+  return { ...DEFAULT_KANBAN_CONFIG }
+}
+
+function writeDefaultKanbanConfig(config: KanbanConfig): void {
+  const configPath = getDefaultKanbanConfigPath()
+  const dir = path.dirname(configPath)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8')
+}
+
+function readKanbanConfig(workspaceId: string): KanbanConfig {
+  const defaults = readDefaultKanbanConfig()
+  const configPath = getKanbanConfigPath(workspaceId)
+  try {
+    if (fs.existsSync(configPath)) {
+      const raw = fs.readFileSync(configPath, 'utf-8')
+      return { ...defaults, ...JSON.parse(raw) }
     }
   } catch { /* fallback to defaults */ }
 
@@ -46,20 +71,20 @@ function readKanbanConfig(workspaceId: string): KanbanConfig {
       const s = appData.settings
       if (s) {
         return {
-          autoCloseCompletedTerminals: s.autoCloseCompletedTerminals ?? DEFAULT_KANBAN_CONFIG.autoCloseCompletedTerminals,
-          autoCloseCtoTerminals: s.autoCloseCtoTerminals ?? DEFAULT_KANBAN_CONFIG.autoCloseCtoTerminals,
-          autoCreateAiMemoryRefactorTickets: s.autoCreateAiMemoryRefactorTickets ?? DEFAULT_KANBAN_CONFIG.autoCreateAiMemoryRefactorTickets,
-          autoPrequalifyTickets: s.kanbanSettings?.autoPrequalifyTickets ?? DEFAULT_KANBAN_CONFIG.autoPrequalifyTickets,
-          autoPrioritizeBugs: s.kanbanSettings?.autoPrioritizeBugs ?? DEFAULT_KANBAN_CONFIG.autoPrioritizeBugs,
-          useWorktrees: DEFAULT_KANBAN_CONFIG.useWorktrees,
-          maxConcurrentWorktrees: DEFAULT_KANBAN_CONFIG.maxConcurrentWorktrees,
-          paused: DEFAULT_KANBAN_CONFIG.paused,
+          autoCloseCompletedTerminals: s.autoCloseCompletedTerminals ?? defaults.autoCloseCompletedTerminals,
+          autoCloseCtoTerminals: s.autoCloseCtoTerminals ?? defaults.autoCloseCtoTerminals,
+          autoCreateAiMemoryRefactorTickets: s.autoCreateAiMemoryRefactorTickets ?? defaults.autoCreateAiMemoryRefactorTickets,
+          autoPrequalifyTickets: s.kanbanSettings?.autoPrequalifyTickets ?? defaults.autoPrequalifyTickets,
+          autoPrioritizeBugs: s.kanbanSettings?.autoPrioritizeBugs ?? defaults.autoPrioritizeBugs,
+          useWorktrees: defaults.useWorktrees,
+          maxConcurrentWorktrees: defaults.maxConcurrentWorktrees,
+          paused: defaults.paused,
         }
       }
     }
   } catch { /* fallback to defaults */ }
 
-  return { ...DEFAULT_KANBAN_CONFIG }
+  return { ...defaults }
 }
 
 function writeKanbanConfig(workspaceId: string, config: KanbanConfig): void {
@@ -829,6 +854,23 @@ Description: ${description || '(aucune)'}`
       const current = readKanbanConfig(workspaceId)
       const updated = { ...current, ...config }
       writeKanbanConfig(workspaceId, updated)
+      return updated
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_GET_DEFAULT_CONFIG,
+    async () => {
+      return readDefaultKanbanConfig()
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_SET_DEFAULT_CONFIG,
+    async (_event, { config }: { config: Partial<KanbanConfig> }) => {
+      const current = readDefaultKanbanConfig()
+      const updated = { ...current, ...config }
+      writeDefaultKanbanConfig(updated)
       return updated
     },
   )

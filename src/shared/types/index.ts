@@ -983,6 +983,8 @@ export const IPC_CHANNELS = {
   KANBAN_PREQUALIFY: 'kanban:prequalify',
   KANBAN_GET_CONFIG: 'kanban:getConfig',
   KANBAN_SET_CONFIG: 'kanban:setConfig',
+  KANBAN_GET_DEFAULT_CONFIG: 'kanban:getDefaultConfig',
+  KANBAN_SET_DEFAULT_CONFIG: 'kanban:setDefaultConfig',
 
   // Updates
   UPDATE_CHECK: 'update:check',
