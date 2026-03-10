@@ -152,8 +152,8 @@ interface AzureApproval {
 }
 
 function mapPipelineStatus(status: string, result: string): PipelineStatus {
-  if (status === 'inProgress') return 'running'
-  if (status === 'notStarted') return 'notStarted'
+  if (status === 'inProgress' || status === 'cancelling') return 'running'
+  if (status === 'notStarted' || status === 'postponed') return 'notStarted'
   if (result === 'succeeded') return 'succeeded'
   if (result === 'failed') return 'failed'
   if (result === 'canceled') return 'canceled'
@@ -207,10 +207,12 @@ interface AzureTimelineRecord {
 function mapTimelineStatus(state: string, result: string | null): PipelineStatus {
   if (state === 'inProgress') return 'running'
   if (state === 'pending') return 'notStarted'
-  if (result === 'succeeded') return 'succeeded'
-  if (result === 'failed') return 'failed'
-  if (result === 'canceled' || result === 'cancelled') return 'canceled'
-  if (result === 'skipped') return 'canceled'
+  if (state === 'completed' || result) {
+    if (result === 'succeeded') return 'succeeded'
+    if (result === 'failed') return 'failed'
+    if (result === 'canceled' || result === 'cancelled') return 'canceled'
+    if (result === 'skipped') return 'canceled'
+  }
   return 'unknown'
 }
 

@@ -130,8 +130,9 @@ function applySavedOrder(pipelines: PipelineDefinition[], savedOrder: number[] |
 
 function sortRunsByDate(runs: PipelineRun[]): PipelineRun[] {
   return [...runs].sort((a, b) => {
-    const timeA = a.startTime ? new Date(a.startTime).getTime() : 0
-    const timeB = b.startTime ? new Date(b.startTime).getTime() : 0
+    // Runs without startTime (notStarted/queued) go first — they are the most recent
+    const timeA = a.startTime ? new Date(a.startTime).getTime() : Infinity
+    const timeB = b.startTime ? new Date(b.startTime).getTime() : Infinity
     return timeB - timeA
   })
 }
