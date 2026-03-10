@@ -296,6 +296,11 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
 
     monitorTimer = setInterval(() => {
       loadPipelines(connection)
+      // Also refresh runs for the currently selected pipeline
+      const { selectedPipelineId, loadPipelineRuns } = get()
+      if (selectedPipelineId) {
+        loadPipelineRuns(connection, selectedPipelineId)
+      }
     }, MONITOR_INTERVAL_MS)
 
     set({ monitoringActive: true })
