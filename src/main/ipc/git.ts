@@ -643,6 +643,21 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
         }
         execGit(['worktree', 'add', worktreePath, '-b', validateRef(branch)], cwd)
 
+        // Propagate .claude/settings.local.json to the worktree so Claude Code
+        // hooks (Stop, PreToolUse, etc.) fire correctly in the worktree context.
+        // The worktree has its own .git file, so Claude treats it as a separate
+        // project root — untracked files like settings.local.json must be copied.
+        try {
+          const sourceSettings = path.join(cwd, '.claude', 'settings.local.json')
+          if (fs.existsSync(sourceSettings)) {
+            const destClaudeDir = path.join(worktreePath, '.claude')
+            if (!fs.existsSync(destClaudeDir)) {
+              fs.mkdirSync(destClaudeDir, { recursive: true })
+            }
+            fs.copyFileSync(sourceSettings, path.join(destClaudeDir, 'settings.local.json'))
+          }
+        } catch { /* hook propagation is best-effort */ }
+
         // Ensure .kanbai-worktrees/ is in .gitignore
         const gitignorePath = path.join(cwd, '.gitignore')
         const entry = '.kanbai-worktrees/'
@@ -725,41 +740,64 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
       },
     ) => {
       try {
+        const mainBranch = execGit(['rev-parse', '--abbrev-ref', 'HEAD'], repoPath).trim()
+        const worktreeExists = fs.existsSync(worktreePath)
+
         // Step 1: Finalize — auto-commit any uncommitted changes in the worktree
-        const status = execGit(['status', '--porcelain'], worktreePath).trim()
-        if (status) {
-          execGit(['add', '-A'], worktreePath)
-          const commitMessage = `chore(kanban): auto-commit ${ticketLabel} worktree changes`
-          execGit(['commit', '-m', commitMessage], worktreePath)
+        if (worktreeExists) {
+          try {
+            const status = execGit(['status', '--porcelain'], worktreePath).trim()
+            if (status) {
+              execGit(['add', '-A'], worktreePath)
+              const commitMessage = `chore(kanban): auto-commit ${ticketLabel} worktree changes`
+              execGit(['commit', '-m', commitMessage], worktreePath)
+            }
+          } catch {
+            // Auto-commit is best-effort — worktree may already be in a clean state
+          }
         }
 
-        // Step 2: Determine the main branch of the repo
-        const mainBranch = execGit(['rev-parse', '--abbrev-ref', 'HEAD'], repoPath).trim()
+        // Step 2: Check if branch exists before attempting merge
+        let branchExists = false
+        try {
+          execGit(['rev-parse', '--verify', validateRef(worktreeBranch)], repoPath)
+          branchExists = true
+        } catch {
+          // Branch doesn't exist — already merged and deleted by the shell hook
+        }
 
         // Step 3: Merge the worktree branch into the main branch
-        execGit(['merge', validateRef(worktreeBranch)], repoPath)
+        if (branchExists) {
+          execGit(['merge', validateRef(worktreeBranch)], repoPath)
+        }
 
         // Step 4: Remove the worktree
-        try {
-          execGit(['worktree', 'remove', '--force', worktreePath], repoPath)
-        } catch {
-          // If git worktree remove fails, try manual cleanup
-          fs.rmSync(worktreePath, { recursive: true, force: true })
-          execGit(['worktree', 'prune'], repoPath)
+        if (worktreeExists) {
+          try {
+            execGit(['worktree', 'remove', '--force', worktreePath], repoPath)
+          } catch {
+            // If git worktree remove fails, try manual cleanup
+            fs.rmSync(worktreePath, { recursive: true, force: true })
+            execGit(['worktree', 'prune'], repoPath)
+          }
         }
 
         // Step 5: Delete the worktree branch (it's merged now)
-        try {
-          execGit(['branch', '-d', validateRef(worktreeBranch)], repoPath)
-        } catch {
-          // Branch deletion is best-effort — may already be gone
+        if (branchExists) {
+          try {
+            execGit(['branch', '-d', validateRef(worktreeBranch)], repoPath)
+          } catch {
+            // Branch deletion is best-effort — may already be gone
+          }
         }
 
         return {
           success: true,
-          merged: true,
+          merged: branchExists,
           mainBranch,
-          message: `Merged ${worktreeBranch} into ${mainBranch} and cleaned up worktree`,
+          message: branchExists
+            ? `Merged ${worktreeBranch} into ${mainBranch} and cleaned up worktree`
+            : `Worktree already merged and cleaned up`,
         }
       } catch (err) {
         return { success: false, merged: false, error: String(err) }

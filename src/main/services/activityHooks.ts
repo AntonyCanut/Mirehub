@@ -253,7 +253,8 @@ merge_and_cleanup_worktree() {
 }
 
 # Read ticket status, isCtoTicket flag, worktree info, and autoMerge config
-read -r TICKET_STATUS IS_CTO WORKTREE_PATH WORKTREE_BRANCH AUTO_MERGE <<< $(node -e "
+# Use tab separator to handle paths with spaces correctly
+IFS=$'\\t' read -r TICKET_STATUS IS_CTO WORKTREE_PATH WORKTREE_BRANCH AUTO_MERGE <<< $(node -e "
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -281,7 +282,7 @@ try {
         }
       } catch(e2) { /* ignore */ }
     }
-    process.stdout.write(task.status + ' ' + (isCto ? 'true' : 'false') + ' ' + wtPath + ' ' + wtBranch + ' ' + autoMerge);
+    process.stdout.write([task.status, isCto ? 'true' : 'false', wtPath, wtBranch, autoMerge].join('\\t'));
   }
 } catch(e) { /* ignore */ }
 ")
