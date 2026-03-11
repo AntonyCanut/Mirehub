@@ -232,15 +232,21 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
 
   loadPipelines: async (connection) => {
     set({ pipelinesLoading: true, pipelinesError: null })
-    const result = await window.kanbai.devops.listPipelines(connection)
-    if (result.success) {
-      detectAndNotifyChanges(result.pipelines)
-      const { data, activeConnectionId } = get()
-      const savedOrder = activeConnectionId ? data?.pipelineOrder?.[activeConnectionId] : undefined
-      const ordered = applySavedOrder(result.pipelines, savedOrder)
-      set({ pipelines: ordered, pipelinesLoading: false })
-    } else {
-      set({ pipelines: [], pipelinesLoading: false, pipelinesError: result.error ?? 'Unknown error' })
+    try {
+      const result = await window.kanbai.devops.listPipelines(connection)
+      if (result.success) {
+        const pipelines = result.pipelines ?? []
+        detectAndNotifyChanges(pipelines)
+        const { data, activeConnectionId } = get()
+        const savedOrder = activeConnectionId ? data?.pipelineOrder?.[activeConnectionId] : undefined
+        const ordered = applySavedOrder(pipelines, savedOrder)
+        set({ pipelines: ordered, pipelinesLoading: false })
+      } else {
+        set({ pipelines: [], pipelinesLoading: false, pipelinesError: result.error ?? 'Unknown error' })
+      }
+    } catch (err) {
+      console.error('[DevOps] loadPipelines error:', err)
+      set({ pipelines: [], pipelinesLoading: false, pipelinesError: String(err) })
     }
   },
 
@@ -250,18 +256,24 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
 
   loadPipelineRuns: async (connection, pipelineId) => {
     set({ runsLoading: true, allApprovalsLoading: true })
-    const result = await window.kanbai.devops.getPipelineRuns(connection, pipelineId)
-    if (result.success) {
-      set({ pipelineRuns: sortRunsByDate(result.runs), runsLoading: false })
-      // Fetch approvals for all displayed runs in parallel
-      const buildIds = result.runs.map((r) => r.id)
-      if (buildIds.length > 0) {
-        const { loadApprovalsForRuns } = get()
-        await loadApprovalsForRuns(connection, buildIds)
+    try {
+      const result = await window.kanbai.devops.getPipelineRuns(connection, pipelineId)
+      if (result.success) {
+        const runs = result.runs ?? []
+        set({ pipelineRuns: sortRunsByDate(runs), runsLoading: false })
+        // Fetch approvals for all displayed runs in parallel
+        const buildIds = runs.map((r) => r.id)
+        if (buildIds.length > 0) {
+          const { loadApprovalsForRuns } = get()
+          await loadApprovalsForRuns(connection, buildIds)
+        } else {
+          set({ allRunApprovals: [], allApprovalsLoading: false })
+        }
       } else {
-        set({ allRunApprovals: [], allApprovalsLoading: false })
+        set({ pipelineRuns: [], runsLoading: false, allRunApprovals: [], allApprovalsLoading: false })
       }
-    } else {
+    } catch (err) {
+      console.error('[DevOps] loadPipelineRuns error:', err)
       set({ pipelineRuns: [], runsLoading: false, allRunApprovals: [], allApprovalsLoading: false })
     }
   },
@@ -317,17 +329,22 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
   expandRun: async (connection, buildId) => {
     set({ expandedRunId: buildId, stagesLoading: true, approvalsLoading: true, runStages: [], runApprovals: [] })
 
-    const [timelineResult, approvalsResult] = await Promise.all([
-      window.kanbai.devops.getBuildTimeline(connection, buildId),
-      window.kanbai.devops.getApprovals(connection, [buildId]),
-    ])
+    try {
+      const [timelineResult, approvalsResult] = await Promise.all([
+        window.kanbai.devops.getBuildTimeline(connection, buildId),
+        window.kanbai.devops.getApprovals(connection, [buildId]),
+      ])
 
-    set({
-      runStages: timelineResult.success ? timelineResult.stages : [],
-      stagesLoading: false,
-      runApprovals: approvalsResult.success ? approvalsResult.approvals : [],
-      approvalsLoading: false,
-    })
+      set({
+        runStages: timelineResult.success ? (timelineResult.stages ?? []) : [],
+        stagesLoading: false,
+        runApprovals: approvalsResult.success ? (approvalsResult.approvals ?? []) : [],
+        approvalsLoading: false,
+      })
+    } catch (err) {
+      console.error('[DevOps] expandRun error:', err)
+      set({ runStages: [], stagesLoading: false, runApprovals: [], approvalsLoading: false })
+    }
   },
 
   collapseRun: () => {
@@ -375,11 +392,16 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
 
   loadApprovalsForRuns: async (connection, buildIds) => {
     set({ allApprovalsLoading: true })
-    const result = await window.kanbai.devops.getApprovals(connection, buildIds)
-    set({
-      allRunApprovals: result.success ? result.approvals : [],
-      allApprovalsLoading: false,
-    })
+    try {
+      const result = await window.kanbai.devops.getApprovals(connection, buildIds)
+      set({
+        allRunApprovals: result.success ? (result.approvals ?? []) : [],
+        allApprovalsLoading: false,
+      })
+    } catch (err) {
+      console.error('[DevOps] loadApprovalsForRuns error:', err)
+      set({ allRunApprovals: [], allApprovalsLoading: false })
+    }
   },
 
   loadJobLog: async (connection, buildId, jobId, logId) => {

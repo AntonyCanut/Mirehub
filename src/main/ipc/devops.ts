@@ -844,14 +844,15 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_TEST_CONNECTION,
     async (_event, { connection }: { connection: DevOpsConnection }) => {
-      if (isGitHub(connection)) {
-        return gitHubTestConnection(connection)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubTestConnection(connection)
+        }
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/definitions?api-version=7.1&$top=1`
         await azureDevOpsRequest(connection.auth, url)
         return { success: true }
       } catch (err) {
+        console.error('[DevOps] testConnection error:', err)
         return { success: false, error: String(err) }
       }
     },
@@ -861,14 +862,14 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_LIST_PIPELINES,
     async (_event, { connection }: { connection: DevOpsConnection }) => {
-      if (isGitHub(connection)) {
-        return gitHubListPipelines(connection)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubListPipelines(connection)
+        }
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/definitions?api-version=7.1&includeLatestBuilds=true`
         const result = await azureDevOpsRequest<{ value: AzureBuildDef[] }>(connection.auth, url)
 
-        const pipelines: PipelineDefinition[] = result.value.map((def) => {
+        const pipelines: PipelineDefinition[] = (result.value ?? []).map((def) => {
           const latestBuild = def.latestBuild ?? def.latestCompletedBuild ?? null
           return {
             id: def.id,
@@ -882,6 +883,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
 
         return { success: true, pipelines }
       } catch (err) {
+        console.error('[DevOps] listPipelines error:', err)
         return { success: false, pipelines: [], error: String(err) }
       }
     },
@@ -892,16 +894,17 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
     IPC_CHANNELS.DEVOPS_GET_PIPELINE_RUNS,
     async (_event, { connection, pipelineId, count }: { connection: DevOpsConnection; pipelineId: number; count?: number }) => {
       const top = count || 20
-      if (isGitHub(connection)) {
-        return gitHubGetPipelineRuns(connection, pipelineId, top)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubGetPipelineRuns(connection, pipelineId, top)
+        }
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1&definitions=${pipelineId}&$top=${top}&queryOrder=queueTimeDescending`
         const result = await azureDevOpsRequest<{ value: AzureBuildRun[] }>(connection.auth, url)
 
-        const runs: PipelineRun[] = result.value.map(mapBuildRun)
+        const runs: PipelineRun[] = (result.value ?? []).map(mapBuildRun)
         return { success: true, runs }
       } catch (err) {
+        console.error('[DevOps] getPipelineRuns error:', err)
         return { success: false, runs: [], error: String(err) }
       }
     },
@@ -911,10 +914,10 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_RUN_PIPELINE,
     async (_event, { connection, pipelineId, branch }: { connection: DevOpsConnection; pipelineId: number; branch?: string }) => {
-      if (isGitHub(connection)) {
-        return gitHubRunPipeline(connection, pipelineId, branch)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubRunPipeline(connection, pipelineId, branch)
+        }
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1`
         const authHeader = await getAuthHeader(connection.auth)
 
@@ -949,10 +952,10 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_GET_BUILD_TIMELINE,
     async (_event, { connection, buildId }: { connection: DevOpsConnection; buildId: number }) => {
-      if (isGitHub(connection)) {
-        return gitHubGetBuildTimeline(connection, buildId)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubGetBuildTimeline(connection, buildId)
+        }
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds/${buildId}/timeline?api-version=7.1`
         const result = await azureDevOpsRequest<{ records: AzureTimelineRecord[] }>(connection.auth, url)
 
@@ -968,16 +971,16 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_GET_APPROVALS,
     async (_event, { connection, buildIds }: { connection: DevOpsConnection; buildIds: number[] }) => {
-      if (isGitHub(connection)) {
-        return gitHubGetApprovals(connection, buildIds)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubGetApprovals(connection, buildIds)
+        }
         const idsParam = buildIds.join(',')
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1&buildIds=${idsParam}`
         const result = await azureDevOpsRequest<{ value: AzureApproval[] }>(connection.auth, url)
 
         const buildIdSet = new Set(buildIds)
-        const allApprovals: PipelineApproval[] = result.value.map((a) => ({
+        const allApprovals: PipelineApproval[] = (result.value ?? []).map((a) => ({
           id: a.id,
           buildId: extractBuildIdFromApproval(a),
           status: mapApprovalStatus(a.status),
@@ -1005,10 +1008,10 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_APPROVE,
     async (_event, { connection, approvalId, status, comment }: { connection: DevOpsConnection; approvalId: string; status: 'approved' | 'rejected'; comment?: string }) => {
-      if (isGitHub(connection)) {
-        return gitHubApprove(connection, approvalId, status, comment)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubApprove(connection, approvalId, status, comment)
+        }
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1`
         const body = [{ approvalId, status, comment: comment || '' }]
         await azureDevOpsPatch(connection.auth, url, body)
@@ -1023,10 +1026,10 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_GET_BUILD_LOG,
     async (_event, { connection, buildId, logId }: { connection: DevOpsConnection; buildId: number; logId: number }) => {
-      if (isGitHub(connection)) {
-        return gitHubGetBuildLog(connection, buildId, logId)
-      }
       try {
+        if (isGitHub(connection)) {
+          return gitHubGetBuildLog(connection, buildId, logId)
+        }
         const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds/${buildId}/logs/${logId}?api-version=7.1`
         const authHeader = await getAuthHeader(connection.auth)
         const response = await fetch(url, {
