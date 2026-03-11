@@ -1828,6 +1828,7 @@ export const en = {
   'devops.approve': 'Approve',
   'devops.reject': 'Reject',
   'devops.approvalComment': 'Comment (optional)',
+  'devops.approvalFailed': 'Approval failed',
   'devops.viewLogs': 'View logs',
   'devops.loadingLogs': 'Loading logs...',
   'devops.retry': 'Retry',

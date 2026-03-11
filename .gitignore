@@ -75,3 +75,5 @@ embedded.provisionprofile
 .checkov/
 # End analysis tool reports
 .kanbai-worktrees/
+
+.kanbai-session.lock
