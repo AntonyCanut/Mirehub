@@ -353,22 +353,28 @@ export const useDevOpsStore = create<DevOpsState>((set, get) => ({
 
   approveRun: async (connection, approvalId, status, comment) => {
     set({ approving: approvalId })
-    const result = await window.kanbai.devops.approve(connection, approvalId, status, comment)
-    set({ approving: null })
+    try {
+      const result = await window.kanbai.devops.approve(connection, approvalId, status, comment)
+      set({ approving: null })
 
-    if (result.success) {
-      // Refresh approvals for all runs
-      const { pipelineRuns, loadApprovalsForRuns, expandedRunId, expandRun } = get()
-      const buildIds = pipelineRuns.map((r) => r.id)
-      if (buildIds.length > 0) {
-        await loadApprovalsForRuns(connection, buildIds)
+      if (result.success) {
+        // Refresh approvals for all runs
+        const { pipelineRuns, loadApprovalsForRuns, expandedRunId, expandRun } = get()
+        const buildIds = pipelineRuns.map((r) => r.id)
+        if (buildIds.length > 0) {
+          await loadApprovalsForRuns(connection, buildIds)
+        }
+        // Also refresh expanded run stages if one is open
+        if (expandedRunId) {
+          await expandRun(connection, expandedRunId)
+        }
       }
-      // Also refresh expanded run stages if one is open
-      if (expandedRunId) {
-        await expandRun(connection, expandedRunId)
-      }
+      return { success: result.success, error: result.error }
+    } catch (err) {
+      console.error('[DevOps] approveRun error:', err)
+      set({ approving: null })
+      return { success: false, error: String(err) }
     }
-    return { success: result.success, error: result.error }
   },
 
   reorderPipelines: async (projectPath, fromIndex, toIndex) => {

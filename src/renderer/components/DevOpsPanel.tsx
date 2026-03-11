@@ -1014,9 +1014,13 @@ function PipelineRunsDetail({
 
   const handleApprove = useCallback(async (approvalId: string, status: 'approved' | 'rejected') => {
     if (!activeConnection) return
-    await approveRun(activeConnection, approvalId, status, approvalComment || undefined)
-    setApprovalComment('')
-  }, [activeConnection, approveRun, approvalComment])
+    const result = await approveRun(activeConnection, approvalId, status, approvalComment || undefined)
+    if (result.success) {
+      setApprovalComment('')
+    } else {
+      pushNotification('error', t('devops.approvalFailed'), result.error ?? 'Unknown error')
+    }
+  }, [activeConnection, approveRun, approvalComment, t])
 
   if (loading) {
     return <div className="devops-runs-loading">{t('devops.loadingRuns')}</div>
