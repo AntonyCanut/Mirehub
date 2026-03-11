@@ -47,7 +47,7 @@ src/
     assets/          # Static assets (rule-templates)
   preload/           # Preload scripts — contextBridge, exposes window.kanbai
   renderer/          # Renderer process (React + Zustand)
-    components/      # All UI components (flat architecture, ~57 components)
+    components/      # All UI components (flat architecture, ~58 components)
     lib/stores/      # Zustand stores (per domain, 13 stores)
     styles/          # CSS custom properties
   shared/            # Shared types and constants (both processes)

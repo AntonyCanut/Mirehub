@@ -31,7 +31,7 @@ Three-process Electron model:
 
 - **Main** (`src/main/`) — Node.js, IPC handlers in `ipc/` (29 handlers), services in `services/` (storage, healthCheck, notifications, activityHooks, ai-cli, pixel-agents, database/, packages/)
 - **Preload** (`src/preload/`) — contextBridge, exposes `window.kanbai` API
-- **Renderer** (`src/renderer/`) — React, flat components in `components/` (~57), Zustand stores in `lib/stores/` (13 stores)
+- **Renderer** (`src/renderer/`) — React, flat components in `components/` (~58), Zustand stores in `lib/stores/` (13 stores)
 - **Shared** (`src/shared/`) — All types in `types/index.ts`, constants in `constants/`
 
 ## Security (Mandatory)

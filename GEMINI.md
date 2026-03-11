@@ -40,7 +40,7 @@ Three-process Electron model:
 
 3. **Renderer** (`src/renderer/`) — Chromium, sandboxed
    - React app with Zustand state management
-   - Flat component architecture in `components/` (~57 components)
+   - Flat component architecture in `components/` (~58 components)
    - Stores in `lib/stores/` (13 stores)
    - CSS custom properties in `styles/`
 
