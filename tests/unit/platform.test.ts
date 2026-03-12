@@ -67,8 +67,8 @@ describe('platform module', () => {
 
   describe('getDefaultShellArgs()', () => {
     if (TEST_IS_WIN) {
-      it('returns empty array on Windows', () => {
-        expect(getDefaultShellArgs('powershell.exe')).toEqual([])
+      it('returns [-NoLogo] for PowerShell and empty array for cmd on Windows', () => {
+        expect(getDefaultShellArgs('powershell.exe')).toEqual(['-NoLogo'])
         expect(getDefaultShellArgs('cmd.exe')).toEqual([])
       })
     }

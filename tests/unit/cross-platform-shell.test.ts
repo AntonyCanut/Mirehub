@@ -144,8 +144,8 @@ describe('cross-platform shell', () => {
 
   describe('getDefaultShellArgs()', () => {
     if (TEST_IS_WIN) {
-      it('returns empty array for Windows shells', () => {
-        expect(getDefaultShellArgs('powershell.exe')).toEqual([])
+      it('returns [-NoLogo] for PowerShell and empty array for cmd', () => {
+        expect(getDefaultShellArgs('powershell.exe')).toEqual(['-NoLogo'])
         expect(getDefaultShellArgs('cmd.exe')).toEqual([])
       })
     }
