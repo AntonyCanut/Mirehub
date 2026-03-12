@@ -339,6 +339,53 @@ async function findInstalledBrewPackage(candidates: string[] | undefined): Promi
   return null
 }
 
+async function isNpmAvailable(): Promise<boolean> {
+  try {
+    await enrichedExecFile('npm', ['--version'], 5000)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * On Windows, npm-dependent tools (claude, codex, copilot, pnpm, yarn) need npm to be installed.
+ * If npm is missing, we auto-install Node.js LTS via winget (which bundles npm).
+ * Throws on macOS/Linux if npm is missing (user should install Node.js via brew or system package manager).
+ */
+async function ensureNpmForInstall(
+  sendStatus: (status: string, progress?: number) => void,
+): Promise<void> {
+  if (await isNpmAvailable()) return
+
+  if (IS_WIN) {
+    sendStatus('installing_prerequisite', 10)
+    await enrichedExecFile(
+      'winget',
+      [
+        'install', '--id', 'OpenJS.NodeJS.LTS', '--silent',
+        '--accept-source-agreements', '--accept-package-agreements',
+      ],
+      120000,
+    )
+    sendStatus('prerequisite_installed', 30)
+
+    // Verify npm is now available after Node.js installation
+    const npmAvailable = await isNpmAvailable()
+    if (!npmAvailable) {
+      throw new Error(
+        'Node.js was installed via winget but npm is not yet available. '
+        + 'Please restart Kanbai so the updated PATH takes effect, then retry.',
+      )
+    }
+  } else {
+    throw new Error(
+      'npm is not installed. Please install Node.js first '
+      + '(click "Install" on the Node.js row in the updates panel) and retry.',
+    )
+  }
+}
+
 
 async function resolveToolInstallSource(tool: string): Promise<ToolInstallResolution> {
   const meta = TOOL_METADATA[tool] ?? {}
@@ -821,6 +868,7 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
                 ? [isInstalled ? 'upgrade' : 'install', '--cask', installResolution.brew.name]
                 : [isInstalled ? 'upgrade' : 'install', installResolution.brew.name]
             } else {
+              await ensureNpmForInstall(sendStatus)
               command = 'npm'
               args = ['install', '-g', 'pnpm@latest']
             }
@@ -832,6 +880,7 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
                 ? [isInstalled ? 'upgrade' : 'install', '--cask', installResolution.brew.name]
                 : [isInstalled ? 'upgrade' : 'install', installResolution.brew.name]
             } else {
+              await ensureNpmForInstall(sendStatus)
               command = 'npm'
               args = ['install', '-g', 'yarn@latest']
             }
@@ -843,6 +892,7 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
                 ? [isInstalled ? 'upgrade' : 'install', '--cask', installResolution.brew.name]
                 : [isInstalled ? 'upgrade' : 'install', installResolution.brew.name]
             } else {
+              await ensureNpmForInstall(sendStatus)
               command = 'npm'
               args = ['install', '-g', '@anthropic-ai/claude-code@latest']
             }
@@ -854,6 +904,7 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
                 ? [isInstalled ? 'upgrade' : 'install', '--cask', installResolution.brew.name]
                 : [isInstalled ? 'upgrade' : 'install', installResolution.brew.name]
             } else {
+              await ensureNpmForInstall(sendStatus)
               command = 'npm'
               args = ['install', '-g', '@openai/codex@latest']
             }
@@ -865,6 +916,7 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
                 ? [isInstalled ? 'upgrade' : 'install', '--cask', installResolution.brew.name]
                 : [isInstalled ? 'upgrade' : 'install', installResolution.brew.name]
             } else {
+              await ensureNpmForInstall(sendStatus)
               command = 'npm'
               args = ['install', '-g', '@github/copilot@latest']
             }
