@@ -26,6 +26,7 @@
     "pixel-agents:setup": "bash scripts/setup-pixel-agents.sh",
     "pixel-agents:update": "cd vendor/pixel-agents && git pull && cd webview-ui && npm install && npm run build && cd ../../.. && node scripts/patch-pixel-agents-html.js",
     "rtk:setup": "bash scripts/setup-rtk.sh",
+    "rtk:setup:windows": "powershell -ExecutionPolicy Bypass -File scripts/setup-rtk-windows.ps1",
     "rtk:update": "cd vendor/rtk && git pull"
   },
   "dependencies": {
