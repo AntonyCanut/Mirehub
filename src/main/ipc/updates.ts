@@ -190,6 +190,11 @@ const TOOLS_TO_CHECK: ToolCheck[] = [
     checkCommand: IS_WIN ? 'pip' : 'pip3',
     checkArgs: ['--version'],
   },
+  {
+    name: 'make',
+    checkCommand: 'make',
+    checkArgs: ['--version'],
+  },
   // cargo — Windows only
   ...(IS_WIN
     ? [
@@ -200,12 +205,6 @@ const TOOLS_TO_CHECK: ToolCheck[] = [
         },
       ]
     : []),
-  // rtk — available on all platforms
-  {
-    name: 'rtk',
-    checkCommand: 'rtk',
-    checkArgs: ['--version'],
-  },
 ]
 
 type ToolInstallSource =
@@ -278,6 +277,9 @@ const TOOL_METADATA: Record<string, ToolMetadata> = {
   cargo: {
     brewCandidates: ['rustup'],
   },
+  make: {
+    brewCandidates: ['make'],
+  },
   rtk: {
     brewCandidates: ['rtk'],
     canUninstall: true,
@@ -300,6 +302,7 @@ async function getVersion(command: string, args: string[]): Promise<string | nul
       .replace(/^cargo /, '')
       .replace(/^codex\s+/i, '')
       .replace(/^copilot\s+/i, '')
+      .replace(/^GNU Make /, '')
       .replace(/ \(.+\)$/, '')
     if (!version) return null
     return version
@@ -517,7 +520,7 @@ async function resolveToolInstallSource(tool: string): Promise<ToolInstallResolu
     }
     return { source: IS_WIN ? 'winget' : 'system' }
   }
-  if (tool === 'go' || tool === 'python' || tool === 'pip' || tool === 'git') {
+  if (tool === 'go' || tool === 'python' || tool === 'pip' || tool === 'git' || tool === 'make') {
     if (!IS_WIN) {
       const brew = await findInstalledBrewPackage(meta.brewCandidates)
       if (brew) {
@@ -598,7 +601,7 @@ async function getLatestVersionForTool(
     return null
   }
 
-  if (tool === 'go' || tool === 'python') {
+  if (tool === 'go' || tool === 'python' || tool === 'make') {
     if (resolution.brew?.name) {
       return getLatestBrewVersion(resolution.brew.name)
     }
@@ -635,6 +638,7 @@ function canInstallTool(tool: string): boolean {
     'python',
     'pip',
     'git',
+    'make',
     'cargo',
     'rtk',
     'pixel-agents',
@@ -716,12 +720,55 @@ function getRtkSourcePath(): string {
 }
 
 async function isRtkInstalled(): Promise<boolean> {
+  // Check vendor directory first (source-based install)
   try {
     const rtkPath = getRtkSourcePath()
     await fs.access(path.join(rtkPath, 'Cargo.toml'))
     return true
   } catch {
-    return false
+    // Fallback: check if rtk binary is in PATH (brew/system install)
+    return (await getCommandPath('rtk')) !== null
+  }
+}
+
+async function getRtkVersion(): Promise<string> {
+  // Try binary version first
+  const binaryVersion = await getVersion('rtk', ['--version'])
+  if (binaryVersion) return binaryVersion
+
+  // Fallback: read version from Cargo.toml in vendor source
+  try {
+    const cargoPath = path.join(getRtkSourcePath(), 'Cargo.toml')
+    const content = await fs.readFile(cargoPath, 'utf-8')
+    const match = content.match(/^version\s*=\s*"([^"]+)"/m)
+    return match?.[1] || 'installed'
+  } catch {
+    return 'installed'
+  }
+}
+
+async function getLocalRtkCommit(): Promise<string | null> {
+  try {
+    const repoPath = getRtkSourcePath()
+    const { stdout } = await enrichedExecFile(
+      'git', ['-C', repoPath, 'rev-parse', '--short=7', 'HEAD'], 5000,
+    )
+    return stdout.trim() || null
+  } catch {
+    return null
+  }
+}
+
+async function getRemoteRtkCommit(): Promise<string | null> {
+  try {
+    const { stdout } = await enrichedExecFile(
+      'git', ['ls-remote', 'https://github.com/rtk-ai/rtk.git', 'HEAD'],
+      8000,
+    )
+    const hash = stdout.trim().split('\t')[0]
+    return hash?.substring(0, 7) || null
+  } catch {
+    return null
   }
 }
 
@@ -744,13 +791,13 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
       if (!result.version) {
         const fallbackSource: ToolInstallSource =
           result.name === 'cargo' ? (IS_WIN ? 'winget' : 'rustup')
-            : result.name === 'rtk' ? (IS_WIN ? 'winget' : 'brew-formula')
-              : result.name === 'pixel-agents' ? 'internal'
-                : (result.name === 'node'
+            : result.name === 'pixel-agents' ? 'internal'
+              : (result.name === 'node'
                   || result.name === 'git'
                   || result.name === 'go'
                   || result.name === 'python'
-                  || result.name === 'pip') ? (IS_WIN ? 'winget' : 'system')
+                  || result.name === 'pip'
+                  || result.name === 'make') ? (IS_WIN ? 'winget' : 'system')
                   : result.name === 'npm' ? (IS_WIN ? 'winget' : 'npm-global')
                     : 'npm-global'
         return {
@@ -816,6 +863,42 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
     latestVersion: paLatestVersion,
     updateAvailable: paUpdateAvailable,
     installed: pixelAgentsInstalled,
+    scope: 'global',
+    installSource: 'internal',
+    canInstall: true,
+    canUninstall: true,
+  })
+
+  // rtk — directory-based detection (like pixel-agents), compare git commits
+  const rtkInstalled = await isRtkInstalled()
+
+  let rtkCurrentVersion = ''
+  let rtkLatestVersion = ''
+  let rtkUpdateAvailable = false
+
+  if (rtkInstalled) {
+    const baseVersion = await getRtkVersion()
+    const [localCommit, remoteCommit] = await Promise.all([
+      getLocalRtkCommit(),
+      getRemoteRtkCommit(),
+    ])
+
+    rtkCurrentVersion = localCommit ? `${baseVersion} (${localCommit})` : baseVersion
+
+    if (localCommit && remoteCommit && localCommit !== remoteCommit) {
+      rtkUpdateAvailable = true
+      rtkLatestVersion = `${baseVersion} (${remoteCommit})`
+    } else {
+      rtkLatestVersion = rtkCurrentVersion
+    }
+  }
+
+  results.push({
+    tool: 'rtk',
+    currentVersion: rtkCurrentVersion,
+    latestVersion: rtkLatestVersion,
+    updateAvailable: rtkUpdateAvailable,
+    installed: rtkInstalled,
     scope: 'global',
     installSource: 'internal',
     canInstall: true,
@@ -1078,6 +1161,24 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
             } else {
               command = IS_WIN ? 'python' : 'python3'
               args = ['-m', 'pip', 'install', '--upgrade', 'pip']
+            }
+            break
+          case 'make':
+            if (IS_WIN) {
+              command = 'winget'
+              args = [
+                isInstalled ? 'upgrade' : 'install',
+                '--id', 'GnuWin32.Make', '--silent',
+                '--accept-source-agreements', '--accept-package-agreements',
+              ]
+            } else if (installResolution.source.startsWith('brew')) {
+              command = 'brew'
+              args = [isInstalled ? 'upgrade' : 'install', installResolution.brew?.name || 'make']
+            } else if (!isInstalled) {
+              command = 'brew'
+              args = ['install', 'make']
+            } else {
+              throw new Error('Cannot upgrade make automatically for non-Homebrew install on macOS')
             }
             break
           case 'cargo': {
