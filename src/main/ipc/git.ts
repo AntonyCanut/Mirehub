@@ -749,20 +749,9 @@ export function registerGitHandlers(ipcMain: IpcMain): void {
           }
         } catch { /* gitignore update is best-effort */ }
 
-        // Ensure .kanbai-session.lock is in .gitignore of the worktree
-        const worktreeGitignorePath = path.join(worktreePath, '.gitignore')
-        const lockEntry = WORKTREE_LOCK_FILE
-        try {
-          let wtContent = ''
-          if (fs.existsSync(worktreeGitignorePath)) {
-            wtContent = fs.readFileSync(worktreeGitignorePath, 'utf-8')
-          }
-          const wtLines = wtContent.split('\n')
-          if (!wtLines.some((l) => l.trim() === lockEntry)) {
-            const wtSuffix = wtContent.length > 0 && !wtContent.endsWith('\n') ? '\n' : ''
-            fs.writeFileSync(worktreeGitignorePath, wtContent + wtSuffix + lockEntry + '\n', 'utf-8')
-          }
-        } catch { /* worktree gitignore update is best-effort */ }
+        // Exclude .kanbai-session.lock via the worktree's git info/exclude
+        // (not tracked, won't pollute commits when merged back)
+        ensureLockExcludedInWorktree(worktreePath)
 
         return { success: true, baseBranch: currentBranch, startPoint: defaultBranch }
       } catch (err) {
