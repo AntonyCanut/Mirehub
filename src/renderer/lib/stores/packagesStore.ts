@@ -11,6 +11,10 @@ interface WorkspacePackagesData {
   managers: ProjectPackageManager[]
   packages: Record<string, PackageInfo[]>
   loading: Record<string, boolean>
+  /** Packages currently being updated, keyed by "projectId:manager" */
+  updatingPackages: Record<string, string[]>
+  /** Whether "update all" is running, keyed by "projectId:manager" */
+  updateAllLoading: Record<string, boolean>
   selectedProjectId: string | null
   selectedManager: PackageManagerType | null
   nlMessages: PkgNlMessage[]
@@ -23,6 +27,8 @@ const EMPTY_WORKSPACE_DATA: WorkspacePackagesData = {
   managers: [],
   packages: {},
   loading: {},
+  updatingPackages: {},
+  updateAllLoading: {},
   selectedProjectId: null,
   selectedManager: null,
   nlMessages: [],
@@ -36,6 +42,8 @@ function snapshotWorkspaceData(state: PackagesState): WorkspacePackagesData {
     managers: state.managers,
     packages: state.packages,
     loading: state.loading,
+    updatingPackages: state.updatingPackages,
+    updateAllLoading: state.updateAllLoading,
     selectedProjectId: state.selectedProjectId,
     selectedManager: state.selectedManager,
     nlMessages: state.nlMessages,
@@ -54,6 +62,10 @@ interface PackagesState {
   /** Packages indexed by "projectId:manager" composite key */
   packages: Record<string, PackageInfo[]>
   loading: Record<string, boolean>
+  /** Packages currently being updated, keyed by "projectId:manager" */
+  updatingPackages: Record<string, string[]>
+  /** Whether "update all" is running, keyed by "projectId:manager" */
+  updateAllLoading: Record<string, boolean>
   selectedProjectId: string | null
   selectedManager: PackageManagerType | null
   nlMessages: PkgNlMessage[]
@@ -81,6 +93,9 @@ interface PackagesActions {
     manager: PackageManagerType,
     packageName?: string,
   ) => Promise<{ success: boolean; error?: string }>
+  addUpdatingPackage: (key: string, packageName: string) => void
+  removeUpdatingPackage: (key: string, packageName: string) => void
+  setUpdateAllLoading: (key: string, loading: boolean) => void
   addNlMessage: (message: PkgNlMessage) => void
   setNlLoading: (loading: boolean) => void
   clearNlMessages: () => void
@@ -96,6 +111,8 @@ export const usePackagesStore = create<PackagesStore>((set, get) => ({
   managers: [],
   packages: {},
   loading: {},
+  updatingPackages: {},
+  updateAllLoading: {},
   selectedProjectId: null,
   selectedManager: null,
   nlMessages: [],
@@ -168,6 +185,37 @@ export const usePackagesStore = create<PackagesStore>((set, get) => ({
         error instanceof Error ? error.message : 'Unknown error during update'
       return { success: false, error: message }
     }
+  },
+
+  addUpdatingPackage: (key, packageName) => {
+    set((state) => {
+      const current = state.updatingPackages[key] ?? []
+      if (current.includes(packageName)) return state
+      return {
+        updatingPackages: {
+          ...state.updatingPackages,
+          [key]: [...current, packageName],
+        },
+      }
+    })
+  },
+
+  removeUpdatingPackage: (key, packageName) => {
+    set((state) => {
+      const current = state.updatingPackages[key] ?? []
+      return {
+        updatingPackages: {
+          ...state.updatingPackages,
+          [key]: current.filter((name) => name !== packageName),
+        },
+      }
+    })
+  },
+
+  setUpdateAllLoading: (key, loading) => {
+    set((state) => ({
+      updateAllLoading: { ...state.updateAllLoading, [key]: loading },
+    }))
   },
 
   addNlMessage: (message) => {

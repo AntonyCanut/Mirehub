@@ -30,10 +30,13 @@ export function PackagesContent() {
     updatePackage,
     searchQuery,
     setSearchQuery,
+    updatingPackages: updatingPackagesMap,
+    updateAllLoading: updateAllLoadingMap,
+    addUpdatingPackage,
+    removeUpdatingPackage,
+    setUpdateAllLoading,
   } = usePackagesStore()
   const [filter, setFilter] = useState<FilterMode>('all')
-  const [updatingPackages, setUpdatingPackages] = useState<Set<string>>(new Set())
-  const [updateAllLoading, setUpdateAllLoading] = useState(false)
   const [feedback, setFeedback] = useState<{
     message: string
     success: boolean
@@ -57,6 +60,8 @@ export function PackagesContent() {
       : null
   const pkgList = key ? (packages[key] ?? []) : []
   const isLoading = key ? (loading[key] ?? false) : false
+  const updatingPackages = key ? (updatingPackagesMap[key] ?? []) : []
+  const updateAllLoading = key ? (updateAllLoadingMap[key] ?? false) : false
 
   useEffect(() => {
     if (selectedProjectId && selectedManager && selectedInfo) {
@@ -99,8 +104,8 @@ export function PackagesContent() {
 
   const handleUpdate = useCallback(
     async (packageName: string) => {
-      if (!selectedInfo || !selectedManager) return
-      setUpdatingPackages((prev) => new Set(prev).add(packageName))
+      if (!selectedInfo || !selectedManager || !key) return
+      addUpdatingPackage(key, packageName)
       try {
         const result = await updatePackage(
           selectedInfo.projectPath,
@@ -120,19 +125,15 @@ export function PackagesContent() {
           loadPackages(selectedProjectId, selectedInfo.projectPath, selectedManager)
         }
       } finally {
-        setUpdatingPackages((prev) => {
-          const next = new Set(prev)
-          next.delete(packageName)
-          return next
-        })
+        removeUpdatingPackage(key, packageName)
       }
     },
-    [selectedInfo, selectedProjectId, selectedManager, updatePackage, loadPackages, t],
+    [selectedInfo, selectedProjectId, selectedManager, key, updatePackage, loadPackages, addUpdatingPackage, removeUpdatingPackage, t],
   )
 
   const handleUpdateAll = useCallback(async () => {
-    if (!selectedInfo || !selectedManager) return
-    setUpdateAllLoading(true)
+    if (!selectedInfo || !selectedManager || !key) return
+    setUpdateAllLoading(key, true)
     try {
       const result = await updatePackage(selectedInfo.projectPath, selectedManager)
       setFeedback({
@@ -148,9 +149,9 @@ export function PackagesContent() {
         loadPackages(selectedProjectId, selectedInfo.projectPath, selectedManager)
       }
     } finally {
-      setUpdateAllLoading(false)
+      setUpdateAllLoading(key, false)
     }
-  }, [selectedInfo, selectedProjectId, selectedManager, updatePackage, loadPackages, t])
+  }, [selectedInfo, selectedProjectId, selectedManager, key, updatePackage, loadPackages, setUpdateAllLoading, t])
 
   if (!selectedProjectId || !selectedManager) {
     return (
@@ -321,13 +322,13 @@ export function PackagesContent() {
               </div>
               {pkg.updateAvailable && (
                 <button
-                  className={`packages-row-update-btn${updatingPackages.has(pkg.name) ? ' packages-row-update-btn--loading' : ''}`}
+                  className={`packages-row-update-btn${updatingPackages.includes(pkg.name) ? ' packages-row-update-btn--loading' : ''}`}
                   onClick={() => handleUpdate(pkg.name)}
-                  disabled={updatingPackages.has(pkg.name) || updateAllLoading}
+                  disabled={updatingPackages.includes(pkg.name) || updateAllLoading}
                   title={t('packages.updatePackage', { name: pkg.name })}
                 >
-                  <span className={updatingPackages.has(pkg.name) ? 'packages-spinner' : ''}>
-                    {updatingPackages.has(pkg.name) ? '⟳' : '\u2191'}
+                  <span className={updatingPackages.includes(pkg.name) ? 'packages-spinner' : ''}>
+                    {updatingPackages.includes(pkg.name) ? '⟳' : '\u2191'}
                   </span>
                 </button>
               )}
