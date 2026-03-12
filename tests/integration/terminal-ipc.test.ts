@@ -139,10 +139,12 @@ describe('Terminal IPC Handlers', () => {
     await mockIpcMain._invoke('terminal:close', { id })
 
     if (IS_WIN) {
-      expect(processKillSpy).toHaveBeenCalledWith(mockPtyInstance.pid)
+      // On Windows, disposeTerminal calls pty.kill() (ConPTY cleanup) instead of process.kill
+      expect(mockPtyInstance.kill).toHaveBeenCalled()
     } else {
       expect(processKillSpy).toHaveBeenCalledWith(mockPtyInstance.pid, 'SIGKILL')
     }
+    processKillSpy.mockRestore()
   })
 
   it('ne fait rien si on ferme un terminal inexistant', async () => {
@@ -191,11 +193,14 @@ describe('cleanupTerminals', () => {
 
     cleanupTerminals()
 
-    expect(processKillSpy).toHaveBeenCalledTimes(2)
     if (IS_WIN) {
-      expect(processKillSpy).toHaveBeenCalledWith(12345)
+      // On Windows, disposeTerminal calls pty.kill() (ConPTY cleanup) instead of process.kill
+      // mockPtyInstance only tracks the last created pty, but kill should have been called on each
+      expect(mockPtyInstance.kill).toHaveBeenCalled()
     } else {
+      expect(processKillSpy).toHaveBeenCalledTimes(2)
       expect(processKillSpy).toHaveBeenCalledWith(12345, 'SIGKILL')
     }
+    processKillSpy.mockRestore()
   })
 })

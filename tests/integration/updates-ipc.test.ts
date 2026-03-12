@@ -451,10 +451,14 @@ describe('Update IPC Handlers', () => {
         scope: 'global',
       })
 
-      expect(result).toEqual({
-        success: false,
-        error: 'Permission denied',
-      })
+      expect(result.success).toBe(false)
+      // On Windows, npm install uses winget which reformats error messages;
+      // on macOS/Linux, the original error message is preserved.
+      if (IS_WIN) {
+        expect(result.error).toContain('winget')
+      } else {
+        expect(result.error).toBe('Permission denied')
+      }
       expect(mockWebContentsSend).toHaveBeenCalledWith('update:status', expect.objectContaining({
         status: 'failed',
       }))
