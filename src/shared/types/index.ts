@@ -62,6 +62,18 @@ export interface SkillStoreEntry {
 
 // --- End skills store types ---
 
+// --- Notes types ---
+
+export interface Note {
+  id: string
+  title: string
+  content: string
+  createdAt: number
+  updatedAt: number
+}
+
+// --- End notes types ---
+
 export interface Namespace {
   id: string
   name: string
@@ -1196,9 +1208,15 @@ export const IPC_CHANNELS = {
   PROJECT_SAVE_IGNORED_TODOS: 'project:saveIgnoredTodos',
   PROJECT_STATS: 'project:stats',
 
-  // Project notes
+  // Project notes (legacy per-project)
   PROJECT_GET_NOTES: 'project:getNotes',
   PROJECT_SAVE_NOTES: 'project:saveNotes',
+
+  // Notes (workspace-level)
+  NOTES_LIST: 'notes:list',
+  NOTES_CREATE: 'notes:create',
+  NOTES_UPDATE: 'notes:update',
+  NOTES_DELETE: 'notes:delete',
 
   // Namespace
   NAMESPACE_LIST: 'namespace:list',

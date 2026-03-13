@@ -1951,4 +1951,18 @@ export const fr = {
   'tutorial.stepOf': 'Étape {current} sur {total}',
   'settings.tutorialEnabled': 'Tutoriel de démarrage',
   'settings.tutorialEnabledHint': 'Réactiver le tutoriel au prochain lancement',
+
+  // Notes
+  'view.notes': 'Notes',
+  'notes.title': 'Notes',
+  'notes.create': 'Nouvelle note',
+  'notes.empty': 'Aucune note',
+  'notes.untitled': 'Sans titre',
+  'notes.noContent': 'Pas de contenu',
+  'notes.noWorkspace': 'Selectionnez un workspace',
+  'notes.selectOrCreate': 'Selectionnez ou creez une note',
+  'notes.titlePlaceholder': 'Titre de la note...',
+  'notes.contentPlaceholder': 'Ecrivez votre note en Markdown...',
+  'notes.preview': 'Apercu',
+  'notes.startWriting': 'Commencer a ecrire',
 } as const

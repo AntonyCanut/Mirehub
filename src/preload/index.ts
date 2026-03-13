@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils, clipboard } from 'electron'
-import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest, RuleEntry, TemplateRuleEntry, PackageManagerType, PackageInfo, ProjectPackageManager, PkgNlMessage, HealthCheckConfig, HealthCheckFile, HealthCheckLogEntry, HealthCheckSchedulerStatus, DevOpsFile, DevOpsConnection, PipelineDefinition, PipelineRun, PipelineStage, PipelineApproval, SkillStoreEntry, SkillStoreRepo } from '../shared/types'
+import { IPC_CHANNELS, AppSettings, Workspace, Namespace, KanbanTask, KanbanAttachment, FileEntry, SessionData, NpmPackageInfo, TodoEntry, ProjectStatsData, SearchResult, PromptTemplate, HttpMethod, ApiHeader, ApiTestAssertion, ApiTestFile, ApiResponse, ApiTestResult, DbConnectionConfig, DbFile, DbTable, DbTableInfo, DbQueryResult, DbBackupResult, DbBackupEntry, DbRestoreResult, DbEnvironmentTag, DbBackupLogEntry, DbNlPermissions, DbNlQueryResponse, DbNlGenerateResponse, DbNlHistoryEntry, DbNlInterpretRequest, DbNlInterpretResponse, McpServerConfig, McpHelpResult, SshKeyInfo, SshKeyType, AnalysisToolDef, AnalysisRunOptions, AnalysisReport, AnalysisProgress, AnalysisTicketRequest, RuleEntry, TemplateRuleEntry, PackageManagerType, PackageInfo, ProjectPackageManager, PkgNlMessage, HealthCheckConfig, HealthCheckFile, HealthCheckLogEntry, HealthCheckSchedulerStatus, DevOpsFile, DevOpsConnection, PipelineDefinition, PipelineRun, PipelineStage, PipelineApproval, SkillStoreEntry, SkillStoreRepo, Note } from '../shared/types'
 
 // Increase max listeners to accommodate multiple terminal tabs and event streams.
 // Each terminal registers onData + onClose listeners on the shared ipcRenderer,
@@ -852,6 +852,18 @@ const api = {
   clipboard: {
     writeText: (text: string): void => clipboard.writeText(text),
     readText: (): string => clipboard.readText(),
+  },
+
+  // Notes (workspace-level)
+  notes: {
+    list: (workspaceId: string): Promise<Note[]> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NOTES_LIST, { workspaceId }),
+    create: (workspaceId: string, title: string, content: string): Promise<Note> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NOTES_CREATE, { workspaceId, title, content }),
+    update: (workspaceId: string, id: string, title?: string, content?: string): Promise<Note | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NOTES_UPDATE, { workspaceId, id, title, content }),
+    delete: (workspaceId: string, id: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.NOTES_DELETE, { workspaceId, id }),
   },
 
   // Utility — resolve file path from drag & drop (required for sandbox mode)

@@ -22,6 +22,7 @@ import { HealthCheckPanel } from './components/HealthCheckPanel'
 import { DatabaseExplorer } from './components/DatabaseExplorer'
 import { CodeAnalysisPanel } from './components/CodeAnalysisPanel'
 import { DevOpsPanel } from './components/DevOpsPanel'
+import { NotesPanel } from './components/NotesPanel'
 import { TutorialModal } from './components/TutorialModal'
 import { ToastContainer } from './components/ToastContainer'
 import { useWorkspaceStore } from './lib/stores/workspaceStore'
@@ -38,7 +39,7 @@ import type { AppSettings, SessionData, SessionTab } from '../shared/types'
 const TUTORIAL_VIEWS = new Set([
   'kanban', 'terminal', 'git', 'database', 'packages',
   'analysis', 'todos', 'stats', 'prompts', 'api', 'healthcheck',
-  'settings', 'search', 'shortcuts', 'claude', 'ai', 'devops',
+  'settings', 'search', 'shortcuts', 'claude', 'ai', 'devops', 'notes',
 ])
 
 export function App() {
@@ -431,6 +432,11 @@ export function App() {
             {viewMode === 'devops' && (
               <div className="view-panel" style={{ display: 'flex' }}>
                 <DevOpsPanel />
+              </div>
+            )}
+            {viewMode === 'notes' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <NotesPanel />
               </div>
             )}
           </div>

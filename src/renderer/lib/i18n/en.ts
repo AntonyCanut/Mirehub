@@ -1951,4 +1951,18 @@ export const en = {
   'tutorial.stepOf': 'Step {current} of {total}',
   'settings.tutorialEnabled': 'Getting started tutorial',
   'settings.tutorialEnabledHint': 'Reactivate the tutorial on next launch',
+
+  // Notes
+  'view.notes': 'Notes',
+  'notes.title': 'Notes',
+  'notes.create': 'New note',
+  'notes.empty': 'No notes yet',
+  'notes.untitled': 'Untitled',
+  'notes.noContent': 'No content',
+  'notes.noWorkspace': 'Select a workspace',
+  'notes.selectOrCreate': 'Select or create a note',
+  'notes.titlePlaceholder': 'Note title...',
+  'notes.contentPlaceholder': 'Write your note in Markdown...',
+  'notes.preview': 'Preview',
+  'notes.startWriting': 'Start writing',
 } as const
