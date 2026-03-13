@@ -1,3 +1,10 @@
+# Force bash on all platforms (on Windows, use Git Bash)
+ifeq ($(OS),Windows_NT)
+  SHELL := $(firstword $(wildcard C:/Program\ Files/Git/bin/bash.exe) bash)
+endif
+SHELL ?= /bin/bash
+.SHELLFLAGS := -c
+
 .PHONY: dev build clean install lint format test typecheck build-app app app-win check web
 
 STAMP = node_modules/.install-stamp
@@ -61,21 +68,14 @@ web:
 	cd website && python3 -m http.server 8080
 
 # Nettoyage
-ifeq ($(OS),Windows_NT)
-clean:
-	if exist dist rmdir /s /q dist
-	if exist release rmdir /s /q release
-	if exist .vite rmdir /s /q .vite
-else
 clean:
 	rm -rf dist release .vite
-endif
 
 # Pre-deploy check — runs the 4 CI conditions and prints a report
 check: $(STAMP)
 	@echo ""
 	@echo "══════════════════════════════════════"
-	@echo "  Mirehub — Pre-deploy Check"
+	@echo "  Kanbai — Pre-deploy Check"
 	@echo "══════════════════════════════════════"
 	@echo ""
 	@LINT=0; TYPES=0; TESTS=0; BUILD=0; \
