@@ -51,6 +51,11 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, 'src/shared'),
       '@renderer': path.resolve(__dirname, 'src/renderer'),
     },
+    // Prevent Vite from resolving symlinks/junctions to their real paths.
+    // Without this, esbuild outputs use the real path while Vite's dep
+    // optimizer looks up the junction path — the mismatch causes a crash
+    // ("Cannot read properties of undefined (reading 'imports')") on Windows.
+    preserveSymlinks: true,
   },
   build: {
     outDir: path.resolve(__dirname, 'dist/renderer'),
