@@ -478,6 +478,7 @@ export function SettingsPanel() {
                   <AiProviderSelector
                     value={(settings.defaultAiProvider || 'claude') as AiProviderId}
                     onChange={(provider) => updateSetting('defaultAiProvider', provider)}
+                    showInstall={false}
                   />
                 </div>
               </div>

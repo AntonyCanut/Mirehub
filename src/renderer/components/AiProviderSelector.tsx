@@ -6,17 +6,20 @@ import { useI18n } from '../lib/i18n'
 interface AiProviderSelectorProps {
   value: AiProviderId
   onChange: (provider: AiProviderId) => void
+  showInstall?: boolean
 }
 
-export function AiProviderSelector({ value, onChange }: AiProviderSelectorProps) {
+export function AiProviderSelector({ value, onChange, showInstall = true }: AiProviderSelectorProps) {
   const { t } = useI18n()
   const [installStatus, setInstallStatus] = useState<Record<string, boolean>>({})
   const [installing, setInstalling] = useState<string | null>(null)
   const [installResult, setInstallResult] = useState<Record<string, 'success' | 'failed'>>({})
 
   useEffect(() => {
-    window.kanbai.aiProvider.checkInstalled().then(setInstallStatus)
-  }, [])
+    if (showInstall) {
+      window.kanbai.aiProvider.checkInstalled().then(setInstallStatus)
+    }
+  }, [showInstall])
 
   // Listen for install status updates
   useEffect(() => {
@@ -68,7 +71,7 @@ export function AiProviderSelector({ value, onChange }: AiProviderSelectorProps)
             >
               {config.displayName}
             </button>
-            {!isChecked && !isInstalled && !isInstallingThis && !result && (
+            {showInstall && !isChecked && !isInstalled && !isInstallingThis && !result && (
               <button
                 className="ai-provider-install-btn"
                 onClick={(e) => handleInstall(id, e)}
@@ -80,19 +83,19 @@ export function AiProviderSelector({ value, onChange }: AiProviderSelectorProps)
                 {t('ai.install')}
               </button>
             )}
-            {isInstallingThis && (
+            {showInstall && isInstallingThis && (
               <span className="ai-provider-status ai-provider-status--installing">
                 {t('ai.installing')}
               </span>
             )}
-            {result === 'success' && (
+            {showInstall && result === 'success' && (
               <span className="ai-provider-status ai-provider-status--success">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path d="M2 5l2.5 2.5L8 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
             )}
-            {result === 'failed' && (
+            {showInstall && result === 'failed' && (
               <span className="ai-provider-status ai-provider-status--failed">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
