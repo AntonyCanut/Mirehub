@@ -28,7 +28,7 @@ import { registerClaudeMemoryHandlers } from './ipc/claudeMemory'
 import { registerHealthCheckHandlers } from './ipc/healthcheck'
 import { registerCodexConfigHandlers } from './ipc/codexConfig'
 import { registerCopilotConfigHandlers } from './ipc/copilotConfig'
-import { registerCompanionHandlers, cleanupCompanion } from './ipc/companion'
+import { registerCompanionHandlers, initDevCompanion, cleanupCompanion } from './ipc/companion'
 import { registerGeminiConfigHandlers } from './ipc/geminiConfig'
 import { registerAiProviderHandlers } from './ipc/aiProvider'
 import { registerPixelAgentsHandlers, shutdownPixelAgentsService } from './ipc/pixel-agents'
@@ -382,6 +382,7 @@ app.whenReady().then(() => {
   registerDevOpsHandlers(ipcMain)
   registerNotesHandlers(ipcMain)
   registerCompanionHandlers(ipcMain, () => mainWindow)
+  initDevCompanion(() => mainWindow)
 
   // Ensure a Default namespace exists (first launch or migration)
   new StorageService().ensureDefaultNamespace()

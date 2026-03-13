@@ -107,6 +107,31 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
   })
 }
 
+export async function initDevCompanion(getWindow: () => BrowserWindow | null): Promise<void> {
+  const devCode = process.env['KANBAI_DEV_CODE']
+  if (!devCode) return
+
+  try {
+    const result = await apiRequest<{ sessionId: string; token: string }>(
+      'POST',
+      '/api/v1/pair/claim',
+      { code: devCode },
+    )
+    currentToken = result.token
+    startPolling(devCode, getWindow)
+    // Notify renderer of waiting state after a short delay (window may not be ready yet)
+    setTimeout(() => {
+      const win = getWindow()
+      if (win && !win.isDestroyed()) {
+        win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'waiting')
+      }
+    }, 2000)
+    console.log(`[DEV] Companion auto-connected with code: ${devCode}`)
+  } catch (err) {
+    console.log(`[DEV] Companion auto-connect failed (API not running?): ${(err as Error).message}`)
+  }
+}
+
 export function cleanupCompanion(): void {
   stopPolling()
   if (currentToken) {
