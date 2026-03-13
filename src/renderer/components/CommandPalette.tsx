@@ -50,6 +50,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       { mode: 'todos', label: t('command.showTodos'), shortcut: '' },
       { mode: 'stats', label: t('command.showStats'), shortcut: '' },
       { mode: 'shortcuts', label: t('command.showShortcuts'), shortcut: '' },
+      { mode: 'notes', label: t('command.showNotes'), shortcut: '' },
     ]
 
     for (const v of views) {

@@ -250,6 +250,11 @@ function buildApplicationMenu(): void {
           accelerator: 'CmdOrCtrl+5',
           click: () => sendMenuAction('view:database'),
         },
+        {
+          label: 'Notes',
+          accelerator: 'CmdOrCtrl+6',
+          click: () => sendMenuAction('view:notes'),
+        },
         { type: 'separator' },
         {
           label: isFr ? 'Palette de commandes' : 'Command Palette',

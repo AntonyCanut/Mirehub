@@ -1320,6 +1320,7 @@ export const fr = {
   'command.showStats': 'Afficher Statistiques',
   'command.showPrompts': 'Afficher Prompts',
   'command.showShortcuts': 'Afficher Raccourcis',
+  'command.showNotes': 'Afficher Notes',
   'command.globalSearch': 'Recherche Globale',
 
   // Shortcuts
