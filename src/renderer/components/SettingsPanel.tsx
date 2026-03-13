@@ -6,6 +6,7 @@ import { useAppUpdateStore } from '../lib/stores/appUpdateStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useUpdateStore } from '../lib/stores/updateStore'
 import { AiProviderSelector } from './AiProviderSelector'
+import { CONFIGURABLE_TABS, ALL_TAB_IDS } from '../../shared/constants/tabs'
 
 const FONT_FAMILIES = [
   'Menlo',
@@ -56,11 +57,12 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoCreateAiMemoryRefactorTickets: true,
 }
 
-type SettingsSection = 'general' | 'appearance' | 'terminal' | 'git' | 'ssh' | 'claude' | 'ai' | 'kanban' | 'tools' | 'notifications' | 'about'
+type SettingsSection = 'general' | 'appearance' | 'tabs' | 'terminal' | 'git' | 'ssh' | 'claude' | 'ai' | 'kanban' | 'tools' | 'notifications' | 'about'
 
 const SECTIONS: { id: SettingsSection; icon: string }[] = [
   { id: 'general', icon: '⚙' },
   { id: 'appearance', icon: '🎨' },
+  { id: 'tabs', icon: '◫' },
   { id: 'terminal', icon: '▸' },
   { id: 'kanban', icon: '▦' },
   { id: 'git', icon: '⎇' },
@@ -401,6 +403,7 @@ export function SettingsPanel() {
     const map: Record<SettingsSection, string> = {
       general: t('settings.general'),
       appearance: t('settings.appearance'),
+      tabs: t('settings.tabs'),
       terminal: t('settings.terminal'),
       git: t('settings.git'),
       ssh: t('settings.ssh'),
@@ -554,6 +557,77 @@ export function SettingsPanel() {
                       <option key={f} value={f}>{f}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tabs */}
+          {activeSection === 'tabs' && (
+            <div className="settings-section">
+              {/* Workspace-level visible tabs */}
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.tabsWorkspace')}</label>
+                    <span className="settings-hint">{t('settings.tabsWorkspaceHint')}{activeWorkspaceName ? ` (${activeWorkspaceName})` : ''}</span>
+                  </div>
+                </div>
+                <div className="settings-tab-grid">
+                  {CONFIGURABLE_TABS.map((tab) => {
+                    const wsTabs = activeWorkspaceId
+                      ? (workspaces.find((w) => w.id === activeWorkspaceId)?.visibleTabs ?? ALL_TAB_IDS)
+                      : ALL_TAB_IDS
+                    const isActive = wsTabs.includes(tab.id)
+                    return (
+                      <button
+                        key={tab.id}
+                        className={`settings-radio-btn${isActive ? ' settings-radio-btn--active' : ''}`}
+                        onClick={() => {
+                          if (!activeWorkspaceId) return
+                          const current = workspaces.find((w) => w.id === activeWorkspaceId)?.visibleTabs ?? [...ALL_TAB_IDS]
+                          const next = isActive
+                            ? current.filter((id) => id !== tab.id)
+                            : [...current, tab.id]
+                          const ws = useWorkspaceStore.getState()
+                          ws.updateWorkspace(activeWorkspaceId, { visibleTabs: next })
+                        }}
+                      >
+                        {t(tab.labelKey)}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Default tabs for new workspaces */}
+              <div className="settings-card">
+                <div className="settings-row">
+                  <div className="settings-row-info">
+                    <label className="settings-label">{t('settings.tabsDefault')}</label>
+                    <span className="settings-hint">{t('settings.tabsDefaultHint')}</span>
+                  </div>
+                </div>
+                <div className="settings-tab-grid">
+                  {CONFIGURABLE_TABS.map((tab) => {
+                    const defaultTabs = settings.defaultVisibleTabs ?? ALL_TAB_IDS
+                    const isActive = defaultTabs.includes(tab.id)
+                    return (
+                      <button
+                        key={tab.id}
+                        className={`settings-radio-btn${isActive ? ' settings-radio-btn--active' : ''}`}
+                        onClick={() => {
+                          const current = settings.defaultVisibleTabs ?? [...ALL_TAB_IDS]
+                          const next = isActive
+                            ? current.filter((id) => id !== tab.id)
+                            : [...current, tab.id]
+                          updateSetting('defaultVisibleTabs', next)
+                        }}
+                      >
+                        {t(tab.labelKey)}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>

@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { NotificationCenter } from './NotificationCenter'
 import { UpdateCenter } from './UpdateCenter'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useViewStore, type ViewMode } from '../lib/stores/viewStore'
 import { useI18n } from '../lib/i18n'
+import { ALL_TAB_IDS } from '../../shared/constants/tabs'
 
 interface TitleBarProps {
   availableMagicTabs: string[]
@@ -145,6 +146,17 @@ export function TitleBar(_props: TitleBarProps) {
   const { viewMode, setViewMode } = useViewStore()
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId)
 
+  const visibleTabs = useMemo(() => {
+    return new Set(activeWorkspace?.visibleTabs ?? ALL_TAB_IDS)
+  }, [activeWorkspace?.visibleTabs])
+
+  const isTabVisible = useCallback((tabId: string) => visibleTabs.has(tabId), [visibleTabs])
+
+  const filterDropdown = useCallback((config: DropdownConfig): DropdownConfig | null => {
+    const filteredItems = config.items.filter((item) => isTabVisible(item.mode))
+    return filteredItems.length > 0 ? { ...config, items: filteredItems } : null
+  }, [isTabVisible])
+
   // Search input state
   const [searchFocused, setSearchFocused] = useState(false)
 
@@ -177,29 +189,35 @@ export function TitleBar(_props: TitleBarProps) {
       )}
 
       <div className="titlebar-tabs">
-        <button
-          className={`view-btn${viewMode === 'kanban' ? ' view-btn--active' : ''}`}
-          onClick={() => setViewMode('kanban')}
-        >
-          {t('view.kanban')}
-        </button>
-        <button
-          className={`view-btn${viewMode === 'terminal' ? ' view-btn--active' : ''}`}
-          onClick={() => setViewMode('terminal')}
-        >
-          {t('view.terminal')}
-        </button>
+        {isTabVisible('kanban') && (
+          <button
+            className={`view-btn${viewMode === 'kanban' ? ' view-btn--active' : ''}`}
+            onClick={() => setViewMode('kanban')}
+          >
+            {t('view.kanban')}
+          </button>
+        )}
+        {isTabVisible('terminal') && (
+          <button
+            className={`view-btn${viewMode === 'terminal' ? ' view-btn--active' : ''}`}
+            onClick={() => setViewMode('terminal')}
+          >
+            {t('view.terminal')}
+          </button>
+        )}
 
-        <TabDropdown config={SERVICES_DROPDOWN} viewMode={viewMode} setViewMode={setViewMode} t={t} />
-        <TabDropdown config={DEVOPS_DROPDOWN} viewMode={viewMode} setViewMode={setViewMode} t={t} />
-        <TabDropdown config={PROJECTS_DROPDOWN} viewMode={viewMode} setViewMode={setViewMode} t={t} />
+        {(() => { const sd = filterDropdown(SERVICES_DROPDOWN); return sd ? <TabDropdown config={sd} viewMode={viewMode} setViewMode={setViewMode} t={t} /> : null })()}
+        {(() => { const dd = filterDropdown(DEVOPS_DROPDOWN); return dd ? <TabDropdown config={dd} viewMode={viewMode} setViewMode={setViewMode} t={t} /> : null })()}
+        {(() => { const pd = filterDropdown(PROJECTS_DROPDOWN); return pd ? <TabDropdown config={pd} viewMode={viewMode} setViewMode={setViewMode} t={t} /> : null })()}
 
-        <button
-          className={`view-btn${viewMode === 'claude' || viewMode === 'ai' ? ' view-btn--active' : ''}`}
-          onClick={() => setViewMode('ai')}
-        >
-          {t('view.ai')}
-        </button>
+        {isTabVisible('ai') && (
+          <button
+            className={`view-btn${viewMode === 'claude' || viewMode === 'ai' ? ' view-btn--active' : ''}`}
+            onClick={() => setViewMode('ai')}
+          >
+            {t('view.ai')}
+          </button>
+        )}
 
         {viewMode === 'file' && (
           <button className="view-btn view-btn--active">

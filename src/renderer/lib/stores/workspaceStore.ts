@@ -180,6 +180,14 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       namespaceId: activeNamespaceId ?? undefined,
     })
     if (workspace) {
+      // Apply default visible tabs from settings
+      try {
+        const settings = await window.kanbai.settings.get()
+        if (settings.defaultVisibleTabs) {
+          workspace.visibleTabs = settings.defaultVisibleTabs
+          await window.kanbai.workspace.update({ id: workspace.id, visibleTabs: settings.defaultVisibleTabs })
+        }
+      } catch { /* non-blocking */ }
       set((state) => ({
         workspaces: [...state.workspaces, workspace],
       }))
@@ -201,6 +209,15 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         color: '#6C8CFF',
       })
       if (!workspace) return null
+
+      // Apply default visible tabs from settings
+      try {
+        const settings = await window.kanbai.settings.get()
+        if (settings.defaultVisibleTabs) {
+          workspace.visibleTabs = settings.defaultVisibleTabs
+          await window.kanbai.workspace.update({ id: workspace.id, visibleTabs: settings.defaultVisibleTabs })
+        }
+      } catch { /* non-blocking */ }
 
       set((state) => ({
         workspaces: [...state.workspaces, workspace],
@@ -286,6 +303,15 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         color: '#6C8CFF',
       })
       if (!workspace) return null
+
+      // Apply default visible tabs from settings
+      try {
+        const settings = await window.kanbai.settings.get()
+        if (settings.defaultVisibleTabs) {
+          workspace.visibleTabs = settings.defaultVisibleTabs
+          await window.kanbai.workspace.update({ id: workspace.id, visibleTabs: settings.defaultVisibleTabs })
+        }
+      } catch { /* non-blocking */ }
 
       set((state) => ({
         workspaces: [...state.workspaces, workspace],

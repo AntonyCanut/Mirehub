@@ -1,5 +1,6 @@
-import { useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useI18n } from '../lib/i18n'
+import { CONFIGURABLE_TABS, ALL_TAB_IDS } from '../../shared/constants/tabs'
 
 const SECTION_ICONS: Record<string, string> = {
   welcome: '👋',
@@ -27,8 +28,36 @@ interface TutorialModalProps {
   onDismissAll: () => void
 }
 
+const TAB_GROUP_LABELS: Record<string, { fr: string; en: string }> = {
+  standalone: { fr: 'Principaux', en: 'Main' },
+  services: { fr: 'Services', en: 'Services' },
+  devops: { fr: 'DevOps', en: 'DevOps' },
+  projects: { fr: 'Projets', en: 'Projects' },
+}
+
+const TAB_GROUP_ORDER = ['standalone', 'services', 'devops', 'projects'] as const
+
 export function TutorialModal({ section, onDone, onDismissAll }: TutorialModalProps) {
   const { t, locale, setLocale } = useI18n()
+  const [selectedTabs, setSelectedTabs] = useState<Set<string>>(new Set(ALL_TAB_IDS))
+
+  const toggleTab = useCallback((tabId: string) => {
+    setSelectedTabs((prev) => {
+      const next = new Set(prev)
+      if (next.has(tabId)) {
+        next.delete(tabId)
+      } else {
+        next.add(tabId)
+      }
+      return next
+    })
+  }, [])
+
+  const handleWelcomeDone = useCallback(() => {
+    const tabs = Array.from(selectedTabs)
+    window.kanbai.settings.set({ defaultVisibleTabs: tabs })
+    onDone()
+  }, [selectedTabs, onDone])
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -62,23 +91,52 @@ export function TutorialModal({ section, onDone, onDismissAll }: TutorialModalPr
         <div className="tutorial-modal-body">
           <div className="tutorial-modal-icon">{icon}</div>
           {section === 'welcome' && (
-            <div className="tutorial-language-selector">
-              <span className="tutorial-language-label">{t('tutorial.welcome.chooseLanguage')}</span>
-              <div className="tutorial-language-buttons">
-                <button
-                  className={`tutorial-lang-btn${locale === 'fr' ? ' tutorial-lang-btn--active' : ''}`}
-                  onClick={() => setLocale('fr')}
-                >
-                  Français
-                </button>
-                <button
-                  className={`tutorial-lang-btn${locale === 'en' ? ' tutorial-lang-btn--active' : ''}`}
-                  onClick={() => setLocale('en')}
-                >
-                  English
-                </button>
+            <>
+              <div className="tutorial-language-selector">
+                <span className="tutorial-language-label">{t('tutorial.welcome.chooseLanguage')}</span>
+                <div className="tutorial-language-buttons">
+                  <button
+                    className={`tutorial-lang-btn${locale === 'fr' ? ' tutorial-lang-btn--active' : ''}`}
+                    onClick={() => setLocale('fr')}
+                  >
+                    Français
+                  </button>
+                  <button
+                    className={`tutorial-lang-btn${locale === 'en' ? ' tutorial-lang-btn--active' : ''}`}
+                    onClick={() => setLocale('en')}
+                  >
+                    English
+                  </button>
+                </div>
               </div>
-            </div>
+              <div className="tutorial-tab-selector">
+                <span className="tutorial-language-label">{t('tutorial.welcome.chooseTabs')}</span>
+                <div className="tutorial-tab-groups">
+                  {TAB_GROUP_ORDER.map((group) => {
+                    const tabs = CONFIGURABLE_TABS.filter((tab) => tab.group === group)
+                    if (tabs.length === 0) return null
+                    return (
+                      <div key={group} className="tutorial-tab-group">
+                        <span className="tutorial-tab-group-label">
+                          {TAB_GROUP_LABELS[group]?.[locale] ?? group}
+                        </span>
+                        <div className="tutorial-tab-buttons">
+                          {tabs.map((tab) => (
+                            <button
+                              key={tab.id}
+                              className={`settings-radio-btn${selectedTabs.has(tab.id) ? ' settings-radio-btn--active' : ''}`}
+                              onClick={() => toggleTab(tab.id)}
+                            >
+                              {t(tab.labelKey)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </>
           )}
           <h2 className="tutorial-modal-title">{t(titleKey)}</h2>
           <p className="tutorial-modal-description">{t(descriptionKey)}</p>
@@ -88,7 +146,7 @@ export function TutorialModal({ section, onDone, onDismissAll }: TutorialModalPr
           <button className="tutorial-modal-btn tutorial-modal-btn--secondary" onClick={onDismissAll}>
             {t('tutorial.dismiss')}
           </button>
-          <button className="tutorial-modal-btn tutorial-modal-btn--primary" onClick={onDone}>
+          <button className="tutorial-modal-btn tutorial-modal-btn--primary" onClick={section === 'welcome' ? handleWelcomeDone : onDone}>
             {t('tutorial.ok')}
           </button>
         </div>

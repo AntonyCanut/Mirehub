@@ -13564,6 +13564,53 @@ body {
   color: var(--bg-primary);
 }
 
+/* --- Tutorial Tab Selector --- */
+
+.tutorial-tab-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.tutorial-tab-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.tutorial-tab-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tutorial-tab-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tutorial-tab-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* --- Settings Tab Grid --- */
+
+.settings-tab-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0;
+}
+
 /* ========================================
    Health Check Panel — Modern Design
    ======================================== */
