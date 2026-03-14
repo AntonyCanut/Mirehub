@@ -39,7 +39,6 @@ const PROJECTS_DROPDOWN: DropdownConfig = {
     { mode: 'analysis', labelKey: 'view.analysis' },
     { mode: 'stats', labelKey: 'view.stats' },
     { mode: 'git', labelKey: 'view.git' },
-    { mode: 'notes', labelKey: 'view.notes' },
   ],
 }
 
