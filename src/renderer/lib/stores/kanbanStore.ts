@@ -61,6 +61,14 @@ async function autoMergeWorktree(
       ticketLabel,
       task.worktreeBaseBranch,
     )
+    if (result?.success && task.worktreeEnvPath) {
+      // Clean up the task-specific workspace env now that the worktree is merged
+      const workspace = useWorkspaceStore.getState().workspaces.find((w) => w.id === workspaceId)
+      if (workspace) {
+        const taskEnvName = `${workspace.name}__wt_${task.id.slice(0, 8)}`
+        await window.kanbai.workspaceEnv.delete(taskEnvName).catch(() => { /* best-effort */ })
+      }
+    }
     if (!result?.success) {
       if (result?.conflict) {
         // Merge conflict detected — preserve worktree, notify user, set task PENDING
@@ -927,6 +935,34 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
               // Store the base branch (the branch that was active when worktree was created)
               // so we can merge back into it when the task completes
               const baseBranch = result.baseBranch ?? 'main'
+              let worktreeEnvPath: string | undefined
+
+              // For workspace-scoped tasks, wrap the worktree in a workspace env
+              // so the agent sees all projects, not just the worktree directory
+              if (!task.targetProjectId) {
+                try {
+                  const workspace = workspaces.find((w) => w.id === workspaceId)
+                  if (workspace && workspaceProjects.length > 0) {
+                    const taskEnvName = `${workspace.name}__wt_${task.id.slice(0, 8)}`
+                    // Replace the git project's original path with the worktree path
+                    const modifiedPaths = workspaceProjects.map((p) =>
+                      p.path === projectPath ? worktreeDir : p.path,
+                    )
+                    const envResult = await window.kanbai.workspaceEnv.setup(
+                      taskEnvName,
+                      modifiedPaths,
+                      workspaceId,
+                    )
+                    if (envResult?.success && envResult.envPath) {
+                      cwd = envResult.envPath
+                      worktreeEnvPath = envResult.envPath
+                    }
+                  }
+                } catch {
+                  // Env setup failed — fall through to use worktreeDir as cwd
+                }
+              }
+
               // Persist worktree info on the task
               await window.kanbai.kanban.update({
                 id: task.id,
@@ -934,10 +970,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
                 worktreePath: worktreeDir,
                 worktreeBranch: ticketBranch,
                 worktreeBaseBranch: baseBranch,
+                ...(worktreeEnvPath ? { worktreeEnvPath } : {}),
               })
               set((state) => ({
                 tasks: state.tasks.map((t) =>
-                  t.id === task.id ? { ...t, worktreePath: worktreeDir, worktreeBranch: ticketBranch, worktreeBaseBranch: baseBranch } : t,
+                  t.id === task.id ? { ...t, worktreePath: worktreeDir, worktreeBranch: ticketBranch, worktreeBaseBranch: baseBranch, ...(worktreeEnvPath ? { worktreeEnvPath } : {}) } : t,
                 ),
               }))
             }
@@ -947,9 +984,12 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         // Worktree creation failed — fall through to use original cwd
       }
     } else if (task.worktreePath) {
-      // Reuse existing worktree path
-      cwd = task.worktreePath
+      // Reuse existing worktree — prefer workspace env path if available
+      cwd = task.worktreeEnvPath ?? task.worktreePath
     }
+
+    // Re-assert after worktree try/catch — cwd cannot become null in those branches
+    if (!cwd) { launchingTaskIds.delete(task.id); return }
 
     // Get kanban file path via IPC
     let kanbanFilePath: string

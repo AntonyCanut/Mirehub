@@ -213,6 +213,7 @@ export interface KanbanTask {
   worktreePath?: string
   worktreeBranch?: string
   worktreeBaseBranch?: string
+  worktreeEnvPath?: string
   splitFromId?: string
   createdAt: number
   updatedAt: number
