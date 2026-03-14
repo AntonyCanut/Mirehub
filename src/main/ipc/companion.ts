@@ -271,6 +271,8 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
 
   ipcMain.handle(IPC_CHANNELS.COMPANION_DISCONNECT, async () => {
     stopPolling()
+    stopCompanionServer()
+    stopChangePoll()
     if (currentToken) {
       try {
         await apiRequest<unknown>('DELETE', '/api/v1/pair/unregister', undefined, currentToken)
@@ -279,6 +281,7 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
       }
     }
     currentToken = null
+    currentWorkspaceId = null
     const win = getWindow()
     if (win && !win.isDestroyed()) {
       win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'disconnected')

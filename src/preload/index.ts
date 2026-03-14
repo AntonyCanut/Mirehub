@@ -871,12 +871,12 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.COMPANION_REGISTER, workspaceId),
     cancel: (): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.COMPANION_CANCEL),
+    disconnect: (): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.COMPANION_DISCONNECT),
     getDataInfo: (): Promise<{ port: number; encryptionKey: string } | null> =>
       ipcRenderer.invoke(IPC_CHANNELS.COMPANION_DATA_INFO),
     syncTickets: (workspaceId: string): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.COMPANION_SYNC_TICKETS, workspaceId),
-    disconnect: (): Promise<void> =>
-      ipcRenderer.invoke(IPC_CHANNELS.COMPANION_DISCONNECT),
     onStatusChanged: (callback: (status: string, companionName?: string) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, status: string, companionName?: string) =>
         callback(status, companionName)

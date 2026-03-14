@@ -16,7 +16,7 @@ export function CompanionIndicator() {
   const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { status, pairingCode, syncing, companionName, register, cancel, syncTickets, disconnect } = useCompanionStore()
+  const { status, pairingCode, companionName, syncing, register, cancel, disconnect, syncTickets } = useCompanionStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const applyCompanionUpdate = useKanbanStore((s) => s.applyCompanionUpdate)
 
@@ -66,6 +66,14 @@ export function CompanionIndicator() {
     }
   }, [cancel])
 
+  const handleDisconnect = useCallback(async () => {
+    try {
+      await disconnect()
+    } catch (err) {
+      console.error('Failed to disconnect companion:', err)
+    }
+  }, [disconnect])
+
   const handleSync = useCallback(async () => {
     if (!activeWorkspaceId) return
     try {
@@ -74,14 +82,6 @@ export function CompanionIndicator() {
       console.error('Failed to sync tickets:', err)
     }
   }, [activeWorkspaceId, syncTickets])
-
-  const handleDisconnect = useCallback(async () => {
-    try {
-      await disconnect()
-    } catch (err) {
-      console.error('Failed to disconnect companion:', err)
-    }
-  }, [disconnect])
 
   const dotColor = STATUS_COLORS[status] ?? STATUS_COLORS.disconnected
 

@@ -6,8 +6,8 @@ export type CompanionStatus = 'disconnected' | 'waiting' | 'connected' | 'lost' 
 interface CompanionState {
   status: CompanionStatus
   pairingCode: string | null
-  syncing: boolean
   companionName: string | null
+  syncing: boolean
 }
 
 interface CompanionActions {
@@ -16,8 +16,8 @@ interface CompanionActions {
   setCompanionName: (name: string | null) => void
   register: (workspaceId: string) => Promise<void>
   cancel: () => Promise<void>
-  syncTickets: (workspaceId: string) => Promise<void>
   disconnect: () => Promise<void>
+  syncTickets: (workspaceId: string) => Promise<void>
 }
 
 type CompanionStore = CompanionState & CompanionActions
@@ -25,8 +25,8 @@ type CompanionStore = CompanionState & CompanionActions
 export const useCompanionStore = create<CompanionStore>((set) => ({
   status: 'disconnected',
   pairingCode: null,
-  syncing: false,
   companionName: null,
+  syncing: false,
 
   setStatus: (status) => set({ status }),
   setPairingCode: (code) => set({ pairingCode: code }),
