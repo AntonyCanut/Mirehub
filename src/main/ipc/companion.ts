@@ -70,7 +70,7 @@ function startPolling(code: string, getWindow: () => BrowserWindow | null): void
     } catch {
       const win = getWindow()
       if (win && !win.isDestroyed()) {
-        win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'maintenance')
+        win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'lost')
       }
     }
   }, 2000)
@@ -131,6 +131,12 @@ export async function initDevCompanion(getWindow: () => BrowserWindow | null): P
     console.log(`[DEV] Registered pairing code: ${devCode} — waiting for companion`)
   } catch (err) {
     console.log(`[DEV] Companion registration failed (API not running?): ${(err as Error).message}`)
+    setTimeout(() => {
+      const win = getWindow()
+      if (win && !win.isDestroyed()) {
+        win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'maintenance')
+      }
+    }, 2000)
   }
 }
 
