@@ -326,41 +326,14 @@ Criteria for approval:
 
 ## Project Standards
 
-### Recommended Structure
-```
-src/
-  main/           # Electron main process
-    ipc/          # IPC handlers (1 file per domain, 30 handlers)
-    services/     # Business logic services
-      storage.ts          # StorageService singleton (~/.kanbai/data.json)
-      healthCheckScheduler.ts
-      notificationService.ts
-      appUpdateState.ts   # App update state management
-      activityHooks.ts    # AI provider activity hooks (Kanbai integration)
-      ai-cli.ts           # AI CLI detection and management
-      pixel-agents-service.ts   # Pixel agents integration
-      pixel-agents-assets.ts    # Pixel agents static assets
-      database/           # DB connection, queries, backup, crypto, NL queries, drivers/
-      packages/           # Package analysis, NL package queries
-    assets/       # Static assets (rule-templates)
-  preload/        # Preload scripts (contextBridge, exposes window.kanbai)
-  renderer/       # Renderer process (React)
-    components/   # All UI components (flat architecture, ~60 components)
-    lib/stores/   # Zustand stores (per domain, 13 stores)
-    styles/       # CSS custom properties
-  shared/         # Types and constants shared between processes
-    types/        # ALL interfaces + IPC_CHANNELS
-    constants/    # Shared constants
-tests/
-  unit/           # Unit tests (services, stores, utils)
-  integration/    # IPC round-trip tests
-```
+Full project architecture, stack, IPC conventions, features, and structure are in `.claude/rules/electron/rules/core.md` (loaded automatically).
 
 ### Code Conventions
 - TypeScript strict mode everywhere
 - No `any` unless documented justification
 - ESLint 9 (flat config) + Prettier for formatting
 - Conventional Commits for git messages (in French)
+- No Co-Authored-By trailers in commits
 - Build: Vite 7 + vite-plugin-electron (NOT electron-vite)
 
 <!-- KANBAI_WORKFLOW -->

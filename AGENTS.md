@@ -178,3 +178,17 @@ npm run build:mcp    # Build MCP server
 - Integration: IPC round-trips with mocked Electron (`tests/integration/`)
 - Mock infrastructure: `tests/mocks/electron.ts`, `tests/helpers/storage.ts`
 - Always run tests before marking work as done
+
+## Workflow
+
+1. **Plan First** — For non-trivial tasks (3+ steps or architectural decisions), write a plan before coding
+2. **Verify Before Completion** — Never mark a task as done without proving it works (run tests, check logs)
+3. **Autonomous Bug Fixing** — When a bug is reported, fix it directly. Point to logs, errors, failing tests — then resolve
+4. **Elegance Check** — For non-trivial changes, pause and ask "is there a more elegant way?" Skip for simple fixes
+5. **Self-Improvement** — After any user correction, capture the lesson to avoid repeating the same mistake
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Minimal code impact.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary.

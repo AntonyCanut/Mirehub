@@ -103,3 +103,39 @@ Three-process Electron model:
 
 - Vitest 4.x: `tests/unit/` (services, stores) + `tests/integration/` (IPC round-trips)
 - Mock infra: `tests/mocks/electron.ts`, `tests/helpers/storage.ts`
+- Always run tests before marking work as done
+
+## Data Persistence
+
+- `~/.kanbai/data.json` — main data store (workspaces, projects, settings, via StorageService singleton)
+- `.workspaces/kanban.json` — per-project Kanban tasks
+- Session state saved/restored via StorageService
+
+## Commands
+
+```bash
+npm run dev          # Dev with hot-reload (vite + vite-plugin-electron)
+npm run build        # Production build
+npm run build:app    # Build + package for macOS
+npm run test         # Unit tests (Vitest)
+npm run test:watch   # Tests in watch mode
+npm run lint         # ESLint (flat config)
+npm run lint:fix     # ESLint auto-fix
+npm run typecheck    # TypeScript check
+npm run format       # Prettier
+npm run build:mcp    # Build MCP server
+```
+
+## Workflow
+
+1. **Plan First** — For non-trivial tasks (3+ steps or architectural decisions), write a plan before coding
+2. **Verify Before Completion** — Never mark a task as done without proving it works (run tests, check logs)
+3. **Autonomous Bug Fixing** — When a bug is reported, fix it directly. Point to logs, errors, failing tests — then resolve
+4. **Elegance Check** — For non-trivial changes, pause and ask "is there a more elegant way?" Skip for simple fixes
+5. **Self-Improvement** — After any user correction, capture the lesson to avoid repeating the same mistake
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Minimal code impact.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary.
