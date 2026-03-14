@@ -1985,6 +1985,8 @@ export const fr = {
   'companion.cancel': 'Annuler',
   'companion.codeLabel': 'Code de pairage',
   'companion.connectedInfo': 'Application compagnon connectée.',
+  'companion.connectedAs': 'Connecté : {name}',
+  'companion.disconnect': 'Déconnecter',
   'companion.lostInfo': 'La connexion avec le compagnon a été perdue.',
   'companion.reconnect': 'Reconnecter',
   'companion.status.maintenance': 'Serveur indisponible',

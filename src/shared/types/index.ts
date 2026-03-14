@@ -1495,5 +1495,6 @@ export const IPC_CHANNELS = {
   // Companion
   COMPANION_REGISTER: 'companion:register',
   COMPANION_CANCEL: 'companion:cancel',
+  COMPANION_DISCONNECT: 'companion:disconnect',
   COMPANION_STATUS_CHANGED: 'companion:statusChanged',
 } as const

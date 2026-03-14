@@ -15,7 +15,7 @@ export function CompanionIndicator() {
   const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { status, pairingCode, register, cancel } = useCompanionStore()
+  const { status, pairingCode, companionName, register, cancel, disconnect } = useCompanionStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
 
   useEffect(() => {
@@ -55,6 +55,14 @@ export function CompanionIndicator() {
       console.error('Failed to cancel companion:', err)
     }
   }, [cancel])
+
+  const handleDisconnect = useCallback(async () => {
+    try {
+      await disconnect()
+    } catch (err) {
+      console.error('Failed to disconnect companion:', err)
+    }
+  }, [disconnect])
 
   const dotColor = STATUS_COLORS[status] ?? STATUS_COLORS.disconnected
 
@@ -96,7 +104,16 @@ export function CompanionIndicator() {
               </>
             )}
             {status === 'connected' && (
-              <p className="companion-info">{t('companion.connectedInfo')}</p>
+              <>
+                <p className="companion-info">
+                  {companionName
+                    ? t('companion.connectedAs', { name: companionName })
+                    : t('companion.connectedInfo')}
+                </p>
+                <button className="companion-action-btn companion-action-btn--cancel" onClick={handleDisconnect}>
+                  {t('companion.disconnect')}
+                </button>
+              </>
             )}
             {status === 'lost' && (
               <>
