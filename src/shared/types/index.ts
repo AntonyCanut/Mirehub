@@ -1497,4 +1497,6 @@ export const IPC_CHANNELS = {
   COMPANION_CANCEL: 'companion:cancel',
   COMPANION_STATUS_CHANGED: 'companion:statusChanged',
   COMPANION_DATA_INFO: 'companion:dataInfo',
+  COMPANION_SYNC_TICKETS: 'companion:syncTickets',
+  COMPANION_TICKET_UPDATED: 'companion:ticketUpdated',
 } as const

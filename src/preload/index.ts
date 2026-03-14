@@ -873,6 +873,8 @@ const api = {
       ipcRenderer.invoke(IPC_CHANNELS.COMPANION_CANCEL),
     getDataInfo: (): Promise<{ port: number; encryptionKey: string } | null> =>
       ipcRenderer.invoke(IPC_CHANNELS.COMPANION_DATA_INFO),
+    syncTickets: (workspaceId: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.COMPANION_SYNC_TICKETS, workspaceId),
     onStatusChanged: (callback: (status: string) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, status: string) => callback(status)
       ipcRenderer.on(IPC_CHANNELS.COMPANION_STATUS_CHANGED, listener)
@@ -882,6 +884,12 @@ const api = {
       const listener = (_event: Electron.IpcRendererEvent, info: { port: number; encryptionKey: string }) => callback(info)
       ipcRenderer.on(IPC_CHANNELS.COMPANION_DATA_INFO, listener)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.COMPANION_DATA_INFO, listener)
+    },
+    onTicketUpdated: (callback: (task: import('../shared/types').KanbanTask) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, task: import('../shared/types').KanbanTask) =>
+        callback(task)
+      ipcRenderer.on(IPC_CHANNELS.COMPANION_TICKET_UPDATED, listener)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.COMPANION_TICKET_UPDATED, listener)
     },
   },
 
