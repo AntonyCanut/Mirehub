@@ -220,10 +220,16 @@ export function Terminal({ cwd, shell, initialCommand, externalSessionId, worksp
     // writes clipboard text to the PTY) AND xterm's internal paste
     // listener (which sends the same text again via onData), causing
     // the pasted text to appear twice.
+    // We use capture phase + stopImmediatePropagation because xterm
+    // registers its own paste listener in open(), so a bubbling listener
+    // added after open() would fire AFTER xterm's — too late.
     const xtermTextarea = containerRef.current.querySelector('.xterm-helper-textarea')
-    const preventDuplicatePaste = (e: Event) => e.preventDefault()
+    const preventDuplicatePaste = (e: Event) => {
+      e.preventDefault()
+      e.stopImmediatePropagation()
+    }
     if (xtermTextarea) {
-      xtermTextarea.addEventListener('paste', preventDuplicatePaste)
+      xtermTextarea.addEventListener('paste', preventDuplicatePaste, true)
     }
 
     // Track scroll position for scroll-to-bottom button
@@ -471,7 +477,7 @@ export function Terminal({ cwd, shell, initialCommand, externalSessionId, worksp
     return () => {
       resizeObserver.disconnect()
       if (xtermTextarea) {
-        xtermTextarea.removeEventListener('paste', preventDuplicatePaste)
+        xtermTextarea.removeEventListener('paste', preventDuplicatePaste, true)
       }
       cleanupDataRef.current?.()
       cleanupCloseRef.current?.()
