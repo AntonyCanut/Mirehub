@@ -142,8 +142,29 @@ function applyAiRulesToEnv(envDir: string, projectPaths: string[]): void {
     }
   }
 
+  // Sanitize Codex config: web_search must be a TOML boolean, not a string
+  sanitizeCodexConfig(envDir)
+
   // Always ensure CLAUDE.md has required sections (even after copy or fresh creation)
   ensureRequiredClaudeMdSections(envDir)
+}
+
+/**
+ * Fix known TOML type issues in Codex config after copying from a project.
+ * Codex expects `web_search` as a boolean, but older Kanbai versions wrote it as a string.
+ */
+function sanitizeCodexConfig(envDir: string): void {
+  const configPath = path.join(envDir, '.codex', 'config.toml')
+  if (!fs.existsSync(configPath)) return
+  try {
+    let content = fs.readFileSync(configPath, 'utf-8')
+    const original = content
+    content = content.replace(/web_search = "(?:cached|live)"/g, 'web_search = true')
+    content = content.replace(/web_search = "disabled"/g, 'web_search = false')
+    if (content !== original) {
+      fs.writeFileSync(configPath, content, 'utf-8')
+    }
+  } catch { /* best-effort sanitization */ }
 }
 
 /**
