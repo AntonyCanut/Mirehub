@@ -985,7 +985,47 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       }
     } else if (task.worktreePath) {
       // Reuse existing worktree — prefer workspace env path if available
-      cwd = task.worktreeEnvPath ?? task.worktreePath
+      if (task.worktreeEnvPath) {
+        cwd = task.worktreeEnvPath
+      } else if (!task.targetProjectId) {
+        // Workspace-scoped task without env — create one now (migration path)
+        try {
+          const workspace = workspaces.find((w) => w.id === workspaceId)
+          if (workspace && workspaceProjects.length > 0) {
+            const repoPath = task.worktreePath.replace(/\/\.kanbai-worktrees\/[^/]+$/, '')
+            const taskEnvName = `${workspace.name}__wt_${task.id.slice(0, 8)}`
+            const wtPath = task.worktreePath!
+            const modifiedPaths = workspaceProjects.map((p) =>
+              p.path === repoPath
+                ? { path: wtPath, name: p.path.split('/').pop()! }
+                : p.path,
+            )
+            const envResult = await window.kanbai.workspaceEnv.setup(
+              taskEnvName,
+              modifiedPaths,
+              workspaceId,
+            )
+            if (envResult?.success && envResult.envPath) {
+              cwd = envResult.envPath
+              // Persist worktreeEnvPath for future reuse
+              await window.kanbai.kanban.update({ id: task.id, workspaceId, worktreeEnvPath: envResult.envPath })
+              set((state) => ({
+                tasks: state.tasks.map((t) =>
+                  t.id === task.id ? { ...t, worktreeEnvPath: envResult.envPath } : t,
+                ),
+              }))
+            } else {
+              cwd = task.worktreePath
+            }
+          } else {
+            cwd = task.worktreePath
+          }
+        } catch {
+          cwd = task.worktreePath
+        }
+      } else {
+        cwd = task.worktreePath
+      }
     }
 
     // Re-assert after worktree try/catch — cwd cannot become null in those branches
