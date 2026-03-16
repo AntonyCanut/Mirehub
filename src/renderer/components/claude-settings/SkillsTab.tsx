@@ -3,7 +3,7 @@ import { useI18n } from '../../lib/i18n'
 import { AgentCard } from './AgentCard'
 import { AddCard } from './AddCard'
 import { AgentSkillEditorModal } from './AgentSkillEditorModal'
-import { SkillsStoreSection } from './SkillsStoreSection'
+import { SkillsStoreSection } from '../../features/skills-store'
 import { parseAgentFrontmatter, type EnrichedAgent } from './parseAgentFrontmatter'
 
 interface AgentFile {
