@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
-import { useViewStore } from '../lib/stores/viewStore'
+import { useViewStore } from '../shared/stores/view-store'
 import { useI18n } from '../lib/i18n'
-import { ContextMenu, ContextMenuItem } from './ContextMenu'
+import { ContextMenu, ContextMenuItem } from '../shared/ui/context-menu'
 import type { GitStatus, GitLogEntry, GitTag, GitBlameLine, GitRemote, Project } from '../../shared/types'
 import '../styles/git.css'
 

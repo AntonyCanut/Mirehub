@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { NotificationCenter } from './NotificationCenter'
-import { CompanionIndicator } from './CompanionIndicator'
-import { UpdateCenter } from './UpdateCenter'
-import { useWorkspaceStore } from '../lib/stores/workspaceStore'
-import { useViewStore, type ViewMode } from '../lib/stores/viewStore'
-import { useI18n } from '../lib/i18n'
-import { ALL_TAB_IDS } from '../../shared/constants/tabs'
+import { NotificationCenter } from '../ui/notification-center'
+import { CompanionIndicator } from '../../components/CompanionIndicator'
+import { UpdateCenter } from '../../components/UpdateCenter'
+import { useWorkspaceStore } from '../../lib/stores/workspaceStore'
+import { useViewStore, type ViewMode } from '../stores/view-store'
+import { useI18n } from '../../lib/i18n'
+import { ALL_TAB_IDS } from '../../../shared/constants/tabs'
 
 interface TitleBarProps {
   availableMagicTabs: string[]

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { useViewStore, ViewMode } from '../lib/stores/viewStore'
-import { useWorkspaceStore } from '../lib/stores/workspaceStore'
-import { useI18n } from '../lib/i18n'
+import { useViewStore, ViewMode } from '../stores/view-store'
+import { useWorkspaceStore } from '../../lib/stores/workspaceStore'
+import { useI18n } from '../../lib/i18n'
 
 interface CommandAction {
   id: string

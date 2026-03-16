@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { DiffEditor } from '@monaco-editor/react'
-import { useViewStore } from '../lib/stores/viewStore'
+import { useViewStore } from '../shared/stores/view-store'
 import { useI18n } from '../lib/i18n'
 
 export function FileDiffViewer() {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { useWorkspaceStore, useFilteredWorkspaces } from '../lib/stores/workspaceStore'
-import { useViewStore } from '../lib/stores/viewStore'
+import { useViewStore } from '../shared/stores/view-store'
 import { useI18n } from '../lib/i18n'
 import { WorkspaceItem } from './WorkspaceItem'
 import { AiProviderSelector } from './AiProviderSelector'

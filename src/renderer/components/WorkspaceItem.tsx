@@ -2,11 +2,11 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import type { Workspace, Project, DbEnvironmentTag } from '../../shared/types/index'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useClaudeStore } from '../lib/stores/claudeStore'
-import { useViewStore } from '../lib/stores/viewStore'
+import { useViewStore } from '../shared/stores/view-store'
 import { useDatabaseStore } from '../lib/stores/databaseStore'
 import { useI18n } from '../lib/i18n'
 import { ProjectItem } from './ProjectItem'
-import { ContextMenu, ContextMenuItem } from './ContextMenu'
+import { ContextMenu, ContextMenuItem } from '../shared/ui/context-menu'
 
 const ENV_TAG_COLORS: Record<DbEnvironmentTag, string> = {
   local: '#3DD68C',

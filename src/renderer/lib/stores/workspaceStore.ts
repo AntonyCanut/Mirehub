@@ -4,7 +4,7 @@ import type { Workspace, Project, Namespace } from '../../../shared/types/index'
 import type { AiProviderId } from '../../../shared/types/ai-provider'
 import { AI_PROVIDERS } from '../../../shared/types/ai-provider'
 import { useTerminalTabStore } from './terminalTabStore'
-import { useViewStore } from './viewStore'
+import { useViewStore } from '../../shared/stores/view-store'
 
 interface WorkspaceState {
   workspaces: Workspace[]

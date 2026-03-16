@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useDatabaseStore } from '../lib/stores/databaseStore'
-import { useViewStore } from '../lib/stores/viewStore'
+import { useViewStore } from '../shared/stores/view-store'
 import { useI18n } from '../lib/i18n'
 import { DatabaseSidebar } from './DatabaseSidebar'
 import { DatabaseQueryArea } from './DatabaseQueryArea'

@@ -5,10 +5,10 @@ import {
   computeSplitDividers,
   findPaneComponentType,
   type PaneNode,
-} from '../lib/stores/terminalTabStore'
-import { useKanbanStore } from '../lib/stores/kanbanStore'
-import { Terminal } from './Terminal'
-import { PixelAgentsPane } from './PixelAgentsPane'
+} from '../../lib/stores/terminalTabStore'
+import { useKanbanStore } from '../../lib/stores/kanbanStore'
+import { Terminal } from '../../components/Terminal'
+import { PixelAgentsPane } from '../../components/PixelAgentsPane'
 
 function findPaneInitialCommand(node: PaneNode, paneId: string): string | null {
   if (node.type === 'leaf') return node.id === paneId ? node.initialCommand : null

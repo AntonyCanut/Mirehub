@@ -8,7 +8,7 @@ import type {
   PipelineStage,
   PipelineApproval,
 } from '../../../shared/types'
-import { pushNotification } from './notificationStore'
+import { pushNotification } from '../../shared/stores/notification-store'
 
 const MONITOR_INTERVAL_MS = 30_000
 

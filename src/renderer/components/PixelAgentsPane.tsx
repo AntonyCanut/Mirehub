@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
-import { useViewStore } from '../lib/stores/viewStore'
+import { useViewStore } from '../shared/stores/view-store'
 import { useI18n } from '../lib/i18n'
 
 interface PixelAgentsPaneProps {

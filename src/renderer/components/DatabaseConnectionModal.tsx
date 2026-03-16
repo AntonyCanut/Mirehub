@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useI18n } from '../lib/i18n'
-import { CopyableError } from './CopyableError'
+import { CopyableError } from '../shared/ui/copyable-error'
 import type {
   DbConnection,
   DbConnectionConfig,

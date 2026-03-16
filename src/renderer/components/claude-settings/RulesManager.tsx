@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useI18n } from '../../lib/i18n'
 import { MemoryEditor } from './MemoryEditor'
-import { ConfirmModal } from '../ConfirmModal'
+import { ConfirmModal } from '../../shared/ui/confirm-modal'
 import { useRulesState } from './rules/useRulesState'
 import { useRulesDragDrop } from './rules/useRulesDragDrop'
 import { buildRuleTree } from './rules/treeUtils'

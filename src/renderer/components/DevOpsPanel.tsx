@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState, useMemo } from 'react'
 import { useDevOpsStore } from '../lib/stores/devopsStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
-import { pushNotification } from '../lib/stores/notificationStore'
+import { pushNotification } from '../shared/stores/notification-store'
 import { useI18n } from '../lib/i18n'
 import type {
   DevOpsConnection,

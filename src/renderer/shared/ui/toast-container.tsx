@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
-import { useNotificationStore, type AppNotification } from '../lib/stores/notificationStore'
-import { useWorkspaceStore } from '../lib/stores/workspaceStore'
-import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
+import { useNotificationStore, type AppNotification } from '../stores/notification-store'
+import { useWorkspaceStore } from '../../lib/stores/workspaceStore'
+import { useTerminalTabStore } from '../../lib/stores/terminalTabStore'
 
 const typeColors: Record<string, string> = {
   success: 'var(--success)',

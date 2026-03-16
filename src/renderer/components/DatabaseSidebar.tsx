@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useI18n } from '../lib/i18n'
-import { ContextMenu, type ContextMenuItem } from './ContextMenu'
+import { ContextMenu, type ContextMenuItem } from '../shared/ui/context-menu'
 import type {
   DbConnection,
   DbConnectionStatus,

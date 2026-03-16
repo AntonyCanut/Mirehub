@@ -2,11 +2,11 @@ import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useKanbanStore } from '../lib/stores/kanbanStore'
-import { useViewStore } from '../lib/stores/viewStore'
+import { useViewStore } from '../shared/stores/view-store'
 import { useUpdateStore } from '../lib/stores/updateStore'
 import { useI18n } from '../lib/i18n'
 import { AI_PROVIDERS } from '../../shared/types/ai-provider'
-import { SplitContainer } from './SplitContainer'
+import { SplitContainer } from '../shared/layout/split-container'
 import { ProjectToolbar } from './ProjectToolbar'
 
 export function TerminalArea() {

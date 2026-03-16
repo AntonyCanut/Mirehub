@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
-import { useViewStore } from '../lib/stores/viewStore'
-import { useI18n } from '../lib/i18n'
-import type { PromptTemplate } from '../../shared/types/index'
-import type { PaneNode } from '../lib/stores/terminalTabStore'
+import { useTerminalTabStore } from '../../lib/stores/terminalTabStore'
+import { useViewStore } from '../stores/view-store'
+import { useI18n } from '../../lib/i18n'
+import type { PromptTemplate } from '../../../shared/types/index'
+import type { PaneNode } from '../../lib/stores/terminalTabStore'
 
 function findClaudeSession(tree: PaneNode): string | null {
   if (tree.type === 'leaf') return tree.initialCommand === 'claude' ? tree.sessionId : null
