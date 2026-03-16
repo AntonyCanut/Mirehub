@@ -347,7 +347,8 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
     it('ne fait rien sans workspaceId', async () => {
       useKanbanStore.setState({ currentWorkspaceId: null, tasks: [makeTask()] })
 
-      await useKanbanStore.getState().sendToAi(makeTask())
+      // Task must also lack a workspaceId — otherwise task.workspaceId is used as fallback
+      await useKanbanStore.getState().sendToAi(makeTask({ workspaceId: '' }))
 
       expect(mockKanbanWritePrompt).not.toHaveBeenCalled()
       expect(mockCreateTab).not.toHaveBeenCalled()

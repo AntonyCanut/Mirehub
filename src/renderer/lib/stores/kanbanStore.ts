@@ -346,7 +346,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         for (const task of workingWithoutTerminal) {
           const workingCount = tasks.filter((t) => t.status === 'WORKING' && (kanbanTabIds[t.id] || t.id === task.id)).length
           if (workingCount <= maxConcurrent) {
-            get().sendToAi(task, undefined, { activate: false })
+            get().sendToAi(task, capturedWorkspaceId, { activate: false })
           }
         }
         if (workingWithoutTerminal.length > 0) return
@@ -360,7 +360,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             const next = pickNextTask(remaining)
             if (!next) break
             remaining.splice(remaining.indexOf(next), 1)
-            get().sendToAi(next, undefined, { activate: false })
+            get().sendToAi(next, capturedWorkspaceId, { activate: false })
           }
         }
       }, 500)
@@ -569,12 +569,12 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
       // Launch Claude terminals for tasks manually moved to WORKING
       for (const task of tasksToLaunch) {
-        get().sendToAi(task)
+        get().sendToAi(task, task.workspaceId)
       }
 
       // After a task finishes (DONE/FAILED), pick the next one if under concurrency limit
       if (taskFinished) {
-        const wsId = get().currentWorkspaceId
+        const wsId = currentWorkspaceId
         const capturedTabsToClose = [...tabsToAutoClose]
         setTimeout(async () => {
           let maxConcurrent = 1
@@ -619,7 +619,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
               const next = pickNextTask(remaining)
               if (!next) break
               remaining.splice(remaining.indexOf(next), 1)
-              get().sendToAi(next, undefined, { activate: false })
+              get().sendToAi(next, wsId ?? undefined, { activate: false })
             }
           }
         }, 1000)
@@ -726,7 +726,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
                 const next = pickNextTask(remaining)
                 if (!next) break
                 remaining.splice(remaining.indexOf(next), 1)
-                get().sendToAi(next, undefined, { activate: false })
+                get().sendToAi(next, workspaceId, { activate: false })
               }
             }
             return
@@ -749,7 +749,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             const next = pickNextTask(remaining)
             if (!next) break
             remaining.splice(remaining.indexOf(next), 1)
-            get().sendToAi(next, undefined, { activate: false })
+            get().sendToAi(next, workspaceId, { activate: false })
           }
         }
       } catch (err) {
@@ -771,7 +771,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
             const next = pickNextTask(remaining)
             if (!next) break
             remaining.splice(remaining.indexOf(next), 1)
-            get().sendToAi(next, undefined, { activate: false })
+            get().sendToAi(next, workspaceId, { activate: false })
           }
         }
       }
@@ -786,15 +786,24 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           const next = pickNextTask(remaining)
           if (!next) break
           remaining.splice(remaining.indexOf(next), 1)
-          get().sendToAi(next, undefined, { activate: false })
+          get().sendToAi(next, workspaceId, { activate: false })
         }
       }
     }
   },
 
   updateTaskStatus: async (taskId, status) => {
-    const { currentWorkspaceId, kanbanTabIds } = get()
-    if (!currentWorkspaceId) return
+    const { currentWorkspaceId, kanbanTabIds, tasks, backgroundTasks } = get()
+    // Resolve the task's actual workspace — prefer the task's own workspaceId over the current view
+    const task = tasks.find((t) => t.id === taskId)
+    let taskWorkspaceId = task?.workspaceId
+    if (!taskWorkspaceId) {
+      for (const [wsId, wsTasks] of Object.entries(backgroundTasks)) {
+        if (wsTasks.find((t) => t.id === taskId)) { taskWorkspaceId = wsId; break }
+      }
+    }
+    const workspaceId = taskWorkspaceId ?? currentWorkspaceId
+    if (!workspaceId) return
     // Kill terminal process when ticket moves to PENDING or FAILED (not DONE — hooks handle that)
     if (status === 'PENDING' || status === 'FAILED') {
       const tabId = kanbanTabIds[taskId]
@@ -802,16 +811,25 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         useTerminalTabStore.getState().killTabProcesses(tabId)
       }
     }
-    await window.kanbai.kanban.update({ id: taskId, status, workspaceId: currentWorkspaceId })
+    await window.kanbai.kanban.update({ id: taskId, status, workspaceId })
     set((state) => ({
       tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, status, updatedAt: Date.now() } : t)),
     }))
   },
 
   updateTask: async (taskId, data) => {
-    const { currentWorkspaceId } = get()
-    if (!currentWorkspaceId) return
-    await window.kanbai.kanban.update({ id: taskId, ...data, workspaceId: currentWorkspaceId })
+    const { currentWorkspaceId, tasks, backgroundTasks } = get()
+    // Resolve the task's actual workspace — prefer the task's own workspaceId over the current view
+    const task = tasks.find((t) => t.id === taskId)
+    let taskWorkspaceId = task?.workspaceId
+    if (!taskWorkspaceId) {
+      for (const [wsId, wsTasks] of Object.entries(backgroundTasks)) {
+        if (wsTasks.find((t) => t.id === taskId)) { taskWorkspaceId = wsId; break }
+      }
+    }
+    const workspaceId = taskWorkspaceId ?? currentWorkspaceId
+    if (!workspaceId) return
+    await window.kanbai.kanban.update({ id: taskId, ...data, workspaceId })
     set((state) => ({
       tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, ...data, updatedAt: Date.now() } : t)),
     }))
@@ -856,7 +874,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     const shouldActivate = options?.activate ?? true
     if (task.disabled) return
     if (launchingTaskIds.has(task.id)) return
-    const workspaceId = explicitWorkspaceId ?? get().currentWorkspaceId
+    const workspaceId = explicitWorkspaceId ?? task.workspaceId ?? get().currentWorkspaceId
     if (!workspaceId) return
     launchingTaskIds.add(task.id)
 
@@ -1809,7 +1827,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       const next = pickNextTask(remaining)
       if (!next) break
       remaining.splice(remaining.indexOf(next), 1)
-      get().sendToAi(next, undefined, { activate: false })
+      get().sendToAi(next, currentWorkspaceId, { activate: false })
     }
   },
 
