@@ -303,11 +303,10 @@ export function KanbanBoard() {
     }
   }, [pendingKanbanTaskId, tasks])
 
-  // File watcher: instant sync when kanban.json changes on disk (replaces 5s polling)
-  const hasWorkingTasks = tasks.some((t) => t.status === 'WORKING')
+  // File watcher: instant sync when kanban.json changes on disk (Claude, hooks, companion API)
   useEffect(() => {
-    if (!activeWorkspaceId || !hasWorkingTasks) return
-    // Start watching the kanban file for external changes (Claude, hooks)
+    if (!activeWorkspaceId) return
+    // Start watching the kanban file for external changes
     window.kanbai.kanban.watch(activeWorkspaceId)
     const unsubscribe = window.kanbai.kanban.onFileChanged(({ workspaceId }) => {
       if (workspaceId === activeWorkspaceId) {
@@ -321,7 +320,7 @@ export function KanbanBoard() {
       clearInterval(fallback)
       window.kanbai.kanban.watchRemove(activeWorkspaceId)
     }
-  }, [activeWorkspaceId, hasWorkingTasks, syncTasksFromFile])
+  }, [activeWorkspaceId, syncTasksFromFile])
 
   // Load prompt templates when create form opens
 

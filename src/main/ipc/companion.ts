@@ -1,38 +1,14 @@
 import type { IpcMain, BrowserWindow } from 'electron'
 import crypto from 'crypto'
 import http from 'http'
-import type { KanbanTask } from '../../shared/types'
 import { IPC_CHANNELS } from '../../shared/types'
 import { startCompanionServer, stopCompanionServer, getCompanionServerInfo } from '../services/companion-server'
-import { readKanbanTasks, updateKanbanTask } from '../../mcp-server/lib/kanban-store'
 
 const API_HOST = process.env['KANBAI_API_HOST'] ?? 'localhost'
 const API_PORT = parseInt(process.env['KANBAI_API_PORT'] ?? '3847', 10)
 
 let currentToken: string | null = null
-let currentWorkspaceId: string | null = null
 let pollTimer: ReturnType<typeof setInterval> | null = null
-let changePollTimer: ReturnType<typeof setInterval> | null = null
-
-/** Modifiable fields from the companion app */
-const ALLOWED_UPDATE_FIELDS = new Set([
-  'status',
-  'title',
-  'description',
-  'priority',
-  'type',
-  'dueDate',
-  'archived',
-  'disabled',
-  'comments',
-])
-
-interface CompanionTicketChange {
-  id: string
-  changeId: string
-  taskId: string
-  updates: Partial<KanbanTask>
-}
 
 function apiRequest<T>(method: string, path: string, body?: unknown, token?: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -73,111 +49,6 @@ function stopPolling(): void {
   }
 }
 
-function stopChangePoll(): void {
-  if (changePollTimer) {
-    clearInterval(changePollTimer)
-    changePollTimer = null
-  }
-}
-
-/** Filter update payload to only allowed fields */
-function sanitizeUpdates(updates: Record<string, unknown>): Partial<KanbanTask> {
-  const sanitized: Record<string, unknown> = {}
-  for (const key of Object.keys(updates)) {
-    if (ALLOWED_UPDATE_FIELDS.has(key)) {
-      sanitized[key] = updates[key]
-    }
-  }
-  return sanitized as Partial<KanbanTask>
-}
-
-/** Push current tickets to the companion API so the companion app can display them */
-async function syncTicketsToCompanion(workspaceId: string): Promise<void> {
-  if (!currentToken) throw new Error('Companion not connected')
-
-  const tasks = readKanbanTasks(workspaceId)
-
-  // Send a lightweight version of tickets (exclude large fields like conversationHistoryPath)
-  const lightTasks = tasks.map((t) => ({
-    id: t.id,
-    workspaceId: t.workspaceId,
-    ticketNumber: t.ticketNumber,
-    title: t.title,
-    description: t.description,
-    status: t.status,
-    priority: t.priority,
-    type: t.type,
-    agentId: t.agentId,
-    question: t.question,
-    result: t.result,
-    error: t.error,
-    comments: t.comments,
-    dueDate: t.dueDate,
-    archived: t.archived,
-    disabled: t.disabled,
-    isCtoTicket: t.isCtoTicket,
-    parentTicketId: t.parentTicketId,
-    childTicketIds: t.childTicketIds,
-    createdAt: t.createdAt,
-    updatedAt: t.updatedAt,
-  }))
-
-  await apiRequest<unknown>(
-    'PUT',
-    '/api/v1/kanban/sync',
-    { workspaceId, tickets: lightTasks },
-    currentToken,
-  )
-}
-
-/** Poll the companion API for pending ticket modifications */
-function startChangePoll(getWindow: () => BrowserWindow | null): void {
-  stopChangePoll()
-  changePollTimer = setInterval(async () => {
-    if (!currentToken || !currentWorkspaceId) return
-
-    try {
-      const result = await apiRequest<{ changes: CompanionTicketChange[] }>(
-        'GET',
-        `/api/v1/kanban/changes?workspaceId=${encodeURIComponent(currentWorkspaceId)}`,
-        undefined,
-        currentToken,
-      )
-
-      if (!result.changes || result.changes.length === 0) return
-
-      for (const change of result.changes) {
-        try {
-          const sanitized = sanitizeUpdates(change.updates as Record<string, unknown>)
-          if (Object.keys(sanitized).length === 0) continue
-
-          const updated = updateKanbanTask(currentWorkspaceId, change.taskId, sanitized)
-
-          // Notify the renderer of the update
-          const win = getWindow()
-          if (win && !win.isDestroyed()) {
-            win.webContents.send(IPC_CHANNELS.COMPANION_TICKET_UPDATED, updated)
-          }
-
-          // Acknowledge the change was processed
-          await apiRequest<unknown>(
-            'POST',
-            `/api/v1/kanban/changes/${change.changeId}/ack`,
-            undefined,
-            currentToken,
-          ).catch(() => {
-            // Best effort acknowledgement
-          })
-        } catch (err) {
-          console.error(`[Companion] Failed to apply ticket change ${change.changeId}:`, (err as Error).message)
-        }
-      }
-    } catch {
-      // Silently skip — companion API may be temporarily unreachable
-    }
-  }, 3000)
-}
-
 function startPolling(code: string, getWindow: () => BrowserWindow | null): void {
   stopPolling()
   pollTimer = setInterval(async () => {
@@ -202,20 +73,9 @@ function startPolling(code: string, getWindow: () => BrowserWindow | null): void
             })
         }
         win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'connected', status.companionName ?? null)
-
-        // Start polling for ticket changes once connected
-        startChangePoll(getWindow)
-
-        // Auto-sync tickets on connection
-        if (currentWorkspaceId) {
-          syncTicketsToCompanion(currentWorkspaceId).catch((err) => {
-            console.error('[Companion] Initial ticket sync failed:', (err as Error).message)
-          })
-        }
       } else if (status.status === 'expired') {
         stopPolling()
         stopCompanionServer()
-        stopChangePoll()
         currentToken = null
         win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'disconnected')
       }
@@ -239,8 +99,6 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
     )
 
     currentToken = result.token
-    currentWorkspaceId = workspaceId
-
     startPolling(code, getWindow)
 
     return { code }
@@ -249,7 +107,6 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
   ipcMain.handle(IPC_CHANNELS.COMPANION_CANCEL, async () => {
     stopPolling()
     stopCompanionServer()
-    stopChangePoll()
     if (currentToken) {
       try {
         await apiRequest<unknown>('DELETE', '/api/v1/pair/unregister', undefined, currentToken)
@@ -258,12 +115,10 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
       }
     }
     currentToken = null
-    currentWorkspaceId = null
   })
 
-  ipcMain.handle(IPC_CHANNELS.COMPANION_SYNC_TICKETS, async (_event, workspaceId: string) => {
-    await syncTicketsToCompanion(workspaceId)
-  })
+  // No-op: sync is handled automatically via shared kanban.json file
+  ipcMain.handle(IPC_CHANNELS.COMPANION_SYNC_TICKETS, async () => {})
 
   ipcMain.handle(IPC_CHANNELS.COMPANION_DATA_INFO, () => {
     return getCompanionServerInfo()
@@ -272,7 +127,6 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
   ipcMain.handle(IPC_CHANNELS.COMPANION_DISCONNECT, async () => {
     stopPolling()
     stopCompanionServer()
-    stopChangePoll()
     if (currentToken) {
       try {
         await apiRequest<unknown>('DELETE', '/api/v1/pair/unregister', undefined, currentToken)
@@ -281,7 +135,6 @@ export function registerCompanionHandlers(ipcMain: IpcMain, getWindow: () => Bro
       }
     }
     currentToken = null
-    currentWorkspaceId = null
     const win = getWindow()
     if (win && !win.isDestroyed()) {
       win.webContents.send(IPC_CHANNELS.COMPANION_STATUS_CHANGED, 'disconnected')
@@ -302,7 +155,6 @@ export async function initDevCompanion(getWindow: () => BrowserWindow | null): P
       { code: devCode, appId: 'kanbai-desktop', workspaceId: devWorkspace },
     )
     currentToken = result.token
-    currentWorkspaceId = devWorkspace
     startPolling(devCode, getWindow)
     // Notify renderer of waiting state after a short delay (window may not be ready yet)
     setTimeout(() => {
@@ -326,7 +178,6 @@ export async function initDevCompanion(getWindow: () => BrowserWindow | null): P
 export function cleanupCompanion(): void {
   stopPolling()
   stopCompanionServer()
-  stopChangePoll()
   if (currentToken) {
     // Best-effort cleanup on quit — fire and forget
     try {
@@ -336,5 +187,4 @@ export function cleanupCompanion(): void {
     }
   }
   currentToken = null
-  currentWorkspaceId = null
 }
