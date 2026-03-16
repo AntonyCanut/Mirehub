@@ -1,12 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
-import { useTerminalTabStore } from '../lib/stores/terminalTabStore'
-import { useViewStore } from '../lib/stores/viewStore'
-import { useI18n } from '../lib/i18n'
-
-interface PixelAgentsPaneProps {
-  isVisible: boolean
-  workspaceId?: string
-}
+import { useTerminalTabStore } from '../../lib/stores/terminalTabStore'
+import { useViewStore } from '../../lib/stores/viewStore'
+import { useI18n } from '../../lib/i18n'
 
 /** Map string-based session IDs from the service to numeric IDs expected by the webview */
 function createAgentIdMapper() {
@@ -21,7 +16,7 @@ function createAgentIdMapper() {
       }
       return numId
     },
-    /** Reverse lookup: numeric ID → string session ID */
+    /** Reverse lookup: numeric ID -> string session ID */
     findString(numericId: number): string | undefined {
       for (const [str, num] of map) {
         if (num === numericId) return str
@@ -40,11 +35,22 @@ function translateTool(toolName: string): string {
   return translated === key ? toolName : translated
 }
 
-export function PixelAgentsPane({ isVisible, workspaceId }: PixelAgentsPaneProps) {
+interface UsePixelAgentsOptions {
+  workspaceId?: string
+}
+
+/**
+ * Hook encapsulating all Pixel Agents logic:
+ * - iframe communication (postMessage)
+ * - agent lifecycle events from main process
+ * - workspace filtering
+ * - focus navigation between agents and terminals
+ */
+export function usePixelAgents({ workspaceId }: UsePixelAgentsOptions) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const unsubscribeRef = useRef<(() => void) | null>(null)
   const agentIdRef = useRef(createAgentIdMapper())
-  /** Maps numeric webview agent ID → terminal tab ID for focus navigation */
+  /** Maps numeric webview agent ID -> terminal tab ID for focus navigation */
   const agentTabMapRef = useRef(new Map<number, string>())
   /** Tracks which numeric IDs are currently displayed in the webview (for workspace switching) */
   const displayedAgentsRef = useRef(new Set<number>())
@@ -173,27 +179,5 @@ export function PixelAgentsPane({ isVisible, workspaceId }: PixelAgentsPaneProps
     }
   }, [postToIframe, sendInitData])
 
-  return (
-    <div
-      className="pixel-agents-pane"
-      style={{
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-        visibility: isVisible ? 'visible' : 'hidden',
-      }}
-    >
-      <iframe
-        ref={iframeRef}
-        src="pixel-agents://app/"
-        sandbox="allow-scripts allow-same-origin"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          backgroundColor: '#1a1a2e',
-        }}
-      />
-    </div>
-  )
+  return { iframeRef }
 }
