@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { NotificationCenter } from './NotificationCenter'
 import { CompanionIndicator } from './CompanionIndicator'
-import { UpdateCenter } from './UpdateCenter'
+import { UpdateCenter } from '../features/updates'
 import { useWorkspaceStore } from '../lib/stores/workspaceStore'
 import { useViewStore, type ViewMode } from '../lib/stores/viewStore'
 import { useI18n } from '../lib/i18n'
