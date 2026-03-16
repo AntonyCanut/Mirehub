@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/features/rules/tree-utils.ts
 import { RuleEntry, RuleTreeNode } from '../../../../../../../shared/types'
+========
+import { RuleEntry, RuleTreeNode } from '../../../../../shared/types'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/tree-utils.ts
 
 /**
  * Build a tree structure from flat rule entries and directory list.

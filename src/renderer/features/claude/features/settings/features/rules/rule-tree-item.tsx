@@ -1,5 +1,9 @@
 import { useRef, useEffect } from 'react'
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/features/rules/rule-tree-item.tsx
 import { RuleTreeNode } from '../../../../../../../shared/types'
+========
+import { RuleTreeNode } from '../../../../../shared/types'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/rule-tree-item.tsx
 import { DropTarget } from './use-rules-drag-drop'
 
 interface Props {

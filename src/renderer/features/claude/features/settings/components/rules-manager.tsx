@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/components/rules-manager.tsx
 import { useI18n } from '../../../../../lib/i18n'
 import { MemoryEditor } from '../features/memory/memory-editor'
 import { ConfirmModal } from '../../../../../components/ConfirmModal'
@@ -8,6 +9,17 @@ import { buildRuleTree } from '../features/rules/tree-utils'
 import { RulesSidebar } from '../features/rules/rules-sidebar'
 import { RuleContextMenu } from '../features/rules/rule-context-menu'
 import { RuleAuthorBadge } from '../features/rules/rule-author-badge'
+========
+import { useI18n } from '../../../../lib/i18n'
+import { MemoryEditor } from '../../../../components/claude-settings/MemoryEditor'
+import { ConfirmModal } from '../../../../components/ConfirmModal'
+import { useRulesState } from './use-rules-state'
+import { useRulesDragDrop } from './use-rules-drag-drop'
+import { buildRuleTree } from './tree-utils'
+import { RulesSidebar } from './rules-sidebar'
+import { RuleContextMenu } from './rule-context-menu'
+import { RuleAuthorBadge } from './rule-author-badge'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/rules-manager.tsx
 
 interface Props {
   projectPath: string

@@ -1,5 +1,9 @@
 import { useRef, useEffect } from 'react'
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/features/rules/rule-context-menu.tsx
 import { useI18n } from '../../../../../../lib/i18n'
+========
+import { useI18n } from '../../../../lib/i18n'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/rule-context-menu.tsx
 
 interface Props {
   x: number

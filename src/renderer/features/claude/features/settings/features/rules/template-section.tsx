@@ -1,6 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react'
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/features/rules/template-section.tsx
 import { TemplateRuleEntry } from '../../../../../../../shared/types'
 import { useI18n } from '../../../../../../lib/i18n'
+========
+import { TemplateRuleEntry } from '../../../../../shared/types'
+import { useI18n } from '../../../../lib/i18n'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/template-section.tsx
 
 interface TemplateTreeNode {
   name: string

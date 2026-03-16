@@ -1,5 +1,9 @@
 import { useState } from 'react'
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/features/rules/rule-author-badge.tsx
 import { useI18n } from '../../../../../../lib/i18n'
+========
+import { useI18n } from '../../../../lib/i18n'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/rule-author-badge.tsx
 
 interface Props {
   author: string

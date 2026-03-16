@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/components/settings-file-hierarchy.tsx
 import { useI18n } from '../../../../../lib/i18n'
+========
+import { useI18n } from '../../../../lib/i18n'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/settings-file-hierarchy.tsx
 
 interface Props {
   userSettingsExists: boolean

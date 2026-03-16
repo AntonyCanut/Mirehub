@@ -1,5 +1,9 @@
 import React, { useState, useCallback } from 'react'
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/features/rules/rule-tree-view.tsx
 import { RuleTreeNode } from '../../../../../../../shared/types'
+========
+import { RuleTreeNode } from '../../../../../shared/types'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/rule-tree-view.tsx
 import { RuleTreeItem } from './rule-tree-item'
 import { DropTarget } from './use-rules-drag-drop'
 

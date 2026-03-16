@@ -1,5 +1,10 @@
+<<<<<<<< HEAD:src/renderer/features/claude/features/settings/features/rules/rules-sidebar.tsx
 import { RuleTreeNode, TemplateRuleEntry } from '../../../../../../../shared/types'
 import { useI18n } from '../../../../../../lib/i18n'
+========
+import { RuleTreeNode, TemplateRuleEntry } from '../../../../../shared/types'
+import { useI18n } from '../../../../lib/i18n'
+>>>>>>>> kanban/r-43:src/renderer/features/claude/features/rules/rules-sidebar.tsx
 import { RuleTreeView } from './rule-tree-view'
 import { TemplateSection } from './template-section'
 import { SharedRule, Selection } from './use-rules-state'
