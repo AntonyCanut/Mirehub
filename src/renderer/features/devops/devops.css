@@ -1,0 +1,1600 @@
+/* DevOps Panel */
+.devops-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  padding: 16px;
+  gap: 12px;
+}
+
+.devops-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.devops-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.devops-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Main layout with optional connections sidebar */
+.devops-main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  gap: 0;
+}
+
+/* ──────────────────────────────────
+   Connections sidebar
+   ────────────────────────────────── */
+.devops-connections-sidebar {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.devops-connections-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.devops-connections-sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.devops-connections-sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.devops-connection-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-left: 2px solid transparent;
+}
+
+.devops-connection-item:hover {
+  background: var(--bg-surface);
+}
+
+.devops-connection-item--active {
+  background: var(--accent-soft, rgba(108, 140, 255, 0.08));
+  border-left-color: var(--accent);
+}
+
+.devops-connection-item-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.devops-connection-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.devops-connection-item-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.devops-connection-item-project {
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.devops-connection-item-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.devops-connection-item:hover .devops-connection-item-actions,
+.devops-connection-item--active .devops-connection-item-actions {
+  opacity: 1;
+}
+
+/* ──────────────────────────────────
+   Pipeline area (right of sidebar)
+   ────────────────────────────────── */
+.devops-pipeline-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  padding: 0 0 0 16px;
+}
+
+/* Content layout */
+.devops-content {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.devops-pipelines-list {
+  flex: 0 0 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 4px;
+}
+
+.devops-detail-panel {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* ──────────────────────────────────
+   Status Dot
+   ────────────────────────────────── */
+.devops-dot {
+  display: inline-block;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.devops-dot--succeeded { background: var(--success, #3DD68C); }
+.devops-dot--failed { background: var(--danger, #F47067); }
+.devops-dot--canceled { background: var(--warning, #F5A623); }
+.devops-dot--running { background: var(--info, #58A6FF); animation: devops-dot-pulse 1.5s ease-in-out infinite; }
+.devops-dot--notStarted { background: var(--text-muted, #565C66); }
+.devops-dot--pending { background: var(--warning, #F5A623); animation: devops-dot-pulse 2s ease-in-out infinite; }
+.devops-dot--unknown { background: var(--text-muted, #565C66); }
+
+@keyframes devops-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* ──────────────────────────────────
+   Pipeline Card (redesigned)
+   ────────────────────────────────── */
+.devops-pipeline-card {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.devops-pipeline-card:hover {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  border-left-color: var(--border);
+}
+
+.devops-pipeline-card--selected {
+  background: var(--accent-soft, rgba(108, 140, 255, 0.08));
+  border-color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+/* Status-colored left bar */
+.devops-pipeline-card[data-status="succeeded"] { border-left-color: var(--success, #3DD68C); }
+.devops-pipeline-card[data-status="failed"] { border-left-color: var(--danger, #F47067); }
+.devops-pipeline-card[data-status="running"] { border-left-color: var(--info, #58A6FF); }
+.devops-pipeline-card[data-status="canceled"] { border-left-color: var(--warning, #F5A623); }
+.devops-pipeline-card[data-status="notStarted"] { border-left-color: var(--text-muted, #565C66); }
+
+.devops-pipeline-card--selected[data-status="succeeded"] { border-left-color: var(--success, #3DD68C); }
+.devops-pipeline-card--selected[data-status="failed"] { border-left-color: var(--danger, #F47067); }
+.devops-pipeline-card--selected[data-status="running"] { border-left-color: var(--info, #58A6FF); }
+.devops-pipeline-card--selected[data-status="canceled"] { border-left-color: var(--warning, #F5A623); }
+
+.devops-pipeline-card--drag-over {
+  border-color: var(--accent);
+  border-style: dashed;
+  background: var(--bg-surface);
+}
+
+.devops-pipeline-card[draggable="true"] {
+  cursor: grab;
+}
+
+.devops-pipeline-card[draggable="true"]:active {
+  cursor: grabbing;
+  opacity: 0.6;
+}
+
+.devops-pipeline-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devops-pipeline-card-name {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.devops-pipeline-card-folder {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.devops-pipeline-card-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  padding-left: 18px;
+}
+
+.devops-pipeline-card-branch {
+  background: var(--bg-surface);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.devops-pipeline-card-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.devops-pipeline-card:hover .devops-pipeline-card-actions,
+.devops-pipeline-card--selected .devops-pipeline-card-actions {
+  opacity: 1;
+}
+
+/* ──────────────────────────────────
+   Status (emoji-based, kept for stages/tasks)
+   ────────────────────────────────── */
+.devops-status {
+  font-size: 13px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.devops-status--succeeded { color: var(--success, #3DD68C); }
+.devops-status--failed { color: var(--danger, #F47067); }
+.devops-status--canceled { color: var(--warning, #F5A623); }
+.devops-status--running { color: var(--info, #58A6FF); }
+.devops-status--notStarted { color: var(--text-muted, #565C66); }
+.devops-status--unknown { color: var(--text-muted, #565C66); }
+.devops-status--pending { color: var(--warning, #F5A623); }
+
+/* ──────────────────────────────────
+   Pipeline Runs
+   ────────────────────────────────── */
+.devops-runs-detail h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.devops-runs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.devops-run-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.devops-run-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.devops-run-row--expandable {
+  cursor: pointer;
+}
+
+.devops-run-row--expandable:hover {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+
+.devops-run-row--expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+  background: var(--bg-surface);
+}
+
+.devops-run-expand-icon {
+  font-size: 8px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.devops-run-expand-icon--open {
+  transform: rotate(90deg);
+}
+
+.devops-run-approval-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--warning, #F5A623);
+  background: rgba(245, 166, 35, 0.12);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.devops-run-approval-badge:hover {
+  background: rgba(245, 166, 35, 0.25);
+}
+
+.devops-run-approval-badge--active {
+  background: rgba(245, 166, 35, 0.3);
+}
+
+/* Run item with pending approval highlight */
+.devops-run-item--pending {
+  border-left: 3px solid var(--warning, #F5A623);
+  border-radius: 6px;
+}
+
+/* Inline approval actions */
+.devops-run-inline-approvals {
+  padding: 8px 12px;
+  background: rgba(245, 166, 35, 0.04);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.devops-inline-approval {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.devops-inline-approval-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.devops-inline-approval-instructions {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.devops-inline-approval-assignees {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.devops-inline-approval-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.devops-approval-comment--inline {
+  width: 160px;
+  flex: none;
+}
+
+/* Expanded run content */
+.devops-run-expanded {
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ──────────────────────────────────
+   Stages
+   ────────────────────────────────── */
+.devops-stages-section h5,
+.devops-approvals-section h5 {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.devops-stages-loading,
+.devops-stages-empty {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.devops-stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Stage item */
+.devops-stage-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.devops-stage-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-primary);
+  border: 1px solid transparent;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.devops-stage-row:hover {
+  background: var(--bg-surface);
+  border-color: var(--border);
+}
+
+.devops-stage-row--expanded {
+  border-color: var(--border);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: var(--bg-surface);
+}
+
+.devops-stage-expand-icon {
+  font-size: 8px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.devops-stage-expand-icon--open {
+  transform: rotate(90deg);
+}
+
+.devops-stage-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.devops-stage-badges {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.devops-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.devops-badge--error {
+  color: var(--danger, #F47067);
+  background: rgba(244, 112, 103, 0.12);
+}
+
+.devops-badge--warning {
+  color: var(--warning, #F5A623);
+  background: rgba(245, 166, 35, 0.12);
+}
+
+.devops-stage-datetime {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  flex-shrink: 0;
+}
+
+.devops-stage-duration {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  flex-shrink: 0;
+}
+
+/* Stage expanded content */
+.devops-stage-expanded {
+  border: 1px solid var(--border);
+  border-top: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+/* Failed stage highlight */
+.devops-stage-row--failed {
+  border-left: 3px solid var(--danger, #F47067);
+}
+
+/* ──────────────────────────────────
+   Jobs
+   ────────────────────────────────── */
+.devops-jobs-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.devops-job-item {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-subtle, #16191D);
+}
+
+.devops-job-item:last-child {
+  border-bottom: none;
+}
+
+.devops-job-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 24px;
+  font-size: 12px;
+}
+
+.devops-job-name {
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.devops-job-duration {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  flex-shrink: 0;
+}
+
+.devops-job-worker {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  padding: 1px 6px;
+  border-radius: 3px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Jobs -- expandable */
+.devops-job-row--expandable {
+  cursor: pointer;
+}
+
+.devops-job-row--expandable:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.devops-job-item--failed {
+  border-left: 2px solid rgba(244, 112, 103, 0.4);
+}
+
+.devops-job-expand-icon {
+  font-size: 8px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.devops-job-expand-icon--open {
+  transform: rotate(90deg);
+}
+
+/* ──────────────────────────────────
+   Tasks (sub-steps within jobs)
+   ────────────────────────────────── */
+.devops-tasks-list {
+  display: flex;
+  flex-direction: column;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  margin-left: 36px;
+}
+
+.devops-task-item {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.devops-task-item:last-child {
+  border-bottom: none;
+}
+
+.devops-task-item--failed {
+  border-left: 2px solid rgba(244, 112, 103, 0.3);
+}
+
+.devops-task-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.devops-task-row--clickable {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.devops-task-row--clickable:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.devops-task-row--active {
+  background: rgba(88, 166, 255, 0.08);
+}
+
+.devops-task-name {
+  color: var(--text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.devops-task-duration {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  flex-shrink: 0;
+}
+
+.devops-task-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 8px 6px 20px;
+}
+
+/* ──────────────────────────────────
+   Issues (errors/warnings)
+   ────────────────────────────────── */
+.devops-job-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 12px 8px 24px;
+}
+
+.devops-issue {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.devops-issue--error {
+  background: rgba(244, 112, 103, 0.08);
+  color: #ef9a9a;
+}
+
+.devops-issue--warning {
+  background: rgba(245, 166, 35, 0.08);
+  color: #ffcc80;
+}
+
+.devops-issue-icon {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.devops-issue-message {
+  word-break: break-word;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 11px;
+  flex: 1;
+}
+
+/* Error actions (copy + create ticket) */
+.devops-error-actions {
+  display: inline-flex;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.devops-btn--icon {
+  padding: 1px 4px;
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0.4;
+  border-radius: 3px;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.devops-btn--icon:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Error summary */
+.devops-error-summary {
+  background: rgba(244, 112, 103, 0.06);
+  border: 1px solid rgba(244, 112, 103, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.devops-error-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--danger, #F47067);
+}
+
+.devops-error-summary-icon {
+  font-size: 12px;
+}
+
+.devops-error-summary-actions {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.devops-error-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.devops-error-summary-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.devops-error-summary-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.devops-error-summary-location {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.devops-error-summary-message {
+  color: #ef9a9a;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  word-break: break-word;
+}
+
+/* ──────────────────────────────────
+   Approvals
+   ────────────────────────────────── */
+.devops-approval-card {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(245, 166, 35, 0.06);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.devops-approval-instructions {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.devops-approval-assignees {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.devops-approval-assignee {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.devops-approval-assignee--approved {
+  color: var(--success, #3DD68C);
+}
+
+.devops-approval-assignee--rejected {
+  color: var(--danger, #F47067);
+}
+
+.devops-approval-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devops-approval-comment {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.devops-approval-comment:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.devops-btn--approve {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--success, #3DD68C);
+  color: var(--bg-primary);
+  border-radius: 6px;
+}
+
+.devops-btn--approve:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.devops-btn--reject {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--danger, #F47067);
+  color: #fff;
+  border-radius: 6px;
+}
+
+.devops-btn--reject:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+/* Run metadata */
+.devops-run-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 80px;
+}
+
+.devops-run-branch {
+  background: var(--bg-surface);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.devops-run-time {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.devops-run-by {
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-left: auto;
+}
+
+.devops-run-row--clickable {
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.devops-run-row--clickable:hover {
+  border-color: var(--accent);
+  background: var(--bg-surface);
+}
+
+.devops-run-row--selected {
+  border-color: var(--accent);
+  background: var(--accent-soft, rgba(108, 140, 255, 0.08));
+}
+
+/* ──────────────────────────────────
+   Buttons
+   ────────────────────────────────── */
+.devops-btn {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.devops-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.devops-btn--primary {
+  background: var(--accent);
+  color: var(--bg-primary);
+  padding: 6px 14px;
+  font-weight: 600;
+}
+
+.devops-btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover, #5A7AFF);
+}
+
+.devops-btn--secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  padding: 6px 14px;
+}
+
+.devops-btn--secondary:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.devops-btn--small {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: 4px;
+}
+
+.devops-btn--small:hover:not(:disabled) {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+/* Auth toggle */
+.devops-auth-toggle {
+  display: flex;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  width: fit-content;
+}
+
+.devops-auth-btn {
+  padding: 7px 20px;
+  border: none;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.devops-auth-btn:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.devops-auth-btn--active {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Test result */
+.devops-test-result {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.devops-test-result--success {
+  background: rgba(61, 214, 140, 0.12);
+  color: var(--success, #3DD68C);
+  border: 1px solid rgba(61, 214, 140, 0.25);
+}
+
+.devops-test-result--error {
+  background: rgba(244, 112, 103, 0.12);
+  color: var(--danger, #F47067);
+  border: 1px solid rgba(244, 112, 103, 0.25);
+}
+
+/* ──────────────────────────────────
+   States
+   ────────────────────────────────── */
+.devops-loading,
+.devops-empty,
+.devops-error,
+.devops-runs-loading,
+.devops-runs-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.devops-error {
+  color: var(--danger, #F47067);
+}
+
+/* Empty state (no connections) */
+.devops-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 12px;
+  padding: 48px 24px;
+}
+
+.devops-empty-state-icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.devops-empty-state h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.devops-empty-state p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 320px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ──────────────────────────────────
+   DevOps Modal
+   ────────────────────────────────── */
+.devops-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: devops-fade-in 0.15s ease;
+}
+
+@keyframes devops-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes devops-slide-up {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.devops-modal-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 460px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  animation: devops-slide-up 0.2s ease;
+}
+
+.devops-modal-container--form {
+  width: 500px;
+}
+
+/* Header */
+.devops-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 0;
+}
+
+.devops-modal-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.devops-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.devops-modal-header-left h3 {
+  margin: 0;
+}
+
+.devops-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.devops-modal-close:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.devops-modal-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.devops-modal-back:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+/* Description text */
+.devops-modal-desc {
+  margin: 6px 22px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Body */
+.devops-modal-body {
+  padding: 16px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Footer */
+.devops-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px 18px;
+  gap: 10px;
+}
+
+.devops-modal-footer-right {
+  display: flex;
+  gap: 8px;
+}
+
+/* Modal buttons */
+.devops-modal-btn {
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.devops-modal-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.devops-modal-btn--primary {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.devops-modal-btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover, #5A7AFF);
+}
+
+.devops-modal-btn--secondary {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+}
+
+.devops-modal-btn--secondary:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.devops-modal-btn--test {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.devops-modal-btn--test:hover:not(:disabled) {
+  background: var(--accent-soft, rgba(108, 140, 255, 0.1));
+}
+
+/* ──────────────────────────────────
+   Provider Selection List
+   ────────────────────────────────── */
+.devops-provider-list {
+  padding: 14px 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.devops-provider-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.devops-provider-item:hover {
+  border-color: var(--accent);
+  background: var(--bg-surface);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.devops-provider-item-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(0, 120, 215, 0.1);
+}
+
+.devops-provider-item-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.devops-provider-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.devops-provider-item-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.devops-provider-item-arrow {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+
+.devops-provider-item:hover .devops-provider-item-arrow {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+
+/* ──────────────────────────────────
+   Form Fields
+   ────────────────────────────────── */
+.devops-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.devops-field-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.devops-field-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.devops-field-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft, rgba(108, 140, 255, 0.15));
+}
+
+.devops-field-input::placeholder {
+  color: var(--text-muted);
+}
+
+.devops-field-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+}
+
+/* ──────────────────────────────────
+   Log viewer
+   ────────────────────────────────── */
+.devops-job-log {
+  margin: 4px 12px 8px 24px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.devops-job-log-loading {
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.devops-job-log-content {
+  margin: 0;
+  padding: 12px;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  line-height: 1.5;
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.devops-job-log-error {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--danger, #F47067);
+}
+
+.devops-job-log-error span {
+  flex: 1;
+}
+
+/* Log button */
+.devops-btn--log {
+  font-size: 12px;
+  padding: 1px 4px;
+  background: transparent;
+  opacity: 0.6;
+}
+
+.devops-btn--log:hover:not(:disabled) {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.devops-btn--log-active {
+  opacity: 1;
+  background: var(--accent-soft, rgba(108, 140, 255, 0.15));
+}
+
+/* --- Run Pipeline Modal (smaller variant) --- */
+.devops-modal-container--sm {
+  width: 420px;
+}
+
+.devops-modal-body {
+  padding: 14px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+/* Parameters section in modal */
+.devops-params-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.devops-params-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.devops-param-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.devops-param-key {
+  flex: 2;
+}
+
+.devops-param-value {
+  flex: 3;
+}
+
+/* Parameters display in expanded run */
+.devops-params-display {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.devops-params-display h5 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.devops-params-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.devops-param-display-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.devops-param-display-key {
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.devops-param-display-key::after {
+  content: ':';
+}
+
+.devops-param-display-value {
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  word-break: break-all;
+}
