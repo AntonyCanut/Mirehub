@@ -94,12 +94,12 @@ export const MCP_CATALOG: McpCatalogEntry[] = [
   {
     id: 'playwright',
     name: 'Playwright',
-    description: 'Browser automation with Playwright for testing and scraping',
+    description: 'Browser automation and testing with Playwright (snapshot + vision modes)',
     command: 'npx',
-    args: ['-y', '@anthropic-ai/mcp-server-playwright'],
+    args: ['-y', '@playwright/mcp@latest'],
     category: 'web',
-    features: ['navigate', 'screenshot', 'click', 'fill', 'select', 'evaluate'],
-    official: false,
+    features: ['browser_navigate', 'browser_click', 'browser_snapshot', 'browser_take_screenshot', 'browser_fill_form', 'browser_evaluate'],
+    official: true,
   },
 
   // === AI ===
