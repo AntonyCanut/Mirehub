@@ -166,9 +166,15 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     )
 
     if (!currentWsBelongs) {
-      // Focus the first workspace of the new namespace
+      // Focus the first workspace of the new namespace without auto-selecting a project
       const firstWs = workspaces.find((w) => w.namespaceId === id)
-      get().setActiveWorkspace(firstWs?.id ?? null)
+      set({ activeWorkspaceId: firstWs?.id ?? null, activeProjectId: null })
+
+      // Activate existing terminal tabs for this workspace if any
+      if (firstWs) {
+        const termStore = useTerminalTabStore.getState()
+        termStore.activateFirstInWorkspace(firstWs.id)
+      }
     }
   },
 
