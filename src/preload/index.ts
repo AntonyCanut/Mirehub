@@ -736,6 +736,8 @@ const api = {
     set: (projectId: string, defaults: Record<string, unknown>) => ipcRenderer.invoke(IPC_CHANNELS.AI_DEFAULTS_SET, { projectId, defaults }),
     getGlobal: () => ipcRenderer.invoke(IPC_CHANNELS.AI_DEFAULTS_GET_GLOBAL),
     setGlobal: (defaults: Record<string, unknown>) => ipcRenderer.invoke(IPC_CHANNELS.AI_DEFAULTS_SET_GLOBAL, { defaults }),
+    getWorkspace: (workspaceId: string) => ipcRenderer.invoke(IPC_CHANNELS.AI_DEFAULTS_GET_WORKSPACE, { workspaceId }),
+    setWorkspace: (workspaceId: string, defaults: Record<string, unknown>) => ipcRenderer.invoke(IPC_CHANNELS.AI_DEFAULTS_SET_WORKSPACE, { workspaceId, defaults }),
   },
 
   // App info

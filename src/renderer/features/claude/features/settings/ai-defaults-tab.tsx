@@ -6,7 +6,8 @@ import type { AiDefaults } from '../../../../../shared/types'
 import { useWorkspaceStore } from '../../../../lib/stores/workspaceStore'
 
 interface Props {
-  projectId: string
+  projectId?: string
+  workspaceId?: string
 }
 
 function ProviderSelector({
@@ -46,28 +47,76 @@ function ProviderSelector({
   )
 }
 
-export function AiDefaultsTab({ projectId }: Props) {
+export function AiDefaultsTab({ projectId, workspaceId }: Props) {
   const { t } = useI18n()
   const [defaults, setDefaults] = useState<AiDefaults>({})
   const [loading, setLoading] = useState(true)
+  const [propagated, setPropagated] = useState(false)
+
+  const isWorkspaceMode = !projectId && !!workspaceId
 
   useEffect(() => {
     setLoading(true)
-    window.kanbai.aiDefaults.get(projectId).then((d: AiDefaults) => {
-      setDefaults(d ?? {})
+    if (projectId) {
+      window.kanbai.aiDefaults.get(projectId).then((d: AiDefaults) => {
+        setDefaults(d ?? {})
+        setLoading(false)
+      }).catch(() => setLoading(false))
+    } else if (workspaceId) {
+      window.kanbai.aiDefaults.getWorkspace(workspaceId).then((d: AiDefaults) => {
+        setDefaults(d ?? {})
+        setLoading(false)
+      }).catch(() => setLoading(false))
+    } else {
       setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [projectId])
+    }
+  }, [projectId, workspaceId])
 
   const save = useCallback(async (next: AiDefaults) => {
     setDefaults(next)
-    await window.kanbai.aiDefaults.set(projectId, next as unknown as Record<string, unknown>)
-    const { projects } = useWorkspaceStore.getState()
-    const updated = projects.map((p) =>
-      p.id === projectId ? { ...p, aiDefaults: next } : p,
-    )
-    useWorkspaceStore.setState({ projects: updated })
-  }, [projectId])
+    setPropagated(false)
+
+    if (projectId) {
+      // Save to project
+      await window.kanbai.aiDefaults.set(projectId, next as unknown as Record<string, unknown>)
+      const { projects } = useWorkspaceStore.getState()
+      const updated = projects.map((p) =>
+        p.id === projectId ? { ...p, aiDefaults: next } : p,
+      )
+      useWorkspaceStore.setState({ projects: updated })
+
+      // Also propagate to workspace if workspaceId is available
+      if (workspaceId) {
+        await window.kanbai.aiDefaults.setWorkspace(workspaceId, next as unknown as Record<string, unknown>)
+        // Update workspace in store
+        const { workspaces } = useWorkspaceStore.getState()
+        const updatedWs = workspaces.map((w) =>
+          w.id === workspaceId ? { ...w, aiDefaults: next } : w,
+        )
+        useWorkspaceStore.setState({ workspaces: updatedWs })
+        setPropagated(true)
+        setTimeout(() => setPropagated(false), 2000)
+      }
+    } else if (workspaceId) {
+      // Workspace-only mode: save and propagate to all projects
+      await window.kanbai.aiDefaults.setWorkspace(workspaceId, next as unknown as Record<string, unknown>)
+      // Update workspace in store
+      const { workspaces, projects } = useWorkspaceStore.getState()
+      const updatedWs = workspaces.map((w) =>
+        w.id === workspaceId ? { ...w, aiDefaults: next } : w,
+      )
+      // Update all projects in this workspace with merged defaults
+      const updatedProjects = projects.map((p) => {
+        if (p.workspaceId === workspaceId) {
+          return { ...p, aiDefaults: { ...next, ...(p.aiDefaults ?? {}) } }
+        }
+        return p
+      })
+      useWorkspaceStore.setState({ workspaces: updatedWs, projects: updatedProjects })
+      setPropagated(true)
+      setTimeout(() => setPropagated(false), 2000)
+    }
+  }, [projectId, workspaceId])
 
   if (loading) {
     return <div className="file-viewer-empty">{t('common.loading')}</div>
@@ -93,6 +142,14 @@ export function AiDefaultsTab({ projectId }: Props) {
 
   return (
     <div className="cs-general-tab">
+      {isWorkspaceMode && (
+        <div className="cs-general-section">
+          <div className="cs-general-card" style={{ padding: '8px 12px', background: 'var(--bg-tertiary)', borderRadius: 6, fontSize: 13, color: 'var(--text-secondary)' }}>
+            {t('ai.defaults.workspaceMode')}
+          </div>
+        </div>
+      )}
+
       <div className="cs-general-section">
         <div className="cs-general-section-header">{t('ai.defaults.allLabel')}</div>
         <div className="cs-general-card">
@@ -140,6 +197,12 @@ export function AiDefaultsTab({ projectId }: Props) {
           />
         </div>
       </div>
+
+      {propagated && (
+        <div style={{ position: 'fixed', bottom: 20, right: 20, background: 'var(--green)', color: '#fff', padding: '8px 16px', borderRadius: 8, fontSize: 13, zIndex: 9999 }}>
+          {t('ai.defaults.propagated')}
+        </div>
+      )}
     </div>
   )
 }

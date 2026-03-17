@@ -142,6 +142,52 @@ export function registerAiProviderHandlers(ipcMain: IpcMain): void {
     },
   )
 
+  ipcMain.handle(
+    IPC_CHANNELS.AI_DEFAULTS_GET_WORKSPACE,
+    async (_event, { workspaceId }: { workspaceId: string }) => {
+      if (typeof workspaceId !== 'string') throw new Error('Invalid workspace ID')
+
+      const globalDefaults = readGlobalAiDefaults()
+      const workspaces = storage.getWorkspaces()
+      const workspace = workspaces.find((w) => w.id === workspaceId)
+      const workspaceDefaults = workspace?.aiDefaults ?? {}
+
+      return { ...globalDefaults, ...workspaceDefaults }
+    },
+  )
+
+  ipcMain.handle(
+    IPC_CHANNELS.AI_DEFAULTS_SET_WORKSPACE,
+    async (_event, { workspaceId, defaults }: { workspaceId: string; defaults: AiDefaults }) => {
+      if (typeof workspaceId !== 'string') throw new Error('Invalid workspace ID')
+
+      const workspaces = storage.getWorkspaces()
+      const workspace = workspaces.find((w) => w.id === workspaceId)
+      if (!workspace) {
+        return { success: false, error: 'Workspace not found' }
+      }
+
+      // Save workspace-level defaults
+      workspace.aiDefaults = defaults
+      storage.updateWorkspace(workspace)
+
+      // Propagate to all projects in the workspace
+      const projects = storage.getProjects()
+      const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId)
+      for (const project of workspaceProjects) {
+        const merged = { ...defaults, ...(project.aiDefaults ?? {}) }
+        const currentStr = JSON.stringify(project.aiDefaults ?? {})
+        const mergedStr = JSON.stringify(merged)
+        if (currentStr !== mergedStr) {
+          project.aiDefaults = merged
+          storage.updateProject(project)
+        }
+      }
+
+      return { success: true, propagatedCount: workspaceProjects.length }
+    },
+  )
+
   // Check if multi-agent is enabled for a given provider and project path
   ipcMain.handle(
     IPC_CHANNELS.AI_CHECK_MULTI_AGENT,

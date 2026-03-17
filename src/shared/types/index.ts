@@ -92,6 +92,7 @@ export interface Workspace {
   namespaceId?: string
   projectIds: string[]
   visibleTabs?: string[]
+  aiDefaults?: AiDefaults
   createdAt: number
   updatedAt: number
   deletedAt?: number
@@ -1479,6 +1480,8 @@ export const IPC_CHANNELS = {
   AI_DEFAULTS_GET: 'ai:defaultsGet',
   AI_DEFAULTS_GET_GLOBAL: 'ai:defaultsGetGlobal',
   AI_DEFAULTS_SET_GLOBAL: 'ai:defaultsSetGlobal',
+  AI_DEFAULTS_GET_WORKSPACE: 'ai:defaultsGetWorkspace',
+  AI_DEFAULTS_SET_WORKSPACE: 'ai:defaultsSetWorkspace',
   AI_CHECK_MULTI_AGENT: 'ai:checkMultiAgent',
 
   // Code Analysis
