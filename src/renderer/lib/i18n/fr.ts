@@ -2076,6 +2076,16 @@ export const fr = {
   'settings.tutorialEnabled': 'Tutoriel de démarrage',
   'settings.tutorialEnabledHint': 'Réactiver le tutoriel au prochain lancement',
 
+  // Multi-Agent
+  'view.multiAgent': 'Multi-Agent',
+  'multiAgent.selectProject': 'Sélectionnez un projet pour utiliser le mode multi-agents.',
+  'multiAgent.placeholder': 'Mode Multi-Agents',
+  'multiAgent.placeholderSub': 'Ajoutez jusqu\'à 4 agents IA simultanés sur ce projet.',
+  'multiAgent.addAgent': '+ Ajouter un agent',
+  'multiAgent.promptPlaceholder': 'Prompt pour l\'agent (optionnel)...',
+  'multiAgent.launch': 'Lancer',
+  'multiAgent.cancel': 'Annuler',
+
   // Notes
   'view.notes': 'Notes',
   'notes.title': 'Notes',

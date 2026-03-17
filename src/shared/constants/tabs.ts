@@ -23,6 +23,7 @@ export const CONFIGURABLE_TABS: TabConfig[] = [
   { id: 'git', group: 'projects', labelKey: 'view.git' },
   { id: 'notes', group: 'standalone', labelKey: 'view.notes' },
   { id: 'ai', group: 'standalone', labelKey: 'view.ai' },
+  { id: 'multi-agent', group: 'standalone', labelKey: 'view.multiAgent' },
 ]
 
 export const ALL_TAB_IDS = CONFIGURABLE_TABS.map((t) => t.id)

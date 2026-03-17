@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type ViewMode = 'terminal' | 'git' | 'kanban' | 'file' | 'npm' | 'packages' | 'diff' | 'claude' | 'ai' | 'settings' | 'todos' | 'shortcuts' | 'stats' | 'search' | 'prompts' | 'api' | 'database' | 'analysis' | 'healthcheck' | 'devops' | 'notes'
+export type ViewMode = 'terminal' | 'git' | 'kanban' | 'file' | 'npm' | 'packages' | 'diff' | 'claude' | 'ai' | 'settings' | 'todos' | 'shortcuts' | 'stats' | 'search' | 'prompts' | 'api' | 'database' | 'analysis' | 'healthcheck' | 'devops' | 'notes' | 'multi-agent'
 
 interface ViewState {
   viewMode: ViewMode

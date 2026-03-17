@@ -19,6 +19,7 @@ import { DatabaseExplorer } from './features/database'
 import { CodeAnalysisPanel } from './features/code-analysis'
 import { DevOpsPanel } from './features/devops'
 import { NotesPanel } from './features/notes'
+import { MultiAgentView } from './features/multi-agent'
 import { useAppUpdateStore } from './features/updates'
 import { useI18n } from './lib/i18n'
 import { AI_PROVIDERS, type AiProviderId } from '../shared/types/ai-provider'
@@ -28,6 +29,7 @@ const TUTORIAL_VIEWS = new Set([
   'kanban', 'terminal', 'git', 'database', 'packages',
   'analysis', 'todos', 'stats', 'prompts', 'api', 'healthcheck',
   'settings', 'search', 'shortcuts', 'claude', 'ai', 'devops', 'notes',
+  'multi-agent',
 ])
 
 export function App() {
@@ -425,6 +427,11 @@ export function App() {
             {viewMode === 'notes' && (
               <div className="view-panel" style={{ display: 'flex' }}>
                 <NotesPanel />
+              </div>
+            )}
+            {viewMode === 'multi-agent' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <MultiAgentView />
               </div>
             )}
           </div>

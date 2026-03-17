@@ -2076,6 +2076,16 @@ export const en = {
   'settings.tutorialEnabled': 'Getting started tutorial',
   'settings.tutorialEnabledHint': 'Reactivate the tutorial on next launch',
 
+  // Multi-Agent
+  'view.multiAgent': 'Multi-Agent',
+  'multiAgent.selectProject': 'Select a project to use multi-agent mode.',
+  'multiAgent.placeholder': 'Multi-Agent Mode',
+  'multiAgent.placeholderSub': 'Add up to 4 simultaneous AI agents on this project.',
+  'multiAgent.addAgent': '+ Add an agent',
+  'multiAgent.promptPlaceholder': 'Prompt for the agent (optional)...',
+  'multiAgent.launch': 'Launch',
+  'multiAgent.cancel': 'Cancel',
+
   // Notes
   'view.notes': 'Notes',
   'notes.title': 'Notes',
