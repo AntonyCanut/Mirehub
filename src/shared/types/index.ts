@@ -463,11 +463,17 @@ export interface PromptTemplate {
   createdAt: number
 }
 
+export interface WorkspaceExportRule {
+  relativePath: string
+  content: string
+}
+
 export interface WorkspaceExportData {
   name: string
   color: string
   icon?: string
   projectPaths: string[]
+  aiRules?: WorkspaceExportRule[]
   exportedAt: number
 }
 

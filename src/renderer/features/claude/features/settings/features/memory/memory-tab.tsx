@@ -5,6 +5,7 @@ import { MemoryEditor } from './memory-editor'
 
 interface Props {
   projectPath: string
+  rulesPath?: string
 }
 
 type SubTab = 'rules' | 'project' | 'user' | 'local' | 'managed'
@@ -31,7 +32,7 @@ const FILE_TEMPLATES: Record<string, string> = {
 `,
 }
 
-export function MemoryTab({ projectPath }: Props) {
+export function MemoryTab({ projectPath, rulesPath }: Props) {
   const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<SubTab>('rules')
   const [projectMd, setProjectMd] = useState<string | null>(null)
@@ -135,7 +136,7 @@ export function MemoryTab({ projectPath }: Props) {
       </div>
 
       <div className="cs-memory-content">
-        {activeTab === 'rules' && <RulesManager projectPath={projectPath} />}
+        {activeTab === 'rules' && <RulesManager projectPath={rulesPath ?? projectPath} />}
         {activeTab === 'project' && renderFileTab('project', 'CLAUDE.md', projectMd, handleSaveProject)}
         {activeTab === 'user' && renderFileTab('user', '~/.claude/CLAUDE.md', userMd, handleSaveUser)}
         {activeTab === 'local' && renderFileTab('local', 'CLAUDE.local.md', localMd, handleSaveLocal)}

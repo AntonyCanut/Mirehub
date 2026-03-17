@@ -2,12 +2,64 @@ import { IpcMain, dialog } from 'electron'
 import { v4 as uuid } from 'uuid'
 import fs from 'fs'
 import path from 'path'
-import { IPC_CHANNELS, Workspace, WorkspaceExportData } from '../../shared/types'
+import os from 'os'
+import { IPC_CHANNELS, Workspace, WorkspaceExportData, WorkspaceExportRule } from '../../shared/types'
 import { StorageService } from '../services/storage'
 import { deleteWorkspaceEnv, renameWorkspaceEnv } from './workspaceEnv'
 import { readDefaultKanbanConfig, writeKanbanConfig } from './kanban'
 
 const storage = new StorageService()
+
+const ENVS_DIR = path.join(os.homedir(), '.kanbai', 'envs')
+
+function getEnvDir(workspaceName: string): string {
+  return path.join(ENVS_DIR, workspaceName.replace(/[/\\:*?"<>|]/g, '_'))
+}
+
+/**
+ * Collect all .md rule files from the workspace env's .claude/rules/ directory.
+ * Returns an array of { relativePath, content } entries for export.
+ */
+function collectWorkspaceRules(workspaceName: string): WorkspaceExportRule[] {
+  const rulesDir = path.join(getEnvDir(workspaceName), '.claude', 'rules')
+  if (!fs.existsSync(rulesDir)) return []
+
+  const rules: WorkspaceExportRule[] = []
+  function walk(dir: string): void {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(fullPath)
+      } else if (entry.name.endsWith('.md')) {
+        const stat = fs.lstatSync(fullPath)
+        if (stat.isSymbolicLink()) continue // skip symlinks — they point to shared rules
+        const relativePath = path.relative(rulesDir, fullPath).split(path.sep).join('/')
+        try {
+          const content = fs.readFileSync(fullPath, 'utf-8')
+          rules.push({ relativePath, content })
+        } catch { /* skip unreadable files */ }
+      }
+    }
+  }
+  walk(rulesDir)
+  return rules
+}
+
+/**
+ * Restore exported rules into a workspace env's .claude/rules/ directory.
+ */
+function restoreWorkspaceRules(workspaceName: string, rules: WorkspaceExportRule[]): void {
+  if (!rules || rules.length === 0) return
+  const rulesDir = path.join(getEnvDir(workspaceName), '.claude', 'rules')
+  if (!fs.existsSync(rulesDir)) fs.mkdirSync(rulesDir, { recursive: true })
+
+  for (const rule of rules) {
+    const filePath = path.join(rulesDir, rule.relativePath)
+    const dir = path.dirname(filePath)
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+    fs.writeFileSync(filePath, rule.content, 'utf-8')
+  }
+}
 
 export function registerWorkspaceHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(IPC_CHANNELS.WORKSPACE_LIST, async () => {
@@ -100,6 +152,7 @@ export function registerWorkspaceHandlers(ipcMain: IpcMain): void {
         color: workspace.color,
         icon: workspace.icon,
         projectPaths: projects.map((p) => p.path),
+        aiRules: collectWorkspaceRules(workspace.name),
         exportedAt: Date.now(),
       }
 
@@ -167,6 +220,12 @@ export function registerWorkspaceHandlers(ipcMain: IpcMain): void {
       }
 
       storage.updateWorkspace(workspace)
+
+      // Restore workspace-level AI rules if present in the export
+      if (data.aiRules && data.aiRules.length > 0) {
+        restoreWorkspaceRules(workspace.name, data.aiRules)
+      }
+
       return { success: true, workspace }
     } catch {
       return { success: false, error: 'Invalid workspace file' }

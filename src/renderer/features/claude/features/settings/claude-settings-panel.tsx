@@ -69,6 +69,15 @@ export function ClaudeSettingsPanel() {
   const [workflowDeployed, setWorkflowDeployed] = useState(false)
   const [settingsTarget, setSettingsTarget] = useState<'project' | 'local'>('project')
   const [mcpServers, setMcpServers] = useState<Record<string, { command: string; args?: string[]; env?: Record<string, string> } | { type: 'http'; url: string; headers?: Record<string, string> }>>({})
+  const [workspaceEnvPath, setWorkspaceEnvPath] = useState<string | null>(null)
+
+  // Fetch workspace env path for workspace-level rules management
+  useEffect(() => {
+    if (!activeWorkspace) return
+    window.kanbai.workspaceEnv.getPath(activeWorkspace.name).then((envPath) => {
+      setWorkspaceEnvPath(envPath ?? null)
+    })
+  }, [activeWorkspace])
 
   const loadData = useCallback(async () => {
     if (!activeProject) return
@@ -319,7 +328,7 @@ export function ClaudeSettingsPanel() {
                   />
                 )}
                 {claudeSubTab === 'memory' && (
-                  <MemoryTab projectPath={activeProject.path} />
+                  <MemoryTab projectPath={activeProject.path} rulesPath={workspaceEnvPath ?? activeProject.path} />
                 )}
               </div>
             </>
@@ -351,7 +360,7 @@ export function ClaudeSettingsPanel() {
                   <CodexGeneralTab projectPath={activeProject.path} />
                 )}
                 {codexSubTab === 'rules' && (
-                  <CodexRulesTab projectPath={activeProject.path} />
+                  <CodexRulesTab projectPath={workspaceEnvPath ?? activeProject.path} />
                 )}
                 {codexSubTab === 'agents' && (
                   <CodexAgentsTab projectPath={activeProject.path} />
@@ -393,7 +402,7 @@ export function ClaudeSettingsPanel() {
                   <CopilotGeneralTab projectPath={activeProject.path} />
                 )}
                 {copilotSubTab === 'rules' && (
-                  <CopilotRulesTab projectPath={activeProject.path} />
+                  <CopilotRulesTab projectPath={workspaceEnvPath ?? activeProject.path} />
                 )}
                 {copilotSubTab === 'skills' && (
                   <CopilotSkillsTab projectPath={activeProject.path} />

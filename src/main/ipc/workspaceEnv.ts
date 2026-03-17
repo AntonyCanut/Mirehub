@@ -136,12 +136,28 @@ function ensureRequiredClaudeMdSections(envDir: string): void {
  * Copy AI config directories and memory files from the first project
  * that has them into the workspace env root directory.
  * Handles all AI providers: Claude, Codex, Copilot, Gemini.
+ *
+ * IMPORTANT: Preserves workspace-level rules/ directories. Rules are managed
+ * at workspace scope (not per-project). Only seed from the first project
+ * when no workspace-level rules exist yet.
  */
 function applyAiRulesToEnv(envDir: string, projectPaths: string[]): void {
   for (const configDir of AI_CONFIG_DIRS) {
     const envConfigDir = path.join(envDir, configDir)
     const memoryFile = AI_MEMORY_FILES[configDir]
     const envMemoryFile = memoryFile ? path.join(envDir, memoryFile) : null
+
+    // Preserve workspace-level rules — they are managed at workspace scope
+    const envRulesDir = path.join(envConfigDir, 'rules')
+    const hasWorkspaceRules = fs.existsSync(envRulesDir) && !fs.lstatSync(envRulesDir).isSymbolicLink()
+    let savedRulesDir: string | null = null
+
+    if (hasWorkspaceRules) {
+      // Temporarily move rules out before cleaning the config dir
+      savedRulesDir = path.join(envDir, `._saved_${configDir}_rules`)
+      if (fs.existsSync(savedRulesDir)) fs.rmSync(savedRulesDir, { recursive: true, force: true })
+      fs.renameSync(envRulesDir, savedRulesDir)
+    }
 
     // Remove existing copies (not symlinks)
     if (fs.existsSync(envConfigDir) && !fs.lstatSync(envConfigDir).isSymbolicLink()) {
@@ -165,8 +181,19 @@ function applyAiRulesToEnv(envDir: string, projectPaths: string[]): void {
         if (hasMemoryFile && projMemoryFile) {
           fs.copyFileSync(projMemoryFile, envMemoryFile!)
         }
-        break // Only use the first project's rules per AI
+        break // Only use the first project's config per AI
       }
+    }
+
+    // Restore workspace-level rules (overrides project rules if they existed)
+    if (savedRulesDir && fs.existsSync(savedRulesDir)) {
+      const restoredRulesDir = path.join(envConfigDir, 'rules')
+      // Remove project-seeded rules — workspace rules take precedence
+      if (fs.existsSync(restoredRulesDir)) {
+        fs.rmSync(restoredRulesDir, { recursive: true, force: true })
+      }
+      if (!fs.existsSync(envConfigDir)) fs.mkdirSync(envConfigDir, { recursive: true })
+      fs.renameSync(savedRulesDir, restoredRulesDir)
     }
   }
 
