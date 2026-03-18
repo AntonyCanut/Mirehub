@@ -1818,9 +1818,10 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     const task = tasks.find((t) => t.id === taskId)
     if (!task?.splitSuggestions?.length) return
 
-    // Create child tickets from split suggestions
+    // Create child tickets from split suggestions, inheriting metadata from the original
+    const childIds: string[] = []
     for (const suggestion of task.splitSuggestions) {
-      await window.kanbai.kanban.create({
+      const child = await window.kanbai.kanban.create({
         workspaceId: currentWorkspaceId,
         targetProjectId: task.targetProjectId,
         title: suggestion.title,
@@ -1828,11 +1829,22 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         status: 'TODO',
         priority: suggestion.priority,
         type: suggestion.type,
+        isCtoTicket: task.isCtoTicket,
+        aiProvider: task.aiProvider,
+        splitFromId: task.id,
       })
+      childIds.push(child.id)
     }
 
-    // Delete the original task
-    await window.kanbai.kanban.delete(taskId, currentWorkspaceId)
+    // Archive the original ticket instead of deleting — preserves audit trail
+    await window.kanbai.kanban.update({
+      id: task.id,
+      workspaceId: currentWorkspaceId,
+      status: 'DONE' as KanbanStatus,
+      archived: true,
+      childTicketIds: childIds,
+      result: `Ticket split en ${childIds.length} sous-tickets (accepte manuellement)`,
+    })
 
     // Reload tasks from file to get the new tickets
     const newTasks: KanbanTask[] = await window.kanbai.kanban.list(currentWorkspaceId)
