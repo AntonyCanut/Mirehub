@@ -1219,6 +1219,7 @@ REGLES IMPORTANTES :
    - EXCEPTION : Si une SEULE feature impacte plusieurs applications ou environnements, ne PAS decouper — c'est un seul ticket.
    - "splitSuggestions" doit etre un tableau VIDE [] si le ticket ne contient qu'un seul element ou si les elements sont lies.
    - CHAQUE suggestion DOIT inclure le texte exact de l'utilisateur pertinent a ce sous-ticket dans sa description (copier-coller verbatim), suivi d'eventuelles precisions supplementaires. Ne JAMAIS resumer ou reformuler le texte de l'utilisateur dans les splits.
+   - PRESERVATION DU CONTEXTE : Si les metadonnees indiquent un projet cible, CHAQUE suggestion de split DOIT mentionner ce projet cible dans sa description (ex: "Projet cible: NomDuProjet. [description]"). Le contexte de travail (workspace, projet) ne doit JAMAIS etre perdu lors du decoupage.
 
 3. RESPECT DES METADONNEES : Si une priorite ou un type est deja defini par l'utilisateur, ne le change que si c'est clairement incorrect. Privilegie le choix explicite de l'utilisateur.
 ${metadataSection}

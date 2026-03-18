@@ -7,6 +7,7 @@ function summarizeTask(task: KanbanTask): Partial<KanbanTask> {
   return {
     id: task.id,
     workspaceId: task.workspaceId,
+    targetProjectId: task.targetProjectId,
     ticketNumber: task.ticketNumber,
     title: task.title,
     description: task.description,
@@ -15,6 +16,8 @@ function summarizeTask(task: KanbanTask): Partial<KanbanTask> {
     type: task.type,
     dueDate: task.dueDate,
     archived: task.archived,
+    splitFromId: task.splitFromId,
+    parentTicketId: task.parentTicketId,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
   }
