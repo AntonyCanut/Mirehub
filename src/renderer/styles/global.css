@@ -9,6 +9,7 @@
 /* Default dark theme — Kanbai Brand Identity v1.0 */
 :root,
 [data-theme="dark"] {
+  /* 5-level surface system: base → raised → surface → hover → active */
   --bg-primary: #0E0D0B;
   --bg-secondary: #181715;
   --bg-tertiary: #181715;
@@ -17,27 +18,50 @@
   --bg-card-hover: #282724;
   --bg-input: #201F1C;
   --bg-elevated: #282724;
+  --bg-hover: #282724;
+  --bg-active: #302F2B;
+  /* Text */
   --text-primary: #E0DCE8;
   --text-secondary: #A5A49E;
   --text-muted: #6B6A65;
+  --text-disabled: #3E3D3A;
+  /* Brand purple */
   --accent: #9747FF;
   --accent-hover: #B78AFF;
-  --accent-soft: #9747FF18;
+  --accent-soft: rgba(151, 71, 255, 0.10);
+  --accent-glow: rgba(151, 71, 255, 0.04);
+  /* Agents */
   --claude-color: #D4A574;
+  --codex-color: #10A37F;
+  --color-blue: #4B9CFF;
+  --color-cyan: #22D3EE;
+  /* Borders — kept subtle, prefer surface contrast */
   --border: #201F1C;
   --border-subtle: #181715;
+  /* Status */
   --danger: #F4585B;
   --success: #20D4A0;
   --warning: #F5A623;
   --info: #4B9CFF;
-  --error-soft: #F4585B18;
-  --success-soft: #20D4A018;
-  --warning-soft: #F5A62318;
-  --info-soft: #4B9CFF18;
-  --nav-active-bg: #9747FF15;
+  --status-todo: #6B6A65;
+  --status-pending: #9747FF;
+  --error-soft: rgba(244, 88, 91, 0.10);
+  --success-soft: rgba(32, 212, 160, 0.10);
+  --warning-soft: rgba(245, 166, 35, 0.10);
+  --info-soft: rgba(75, 156, 255, 0.10);
+  /* Navigation */
+  --nav-active-bg: rgba(151, 71, 255, 0.08);
   --nav-active-text: #9747FF;
   --tab-active-bg: #282724;
   --badge-bg: #282724;
+  /* Ambient glow (3-4% opacity radials) */
+  --glow-purple: radial-gradient(ellipse at 50% 0%, rgba(151, 71, 255, 0.04) 0%, transparent 70%);
+  --glow-surface: radial-gradient(ellipse at 50% 50%, rgba(151, 71, 255, 0.03) 0%, transparent 80%);
+  /* Shadows (no border replacement) */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.20);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.30);
+  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.40);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.50);
 }
 
 /* Light theme */
