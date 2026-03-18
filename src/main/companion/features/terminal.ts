@@ -43,7 +43,8 @@ export const terminalFeature: CompanionFeature = {
     }
 
     const tabEntries = Array.from(tabMap.values()).flatMap((group) => {
-      // Use the first session as representative for the tab
+      // Use the most recently created session as representative — the latest is most likely active
+      group.sort((a, b) => b.createdAt - a.createdAt)
       const representative = group[0]
       if (!representative) return []
       // A tab is "working" if any of its sessions is working
