@@ -23,8 +23,16 @@ interface ManagedTerminal {
   taskId: string | null
   ticketNumber: string | null
   createdAt: number
+  lastActivity: number
   disposables: Array<{ dispose(): void }>
 }
+
+/** Threshold in ms — terminal is considered "working" if it received output within this window */
+const ACTIVITY_THRESHOLD_MS = 5000
+
+/** Interval for periodic session file persistence (keeps KanbaiApi data fresh) */
+let sessionPersistInterval: ReturnType<typeof setInterval> | null = null
+const SESSION_PERSIST_INTERVAL_MS = 3000
 
 /** Exported terminal session info for the companion API */
 export interface TerminalSessionInfo {
@@ -135,6 +143,7 @@ export function getTerminalSessions(): Array<{ id: string; cwd: string }> {
 
 /** Return enriched terminal session info for the companion feature */
 export function getTerminalSessionsInfo(): TerminalSessionInfo[] {
+  const now = Date.now()
   return Array.from(terminals.values()).map((t) => ({
     id: t.id,
     cwd: t.cwd,
@@ -143,7 +152,7 @@ export function getTerminalSessionsInfo(): TerminalSessionInfo[] {
     taskId: t.taskId,
     ticketNumber: t.ticketNumber,
     title: t.label || path.basename(t.cwd) || 'Terminal',
-    status: 'idle' as const,
+    status: (now - t.lastActivity < ACTIVITY_THRESHOLD_MS ? 'working' : 'idle') as 'working' | 'idle',
     createdAt: t.createdAt,
   }))
 }
@@ -236,11 +245,23 @@ function startInputQueuePolling(): void {
   inputQueueInterval = setInterval(processInputQueue, 500)
 }
 
+/** Start periodic session persistence so KanbaiApi reads fresh status */
+function startSessionPersistInterval(): void {
+  if (sessionPersistInterval) return
+  sessionPersistInterval = setInterval(() => {
+    if (terminals.size > 0) persistTerminalSessions()
+  }, 3000)
+}
+
 /** Stop input queue polling (called on cleanup) */
 function stopInputQueuePolling(): void {
   if (inputQueueInterval) {
     clearInterval(inputQueueInterval)
     inputQueueInterval = null
+  }
+  if (sessionPersistInterval) {
+    clearInterval(sessionPersistInterval)
+    sessionPersistInterval = null
   }
 }
 
@@ -301,6 +322,7 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
         env: shellEnv,
       })
 
+      const now = Date.now()
       const managed: ManagedTerminal = {
         id,
         pty,
@@ -310,7 +332,8 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
         label: options.label ?? null,
         taskId: null,
         ticketNumber: null,
-        createdAt: Date.now(),
+        createdAt: now,
+        lastActivity: now,
         disposables: [],
       }
       terminals.set(id, managed)
@@ -321,6 +344,7 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
         pty.onData((data: string) => {
           // Guard: ignore callbacks for terminals already removed from the map
           if (!terminals.has(id)) return
+          managed.lastActivity = Date.now()
           appendOutputBuffer(id, data)
           for (const win of BrowserWindow.getAllWindows()) {
             try {
@@ -402,8 +426,9 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
     return getTerminalOutput(id)
   })
 
-  // Start input queue polling for companion relay
+  // Start input queue polling for companion relay and periodic session persistence
   startInputQueuePolling()
+  startSessionPersistInterval()
 
   ipcMain.handle(IPC_CHANNELS.TERMINAL_CLOSE, async (_event, { id }: { id: string }) => {
     const terminal = terminals.get(id)
