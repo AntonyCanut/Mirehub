@@ -324,6 +324,14 @@ Criteria for approval:
 - Plans must not bypass Electron security best practices
 - Plans must follow the established project structure
 
+## Execution Rules
+
+When executing kanban tickets or task files, start implementation immediately after reading the ticket. Limit exploration to 2-3 minutes max. Do NOT spend entire sessions planning — produce code changes early and iterate.
+
+After implementing any feature, always run the existing test suite before reporting completion. Fix any failing tests before marking work as done.
+
+When generating shell scripts or wrapper scripts, never use heredoc syntax inside template literals. Write files using direct fs.writeFileSync or equivalent with properly escaped content.
+
 ## Project Standards
 
 Full project architecture, stack, IPC conventions, features, and structure are in `.claude/rules/electron/rules/core.md` (loaded automatically).
@@ -335,8 +343,6 @@ Full project architecture, stack, IPC conventions, features, and structure are i
 - Conventional Commits for git messages (in French)
 - No Co-Authored-By trailers in commits
 - Build: Vite 7 + vite-plugin-electron (NOT electron-vite)
-
-<!-- KANBAI_WORKFLOW -->
 
 ## Workflow Orchestration
 

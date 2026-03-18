@@ -9,6 +9,18 @@ Kanbai is an AI-enhanced desktop terminal built with Electron. It combines a ful
 - Code (variables, functions, comments): **English**
 - Git commits, PR descriptions: **French**
 
+## Execution Rules
+
+When executing kanban tickets or task files, start implementation immediately after reading the ticket. Limit exploration to 2-3 minutes max. Do NOT spend entire sessions planning — produce code changes early and iterate.
+
+## Testing
+
+After implementing any feature, always run the existing test suite before reporting completion. Fix any failing tests before marking work as done.
+
+## Code Patterns / Gotchas
+
+When generating shell scripts or wrapper scripts, never use heredoc syntax inside template literals. Write files using direct fs.writeFileSync or equivalent with properly escaped content.
+
 ## Tech Stack
 
 - Node.js >= 22.12.0 (runtime requirement)
@@ -79,8 +91,9 @@ Three-process Electron model:
 - AI provider configuration (Codex, Copilot, Gemini, generic)
 - Skills Store (Claude Code skills marketplace)
 - Companion API pairing and registration
-- Workspace notes
+- Workspace notes (with image support: paste, drag-drop, resize)
 - SSH remote connection management
+- Makefile runner (terminal tab naming "projectName - target", button attachment)
 
 ## AI Provider Integration
 
@@ -93,14 +106,33 @@ Three-process Electron model:
 | Copilot | #e2538a (pink) | `.copilot/` | `.github/copilot-instructions.md` (this file) |
 | Gemini CLI | #4285F4 (blue) | `.gemini/` | `GEMINI.md` |
 
-Each provider has activity hooks, settings UI with provider-colored accents, Pixel Agents visual integration, and terminal integration.
+Each provider has activity hooks, settings UI with provider-colored accents, Pixel Agents visual integration, terminal integration, workspace-level AI tab with defaults propagation to all projects, and memory/instruction files managed via Kanbai UI.
 
 ## Kanban System
 
 - Data stored in `~/.kanbai/kanban/{workspaceId}.json`
 - Statuses: TODO, WORKING, DONE, FAILED, PENDING
 - Ticket reactivation: DONE->WORKING only on Enter (message submit), not on keystrokes
+- Auto-creation of "Refonte memoires IA" tickets every 10 tickets (configurable in Settings > Kanban)
 - Labels system and comments on tickets with timestamps
+- Cards display update time (hours/minutes) and AI provider/model used
+- PDF preview in ticket attachments
+- Worktree isolation: each ticket runs in its own git worktree branch
+
+## Pixel Agents
+
+Animated AI characters that visually represent active AI sessions:
+- Git submodule in `vendor/pixel-agents/`
+- **Buffer architecture**: events stored in buffer even when Pixel Agents pane is closed
+- Displays ticket number above each character, provider label with brand color below
+- Service in main process (`pixel-agents-service.ts`) with `attachEmitter`/`detachEmitter`
+
+## Design System
+
+Kanbai Brand Identity v1.0 applied across the entire application:
+- Consistent color palette, typography, and spacing via CSS custom properties
+- Provider-colored accents for each AI tool (orange/green/pink/blue)
+- macOS-native feel with vibrancy and system fonts
 
 ## Code Conventions
 
@@ -138,8 +170,9 @@ Each provider has activity hooks, settings UI with provider-colored accents, Pix
 | `~/.kanbai/data.json` | Global persistence (workspaces, projects, settings, via StorageService) |
 | `~/.kanbai/kanban/{workspaceId}.json` | Kanban board data per workspace |
 | `.workspaces/kanban.json` | Per-project Kanban tasks |
-| `~/.kanbai/notes-workspace/{workspaceId}.json` | Per-workspace notes |
+| `~/.kanbai/notes-workspace/{workspaceId}.json` | Per-workspace notes (including embedded images) |
 | `~/.kanbai/envs/{Name}/` | Workspace environment root |
+| `~/.kanbai/hooks/` | Shared activity and automation hooks |
 
 ## Key Architectural Decisions
 

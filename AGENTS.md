@@ -156,7 +156,7 @@ Feature-local stores are colocated in their feature directory (e.g., `features/t
 | Terminal | terminal.ts | terminalTabStore | Terminal, TerminalArea, TabBar |
 | Workspace/Project | workspace.ts, project.ts | workspaceStore | Sidebar, WorkspaceItem, ProjectItem |
 | Claude Integration | claude.ts, claudeDefaults.ts, claudeMemory.ts | claudeStore | ClaudeSessionPanel, ClaudeInfoPanel, AutoClauder |
-| Kanban Board | kanban.ts | kanbanStore | KanbanBoard |
+| Kanban Board | kanban.ts | kanbanStore | KanbanBoard (with PDF preview, AI provider/model display) |
 | Git | git.ts, gitConfig.ts | — | GitPanel, FileDiffViewer |
 | Database Explorer | database.ts | databaseStore, databaseTabStore | DatabaseExplorer, DatabaseSidebar, DatabaseQueryArea |
 | Health Check | healthcheck.ts | healthCheckStore | HealthCheckPanel |
@@ -166,15 +166,16 @@ Feature-local stores are colocated in their feature directory (e.g., `features/t
 | API Tester | api.ts | — | ApiTesterPanel |
 | MCP | mcp.ts | — | McpPanel |
 | Settings | app.ts | viewStore | SettingsPanel |
-| File Explorer | filesystem.ts | — | FileExplorer, FileViewer |
+| File Explorer | filesystem.ts | — | FileExplorer, FileViewer (buffered reading for >5MB files) |
 | App Updates | appUpdate.ts | appUpdateStore | AppUpdateModal, UpdateCenter |
 | Pixel Agents | pixel-agents.ts | — | PixelAgentsPane |
 | Multi-Agent | — | — | MultiAgentView |
-| AI Configs | codexConfig.ts, copilotConfig.ts, geminiConfig.ts, aiProvider.ts | — | SettingsPanel |
+| AI Configs | codexConfig.ts, copilotConfig.ts, geminiConfig.ts, aiProvider.ts | — | SettingsPanel (workspace-level AI tab with propagation to projects) |
 | Skills Store | skillsStore.ts | — | SkillsStoreSection, AgentsSkillsTab |
 | Companion | companion.ts | companionStore | CompanionIndicator |
-| Notes | notes.ts | notesStore | NotesPanel |
+| Notes | notes.ts | notesStore | NotesPanel (with image support: paste, drag-drop, resize) |
 | SSH | ssh.ts | — | — |
+| Makefile Runner | — | — | Makefile target buttons attached to terminal tabs |
 
 ## AI Provider Integration
 
@@ -193,6 +194,8 @@ Each provider has:
 - Settings UI with provider-colored accents (toggles, tabs, borders)
 - Pixel Agents visual integration (animated character per active AI agent)
 - Terminal integration (double terminal: user + AI)
+- Workspace-level AI tab with defaults propagation to all projects
+- Memory/instruction files managed via Kanbai UI
 
 ## Pixel Agents
 
@@ -211,6 +214,16 @@ Animated AI characters that visually represent active AI sessions:
 - Auto-creation of "Refonte memoires IA" tickets every 10 tickets (configurable in Settings > Kanban)
 - Labels system (e.g., `ai-memory-refactor`, `maintenance`, `bug`)
 - Comments on tickets with timestamps
+- Cards display update time (hours/minutes) and AI provider/model used
+- PDF preview in ticket attachments
+- Worktree isolation: each ticket runs in its own git worktree branch
+
+## Design System
+
+Kanbai Brand Identity v1.0 applied across the entire application:
+- Consistent color palette, typography, and spacing via CSS custom properties
+- Provider-colored accents for each AI tool (orange/green/pink/blue)
+- macOS-native feel with vibrancy and system fonts
 
 ## Data Persistence
 
@@ -219,7 +232,7 @@ Animated AI characters that visually represent active AI sessions:
 | `~/.kanbai/data.json` | Global persistence (workspaces, projects, settings, via StorageService) |
 | `~/.kanbai/kanban/{workspaceId}.json` | Kanban board data per workspace |
 | `.workspaces/kanban.json` | Per-project Kanban tasks |
-| `~/.kanbai/notes-workspace/{workspaceId}.json` | Per-workspace notes |
+| `~/.kanbai/notes-workspace/{workspaceId}.json` | Per-workspace notes (including embedded images) |
 | `~/.kanbai/envs/{Name}/` | Workspace environment root |
 | `~/.kanbai/hooks/` | Shared activity and automation hooks |
 | `src/shared/types/index.ts` | Main TypeScript type definitions |

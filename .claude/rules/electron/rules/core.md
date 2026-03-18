@@ -144,7 +144,7 @@ Feature-local stores are colocated in their feature directory (e.g., `features/t
 | Terminal | terminal.ts | terminalTabStore | Terminal, TerminalArea, TabBar |
 | Workspace/Project | workspace.ts, project.ts | workspaceStore | Sidebar, WorkspaceItem, ProjectItem |
 | Claude Integration | claude.ts, claudeDefaults.ts, claudeMemory.ts | claudeStore | ClaudeSessionPanel, ClaudeInfoPanel, AutoClauder |
-| Kanban Board | kanban.ts | kanbanStore | KanbanBoard |
+| Kanban Board | kanban.ts | kanbanStore | KanbanBoard (PDF preview, AI provider/model display) |
 | Git | git.ts, gitConfig.ts | — | GitPanel, FileDiffViewer |
 | Database Explorer | database.ts | databaseStore, databaseTabStore | DatabaseExplorer, DatabaseSidebar, DatabaseQueryArea |
 | Health Check | healthcheck.ts | healthCheckStore | HealthCheckPanel |
@@ -154,21 +154,24 @@ Feature-local stores are colocated in their feature directory (e.g., `features/t
 | API Tester | api.ts | — | ApiTesterPanel |
 | MCP | mcp.ts | — | McpPanel |
 | Settings | app.ts | viewStore | SettingsPanel |
-| File Explorer | filesystem.ts | — | FileExplorer, FileViewer |
+| File Explorer | filesystem.ts | — | FileExplorer, FileViewer (buffered reading for >5MB) |
 | App Updates | appUpdate.ts | appUpdateStore | AppUpdateModal, UpdateCenter |
 | Pixel Agents | pixel-agents.ts | — | PixelAgentsPane |
 | Multi-Agent | — | — | MultiAgentView |
-| AI Configs | codexConfig.ts, copilotConfig.ts, geminiConfig.ts, aiProvider.ts | — | SettingsPanel |
+| AI Configs | codexConfig.ts, copilotConfig.ts, geminiConfig.ts, aiProvider.ts | — | SettingsPanel (workspace-level AI tab with propagation) |
 | Skills Store | skillsStore.ts | — | SkillsStoreSection, AgentsSkillsTab |
 | Companion | companion.ts | companionStore | CompanionIndicator |
-| Notes | notes.ts | notesStore | NotesPanel |
+| Notes | notes.ts | notesStore | NotesPanel (images: paste, drag-drop, resize) |
 | SSH | ssh.ts | — | — |
 
 ## Data Persistence
 
 - `~/.kanbai/data.json` — workspaces, projects, settings, templates (via StorageService singleton)
 - `.workspaces/kanban.json` — per-project Kanban tasks
-- `~/.kanbai/notes-workspace/{workspaceId}.json` — per-workspace notes
+- `~/.kanbai/kanban/{workspaceId}.json` — Kanban board data per workspace
+- `~/.kanbai/notes-workspace/{workspaceId}.json` — per-workspace notes (including embedded images)
+- `~/.kanbai/envs/{Name}/` — workspace environment root
+- `~/.kanbai/hooks/` — shared activity and automation hooks
 - Session state saved/restored via StorageService
 
 ## Key Types
