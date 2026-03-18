@@ -836,3 +836,17 @@ export function computeSplitDividers(
 
   return dividers
 }
+
+// Sync tab metadata to the main process whenever tabs change.
+// This allows the companion/mobile app to see ALL open tabs, even those
+// whose PTY process has exited.
+useTerminalTabStore.subscribe((state, prevState) => {
+  if (state.tabs !== prevState.tabs && typeof window !== 'undefined' && window.kanbai?.terminal?.syncTabs) {
+    const tabSummary = state.tabs.map((t) => ({
+      id: t.id,
+      label: t.label,
+      workspaceId: t.workspaceId,
+    }))
+    window.kanbai.terminal.syncTabs(tabSummary)
+  }
+})

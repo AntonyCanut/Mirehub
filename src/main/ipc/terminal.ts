@@ -50,6 +50,19 @@ export interface TerminalSessionInfo {
 const terminals = new Map<string, ManagedTerminal>()
 
 /**
+ * Tab metadata synced from the renderer store.
+ * Tabs may outlive their PTY sessions (e.g. process exited but tab stays open).
+ * This allows the companion/mobile app to see ALL open tabs, not just live PTY sessions.
+ */
+interface SyncedTab {
+  id: string
+  label: string
+  workspaceId: string
+  hasLiveSession: boolean
+}
+const syncedTabs = new Map<string, SyncedTab>()
+
+/**
  * Ring buffer per terminal — stores the last OUTPUT_BUFFER_MAX_SIZE bytes of
  * PTY output so the companion app can display recent terminal content.
  */
@@ -144,17 +157,43 @@ export function getTerminalSessions(): Array<{ id: string; cwd: string }> {
 /** Return enriched terminal session info for the companion feature */
 export function getTerminalSessionsInfo(): TerminalSessionInfo[] {
   const now = Date.now()
-  return Array.from(terminals.values()).map((t) => ({
-    id: t.id,
-    cwd: t.cwd,
-    workspaceId: t.workspaceId,
-    tabId: t.tabId,
-    taskId: t.taskId,
-    ticketNumber: t.ticketNumber,
-    title: t.label || path.basename(t.cwd) || 'Terminal',
-    status: (now - t.lastActivity < ACTIVITY_THRESHOLD_MS ? 'working' : 'idle') as 'working' | 'idle',
-    createdAt: t.createdAt,
-  }))
+
+  // Live PTY sessions
+  const liveTabIds = new Set<string>()
+  const liveEntries = Array.from(terminals.values()).map((t) => {
+    if (t.tabId) liveTabIds.add(t.tabId)
+    return {
+      id: t.id,
+      cwd: t.cwd,
+      workspaceId: t.workspaceId,
+      tabId: t.tabId,
+      taskId: t.taskId,
+      ticketNumber: t.ticketNumber,
+      title: t.label || path.basename(t.cwd) || 'Terminal',
+      status: (now - t.lastActivity < ACTIVITY_THRESHOLD_MS ? 'working' : 'idle') as 'working' | 'idle',
+      createdAt: t.createdAt,
+    }
+  })
+
+  // Tabs without live PTY sessions (process exited but tab still open)
+  const orphanTabEntries: TerminalSessionInfo[] = []
+  for (const tab of syncedTabs.values()) {
+    if (!liveTabIds.has(tab.id)) {
+      orphanTabEntries.push({
+        id: `tab-placeholder-${tab.id}`,
+        cwd: '',
+        workspaceId: tab.workspaceId,
+        tabId: tab.id,
+        taskId: null,
+        ticketNumber: null,
+        title: tab.label,
+        status: 'idle',
+        createdAt: now,
+      })
+    }
+  }
+
+  return [...liveEntries, ...orphanTabEntries]
 }
 
 /** Persist current terminal sessions to ~/.kanbai/terminal-sessions.json for the companion API */
@@ -166,6 +205,15 @@ function persistTerminalSessions(): void {
   } catch {
     // Best-effort — companion may not be active
   }
+}
+
+/** Sync tab metadata from the renderer store */
+function syncTabs(tabs: Array<{ id: string; label: string; workspaceId: string }>): void {
+  syncedTabs.clear()
+  for (const tab of tabs) {
+    syncedTabs.set(tab.id, { ...tab, hasLiveSession: false })
+  }
+  persistTerminalSessions()
 }
 
 /** Update the label for a terminal session (called from renderer via IPC) */
@@ -205,10 +253,29 @@ export function getTerminalOutputClean(sessionId: string): string {
   return renderTerminalToPlainText(raw)
 }
 
-/** Minimal virtual-terminal renderer: processes raw PTY bytes into readable text */
+/**
+ * Minimal virtual-terminal renderer with row+column tracking.
+ * Handles CR, LF, cursor movement, erase-line, erase-display, and
+ * strips all ANSI styling/mode sequences to produce readable plain text.
+ */
 function renderTerminalToPlainText(raw: string): string {
-  const lines: string[] = ['']
+  // Screen buffer: array of char arrays (sparse, filled with spaces on demand)
+  const screen: string[][] = [[]]
   let row = 0
+  let col = 0
+
+  function ensureRow(r: number): void {
+    while (screen.length <= r) screen.push([])
+  }
+
+  function writeChar(ch: string): void {
+    ensureRow(row)
+    const line = screen[row]!
+    // Pad with spaces if cursor is past the current line length
+    while (line.length <= col) line.push(' ')
+    line[col] = ch
+    col++
+  }
 
   let i = 0
   while (i < raw.length) {
@@ -220,53 +287,67 @@ function renderTerminalToPlainText(raw: string): string {
 
       // CSI: ESC [
       if (next === '[') {
-        const match = raw.slice(i).match(/^\x1b\[([?]?)([0-9;]*)([@A-Za-z])/)
+        const match = raw.slice(i).match(/^\x1b\[([?>]?)([0-9;]*)([@A-Za-z])/)
         if (match) {
           i += match[0].length
           const params = match[2] ?? ''
           const code = match[3] ?? ''
 
           if (code === 'H' || code === 'f') {
-            // Cursor position — move to row;col (1-based)
+            // Cursor position (1-based)
             const parts = params.split(';')
-            const targetRow = Math.max(0, (parseInt(parts[0] || '1', 10) - 1))
-            while (lines.length <= targetRow) lines.push('')
-            row = targetRow
+            row = Math.max(0, parseInt(parts[0] || '1', 10) - 1)
+            col = Math.max(0, parseInt(parts[1] || '1', 10) - 1)
+            ensureRow(row)
           } else if (code === 'A') {
-            // Cursor up
-            const n = parseInt(params || '1', 10)
-            row = Math.max(0, row - n)
+            row = Math.max(0, row - (parseInt(params || '1', 10)))
           } else if (code === 'B') {
-            // Cursor down
-            const n = parseInt(params || '1', 10)
-            row += n
-            while (lines.length <= row) lines.push('')
+            row += parseInt(params || '1', 10)
+            ensureRow(row)
+          } else if (code === 'C') {
+            // Cursor forward
+            col += parseInt(params || '1', 10)
+          } else if (code === 'D') {
+            // Cursor backward
+            col = Math.max(0, col - (parseInt(params || '1', 10)))
+          } else if (code === 'G') {
+            // Cursor horizontal absolute (1-based)
+            col = Math.max(0, parseInt(params || '1', 10) - 1)
           } else if (code === 'J') {
-            // Erase display
             const n = parseInt(params || '0', 10)
             if (n === 2 || n === 3) {
               // Clear entire screen
-              lines.length = 0
-              lines.push('')
+              screen.length = 0
+              screen.push([])
               row = 0
+              col = 0
             } else if (n === 0) {
-              // Clear from cursor to end
-              lines[row] = lines[row]?.slice(0, 0) ?? ''
-              lines.length = row + 1
+              // Clear from cursor to end of screen
+              ensureRow(row)
+              screen[row]!.length = col
+              screen.length = row + 1
             }
           } else if (code === 'K') {
-            // Erase in line
             const n = parseInt(params || '0', 10)
-            if (n === 0 || n === 2) {
-              lines[row] = ''
+            ensureRow(row)
+            const line = screen[row]!
+            if (n === 0) {
+              // Erase from cursor to end of line
+              line.length = col
+            } else if (n === 1) {
+              // Erase from start to cursor
+              for (let c = 0; c <= col && c < line.length; c++) line[c] = ' '
+            } else if (n === 2) {
+              // Erase entire line
+              screen[row] = []
             }
           }
-          // All other CSI (colors, modes, etc.) — skip silently
+          // All other CSI (colors m, modes h/l, etc.) — skip
           continue
         }
       }
 
-      // OSC: ESC ]...BEL or ESC ]...ESC\
+      // OSC: ESC ]...BEL or ESC ]...ESC backslash
       if (next === ']') {
         const oscEnd = raw.indexOf('\x07', i + 2)
         const oscEnd2 = raw.indexOf('\x1b\\', i + 2)
@@ -274,18 +355,11 @@ function renderTerminalToPlainText(raw: string): string {
         if (oscEnd >= 0 && oscEnd2 >= 0) end = Math.min(oscEnd, oscEnd2)
         else if (oscEnd >= 0) end = oscEnd
         else if (oscEnd2 >= 0) end = oscEnd2
-        if (end >= 0) {
-          i = end + (raw[end] === '\x07' ? 1 : 2)
-          continue
-        }
+        if (end >= 0) { i = end + (raw[end] === '\x07' ? 1 : 2); continue }
       }
 
-      // Other escape sequences (charset, etc.) — skip 2-3 chars
-      if (next && '()#'.includes(next)) {
-        i += 3
-        continue
-      }
-      // Generic: skip ESC + one char
+      // Charset / other 2-3 byte sequences
+      if (next && '()#'.includes(next)) { i += 3; continue }
       i += 2
       continue
     }
@@ -293,49 +367,59 @@ function renderTerminalToPlainText(raw: string): string {
     // --- Newline ---
     if (ch === '\n') {
       row++
-      while (lines.length <= row) lines.push('')
+      col = 0
+      ensureRow(row)
       i++
       continue
     }
 
     // --- Carriage return ---
     if (ch === '\r') {
-      // CR resets write position to start of current line (handled by overwrite on next char)
-      // Just mark for overwrite by clearing current line content
-      // (next chars will overwrite from position 0)
-      if (raw[i + 1] === '\n') {
-        // CR+LF: normal newline
-        row++
-        while (lines.length <= row) lines.push('')
-        i += 2
-        continue
-      }
-      // Bare CR: reset to beginning of line (used for progress bars, spinners)
-      lines[row] = ''
+      col = 0
+      i++
+      continue
+    }
+
+    // --- Backspace ---
+    if (ch === '\b') {
+      if (col > 0) col--
+      i++
+      continue
+    }
+
+    // --- Tab ---
+    if (ch === '\t') {
+      const tabStop = ((Math.floor(col / 8) + 1) * 8)
+      while (col < tabStop) writeChar(' ')
       i++
       continue
     }
 
     // --- Skip other control chars ---
-    if (ch.charCodeAt(0) < 32) {
-      i++
-      continue
-    }
+    if (ch.charCodeAt(0) < 32) { i++; continue }
 
-    // --- Normal character ---
-    while (lines.length <= row) lines.push('')
-    lines[row] += ch
+    // --- Normal printable character ---
+    writeChar(ch)
     i++
   }
 
-  // Clean up: trim trailing empty lines, collapse excessive blank line runs
-  while (lines.length > 0 && lines[lines.length - 1]?.trim() === '') {
-    lines.pop()
+  // Convert screen buffer to string lines, trimming trailing spaces
+  const textLines = screen.map((line) => {
+    let str = line.join('')
+    // Trim trailing spaces
+    str = str.replace(/\s+$/, '')
+    return str
+  })
+
+  // Trim trailing empty lines
+  while (textLines.length > 0 && textLines[textLines.length - 1]?.trim() === '') {
+    textLines.pop()
   }
 
+  // Collapse runs of more than 2 blank lines
   const result: string[] = []
   let blankRun = 0
-  for (const line of lines) {
+  for (const line of textLines) {
     if (line.trim() === '') {
       blankRun++
       if (blankRun <= 2) result.push('')
@@ -578,6 +662,10 @@ export function registerTerminalHandlers(ipcMain: IpcMain): void {
 
   ipcMain.handle(IPC_CHANNELS.TERMINAL_GET_OUTPUT, async (_event, { id }: { id: string }): Promise<string> => {
     return getTerminalOutput(id)
+  })
+
+  ipcMain.on(IPC_CHANNELS.TERMINAL_SYNC_TABS, (_event, tabs: Array<{ id: string; label: string; workspaceId: string }>) => {
+    syncTabs(tabs)
   })
 
   // Start input queue polling for companion relay and periodic session persistence

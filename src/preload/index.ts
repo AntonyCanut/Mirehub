@@ -25,6 +25,8 @@ const api = {
       ipcRenderer.send(IPC_CHANNELS.TERMINAL_SET_TASK_INFO, { tabId, taskId, ticketNumber }),
     getOutput: (id: string): Promise<string> =>
       ipcRenderer.invoke(IPC_CHANNELS.TERMINAL_GET_OUTPUT, { id }),
+    syncTabs: (tabs: Array<{ id: string; label: string; workspaceId: string }>) =>
+      ipcRenderer.send(IPC_CHANNELS.TERMINAL_SYNC_TABS, tabs),
     onData: (callback: (data: { id: string; data: string }) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, payload: { id: string; data: string }) =>
         callback(payload)
