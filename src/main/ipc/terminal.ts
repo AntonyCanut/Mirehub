@@ -243,111 +243,142 @@ export function getTerminalOutput(sessionId: string): string {
 }
 
 /**
- * Return a clean plain-text rendering of terminal output.
- * Simulates a minimal virtual terminal to handle CR, line-clear (EL),
- * erase-display, and cursor-position sequences that raw ANSI stripping misses.
+ * Return an HTML rendering of terminal output with ANSI colors preserved.
  */
 export function getTerminalOutputClean(sessionId: string): string {
   const raw = outputBuffers.get(sessionId) ?? ''
   if (!raw) return ''
-  return renderTerminalToPlainText(raw)
+  return renderTerminalToHtml(raw)
 }
 
+// ANSI 8-color palette (SGR 30-37 foreground)
+const ANSI_COLORS: Record<number, string> = {
+  30: '#555', 31: '#f55', 32: '#5f5', 33: '#ff5',
+  34: '#55f', 35: '#f5f', 36: '#5ff', 37: '#ccc',
+  90: '#888', 91: '#f88', 92: '#8f8', 93: '#ff8',
+  94: '#88f', 95: '#f8f', 96: '#8ff', 97: '#fff',
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+interface Cell { ch: string; fg: string | null; bold: boolean; dim: boolean }
+
 /**
- * Minimal virtual-terminal renderer with row+column tracking.
- * Handles CR, LF, cursor movement, erase-line, erase-display, and
- * strips all ANSI styling/mode sequences to produce readable plain text.
+ * Virtual-terminal renderer with row+column tracking and ANSI color support.
+ * Returns HTML with colored <span> elements.
  */
-function renderTerminalToPlainText(raw: string): string {
-  // Screen buffer: array of char arrays (sparse, filled with spaces on demand)
-  const screen: string[][] = [[]]
+function renderTerminalToHtml(raw: string): string {
+  const screen: Cell[][] = [[]]
   let row = 0
   let col = 0
+  let curFg: string | null = null
+  let curBold = false
+  let curDim = false
 
   function ensureRow(r: number): void {
     while (screen.length <= r) screen.push([])
   }
 
+  function makeCell(ch: string): Cell {
+    return { ch, fg: curFg, bold: curBold, dim: curDim }
+  }
+
   function writeChar(ch: string): void {
     ensureRow(row)
     const line = screen[row]!
-    // Pad with spaces if cursor is past the current line length
-    while (line.length <= col) line.push(' ')
-    line[col] = ch
+    while (line.length <= col) line.push({ ch: ' ', fg: null, bold: false, dim: false })
+    line[col] = makeCell(ch)
     col++
+  }
+
+  function parseSgr(params: string): void {
+    const codes = params ? params.split(';').map(Number) : [0]
+    let ci = 0
+    while (ci < codes.length) {
+      const c = codes[ci]!
+      if (c === 0) { curFg = null; curBold = false; curDim = false }
+      else if (c === 1) { curBold = true }
+      else if (c === 2) { curDim = true }
+      else if (c === 22) { curBold = false; curDim = false }
+      else if (c === 39) { curFg = null }
+      else if ((c >= 30 && c <= 37) || (c >= 90 && c <= 97)) { curFg = ANSI_COLORS[c] ?? null }
+      else if (c === 38) {
+        // Extended color: 38;5;N (256-color) or 38;2;R;G;B (truecolor)
+        const mode = codes[ci + 1]
+        if (mode === 5 && ci + 2 < codes.length) {
+          const idx = codes[ci + 2]!
+          if (idx < 8) curFg = ANSI_COLORS[30 + idx] ?? null
+          else if (idx < 16) curFg = ANSI_COLORS[90 + idx - 8] ?? null
+          else if (idx < 232) {
+            // 216-color cube
+            const n = idx - 16
+            const r = Math.round((Math.floor(n / 36) % 6) * 51)
+            const g = Math.round((Math.floor(n / 6) % 6) * 51)
+            const b = Math.round((n % 6) * 51)
+            curFg = `rgb(${r},${g},${b})`
+          } else {
+            // Grayscale ramp
+            const v = (idx - 232) * 10 + 8
+            curFg = `rgb(${v},${v},${v})`
+          }
+          ci += 2
+        } else if (mode === 2 && ci + 4 < codes.length) {
+          curFg = `rgb(${codes[ci + 2]},${codes[ci + 3]},${codes[ci + 4]})`
+          ci += 4
+        }
+      }
+      // Skip background (40-47, 48, 100-107) — not rendered on mobile
+      ci++
+    }
   }
 
   let i = 0
   while (i < raw.length) {
     const ch = raw[i] ?? ''
 
-    // --- ESC sequence ---
     if (ch === '\x1b') {
       const next = raw[i + 1]
 
-      // CSI: ESC [
       if (next === '[') {
         const match = raw.slice(i).match(/^\x1b\[([?>]?)([0-9;]*)([@A-Za-z])/)
         if (match) {
           i += match[0].length
+          const prefix = match[1] ?? ''
           const params = match[2] ?? ''
           const code = match[3] ?? ''
 
+          // SGR (Select Graphic Rendition) — colors and styles
+          if (code === 'm' && !prefix) { parseSgr(params); continue }
+
+          // Cursor and erase — same as before
           if (code === 'H' || code === 'f') {
-            // Cursor position (1-based)
             const parts = params.split(';')
             row = Math.max(0, parseInt(parts[0] || '1', 10) - 1)
             col = Math.max(0, parseInt(parts[1] || '1', 10) - 1)
             ensureRow(row)
-          } else if (code === 'A') {
-            row = Math.max(0, row - (parseInt(params || '1', 10)))
-          } else if (code === 'B') {
-            row += parseInt(params || '1', 10)
-            ensureRow(row)
-          } else if (code === 'C') {
-            // Cursor forward
-            col += parseInt(params || '1', 10)
-          } else if (code === 'D') {
-            // Cursor backward
-            col = Math.max(0, col - (parseInt(params || '1', 10)))
-          } else if (code === 'G') {
-            // Cursor horizontal absolute (1-based)
-            col = Math.max(0, parseInt(params || '1', 10) - 1)
-          } else if (code === 'J') {
+          } else if (code === 'A') { row = Math.max(0, row - (parseInt(params || '1', 10))) }
+          else if (code === 'B') { row += parseInt(params || '1', 10); ensureRow(row) }
+          else if (code === 'C') { col += parseInt(params || '1', 10) }
+          else if (code === 'D') { col = Math.max(0, col - (parseInt(params || '1', 10))) }
+          else if (code === 'G') { col = Math.max(0, parseInt(params || '1', 10) - 1) }
+          else if (code === 'J') {
             const n = parseInt(params || '0', 10)
-            if (n === 2 || n === 3) {
-              // Clear entire screen
-              screen.length = 0
-              screen.push([])
-              row = 0
-              col = 0
-            } else if (n === 0) {
-              // Clear from cursor to end of screen
-              ensureRow(row)
-              screen[row]!.length = col
-              screen.length = row + 1
-            }
+            if (n === 2 || n === 3) { screen.length = 0; screen.push([]); row = 0; col = 0 }
+            else if (n === 0) { ensureRow(row); screen[row]!.length = col; screen.length = row + 1 }
           } else if (code === 'K') {
             const n = parseInt(params || '0', 10)
             ensureRow(row)
             const line = screen[row]!
-            if (n === 0) {
-              // Erase from cursor to end of line
-              line.length = col
-            } else if (n === 1) {
-              // Erase from start to cursor
-              for (let c = 0; c <= col && c < line.length; c++) line[c] = ' '
-            } else if (n === 2) {
-              // Erase entire line
-              screen[row] = []
-            }
+            if (n === 0) line.length = col
+            else if (n === 1) { for (let c = 0; c <= col && c < line.length; c++) line[c] = { ch: ' ', fg: null, bold: false, dim: false } }
+            else if (n === 2) { screen[row] = [] }
           }
-          // All other CSI (colors m, modes h/l, etc.) — skip
           continue
         }
       }
 
-      // OSC: ESC ]...BEL or ESC ]...ESC backslash
       if (next === ']') {
         const oscEnd = raw.indexOf('\x07', i + 2)
         const oscEnd2 = raw.indexOf('\x1b\\', i + 2)
@@ -358,75 +389,70 @@ function renderTerminalToPlainText(raw: string): string {
         if (end >= 0) { i = end + (raw[end] === '\x07' ? 1 : 2); continue }
       }
 
-      // Charset / other 2-3 byte sequences
       if (next && '()#'.includes(next)) { i += 3; continue }
       i += 2
       continue
     }
 
-    // --- Newline ---
-    if (ch === '\n') {
-      row++
-      col = 0
-      ensureRow(row)
-      i++
-      continue
-    }
-
-    // --- Carriage return ---
-    if (ch === '\r') {
-      col = 0
-      i++
-      continue
-    }
-
-    // --- Backspace ---
-    if (ch === '\b') {
-      if (col > 0) col--
-      i++
-      continue
-    }
-
-    // --- Tab ---
-    if (ch === '\t') {
-      const tabStop = ((Math.floor(col / 8) + 1) * 8)
-      while (col < tabStop) writeChar(' ')
-      i++
-      continue
-    }
-
-    // --- Skip other control chars ---
+    if (ch === '\n') { row++; col = 0; ensureRow(row); i++; continue }
+    if (ch === '\r') { col = 0; i++; continue }
+    if (ch === '\b') { if (col > 0) col--; i++; continue }
+    if (ch === '\t') { const ts = (Math.floor(col / 8) + 1) * 8; while (col < ts) writeChar(' '); i++; continue }
     if (ch.charCodeAt(0) < 32) { i++; continue }
 
-    // --- Normal printable character ---
     writeChar(ch)
     i++
   }
 
-  // Convert screen buffer to string lines, trimming trailing spaces
-  const textLines = screen.map((line) => {
-    let str = line.join('')
+  // Render screen buffer to HTML lines
+  const htmlLines: string[] = []
+  for (const line of screen) {
     // Trim trailing spaces
-    str = str.replace(/\s+$/, '')
-    return str
-  })
+    let end = line.length
+    while (end > 0 && line[end - 1]?.ch === ' ' && !line[end - 1]?.fg && !line[end - 1]?.bold) end--
+
+    let html = ''
+    let spanOpen = false
+    let prevFg: string | null = null
+    let prevBold = false
+
+    for (let c = 0; c < end; c++) {
+      const cell = line[c]
+      if (!cell) { html += ' '; continue }
+
+      const fg = cell.fg
+      const bold = cell.bold || cell.dim
+
+      if (fg !== prevFg || bold !== prevBold) {
+        if (spanOpen) html += '</span>'
+        spanOpen = false
+        if (fg || bold) {
+          const styles: string[] = []
+          if (fg) styles.push(`color:${fg}`)
+          if (cell.bold) styles.push('font-weight:700')
+          if (cell.dim) styles.push('opacity:.6')
+          html += `<span style="${styles.join(';')}">`
+          spanOpen = true
+        }
+        prevFg = fg
+        prevBold = bold
+      }
+
+      html += escapeHtml(cell.ch)
+    }
+    if (spanOpen) html += '</span>'
+    htmlLines.push(html)
+  }
 
   // Trim trailing empty lines
-  while (textLines.length > 0 && textLines[textLines.length - 1]?.trim() === '') {
-    textLines.pop()
-  }
+  while (htmlLines.length > 0 && htmlLines[htmlLines.length - 1]?.trim() === '') htmlLines.pop()
 
   // Collapse runs of more than 2 blank lines
   const result: string[] = []
   let blankRun = 0
-  for (const line of textLines) {
-    if (line.trim() === '') {
-      blankRun++
-      if (blankRun <= 2) result.push('')
-    } else {
-      blankRun = 0
-      result.push(line)
-    }
+  for (const line of htmlLines) {
+    if (line.trim() === '') { blankRun++; if (blankRun <= 2) result.push('') }
+    else { blankRun = 0; result.push(line) }
   }
 
   return result.join('\n')
