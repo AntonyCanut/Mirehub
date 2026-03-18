@@ -194,6 +194,160 @@ export function getTerminalOutput(sessionId: string): string {
   return outputBuffers.get(sessionId) ?? ''
 }
 
+/**
+ * Return a clean plain-text rendering of terminal output.
+ * Simulates a minimal virtual terminal to handle CR, line-clear (EL),
+ * erase-display, and cursor-position sequences that raw ANSI stripping misses.
+ */
+export function getTerminalOutputClean(sessionId: string): string {
+  const raw = outputBuffers.get(sessionId) ?? ''
+  if (!raw) return ''
+  return renderTerminalToPlainText(raw)
+}
+
+/** Minimal virtual-terminal renderer: processes raw PTY bytes into readable text */
+function renderTerminalToPlainText(raw: string): string {
+  const lines: string[] = ['']
+  let row = 0
+
+  let i = 0
+  while (i < raw.length) {
+    const ch = raw[i] ?? ''
+
+    // --- ESC sequence ---
+    if (ch === '\x1b') {
+      const next = raw[i + 1]
+
+      // CSI: ESC [
+      if (next === '[') {
+        const match = raw.slice(i).match(/^\x1b\[([?]?)([0-9;]*)([@A-Za-z])/)
+        if (match) {
+          i += match[0].length
+          const params = match[2] ?? ''
+          const code = match[3] ?? ''
+
+          if (code === 'H' || code === 'f') {
+            // Cursor position — move to row;col (1-based)
+            const parts = params.split(';')
+            const targetRow = Math.max(0, (parseInt(parts[0] || '1', 10) - 1))
+            while (lines.length <= targetRow) lines.push('')
+            row = targetRow
+          } else if (code === 'A') {
+            // Cursor up
+            const n = parseInt(params || '1', 10)
+            row = Math.max(0, row - n)
+          } else if (code === 'B') {
+            // Cursor down
+            const n = parseInt(params || '1', 10)
+            row += n
+            while (lines.length <= row) lines.push('')
+          } else if (code === 'J') {
+            // Erase display
+            const n = parseInt(params || '0', 10)
+            if (n === 2 || n === 3) {
+              // Clear entire screen
+              lines.length = 0
+              lines.push('')
+              row = 0
+            } else if (n === 0) {
+              // Clear from cursor to end
+              lines[row] = lines[row]?.slice(0, 0) ?? ''
+              lines.length = row + 1
+            }
+          } else if (code === 'K') {
+            // Erase in line
+            const n = parseInt(params || '0', 10)
+            if (n === 0 || n === 2) {
+              lines[row] = ''
+            }
+          }
+          // All other CSI (colors, modes, etc.) — skip silently
+          continue
+        }
+      }
+
+      // OSC: ESC ]...BEL or ESC ]...ESC\
+      if (next === ']') {
+        const oscEnd = raw.indexOf('\x07', i + 2)
+        const oscEnd2 = raw.indexOf('\x1b\\', i + 2)
+        let end = -1
+        if (oscEnd >= 0 && oscEnd2 >= 0) end = Math.min(oscEnd, oscEnd2)
+        else if (oscEnd >= 0) end = oscEnd
+        else if (oscEnd2 >= 0) end = oscEnd2
+        if (end >= 0) {
+          i = end + (raw[end] === '\x07' ? 1 : 2)
+          continue
+        }
+      }
+
+      // Other escape sequences (charset, etc.) — skip 2-3 chars
+      if (next && '()#'.includes(next)) {
+        i += 3
+        continue
+      }
+      // Generic: skip ESC + one char
+      i += 2
+      continue
+    }
+
+    // --- Newline ---
+    if (ch === '\n') {
+      row++
+      while (lines.length <= row) lines.push('')
+      i++
+      continue
+    }
+
+    // --- Carriage return ---
+    if (ch === '\r') {
+      // CR resets write position to start of current line (handled by overwrite on next char)
+      // Just mark for overwrite by clearing current line content
+      // (next chars will overwrite from position 0)
+      if (raw[i + 1] === '\n') {
+        // CR+LF: normal newline
+        row++
+        while (lines.length <= row) lines.push('')
+        i += 2
+        continue
+      }
+      // Bare CR: reset to beginning of line (used for progress bars, spinners)
+      lines[row] = ''
+      i++
+      continue
+    }
+
+    // --- Skip other control chars ---
+    if (ch.charCodeAt(0) < 32) {
+      i++
+      continue
+    }
+
+    // --- Normal character ---
+    while (lines.length <= row) lines.push('')
+    lines[row] += ch
+    i++
+  }
+
+  // Clean up: trim trailing empty lines, collapse excessive blank line runs
+  while (lines.length > 0 && lines[lines.length - 1]?.trim() === '') {
+    lines.pop()
+  }
+
+  const result: string[] = []
+  let blankRun = 0
+  for (const line of lines) {
+    if (line.trim() === '') {
+      blankRun++
+      if (blankRun <= 2) result.push('')
+    } else {
+      blankRun = 0
+      result.push(line)
+    }
+  }
+
+  return result.join('\n')
+}
+
 /** Write input to a terminal session (used by companion feature) */
 export function writeTerminalInput(sessionId: string, data: string): boolean {
   const terminal = terminals.get(sessionId)

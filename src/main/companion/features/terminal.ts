@@ -1,4 +1,4 @@
-import { getTerminalSessionsInfo, getTerminalOutput, writeTerminalInput } from '../../ipc/terminal'
+import { getTerminalSessionsInfo, getTerminalOutputClean, writeTerminalInput } from '../../ipc/terminal'
 import type { CompanionFeature, CompanionContext, CompanionResult, CompanionCommandDef } from '../../../shared/types/companion'
 
 function formatElapsed(createdAt: number): string {
@@ -105,7 +105,7 @@ export const terminalFeature: CompanionFeature = {
     if (command === 'getOutput') {
       const sessionId = params.sessionId as string
       if (!sessionId) return { success: false, error: 'Missing sessionId' }
-      const output = getTerminalOutput(sessionId)
+      const output = getTerminalOutputClean(sessionId)
       return { success: true, data: { output } }
     }
 
