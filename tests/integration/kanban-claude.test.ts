@@ -15,12 +15,14 @@ const mockKanbanRemoveAttachment = vi.fn()
 const mockKanbanLinkConversation = vi.fn()
 const mockKanbanGetConfig = vi.fn()
 const mockTerminalWrite = vi.fn()
+const mockTerminalCheckBusy = vi.fn()
 const mockWorkspaceEnvSetup = vi.fn()
 
 vi.stubGlobal('window', {
   kanbai: {
     terminal: {
       write: mockTerminalWrite,
+      checkBusy: mockTerminalCheckBusy,
     },
     kanban: {
       list: mockKanbanList,
@@ -84,6 +86,7 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
       autoCloseCompletedTerminals: true,
       autoCloseCtoTerminals: true,
     })
+    mockTerminalCheckBusy.mockResolvedValue(true)
 
     useKanbanStore.setState({
       tasks: [],
@@ -340,6 +343,68 @@ describe('Kanban → Claude Integration (PTY interactif)', () => {
 
       // Should activate existing tab, not create new one
       expect(mockSetActiveTab).toHaveBeenCalledWith('tab-existing')
+      expect(mockCreateTab).not.toHaveBeenCalled()
+      expect(mockKanbanWritePrompt).not.toHaveBeenCalled()
+    })
+
+    it('reutilise le terminal existant quand Claude a termine (reopen)', async () => {
+      const task = makeTask({ result: 'Travail effectue' })
+      mockTerminalCheckBusy.mockResolvedValue(false) // Claude has exited
+      mockKanbanWritePrompt.mockResolvedValue(undefined)
+      mockKanbanUpdate.mockResolvedValue(undefined)
+
+      // Simulate an existing tab where Claude has finished
+      useTerminalTabStore.setState({
+        tabs: [{ id: 'tab-existing', label: '[F-01] Fix bug', color: '#F5A623', hasActivity: false, paneTree: { type: 'leaf', id: 'p1', sessionId: 'pty-1', initialCommand: null, externalSessionId: null }, activePaneId: 'p1', zoomedPaneId: null, workspaceId: 'ws-1', cwd: '/tmp/workspace-env', initialCommand: null }],
+        setActiveTab: mockSetActiveTab as ReturnType<typeof useTerminalTabStore.getState>['setActiveTab'],
+        createTab: mockCreateTab as ReturnType<typeof useTerminalTabStore.getState>['createTab'],
+        setTabColor: mockSetTabColor,
+        setTabActivity: mockSetTabActivity,
+      })
+
+      useKanbanStore.setState({
+        tasks: [task],
+        kanbanTabIds: { 'task-1': 'tab-existing' },
+      })
+
+      await useKanbanStore.getState().sendToAi(task)
+
+      // Should reuse existing tab — NOT create a new one
+      expect(mockCreateTab).not.toHaveBeenCalled()
+      // Should write the new prompt file for the reopened ticket
+      expect(mockKanbanWritePrompt).toHaveBeenCalled()
+      // Should write the launch command to the existing terminal session
+      expect(mockTerminalWrite).toHaveBeenCalledWith('pty-1', expect.stringContaining('claude'))
+      // Should activate the existing tab
+      expect(mockSetActiveTab).toHaveBeenCalledWith('tab-existing')
+    })
+
+    it('envoie le commentaire quand Claude est encore actif (reopen avec busy)', async () => {
+      const task = makeTask({
+        result: 'Travail effectue',
+        comments: [{ id: 'c1', text: 'Corrige aussi le test unitaire', createdAt: Date.now() }],
+      })
+      mockTerminalCheckBusy.mockResolvedValue(true) // Claude is still running
+
+      // Simulate an existing tab with active Claude session
+      useTerminalTabStore.setState({
+        tabs: [{ id: 'tab-existing', label: '[F-01] Fix bug', color: '#F5A623', hasActivity: false, paneTree: { type: 'leaf', id: 'p1', sessionId: 'pty-1', initialCommand: null, externalSessionId: null }, activePaneId: 'p1', zoomedPaneId: null, workspaceId: 'ws-1', cwd: '/tmp/workspace-env', initialCommand: null }],
+        setActiveTab: mockSetActiveTab as ReturnType<typeof useTerminalTabStore.getState>['setActiveTab'],
+        createTab: mockCreateTab as ReturnType<typeof useTerminalTabStore.getState>['createTab'],
+        setTabColor: mockSetTabColor,
+        setTabActivity: mockSetTabActivity,
+      })
+
+      useKanbanStore.setState({
+        tasks: [task],
+        kanbanTabIds: { 'task-1': 'tab-existing' },
+      })
+
+      await useKanbanStore.getState().sendToAi(task)
+
+      // Should type the user's comment directly into the running session
+      expect(mockTerminalWrite).toHaveBeenCalledWith('pty-1', 'Corrige aussi le test unitaire\r')
+      // Should NOT create a new tab or write a new prompt
       expect(mockCreateTab).not.toHaveBeenCalled()
       expect(mockKanbanWritePrompt).not.toHaveBeenCalled()
     })
