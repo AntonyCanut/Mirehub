@@ -1,4 +1,5 @@
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 import type { DevOpsFile, DevOpsConnection } from '../../../shared/types'
 import type { CompanionFeature, CompanionContext, CompanionResult, CompanionCommandDef } from '../../../shared/types/companion'
@@ -11,9 +12,19 @@ import {
   devopsApprove,
   devopsGetBuildLog,
 } from '../../ipc/devops'
+import { StorageService } from '../../services/storage'
 
-function loadDevOpsFile(projectPath: string): DevOpsFile {
-  const filePath = path.join(projectPath, '.kanbai', 'devops.json')
+function resolveWorkspacePath(workspaceId: string): string | undefined {
+  const storage = new StorageService()
+  const workspace = storage.getWorkspace(workspaceId)
+  if (!workspace) return undefined
+  const sanitized = workspace.name.replace(/[/\\:*?"<>|]/g, '_')
+  const envDir = path.join(os.homedir(), '.kanbai', 'envs', sanitized)
+  return fs.existsSync(envDir) ? envDir : undefined
+}
+
+function loadDevOpsFile(workspacePath: string): DevOpsFile {
+  const filePath = path.join(workspacePath, '.kanbai', 'devops.json')
   if (!fs.existsSync(filePath)) return { version: 1, connections: [] }
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as DevOpsFile
@@ -29,12 +40,13 @@ function findConnection(data: DevOpsFile, connectionId: string): DevOpsConnectio
 export const devopsFeature: CompanionFeature = {
   id: 'devops',
   name: 'DevOps',
-  workspaceScoped: false,
-  projectScoped: true,
+  workspaceScoped: true,
+  projectScoped: false,
 
   async getState(ctx: CompanionContext): Promise<CompanionResult> {
-    if (!ctx.projectPath) return { success: false, error: 'Project path required' }
-    const data = loadDevOpsFile(ctx.projectPath)
+    const workspacePath = resolveWorkspacePath(ctx.workspaceId)
+    if (!workspacePath) return { success: true, data: [] }
+    const data = loadDevOpsFile(workspacePath)
     return {
       success: true,
       data: data.connections.map((c) => ({
@@ -113,8 +125,9 @@ export const devopsFeature: CompanionFeature = {
   },
 
   async execute(command: string, params: Record<string, unknown>, ctx: CompanionContext): Promise<CompanionResult> {
-    if (!ctx.projectPath) return { success: false, error: 'Project path required' }
-    const data = loadDevOpsFile(ctx.projectPath)
+    const workspacePath = resolveWorkspacePath(ctx.workspaceId)
+    if (!workspacePath) return { success: false, error: 'Workspace path not found' }
+    const data = loadDevOpsFile(workspacePath)
     const connectionId = String(params.connectionId ?? '')
     const connection = findConnection(data, connectionId)
 
