@@ -250,13 +250,43 @@ function persistTerminalSessions(): void {
   }
 }
 
-/** Sync tab metadata from the renderer store */
+/** Sync tab metadata from the renderer store.
+ * When a tab disappears from the new list it means the user closed it on the
+ * desktop — we must purge any associated finished sessions so the mobile app
+ * no longer displays them. */
 function syncTabs(tabs: Array<{ id: string; label: string; workspaceId: string }>): void {
+  const newTabIds = new Set(tabs.map((t) => t.id))
+
+  // Detect tabs that were removed (closed on the desktop)
+  const removedTabIds: string[] = []
+  for (const prevTabId of syncedTabs.keys()) {
+    if (!newTabIds.has(prevTabId)) {
+      removedTabIds.push(prevTabId)
+    }
+  }
+
+  // Purge finished sessions and their output buffers for removed tabs
+  if (removedTabIds.length > 0) {
+    const removedSet = new Set(removedTabIds)
+    for (let i = finishedSessions.length - 1; i >= 0; i--) {
+      const session = finishedSessions[i]!
+      if (session.tabId && removedSet.has(session.tabId)) {
+        finishedOutputBuffers.delete(session.id)
+        // Clean up output log file on disk
+        try { fs.unlinkSync(path.join(OUTPUT_DIR, `${session.id}.log`)) } catch { /* already gone */ }
+        finishedSessions.splice(i, 1)
+      }
+    }
+  }
+
   syncedTabs.clear()
   for (const tab of tabs) {
     syncedTabs.set(tab.id, { ...tab, hasLiveSession: false })
   }
   persistTerminalSessions()
+  if (removedTabIds.length > 0) {
+    bumpCompanionChangeVersion()
+  }
 }
 
 /** Update the label for a terminal session (called from renderer via IPC) */
