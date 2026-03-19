@@ -1,5 +1,4 @@
 import fs from 'fs'
-import os from 'os'
 import path from 'path'
 import type { DevOpsFile, DevOpsConnection } from '../../../shared/types'
 import type { CompanionFeature, CompanionContext, CompanionResult, CompanionCommandDef } from '../../../shared/types/companion'
@@ -14,17 +13,16 @@ import {
 } from '../../ipc/devops'
 import { StorageService } from '../../services/storage'
 
-function resolveWorkspacePath(workspaceId: string): string | undefined {
-  const storage = new StorageService()
-  const workspace = storage.getWorkspace(workspaceId)
-  if (!workspace) return undefined
-  const sanitized = workspace.name.replace(/[/\\:*?"<>|]/g, '_')
-  const envDir = path.join(os.homedir(), '.kanbai', 'envs', sanitized)
-  return fs.existsSync(envDir) ? envDir : undefined
+/** Resolve the base path where devops.json is stored.
+ *  Uses projectPath (per-project config) when available,
+ *  otherwise falls back to iterating all projects in the workspace. */
+function resolveDevOpsBasePath(ctx: CompanionContext): string | undefined {
+  if (ctx.projectPath) return ctx.projectPath
+  return undefined
 }
 
-function loadDevOpsFile(workspacePath: string): DevOpsFile {
-  const filePath = path.join(workspacePath, '.kanbai', 'devops.json')
+function loadDevOpsFile(basePath: string): DevOpsFile {
+  const filePath = path.join(basePath, '.kanbai', 'devops.json')
   if (!fs.existsSync(filePath)) return { version: 1, connections: [] }
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as DevOpsFile
@@ -37,6 +35,39 @@ function findConnection(data: DevOpsFile, connectionId: string): DevOpsConnectio
   return data.connections.find((c) => c.id === connectionId)
 }
 
+/** Load all DevOps connections across all projects in a workspace */
+function loadAllWorkspaceConnections(workspaceId: string): Array<{ connection: DevOpsConnectionInfo; projectId: string }> {
+  const storage = new StorageService()
+  const projects = storage.getProjects(workspaceId)
+  const results: Array<{ connection: DevOpsConnectionInfo; projectId: string }> = []
+
+  for (const project of projects) {
+    const data = loadDevOpsFile(project.path)
+    for (const conn of data.connections) {
+      results.push({
+        connection: {
+          id: conn.id,
+          name: conn.name,
+          provider: conn.provider ?? 'azure-devops',
+          organizationUrl: conn.organizationUrl,
+          projectName: conn.projectName,
+        },
+        projectId: project.id,
+      })
+    }
+  }
+
+  return results
+}
+
+interface DevOpsConnectionInfo {
+  id: string
+  name: string
+  provider: string
+  organizationUrl: string
+  projectName: string
+}
+
 export const devopsFeature: CompanionFeature = {
   id: 'devops',
   name: 'DevOps',
@@ -44,18 +75,27 @@ export const devopsFeature: CompanionFeature = {
   projectScoped: false,
 
   async getState(ctx: CompanionContext): Promise<CompanionResult> {
-    const workspacePath = resolveWorkspacePath(ctx.workspaceId)
-    if (!workspacePath) return { success: true, data: [] }
-    const data = loadDevOpsFile(workspacePath)
+    // If a specific project is targeted, return its connections
+    const basePath = resolveDevOpsBasePath(ctx)
+    if (basePath) {
+      const data = loadDevOpsFile(basePath)
+      return {
+        success: true,
+        data: data.connections.map((c) => ({
+          id: c.id,
+          name: c.name,
+          provider: c.provider ?? 'azure-devops',
+          organizationUrl: c.organizationUrl,
+          projectName: c.projectName,
+        })),
+      }
+    }
+
+    // No project specified — aggregate connections from all projects in workspace
+    const allConnections = loadAllWorkspaceConnections(ctx.workspaceId)
     return {
       success: true,
-      data: data.connections.map((c) => ({
-        id: c.id,
-        name: c.name,
-        provider: c.provider ?? 'azure-devops',
-        organizationUrl: c.organizationUrl,
-        projectName: c.projectName,
-      })),
+      data: allConnections.map((entry) => entry.connection),
     }
   },
 
@@ -125,19 +165,31 @@ export const devopsFeature: CompanionFeature = {
   },
 
   async execute(command: string, params: Record<string, unknown>, ctx: CompanionContext): Promise<CompanionResult> {
-    const workspacePath = resolveWorkspacePath(ctx.workspaceId)
-    if (!workspacePath) return { success: false, error: 'Workspace path not found' }
-    const data = loadDevOpsFile(workspacePath)
+    const basePath = resolveDevOpsBasePath(ctx)
     const connectionId = String(params.connectionId ?? '')
-    const connection = findConnection(data, connectionId)
 
-    if (!connection && command !== 'listPipelines') {
+    // Resolve connection: try project path first, then search all projects
+    let connection: DevOpsConnection | undefined
+    if (basePath) {
+      const data = loadDevOpsFile(basePath)
+      connection = findConnection(data, connectionId)
+    } else {
+      // Search all projects in workspace for the connection
+      const storage = new StorageService()
+      const projects = storage.getProjects(ctx.workspaceId)
+      for (const project of projects) {
+        const data = loadDevOpsFile(project.path)
+        connection = findConnection(data, connectionId)
+        if (connection) break
+      }
+    }
+
+    if (!connection) {
       return { success: false, error: `Connection not found: ${connectionId}` }
     }
 
     try {
       if (command === 'listPipelines') {
-        if (!connection) return { success: false, error: `Connection not found: ${connectionId}` }
         const result = await devopsListPipelines(connection)
         return { success: result.success, data: result.pipelines, error: result.error }
       }
@@ -145,26 +197,26 @@ export const devopsFeature: CompanionFeature = {
       if (command === 'getPipelineRuns') {
         const pipelineId = Number(params.pipelineId)
         const count = Number(params.count) || 10
-        const result = await devopsGetPipelineRuns(connection!, pipelineId, count)
+        const result = await devopsGetPipelineRuns(connection, pipelineId, count)
         return { success: result.success, data: result.runs, error: result.error }
       }
 
       if (command === 'getRunTimeline') {
         const buildId = Number(params.buildId)
-        const result = await devopsGetBuildTimeline(connection!, buildId)
+        const result = await devopsGetBuildTimeline(connection, buildId)
         return { success: result.success, data: result.stages, error: result.error }
       }
 
       if (command === 'runPipeline') {
         const pipelineId = Number(params.pipelineId)
         const branch = params.branch ? String(params.branch) : undefined
-        const result = await devopsRunPipeline(connection!, pipelineId, branch)
+        const result = await devopsRunPipeline(connection, pipelineId, branch)
         return { success: result.success, data: result.run, error: result.error }
       }
 
       if (command === 'getApprovals') {
         const buildIds = String(params.buildIds).split(',').map(Number).filter((n) => !isNaN(n))
-        const result = await devopsGetApprovals(connection!, buildIds)
+        const result = await devopsGetApprovals(connection, buildIds)
         return { success: result.success, data: result.approvals, error: result.error }
       }
 
@@ -175,14 +227,14 @@ export const devopsFeature: CompanionFeature = {
           return { success: false, error: 'Status must be "approved" or "rejected"' }
         }
         const comment = params.comment ? String(params.comment) : undefined
-        const result = await devopsApprove(connection!, approvalId, status, comment)
+        const result = await devopsApprove(connection, approvalId, status, comment)
         return result
       }
 
       if (command === 'getBuildLog') {
         const buildId = Number(params.buildId)
         const logId = Number(params.logId)
-        const result = await devopsGetBuildLog(connection!, buildId, logId)
+        const result = await devopsGetBuildLog(connection, buildId, logId)
         return { success: result.success, data: result.content, error: result.error }
       }
 
