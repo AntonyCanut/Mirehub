@@ -217,7 +217,7 @@ export function TitleBar(_props: TitleBarProps) {
           <div
             className="titlebar-indicator"
             style={{
-              transform: `translateX(${indicator.left}px)`,
+              transform: `translateX(${indicator.left}px) translateY(-50%)`,
               width: `${indicator.width}px`,
               transition: hasAnimated ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
             }}
