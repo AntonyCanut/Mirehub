@@ -106,10 +106,21 @@ export function App() {
       const provider = AI_PROVIDERS[payload.provider as AiProviderId]
       if (!provider) return
 
-      const workspace = useWorkspaceStore.getState().workspaces.find((w) => w.id === wsId)
-      const envPath = workspace ? await window.kanbai.workspaceEnv.getPath(workspace.name) : ''
-      const cwd = envPath || useWorkspaceStore.getState().projects.find((p) => p.workspaceId === wsId)?.path || ''
-      if (!cwd) return
+      const { workspaces: allWs, projects: allProjects } = useWorkspaceStore.getState()
+      const workspace = allWs.find((w) => w.id === wsId)
+      let cwd = ''
+      if (workspace) {
+        try { cwd = await window.kanbai.workspaceEnv.getPath(workspace.name) || '' } catch { /* fallback */ }
+      }
+      if (!cwd) cwd = allProjects.find((p) => p.workspaceId === wsId)?.path || ''
+      // Fallback to home directory if workspace has no projects or env path
+      if (!cwd) {
+        try {
+          const settings = await window.kanbai.settings.get()
+          cwd = settings?.defaultCwd || ''
+        } catch { /* ignore */ }
+      }
+      if (!cwd) cwd = '~'
 
       const label = `${provider.displayName} + Terminal`
       termStore.createSplitTab(wsId, cwd, label, provider.cliCommand, null)

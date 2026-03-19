@@ -270,6 +270,7 @@ export function setTerminalTaskInfo(tabId: string, taskId: string, ticketNumber:
       terminal.taskId = taskId
       terminal.ticketNumber = ticketNumber
       persistTerminalSessions()
+      bumpCompanionChangeVersion()
       return
     }
   }
@@ -297,45 +298,72 @@ export function getTerminalOutputClean(sessionId: string): string {
  * Returns true if the session was found and removed.
  */
 export function closeTerminalSession(sessionId: string): boolean {
-  // Try live session first
-  const terminal = terminals.get(sessionId)
-  if (terminal) {
-    addFinishedSession({
-      id: terminal.id,
-      cwd: terminal.cwd,
-      workspaceId: terminal.workspaceId,
-      tabId: terminal.tabId,
-      taskId: terminal.taskId,
-      ticketNumber: terminal.ticketNumber,
-      title: terminal.label || path.basename(terminal.cwd) || 'Terminal',
-      status: 'done',
-      createdAt: terminal.createdAt,
-    })
-    disposeTerminal(terminal)
-    terminals.delete(sessionId)
-    outputBuffers.delete(sessionId)
-    persistTerminalSessions()
-    bumpCompanionChangeVersion()
-    // Notify renderer
+  // Resolve the tabId from the session so we can close the entire tab group
+  let targetTabId: string | null = null
+  let found = false
+
+  // Check live sessions first
+  const liveSession = terminals.get(sessionId)
+  if (liveSession) {
+    targetTabId = liveSession.tabId
+    found = true
+  }
+
+  // Check finished sessions if not found live
+  if (!found) {
+    const finished = finishedSessions.find((s) => s.id === sessionId)
+    if (finished) {
+      targetTabId = finished.tabId
+      found = true
+    }
+  }
+
+  if (!found) return false
+
+  // Close ALL live sessions sharing this tabId (or just the single session if no tabId)
+  const sessionsToClose = targetTabId
+    ? Array.from(terminals.entries()).filter(([, t]) => t.tabId === targetTabId)
+    : liveSession ? [[sessionId, liveSession] as const] : []
+
+  for (const [id, terminal] of sessionsToClose) {
+    disposeTerminal(terminal as ManagedTerminal)
+    terminals.delete(id as string)
+    outputBuffers.delete(id as string)
+    // Notify renderer for each closed session
     for (const win of BrowserWindow.getAllWindows()) {
       try {
         if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
-          win.webContents.send(IPC_CHANNELS.TERMINAL_CLOSE, { id: sessionId, exitCode: 0, signal: 0 })
+          win.webContents.send(IPC_CHANNELS.TERMINAL_CLOSE, { id, exitCode: 0, signal: 0 })
         }
       } catch { /* window destroyed */ }
     }
-    return true
   }
-  // Try finished session
-  const idx = finishedSessions.findIndex((s) => s.id === sessionId)
-  if (idx !== -1) {
-    finishedSessions.splice(idx, 1)
-    finishedOutputBuffers.delete(sessionId)
-    persistTerminalSessions()
-    bumpCompanionChangeVersion()
-    return true
+
+  // Remove all finished sessions with the same tabId
+  if (targetTabId) {
+    for (let i = finishedSessions.length - 1; i >= 0; i--) {
+      if (finishedSessions[i]!.tabId === targetTabId) {
+        finishedOutputBuffers.delete(finishedSessions[i]!.id)
+        finishedSessions.splice(i, 1)
+      }
+    }
+  } else {
+    // No tabId — remove the specific finished session
+    const idx = finishedSessions.findIndex((s) => s.id === sessionId)
+    if (idx !== -1) {
+      finishedOutputBuffers.delete(sessionId)
+      finishedSessions.splice(idx, 1)
+    }
   }
-  return false
+
+  // Also remove the synced tab so it disappears from the renderer
+  if (targetTabId) {
+    syncedTabs.delete(targetTabId)
+  }
+
+  persistTerminalSessions()
+  bumpCompanionChangeVersion()
+  return true
 }
 
 // ANSI 8-color palette (SGR 30-37 foreground)
