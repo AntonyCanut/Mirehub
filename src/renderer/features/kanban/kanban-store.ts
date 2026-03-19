@@ -879,21 +879,57 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     if (!workspaceId) return
     launchingTaskIds.add(task.id)
 
-    // If a tab already exists for this task, activate it instead of recreating
+    // If a tab already exists for this task, try to continue the conversation in it
     const { kanbanTabIds } = get()
     const existingTabId = kanbanTabIds[task.id]
+    let reuseTabId: string | null = null
+    let reuseSessionId: string | null = null
     if (existingTabId) {
       const termStore = useTerminalTabStore.getState()
       const tab = termStore.tabs.find((t) => t.id === existingTabId)
       if (tab) {
-        if (shouldActivate) termStore.setActiveTab(existingTabId)
-        launchingTaskIds.delete(task.id)
-        return
+        // Get the first session ID from the pane tree
+        const sessionId = tab.paneTree.type === 'leaf'
+          ? tab.paneTree.sessionId
+          : null // Split panes: fall through to create new tab
+        if (sessionId) {
+          try {
+            const isBusy = await window.kanbai.terminal.checkBusy(sessionId)
+            if (isBusy) {
+              // Claude is still running — type the user's latest comment directly
+              if (shouldActivate) termStore.setActiveTab(existingTabId)
+              const latestComment = task.comments?.[task.comments.length - 1]?.text
+              if (latestComment) {
+                window.kanbai.terminal.write(sessionId, latestComment + '\r')
+              }
+              launchingTaskIds.delete(task.id)
+              return
+            }
+            // Claude has exited — mark for reuse so we relaunch in the same terminal
+            reuseTabId = existingTabId
+            reuseSessionId = sessionId
+          } catch {
+            // checkBusy failed — fall through to reuse as idle
+            reuseTabId = existingTabId
+            reuseSessionId = sessionId
+          }
+        } else if (!sessionId && tab.paneTree.type === 'leaf') {
+          // Tab exists but no session yet — fall through to create new tab
+          const newTabIds = { ...get().kanbanTabIds }
+          delete newTabIds[task.id]
+          set({ kanbanTabIds: newTabIds })
+        } else {
+          // Split pane — just activate the existing tab
+          if (shouldActivate) termStore.setActiveTab(existingTabId)
+          launchingTaskIds.delete(task.id)
+          return
+        }
+      } else {
+        // Tab was closed — remove stale mapping and proceed to create a new one
+        const newTabIds = { ...get().kanbanTabIds }
+        delete newTabIds[task.id]
+        set({ kanbanTabIds: newTabIds })
       }
-      // Tab was closed — remove stale mapping and proceed to create a new one
-      const newTabIds = { ...get().kanbanTabIds }
-      delete newTabIds[task.id]
-      set({ kanbanTabIds: newTabIds })
     }
 
     // Determine AI provider first — it affects cwd strategy
@@ -1287,11 +1323,18 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       initialCommand = `${unsetEnv}${exportEnv}${providerConfig.cliCommand} ${providerConfig.interactiveArgs.join(' ')} "${escapedPrompt}"${recoverySuffix}`
     }
 
-    // Create an interactive terminal tab for this task
+    // Create an interactive terminal tab for this task, or reuse an existing one
     let tabId: string | null = null
     try {
       const termStore = useTerminalTabStore.getState()
       if (workspaceId) {
+        if (reuseTabId && reuseSessionId) {
+          // Reuse existing terminal — Claude has exited, relaunch in same tab
+          tabId = reuseTabId
+          if (shouldActivate) termStore.setActiveTab(reuseTabId)
+          // Send the new launch command to the existing terminal
+          window.kanbai.terminal.write(reuseSessionId, initialCommand + '\r')
+        } else {
         // Auto-close oldest completed terminals to free slots when at capacity
         const workspaceTabs = termStore.tabs.filter((t) => t.workspaceId === workspaceId)
         if (workspaceTabs.length >= 10) {
@@ -1320,6 +1363,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
           }))
           // Inform main process of the task-terminal link for companion API
           window.kanbai.terminal.setTaskInfo(tabId, task.id, ticketLabel)
+        }
         }
       }
     } catch {
