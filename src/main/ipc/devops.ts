@@ -42,7 +42,7 @@ function saveDevOpsFile(projectPath: string, data: DevOpsFile): void {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
 }
 
-async function getAuthHeader(auth: DevOpsAuth): Promise<string> {
+export async function getAuthHeader(auth: DevOpsAuth): Promise<string> {
   if (auth.method === 'pat') {
     const encoded = Buffer.from(`:${auth.token}`).toString('base64')
     return `Basic ${encoded}`
@@ -76,7 +76,7 @@ async function getAuthHeader(auth: DevOpsAuth): Promise<string> {
   return `Bearer ${tokenData.access_token}`
 }
 
-async function azureDevOpsRequest<T>(
+export async function azureDevOpsRequest<T>(
   auth: DevOpsAuth,
   url: string,
 ): Promise<T> {
@@ -96,7 +96,7 @@ async function azureDevOpsRequest<T>(
   return response.json() as Promise<T>
 }
 
-async function azureDevOpsPatch<T>(
+export async function azureDevOpsPatch<T>(
   auth: DevOpsAuth,
   url: string,
   body: unknown,
@@ -119,7 +119,7 @@ async function azureDevOpsPatch<T>(
   return response.json() as Promise<T>
 }
 
-function mapApprovalStatus(status: string): ApprovalStatus {
+export function mapApprovalStatus(status: string): ApprovalStatus {
   const mapping: Record<string, ApprovalStatus> = {
     pending: 'pending',
     approved: 'approved',
@@ -156,7 +156,7 @@ interface AzureApproval {
   }
 }
 
-function mapPipelineStatus(status: string, result: string): PipelineStatus {
+export function mapPipelineStatus(status: string, result: string): PipelineStatus {
   if (status === 'inProgress' || status === 'cancelling') return 'running'
   if (status === 'notStarted' || status === 'postponed') return 'notStarted'
   if (result === 'succeeded' || result === 'partiallySucceeded') return 'succeeded'
@@ -260,7 +260,7 @@ function findJobLogId(
   return sorted[sorted.length - 1]!.log!.id
 }
 
-function mapTimelineToStages(records: AzureTimelineRecord[]): PipelineStage[] {
+export function mapTimelineToStages(records: AzureTimelineRecord[]): PipelineStage[] {
   const stages = records.filter((r) => r.type === 'Stage')
   const phases = records.filter((r) => r.type === 'Phase')
   const jobs = records.filter((r) => r.type === 'Job')
@@ -364,7 +364,7 @@ function extractAzureParameters(run: AzureBuildRun): Record<string, string> {
   return params
 }
 
-function mapBuildRun(run: AzureBuildRun): PipelineRun {
+export function mapBuildRun(run: AzureBuildRun): PipelineRun {
   return {
     id: run.id,
     name: run.buildNumber,
@@ -597,12 +597,12 @@ function mapGitHubJobsToStages(jobs: GitHubJob[]): PipelineStage[] {
   })
 }
 
-function getGitHubApiBase(connection: DevOpsConnection): string {
+export function getGitHubApiBase(connection: DevOpsConnection): string {
   // organizationUrl stores the owner, projectName stores the repo
   return `https://api.github.com/repos/${connection.organizationUrl}/${connection.projectName}`
 }
 
-function isGitHub(connection: DevOpsConnection): boolean {
+export function isGitHub(connection: DevOpsConnection): boolean {
   return connection.provider === 'github'
 }
 
@@ -618,7 +618,7 @@ async function gitHubTestConnection(connection: DevOpsConnection): Promise<{ suc
   }
 }
 
-async function gitHubListPipelines(connection: DevOpsConnection): Promise<{ success: boolean; pipelines: PipelineDefinition[]; error?: string }> {
+export async function gitHubListPipelines(connection: DevOpsConnection): Promise<{ success: boolean; pipelines: PipelineDefinition[]; error?: string }> {
   try {
     const base = getGitHubApiBase(connection)
     const result = await gitHubRequest<{ workflows: GitHubWorkflow[] }>(
@@ -659,7 +659,7 @@ async function gitHubListPipelines(connection: DevOpsConnection): Promise<{ succ
   }
 }
 
-async function gitHubGetPipelineRuns(
+export async function gitHubGetPipelineRuns(
   connection: DevOpsConnection,
   workflowId: number,
   count: number,
@@ -677,7 +677,7 @@ async function gitHubGetPipelineRuns(
   }
 }
 
-async function gitHubRunPipeline(
+export async function gitHubRunPipeline(
   connection: DevOpsConnection,
   workflowId: number,
   branch?: string,
@@ -722,7 +722,7 @@ async function gitHubRunPipeline(
   }
 }
 
-async function gitHubGetBuildTimeline(
+export async function gitHubGetBuildTimeline(
   connection: DevOpsConnection,
   runId: number,
 ): Promise<{ success: boolean; stages: PipelineStage[]; error?: string }> {
@@ -739,7 +739,7 @@ async function gitHubGetBuildTimeline(
   }
 }
 
-async function gitHubGetApprovals(
+export async function gitHubGetApprovals(
   connection: DevOpsConnection,
   buildIds: number[],
 ): Promise<{ success: boolean; approvals: PipelineApproval[]; error?: string }> {
@@ -784,7 +784,7 @@ async function gitHubGetApprovals(
   }
 }
 
-async function gitHubApprove(
+export async function gitHubApprove(
   connection: DevOpsConnection,
   approvalId: string,
   status: 'approved' | 'rejected',
@@ -812,7 +812,7 @@ async function gitHubApprove(
   }
 }
 
-async function gitHubGetBuildLog(
+export async function gitHubGetBuildLog(
   connection: DevOpsConnection,
   _buildId: number,
   logId: number,
@@ -839,6 +839,166 @@ async function gitHubGetBuildLog(
     return { success: true, content }
   } catch (err) {
     return { success: false, content: '', error: String(err) }
+  }
+}
+
+// =============================================
+// Exported business logic functions
+// =============================================
+
+export async function devopsListPipelines(connection: DevOpsConnection): Promise<{ success: boolean; pipelines: PipelineDefinition[]; error?: string }> {
+  try {
+    if (isGitHub(connection)) {
+      return gitHubListPipelines(connection)
+    }
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/definitions?api-version=7.1&includeLatestBuilds=true`
+    const result = await azureDevOpsRequest<{ value: AzureBuildDef[] }>(connection.auth, url)
+    const pipelines: PipelineDefinition[] = (result.value ?? []).map((def) => {
+      const latestBuild = def.latestBuild ?? def.latestCompletedBuild ?? null
+      return {
+        id: def.id,
+        name: def.name,
+        folder: def.path || '\\',
+        revision: def.revision,
+        url: def._links?.web?.href ?? '',
+        latestRun: latestBuild ? mapBuildRun(latestBuild) : null,
+      }
+    })
+    return { success: true, pipelines }
+  } catch (err) {
+    return { success: false, pipelines: [], error: String(err) }
+  }
+}
+
+export async function devopsGetPipelineRuns(connection: DevOpsConnection, pipelineId: number, count?: number): Promise<{ success: boolean; runs: PipelineRun[]; error?: string }> {
+  const top = count || 20
+  try {
+    if (isGitHub(connection)) {
+      return gitHubGetPipelineRuns(connection, pipelineId, top)
+    }
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1&definitions=${pipelineId}&$top=${top}&queryOrder=queueTimeDescending`
+    const result = await azureDevOpsRequest<{ value: AzureBuildRun[] }>(connection.auth, url)
+    const runs: PipelineRun[] = (result.value ?? []).map(mapBuildRun)
+    return { success: true, runs }
+  } catch (err) {
+    return { success: false, runs: [], error: String(err) }
+  }
+}
+
+export async function devopsRunPipeline(connection: DevOpsConnection, pipelineId: number, branch?: string, parameters?: Record<string, string>): Promise<{ success: boolean; run?: PipelineRun; error?: string }> {
+  try {
+    if (isGitHub(connection)) {
+      return gitHubRunPipeline(connection, pipelineId, branch, parameters)
+    }
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1`
+    const authHeader = await getAuthHeader(connection.auth)
+    const body: Record<string, unknown> = { definition: { id: pipelineId } }
+    if (branch) body.sourceBranch = `refs/heads/${branch}`
+    if (parameters && Object.keys(parameters).length > 0) body.templateParameters = parameters
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Failed to run pipeline: ${response.status} - ${errorText}`)
+    }
+    const run = await response.json() as AzureBuildRun
+    return { success: true, run: mapBuildRun(run) }
+  } catch (err) {
+    return { success: false, error: String(err) }
+  }
+}
+
+export async function devopsGetBuildTimeline(connection: DevOpsConnection, buildId: number): Promise<{ success: boolean; stages: PipelineStage[]; error?: string }> {
+  try {
+    if (isGitHub(connection)) {
+      return gitHubGetBuildTimeline(connection, buildId)
+    }
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds/${buildId}/timeline?api-version=7.1`
+    const result = await azureDevOpsRequest<{ records: AzureTimelineRecord[] }>(connection.auth, url)
+    const stages = mapTimelineToStages(result.records || [])
+    return { success: true, stages }
+  } catch (err) {
+    return { success: false, stages: [], error: String(err) }
+  }
+}
+
+export async function devopsGetApprovals(connection: DevOpsConnection, buildIds: number[]): Promise<{ success: boolean; approvals: PipelineApproval[]; error?: string }> {
+  try {
+    if (isGitHub(connection)) {
+      return gitHubGetApprovals(connection, buildIds)
+    }
+    const idsParam = buildIds.join(',')
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1&buildIds=${idsParam}`
+    const result = await azureDevOpsRequest<{ value: AzureApproval[] }>(connection.auth, url)
+    const buildIdSet = new Set(buildIds)
+    const allApprovals: PipelineApproval[] = (result.value ?? []).map((a) => ({
+      id: a.id,
+      buildId: extractBuildIdFromApproval(a),
+      status: mapApprovalStatus(a.status),
+      createdOn: a.createdOn,
+      instructions: a.instructions || '',
+      minRequiredApprovers: a.minRequiredApprovers,
+      steps: (a.steps || []).map((s) => ({
+        assignedApprover: s.assignedApprover?.displayName ?? '',
+        status: mapApprovalStatus(s.status),
+        comment: s.comment || '',
+      })),
+    }))
+    const approvals = allApprovals.filter((a) => buildIdSet.has(a.buildId))
+    return { success: true, approvals }
+  } catch (err) {
+    return { success: false, approvals: [], error: String(err) }
+  }
+}
+
+export async function devopsApprove(connection: DevOpsConnection, approvalId: string, status: 'approved' | 'rejected', comment?: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (isGitHub(connection)) {
+      return gitHubApprove(connection, approvalId, status, comment)
+    }
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1`
+    const body = [{ approvalId, status, comment: comment || '' }]
+    await azureDevOpsPatch(connection.auth, url, body)
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: String(err) }
+  }
+}
+
+export async function devopsGetBuildLog(connection: DevOpsConnection, buildId: number, logId: number): Promise<{ success: boolean; content: string; error?: string }> {
+  try {
+    if (isGitHub(connection)) {
+      return gitHubGetBuildLog(connection, buildId, logId)
+    }
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds/${buildId}/logs/${logId}?api-version=7.1`
+    const authHeader = await getAuthHeader(connection.auth)
+    const response = await fetch(url, {
+      headers: { Authorization: authHeader, Accept: 'text/plain' },
+    })
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Azure DevOps API error: ${response.status} - ${errorText}`)
+    }
+    const content = await response.text()
+    return { success: true, content }
+  } catch (err) {
+    return { success: false, content: '', error: String(err) }
+  }
+}
+
+export async function devopsTestConnection(connection: DevOpsConnection): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (isGitHub(connection)) {
+      return gitHubTestConnection(connection)
+    }
+    const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/definitions?api-version=7.1&$top=1`
+    await azureDevOpsRequest(connection.auth, url)
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: String(err) }
   }
 }
 
@@ -874,17 +1034,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_TEST_CONNECTION,
     async (_event, { connection }: { connection: DevOpsConnection }) => {
-      try {
-        if (isGitHub(connection)) {
-          return gitHubTestConnection(connection)
-        }
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/definitions?api-version=7.1&$top=1`
-        await azureDevOpsRequest(connection.auth, url)
-        return { success: true }
-      } catch (err) {
-        console.error('[DevOps] testConnection error:', err)
-        return { success: false, error: String(err) }
-      }
+      return devopsTestConnection(connection)
     },
   )
 
@@ -892,30 +1042,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_LIST_PIPELINES,
     async (_event, { connection }: { connection: DevOpsConnection }) => {
-      try {
-        if (isGitHub(connection)) {
-          return gitHubListPipelines(connection)
-        }
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/definitions?api-version=7.1&includeLatestBuilds=true`
-        const result = await azureDevOpsRequest<{ value: AzureBuildDef[] }>(connection.auth, url)
-
-        const pipelines: PipelineDefinition[] = (result.value ?? []).map((def) => {
-          const latestBuild = def.latestBuild ?? def.latestCompletedBuild ?? null
-          return {
-            id: def.id,
-            name: def.name,
-            folder: def.path || '\\',
-            revision: def.revision,
-            url: def._links?.web?.href ?? '',
-            latestRun: latestBuild ? mapBuildRun(latestBuild) : null,
-          }
-        })
-
-        return { success: true, pipelines }
-      } catch (err) {
-        console.error('[DevOps] listPipelines error:', err)
-        return { success: false, pipelines: [], error: String(err) }
-      }
+      return devopsListPipelines(connection)
     },
   )
 
@@ -923,20 +1050,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_GET_PIPELINE_RUNS,
     async (_event, { connection, pipelineId, count }: { connection: DevOpsConnection; pipelineId: number; count?: number }) => {
-      const top = count || 20
-      try {
-        if (isGitHub(connection)) {
-          return gitHubGetPipelineRuns(connection, pipelineId, top)
-        }
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1&definitions=${pipelineId}&$top=${top}&queryOrder=queueTimeDescending`
-        const result = await azureDevOpsRequest<{ value: AzureBuildRun[] }>(connection.auth, url)
-
-        const runs: PipelineRun[] = (result.value ?? []).map(mapBuildRun)
-        return { success: true, runs }
-      } catch (err) {
-        console.error('[DevOps] getPipelineRuns error:', err)
-        return { success: false, runs: [], error: String(err) }
-      }
+      return devopsGetPipelineRuns(connection, pipelineId, count)
     },
   )
 
@@ -944,40 +1058,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_RUN_PIPELINE,
     async (_event, { connection, pipelineId, branch, parameters }: { connection: DevOpsConnection; pipelineId: number; branch?: string; parameters?: Record<string, string> }) => {
-      try {
-        if (isGitHub(connection)) {
-          return gitHubRunPipeline(connection, pipelineId, branch, parameters)
-        }
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds?api-version=7.1`
-        const authHeader = await getAuthHeader(connection.auth)
-
-        const body: Record<string, unknown> = { definition: { id: pipelineId } }
-        if (branch) {
-          body.sourceBranch = `refs/heads/${branch}`
-        }
-        if (parameters && Object.keys(parameters).length > 0) {
-          body.templateParameters = parameters
-        }
-
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            Authorization: authHeader,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        })
-
-        if (!response.ok) {
-          const errorText = await response.text()
-          throw new Error(`Failed to run pipeline: ${response.status} - ${errorText}`)
-        }
-
-        const run = await response.json() as AzureBuildRun
-        return { success: true, run: mapBuildRun(run) }
-      } catch (err) {
-        return { success: false, error: String(err) }
-      }
+      return devopsRunPipeline(connection, pipelineId, branch, parameters)
     },
   )
 
@@ -985,18 +1066,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_GET_BUILD_TIMELINE,
     async (_event, { connection, buildId }: { connection: DevOpsConnection; buildId: number }) => {
-      try {
-        if (isGitHub(connection)) {
-          return gitHubGetBuildTimeline(connection, buildId)
-        }
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds/${buildId}/timeline?api-version=7.1`
-        const result = await azureDevOpsRequest<{ records: AzureTimelineRecord[] }>(connection.auth, url)
-
-        const stages = mapTimelineToStages(result.records || [])
-        return { success: true, stages }
-      } catch (err) {
-        return { success: false, stages: [], error: String(err) }
-      }
+      return devopsGetBuildTimeline(connection, buildId)
     },
   )
 
@@ -1004,36 +1074,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_GET_APPROVALS,
     async (_event, { connection, buildIds }: { connection: DevOpsConnection; buildIds: number[] }) => {
-      try {
-        if (isGitHub(connection)) {
-          return gitHubGetApprovals(connection, buildIds)
-        }
-        const idsParam = buildIds.join(',')
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1&buildIds=${idsParam}`
-        const result = await azureDevOpsRequest<{ value: AzureApproval[] }>(connection.auth, url)
-
-        const buildIdSet = new Set(buildIds)
-        const allApprovals: PipelineApproval[] = (result.value ?? []).map((a) => ({
-          id: a.id,
-          buildId: extractBuildIdFromApproval(a),
-          status: mapApprovalStatus(a.status),
-          createdOn: a.createdOn,
-          instructions: a.instructions || '',
-          minRequiredApprovers: a.minRequiredApprovers,
-          steps: (a.steps || []).map((s) => ({
-            assignedApprover: s.assignedApprover?.displayName ?? '',
-            status: mapApprovalStatus(s.status),
-            comment: s.comment || '',
-          })),
-        }))
-
-        // Azure API may ignore the buildIds filter — filter client-side
-        const approvals = allApprovals.filter((a) => buildIdSet.has(a.buildId))
-
-        return { success: true, approvals }
-      } catch (err) {
-        return { success: false, approvals: [], error: String(err) }
-      }
+      return devopsGetApprovals(connection, buildIds)
     },
   )
 
@@ -1041,17 +1082,7 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_APPROVE,
     async (_event, { connection, approvalId, status, comment }: { connection: DevOpsConnection; approvalId: string; status: 'approved' | 'rejected'; comment?: string }) => {
-      try {
-        if (isGitHub(connection)) {
-          return gitHubApprove(connection, approvalId, status, comment)
-        }
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/pipelines/approvals?api-version=7.1-preview.1`
-        const body = [{ approvalId, status, comment: comment || '' }]
-        await azureDevOpsPatch(connection.auth, url, body)
-        return { success: true }
-      } catch (err) {
-        return { success: false, error: String(err) }
-      }
+      return devopsApprove(connection, approvalId, status, comment)
     },
   )
 
@@ -1059,34 +1090,12 @@ export function registerDevOpsHandlers(ipcMain: IpcMain): void {
   ipcMain.handle(
     IPC_CHANNELS.DEVOPS_GET_BUILD_LOG,
     async (_event, { connection, buildId, logId }: { connection: DevOpsConnection; buildId: number; logId: number }) => {
-      try {
-        if (isGitHub(connection)) {
-          return gitHubGetBuildLog(connection, buildId, logId)
-        }
-        const url = `${connection.organizationUrl}/${encodeURIComponent(connection.projectName)}/_apis/build/builds/${buildId}/logs/${logId}?api-version=7.1`
-        const authHeader = await getAuthHeader(connection.auth)
-        const response = await fetch(url, {
-          headers: {
-            Authorization: authHeader,
-            Accept: 'text/plain',
-          },
-        })
-
-        if (!response.ok) {
-          const errorText = await response.text()
-          throw new Error(`Azure DevOps API error: ${response.status} - ${errorText}`)
-        }
-
-        const content = await response.text()
-        return { success: true, content }
-      } catch (err) {
-        return { success: false, content: '', error: String(err) }
-      }
+      return devopsGetBuildLog(connection, buildId, logId)
     },
   )
 }
 
-function extractBuildIdFromApproval(approval: AzureApproval): number {
+export function extractBuildIdFromApproval(approval: AzureApproval): number {
   // Primary: pipeline.owner.id contains the build ID directly
   if (approval.pipeline?.owner?.id) {
     return approval.pipeline.owner.id
