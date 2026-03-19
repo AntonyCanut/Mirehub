@@ -298,6 +298,15 @@ body {
   transition: all 0.12s ease;
 }
 
+.titlebar-dropdown-item:focus {
+  outline: none;
+}
+
+.titlebar-dropdown-item:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
 .titlebar-dropdown-item:hover {
   background: var(--bg-surface);
   color: var(--text-primary);
@@ -1023,6 +1032,15 @@ body {
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+}
+
+.view-btn:focus {
+  outline: none;
+}
+
+.view-btn:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
 }
 
 .view-btn:hover {
