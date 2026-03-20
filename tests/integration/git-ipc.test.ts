@@ -7,6 +7,7 @@ import { createMockIpcMain } from '../mocks/electron'
 
 const TEST_DIR = path.join(os.tmpdir(), `.kanbai-git-ipc-test-${process.pid}-${Date.now()}`)
 const repoDir = path.join(TEST_DIR, 'test-repo')
+const DEFAULT_BRANCH = 'main'
 
 function gitExec(cmd: string, cwd: string = repoDir): string {
   return execSync(cmd, { cwd, encoding: 'utf-8' }).trim()
@@ -14,7 +15,7 @@ function gitExec(cmd: string, cwd: string = repoDir): string {
 
 function setupGitRepo(): void {
   fs.mkdirSync(repoDir, { recursive: true })
-  gitExec('git init -b master')
+  gitExec(`git init -b ${DEFAULT_BRANCH}`)
   gitExec('git config user.email "test@test.com"')
   gitExec('git config user.name "Test User"')
 }
@@ -102,7 +103,7 @@ describe('Git IPC Handlers', () => {
       const status = await mockIpcMain._invoke('git:status', { cwd: repoDir })
 
       expect(status).toBeDefined()
-      expect(status.branch).toBe('master')
+      expect(status.branch).toBe(DEFAULT_BRANCH)
       expect(status.untracked).toContain('new-file.txt')
     })
 
@@ -234,7 +235,7 @@ describe('Git IPC Handlers', () => {
       const branches = await mockIpcMain._invoke('git:branches', { cwd: repoDir })
 
       expect(branches.length).toBeGreaterThan(0)
-      expect(branches.some((b: { name: string }) => b.name === 'master')).toBe(true)
+      expect(branches.some((b: { name: string }) => b.name === DEFAULT_BRANCH)).toBe(true)
     }, 15_000)
 
     it('gere un repo sans commits', async () => {
@@ -339,7 +340,7 @@ describe('Git IPC Handlers', () => {
     it('bascule vers une branche existante', async () => {
       setupGitRepoWithCommit()
       gitExec('git checkout -b dev')
-      gitExec('git checkout master')
+      gitExec(`git checkout ${DEFAULT_BRANCH}`)
 
       const result = await mockIpcMain._invoke('git:checkout', {
         cwd: repoDir,
@@ -387,7 +388,7 @@ describe('Git IPC Handlers', () => {
     it('supprime une branche mergee', async () => {
       setupGitRepoWithCommit()
       gitExec('git checkout -b to-delete')
-      gitExec('git checkout master')
+      gitExec(`git checkout ${DEFAULT_BRANCH}`)
 
       const result = await mockIpcMain._invoke('git:deleteBranch', {
         cwd: repoDir,
@@ -405,7 +406,7 @@ describe('Git IPC Handlers', () => {
       fs.writeFileSync(path.join(repoDir, 'feature.txt'), 'feature content')
       gitExec('git add .')
       gitExec('git commit -m "Feature commit"')
-      gitExec('git checkout master')
+      gitExec(`git checkout ${DEFAULT_BRANCH}`)
 
       const result = await mockIpcMain._invoke('git:merge', {
         cwd: repoDir,
@@ -559,7 +560,7 @@ describe('Git IPC Handlers', () => {
     it('renomme une branche', async () => {
       setupGitRepoWithCommit()
       gitExec('git checkout -b old-name')
-      gitExec('git checkout master')
+      gitExec(`git checkout ${DEFAULT_BRANCH}`)
 
       const result = await mockIpcMain._invoke('git:renameBranch', {
         cwd: repoDir,
