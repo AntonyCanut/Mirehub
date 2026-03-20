@@ -769,7 +769,6 @@ export function GitPanel() {
       setCommitMessage('')
       refreshProject(selectedProject)
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Commit failed:', err)
     }
   }, [selectedProject, currentStatus, commitMessage, refreshProject])

@@ -109,7 +109,6 @@ async function autoMergeWorktree(
 
         return
       }
-      // eslint-disable-next-line no-console
       console.warn(`Auto-merge failed for ${ticketLabel}:`, result?.error)
     }
   } catch {
@@ -1249,7 +1248,6 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     try {
       await window.kanbai.kanban.writePrompt(cwd, task.id, prompt)
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Failed to write prompt file for task:', task.id, err)
       launchingTaskIds.delete(task.id)
       return
