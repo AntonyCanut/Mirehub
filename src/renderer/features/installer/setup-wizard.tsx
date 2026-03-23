@@ -15,7 +15,6 @@ const PREREQUISITE_LABELS: Record<string, string> = {
   brew: 'Homebrew',
   node: 'Node.js',
   npm: 'npm',
-  claude: 'Claude Code',
 }
 
 function PrerequisiteRow({ item }: { item: PrerequisiteInfo }) {
@@ -40,11 +39,6 @@ function PrerequisiteRow({ item }: { item: PrerequisiteInfo }) {
       <span className="installer-row-version">
         {item.version || (item.status === 'skipped' ? t('installer.skipped') : t('installer.notDetected'))}
       </span>
-      {item.error && (
-        <span className="installer-row-error" title={item.error}>
-          {item.error.substring(0, 80)}
-        </span>
-      )}
     </div>
   )
 }
@@ -104,6 +98,9 @@ export function SetupWizard() {
     )
   }
 
+  // Find error details for display
+  const failedItem = prerequisites.find((p) => p.status === 'failed')
+
   return (
     <div className="modal-overlay">
       <div className="modal-dialog installer-dialog">
@@ -115,8 +112,15 @@ export function SetupWizard() {
               <PrerequisiteRow key={item.id} item={item} />
             ))}
           </div>
-          {result && !result.success && (
-            <p className="installer-error">{result.error}</p>
+          {failedItem?.error && (
+            <div className="installer-error">
+              {failedItem.error.split('\n').map((line, i) => (
+                <span key={i}>{line}{i < failedItem.error!.split('\n').length - 1 && <br />}</span>
+              ))}
+            </div>
+          )}
+          {result && !result.success && !failedItem?.error && (
+            <div className="installer-error">{result.error}</div>
           )}
         </div>
         <div className="modal-footer">

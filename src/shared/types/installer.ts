@@ -1,6 +1,6 @@
 // Installer types — cascade prerequisite installation
 
-export type PrerequisiteId = 'brew' | 'node' | 'npm' | 'claude'
+export type PrerequisiteId = 'brew' | 'node' | 'npm'
 
 export type PrerequisiteStatus = 'installed' | 'missing' | 'installing' | 'failed' | 'skipped'
 

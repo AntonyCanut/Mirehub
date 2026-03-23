@@ -3,10 +3,11 @@ import { IPC_CHANNELS } from '../../shared/types'
 import type { PrerequisiteId, PrerequisiteInfo, InstallerProgress, InstallerResult } from '../../shared/types'
 import { IS_WIN, IS_MAC, getExtendedToolPaths, PATH_SEP, crossExecFile } from '../../shared/platform'
 
-// Ordered list of prerequisites — each depends on the previous ones
+// Core prerequisites only — AI tools (claude, codex, copilot, gemini) are optional
+// and managed separately via Settings > Tools.
 const PREREQUISITE_ORDER: PrerequisiteId[] = IS_MAC
-  ? ['brew', 'node', 'npm', 'claude']
-  : ['node', 'npm', 'claude']
+  ? ['brew', 'node', 'npm']
+  : ['node', 'npm']
 
 function enrichedEnv(): NodeJS.ProcessEnv {
   const extraPaths = getExtendedToolPaths()
@@ -40,10 +41,11 @@ async function getToolVersion(command: string, args: string[]): Promise<string |
     const { stdout, stderr } = await enrichedExecFile(command, args, 5000)
     const raw = (stdout || stderr).trim()
     if (!raw) return null
-    return raw
+    // Take first line only (brew --version returns multiple lines)
+    const firstLine = raw.split(/\r?\n/)[0] || raw
+    return firstLine
       .replace(/^v/, '')
       .replace(/^Homebrew /, '')
-      .replace(/^Claude Code /, '')
       .replace(/ \(.+\)$/, '')
   } catch {
     return null
@@ -63,10 +65,6 @@ async function checkPrerequisite(id: PrerequisiteId): Promise<PrerequisiteInfo> 
     }
     case 'npm': {
       const version = await getToolVersion('npm', ['--version'])
-      return { id, version, status: version ? 'installed' : 'missing' }
-    }
-    case 'claude': {
-      const version = await getToolVersion('claude', ['--version'])
       return { id, version, status: version ? 'installed' : 'missing' }
     }
   }
@@ -89,13 +87,27 @@ function sendProgress(progress: InstallerProgress): void {
 }
 
 async function installBrew(): Promise<void> {
-  // Install Homebrew via the official install script
-  // The script is non-interactive when NONINTERACTIVE=1
-  await crossExecFile(
-    '/bin/bash',
-    ['-c', 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'],
-    { timeout: 300000, env: { ...enrichedEnv(), NONINTERACTIVE: '1' } },
-  )
+  // Homebrew's official install script requires sudo on macOS.
+  // On Apple Silicon (/opt/homebrew) the directory creation needs admin access.
+  // We try the install and provide a clear message if sudo is needed.
+  try {
+    await crossExecFile(
+      '/bin/bash',
+      ['-c', 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'],
+      { timeout: 300000, env: { ...enrichedEnv(), NONINTERACTIVE: '1' } },
+    )
+  } catch (error) {
+    const msg = extractErrorMessage(error)
+    if (msg.includes('sudo') || msg.includes('administrator') || msg.includes('Administrator')) {
+      throw new Error(
+        'Homebrew requires administrator privileges to install.\n'
+        + 'Please open Terminal and run:\n'
+        + '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"\n'
+        + 'Then restart Kanbai.',
+      )
+    }
+    throw error
+  }
 
   // After installation, add brew to the current process PATH
   const brewPaths = ['/opt/homebrew/bin', '/usr/local/bin']
@@ -120,9 +132,9 @@ async function installNode(): Promise<void> {
 }
 
 async function installNpm(): Promise<void> {
-  // npm comes bundled with Node. If it's missing after Node install, try updating.
+  // npm comes bundled with Node. If it's missing after Node install, try installing Node.
   const version = await getToolVersion('npm', ['--version'])
-  if (version) return // Already available after Node install
+  if (version) return
   if (IS_WIN) {
     await crossExecFile(
       'winget',
@@ -134,15 +146,10 @@ async function installNpm(): Promise<void> {
   }
 }
 
-async function installClaude(): Promise<void> {
-  await enrichedExecFile('npm', ['install', '-g', '@anthropic-ai/claude-code@latest'], 120000)
-}
-
 const INSTALL_FUNCTIONS: Record<PrerequisiteId, () => Promise<void>> = {
   brew: installBrew,
   node: installNode,
   npm: installNpm,
-  claude: installClaude,
 }
 
 async function cascadeInstall(): Promise<InstallerResult> {
@@ -208,7 +215,6 @@ async function cascadeInstall(): Promise<InstallerResult> {
       })
 
       // Stop cascade — subsequent deps likely depend on this one
-      // Mark remaining as missing
       for (let j = i + 1; j < PREREQUISITE_ORDER.length; j++) {
         const remainingId = PREREQUISITE_ORDER[j]!
         finalResults.push({ id: remainingId, version: null, status: 'missing' })
