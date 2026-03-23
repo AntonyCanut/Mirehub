@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useInstallerStore } from './installer-store'
 import { useI18n } from '../../lib/i18n'
-import type { PrerequisiteInfo, PrerequisiteStatus } from '../../../shared/types'
+import { useWorkspaceStore } from '../workspace'
+import { Terminal } from '../terminal'
+import type { PrerequisiteInfo, PrerequisiteId, PrerequisiteStatus } from '../../../shared/types'
 
 const STATUS_ICONS: Record<PrerequisiteStatus, string> = {
   installed: '\u2713',
@@ -17,7 +19,22 @@ const PREREQUISITE_LABELS: Record<string, string> = {
   npm: 'npm',
 }
 
-function PrerequisiteRow({ item }: { item: PrerequisiteInfo }) {
+/** Shell commands to install each prerequisite */
+const INSTALL_COMMANDS: Record<PrerequisiteId, string> = {
+  brew: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
+  node: 'brew install node',
+  npm: 'brew install node',
+}
+
+function PrerequisiteRow({
+  item,
+  onInstall,
+  disabled,
+}: {
+  item: PrerequisiteInfo
+  onInstall: (id: PrerequisiteId) => void
+  disabled: boolean
+}) {
   const { t } = useI18n()
   const statusClass =
     item.status === 'installed' ? 'installer-status--ok'
@@ -28,17 +45,20 @@ function PrerequisiteRow({ item }: { item: PrerequisiteInfo }) {
 
   return (
     <div className={`installer-row ${statusClass}`}>
-      <span className="installer-row-icon">
-        {item.status === 'installing' ? (
-          <span className="notification-spinner">{STATUS_ICONS[item.status]}</span>
-        ) : (
-          STATUS_ICONS[item.status]
-        )}
-      </span>
+      <span className="installer-row-icon">{STATUS_ICONS[item.status]}</span>
       <span className="installer-row-name">{PREREQUISITE_LABELS[item.id] || item.id}</span>
       <span className="installer-row-version">
         {item.version || (item.status === 'skipped' ? t('installer.skipped') : t('installer.notDetected'))}
       </span>
+      {(item.status === 'missing' || item.status === 'failed') && (
+        <button
+          className="installer-row-btn"
+          onClick={() => onInstall(item.id)}
+          disabled={disabled}
+        >
+          {t('updates.install')}
+        </button>
+      )}
     </div>
   )
 }
@@ -48,23 +68,43 @@ export function SetupWizard() {
   const {
     prerequisites,
     isChecking,
-    isInstalling,
-    result,
     dismissed,
     checkPrerequisites,
-    startCascadeInstall,
     dismiss,
-    initProgressListener,
   } = useInstallerStore()
+
+  // Terminal state: which command is running in the embedded terminal
+  const [terminalCommand, setTerminalCommand] = useState<string | null>(null)
+  const [terminalDone, setTerminalDone] = useState(false)
 
   useEffect(() => {
     checkPrerequisites()
   }, [checkPrerequisites])
 
-  useEffect(() => {
-    const cleanup = initProgressListener()
-    return cleanup
-  }, [initProgressListener])
+  const handleInstall = useCallback((id: PrerequisiteId) => {
+    const command = INSTALL_COMMANDS[id]
+    if (!command) return
+    setTerminalCommand(command)
+    setTerminalDone(false)
+  }, [])
+
+  const handleInstallAll = useCallback(() => {
+    const missing = prerequisites.filter((p) => p.status === 'missing' || p.status === 'failed')
+    if (missing.length === 0) return
+    const commands = missing.map((p) => INSTALL_COMMANDS[p.id]).filter(Boolean)
+    setTerminalCommand(commands.join(' && '))
+    setTerminalDone(false)
+  }, [prerequisites])
+
+  const handleTerminalClose = useCallback(() => {
+    setTerminalDone(true)
+  }, [])
+
+  const handleRecheck = useCallback(() => {
+    setTerminalCommand(null)
+    setTerminalDone(false)
+    checkPrerequisites()
+  }, [checkPrerequisites])
 
   // Don't show if dismissed or still checking
   if (dismissed) return null
@@ -72,68 +112,58 @@ export function SetupWizard() {
 
   // Don't show if all prerequisites are installed or skipped
   const hasMissing = prerequisites.some((p) => p.status === 'missing' || p.status === 'failed')
-  if (!hasMissing && !isInstalling && !result) return null
+  if (!hasMissing && !terminalCommand) return null
 
-  // All installed after successful cascade
-  if (result?.success) {
-    return (
-      <div className="modal-overlay">
-        <div className="modal-dialog installer-dialog">
-          <div className="modal-header">{t('installer.title')}</div>
-          <div className="modal-body">
-            <p className="installer-success">{t('installer.allInstalled')}</p>
-            <div className="installer-list">
-              {prerequisites.map((item) => (
-                <PrerequisiteRow key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-          <div className="modal-footer">
-            <button className="modal-btn modal-btn--primary" onClick={dismiss}>
-              {t('installer.continue')}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Find error details for display
-  const failedItem = prerequisites.find((p) => p.status === 'failed')
+  const activeWorkspaceId = useWorkspaceStore.getState().activeWorkspaceId || ''
+  const isTerminalActive = terminalCommand !== null
 
   return (
     <div className="modal-overlay">
-      <div className="modal-dialog installer-dialog">
+      <div className={`modal-dialog installer-dialog${isTerminalActive ? ' installer-dialog--terminal' : ''}`}>
         <div className="modal-header">{t('installer.title')}</div>
         <div className="modal-body">
-          <p className="installer-description">{t('installer.description')}</p>
-          <div className="installer-list">
-            {prerequisites.map((item) => (
-              <PrerequisiteRow key={item.id} item={item} />
-            ))}
-          </div>
-          {failedItem?.error && (
-            <div className="installer-error">
-              {failedItem.error.split('\n').map((line, i) => (
-                <span key={i}>{line}{i < failedItem.error!.split('\n').length - 1 && <br />}</span>
-              ))}
-            </div>
+          {!isTerminalActive && (
+            <>
+              <p className="installer-description">{t('installer.description')}</p>
+              <div className="installer-list">
+                {prerequisites.map((item) => (
+                  <PrerequisiteRow key={item.id} item={item} onInstall={handleInstall} disabled={false} />
+                ))}
+              </div>
+            </>
           )}
-          {result && !result.success && !failedItem?.error && (
-            <div className="installer-error">{result.error}</div>
+          {isTerminalActive && (
+            <div className="installer-terminal">
+              <Terminal
+                cwd="~"
+                initialCommand={terminalCommand}
+                workspaceId={activeWorkspaceId}
+                isVisible={true}
+                fontSize={12}
+                onClose={handleTerminalClose}
+              />
+            </div>
           )}
         </div>
         <div className="modal-footer">
-          <button className="modal-btn modal-btn--secondary" onClick={dismiss}>
-            {t('installer.skip')}
-          </button>
-          <button
-            className="modal-btn modal-btn--primary"
-            onClick={startCascadeInstall}
-            disabled={isInstalling}
-          >
-            {isInstalling ? t('installer.installing') : t('installer.installAll')}
-          </button>
+          {!isTerminalActive && (
+            <>
+              <button className="modal-btn modal-btn--secondary" onClick={dismiss}>
+                {t('installer.skip')}
+              </button>
+              <button className="modal-btn modal-btn--primary" onClick={handleInstallAll}>
+                {t('installer.installAll')}
+              </button>
+            </>
+          )}
+          {isTerminalActive && terminalDone && (
+            <button className="modal-btn modal-btn--primary" onClick={handleRecheck}>
+              {t('installer.recheck')}
+            </button>
+          )}
+          {isTerminalActive && !terminalDone && (
+            <span className="installer-hint">{t('installer.waitingForTerminal')}</span>
+          )}
         </div>
       </div>
     </div>

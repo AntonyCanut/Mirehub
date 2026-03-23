@@ -14717,6 +14717,19 @@ body {
   max-width: 520px;
 }
 
+.installer-dialog--terminal {
+  min-width: 620px;
+  max-width: 720px;
+  min-height: 420px;
+}
+
+.installer-dialog--terminal .modal-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .installer-description {
   margin: 0 0 14px;
   line-height: 1.5;
@@ -14801,4 +14814,48 @@ body {
   padding: 8px 12px;
   background: rgba(239, 68, 68, 0.1);
   border-radius: 8px;
+}
+
+.installer-row-btn {
+  margin-left: auto;
+  padding: 3px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.installer-row-btn:hover {
+  background: var(--accent, #C15F3C);
+  color: #fff;
+  border-color: var(--accent, #C15F3C);
+}
+
+.installer-row-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.installer-terminal {
+  flex: 1;
+  min-height: 280px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.installer-terminal .terminal-wrapper {
+  height: 100%;
+}
+
+.installer-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-style: italic;
 }
