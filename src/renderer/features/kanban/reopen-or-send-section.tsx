@@ -12,7 +12,7 @@ export function ReopenOrSendSection({
   onSendToAi: () => void
 }) {
   const { t } = useI18n()
-  const isCompleted = task.status === 'DONE' || task.status === 'FAILED'
+  const canReopen = task.status === 'DONE' || task.status === 'FAILED' || task.status === 'PENDING'
   const [reopenMode, setReopenMode] = useState(false)
   const [reopenComment, setReopenComment] = useState('')
 
@@ -41,7 +41,7 @@ export function ReopenOrSendSection({
     [handleReopen],
   )
 
-  if (!isCompleted) {
+  if (!canReopen) {
     return (
       <div className="kanban-detail-section">
         <button className="kanban-detail-ai-btn" onClick={onSendToAi}>

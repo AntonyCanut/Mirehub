@@ -121,7 +121,7 @@ export async function buildRegularPrompt(params: RegularPromptParams): Promise<s
     }
   }
 
-  const isReopening = !!(task.result || task.error)
+  const isReopening = !!(task.result || task.error || task.question)
 
   if (task.conversationHistoryPath) {
     if (isReopening) {
@@ -155,6 +155,9 @@ export async function buildRegularPrompt(params: RegularPromptParams): Promise<s
     }
     if (task.error) {
       promptParts.push(`### Erreur precedente`, task.error)
+    }
+    if (task.question) {
+      promptParts.push(`### Question en attente`, task.question)
     }
     promptParts.push(
       ``,
