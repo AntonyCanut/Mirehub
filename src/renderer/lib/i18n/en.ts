@@ -2135,4 +2135,18 @@ export const en = {
   'notes.contentPlaceholder': 'Write your note in Markdown...',
   'notes.preview': 'Preview',
   'notes.startWriting': 'Start writing',
+
+  // Installer (cascade prerequisites)
+  'installer.title': 'Setup Required',
+  'installer.description': 'Some prerequisites are missing. Install them to use all features.',
+  'installer.installAll': 'Install All',
+  'installer.installing': 'Installing...',
+  'installer.skip': 'Skip',
+  'installer.continue': 'Continue',
+  'installer.allInstalled': 'All prerequisites are installed!',
+  'installer.notDetected': 'Not detected',
+  'installer.skipped': 'N/A',
+  'installer.back': 'Back',
+  'installer.recheck': 'Re-check',
+  'installer.waitingForTerminal': 'Waiting for installation to complete...',
 } as const

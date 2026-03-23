@@ -37,6 +37,7 @@ import { registerNotesHandlers } from './ipc/notes'
 import { initCompanionFeatures } from './companion'
 import { registerSkillsStoreHandlers, prefetchSkillsStore } from './ipc/skillsStore'
 import { registerClaudePluginsHandlers } from './ipc/claude-plugins'
+import { registerInstallerHandlers } from './ipc/installer'
 import { cleanupTerminals } from './ipc/terminal'
 import { ensureActivityHookScript, ensureAutoApproveScript, ensureKanbanDoneScript, ensurePixelAgentsHookScript, syncAllWorkspaceEnvHooks, startActivityWatcher } from './services/activityHooks'
 import { clearDockBadge } from './services/notificationService'
@@ -207,6 +208,7 @@ app.whenReady().then(() => {
   registerGeminiConfigHandlers(ipcMain)
   registerSkillsStoreHandlers(ipcMain)
   prefetchSkillsStore()
+  registerInstallerHandlers(ipcMain)
   registerAiProviderHandlers(ipcMain)
   registerPixelAgentsHandlers(ipcMain, () => mainWindow)
   registerDevOpsHandlers(ipcMain)
