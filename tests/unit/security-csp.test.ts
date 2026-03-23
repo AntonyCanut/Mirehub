@@ -116,6 +116,7 @@ vi.mock('../../src/main/services/activityHooks', () => ({
   ensureActivityHookScript: vi.fn(),
   ensureAutoApproveScript: vi.fn(),
   ensureKanbanDoneScript: vi.fn(),
+  ensurePixelAgentsHookScript: vi.fn(),
   syncAllWorkspaceEnvHooks: vi.fn(),
   startActivityWatcher: vi.fn(),
 }))

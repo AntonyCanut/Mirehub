@@ -157,6 +157,7 @@ interface GitCenterViewProps {
 
 export function GitCenterView(props: GitCenterViewProps) {
   const { t } = useI18n()
+  const { graphData, graphMaxLane, graphScrollRef } = props
 
   if (!props.status) {
     return (
@@ -301,14 +302,14 @@ export function GitCenterView(props: GitCenterViewProps) {
       ) : (
         /* Commit Graph (default view) — continuous SVG */
         <div className="git-graph-area">
-          <div className="git-graph-scroll" ref={props.graphScrollRef}>
-            {props.graphData.length === 0 ? (
+          <div className="git-graph-scroll" ref={graphScrollRef}>
+            {graphData.length === 0 ? (
               <div className="git-graph-empty">{t('git.noCommits')}</div>
             ) : (
-              <div className="git-graph-canvas" style={{ position: 'relative', height: props.graphData.length * ROW_HEIGHT }}>
-                <GitGraph data={props.graphData} maxLane={props.graphMaxLane} rowHeight={ROW_HEIGHT} laneWidth={LANE_WIDTH} />
-                <div className="git-graph-rows" style={{ marginLeft: (props.graphMaxLane + 1) * LANE_WIDTH + 12 }}>
-                  {props.graphData.map((info, idx) => (
+              <div className="git-graph-canvas" style={{ position: 'relative', height: graphData.length * ROW_HEIGHT }}>
+                <GitGraph data={graphData} maxLane={graphMaxLane} rowHeight={ROW_HEIGHT} laneWidth={LANE_WIDTH} />
+                <div className="git-graph-rows" style={{ marginLeft: (graphMaxLane + 1) * LANE_WIDTH + 12 }}>
+                  {graphData.map((info, idx) => (
                     <div
                       key={info.entry.hash}
                       className={`git-graph-row${props.selectedCommit?.hash === info.entry.hash ? ' git-graph-row--selected' : ''}`}
