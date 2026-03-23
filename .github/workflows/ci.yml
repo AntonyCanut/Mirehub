@@ -1,4 +1,4 @@
-name: Kanbai — CI
+name: Kanbai - CI
 
 on:
   push:
