@@ -2126,4 +2126,6 @@ export const en = {
   'installer.allInstalled': 'All prerequisites are installed!',
   'installer.notDetected': 'Not detected',
   'installer.skipped': 'N/A',
+  'installer.recheck': 'Re-check',
+  'installer.waitingForTerminal': 'Waiting for installation to complete...',
 } as const
