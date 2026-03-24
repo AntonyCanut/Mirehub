@@ -397,6 +397,10 @@ const api = {
       ipcRenderer.on(IPC_CHANNELS.KANBAN_FILE_CHANGED, listener)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.KANBAN_FILE_CHANGED, listener)
     },
+    evaluateTemplateConditions: (workspaceId: string): Promise<Array<{ templateId: string; projectId: string; projectName: string; projectPath: string }>> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_EVALUATE_TEMPLATE_CONDITIONS, { workspaceId }),
+    executeTemplateAction: (taskId: string, workspaceId: string, actionId: string, projectPath: string, projectId: string): Promise<{ success: boolean; result?: string; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.KANBAN_EXECUTE_TEMPLATE_ACTION, { taskId, workspaceId, actionId, projectPath, projectId }),
   },
 
   // Workspace storage

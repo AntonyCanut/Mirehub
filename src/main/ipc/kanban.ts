@@ -1,5 +1,5 @@
 import { IpcMain, BrowserWindow, dialog } from 'electron'
-import { type ChildProcess } from 'child_process'
+import { type ChildProcess, execFileSync } from 'child_process'
 import { v4 as uuid } from 'uuid'
 import fs from 'fs'
 import path from 'path'
@@ -15,6 +15,7 @@ import {
 import { callAiCli } from '../services/ai-cli'
 import { IS_WIN } from '../../shared/platform'
 import { bumpCompanionChangeVersion } from '../services/companion-server'
+import { StorageService } from '../services/storage'
 
 const DEFAULT_KANBAN_CONFIG: KanbanConfig = {
   autoCloseCompletedTerminals: false,
@@ -1318,6 +1319,93 @@ Description: ${description || '(aucune)'}`
       const updated = { ...current, ...config }
       writeDefaultKanbanConfig(updated)
       return updated
+    },
+  )
+
+  // --- Smart template conditions ---
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_EVALUATE_TEMPLATE_CONDITIONS,
+    async (_event, { workspaceId }: { workspaceId: string }) => {
+      const storage = new StorageService()
+      const projects = storage.getProjects(workspaceId)
+      const results: Array<{ templateId: string; projectId: string; projectName: string; projectPath: string }> = []
+
+      for (const project of projects) {
+        if (!project.path) continue
+        try {
+          if (!fs.existsSync(path.join(project.path, '.git'))) {
+            results.push({ templateId: 'predefined-git', projectId: project.id, projectName: project.name, projectPath: project.path })
+          }
+          if (!fs.existsSync(path.join(project.path, 'Makefile'))) {
+            results.push({ templateId: 'predefined-makefile', projectId: project.id, projectName: project.name, projectPath: project.path })
+          }
+          const hasReadme = fs.existsSync(path.join(project.path, 'README.md')) || fs.existsSync(path.join(project.path, 'readme.md'))
+          if (!hasReadme) {
+            results.push({ templateId: 'predefined-readme', projectId: project.id, projectName: project.name, projectPath: project.path })
+          }
+        } catch {
+          // Skip projects with inaccessible paths
+        }
+      }
+
+      return results
+    },
+  )
+
+  // --- Execute template action (skip-AI) ---
+  ipcMain.handle(
+    IPC_CHANNELS.KANBAN_EXECUTE_TEMPLATE_ACTION,
+    async (
+      _event,
+      { taskId, workspaceId, actionId, projectPath, projectId }: {
+        taskId: string
+        workspaceId: string
+        actionId: string
+        projectPath: string
+        projectId: string
+      },
+    ) => {
+      try {
+        switch (actionId) {
+          case 'git-init': {
+            execFileSync('git', ['init'], { cwd: projectPath, timeout: 10000 })
+            // Update project hasGit flag in storage
+            const storage = new StorageService()
+            const projects = storage.getProjects(workspaceId)
+            const project = projects.find((p) => p.id === projectId)
+            if (project) {
+              storage.updateProject({ ...project, hasGit: true })
+            }
+            // Update the kanban task to DONE
+            const tasks = readKanbanTasks(workspaceId)
+            const task = tasks.find((t) => t.id === taskId)
+            if (task) {
+              task.status = 'DONE'
+              task.result = `Git repository initialized in ${projectPath}`
+              task.updatedAt = Date.now()
+              writeKanbanTasks(workspaceId, tasks)
+              bumpCompanionChangeVersion()
+            }
+            return { success: true, result: `Git repository initialized in ${projectPath}` }
+          }
+          default:
+            return { success: false, error: `Unknown action: ${actionId}` }
+        }
+      } catch (err) {
+        // Update the kanban task to FAILED
+        try {
+          const tasks = readKanbanTasks(workspaceId)
+          const task = tasks.find((t) => t.id === taskId)
+          if (task) {
+            task.status = 'FAILED'
+            task.error = err instanceof Error ? err.message : String(err)
+            task.updatedAt = Date.now()
+            writeKanbanTasks(workspaceId, tasks)
+            bumpCompanionChangeVersion()
+          }
+        } catch { /* best-effort */ }
+        return { success: false, error: err instanceof Error ? err.message : String(err) }
+      }
     },
   )
 }
