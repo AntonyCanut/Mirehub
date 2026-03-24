@@ -66,8 +66,9 @@ function getReadmeDescription(pluginDir: string): string {
     const lines = content.split('\n').filter((l) => l.trim())
     // Skip the title line (starts with #), take the next non-empty line
     for (let i = 0; i < lines.length; i++) {
-      if (!lines[i].startsWith('#') && !lines[i].startsWith('---')) {
-        return lines[i].trim().slice(0, 200)
+      const line = lines[i]
+      if (line && !line.startsWith('#') && !line.startsWith('---')) {
+        return line.trim().slice(0, 200)
       }
     }
     return ''
@@ -125,8 +126,8 @@ async function listPlugins(): Promise<ClaudePlugin[]> {
           description: getReadmeDescription(path.join(officialDir, pluginName)),
           installed: isInstalled,
           enabled: isEnabled,
-          version: isInstalled ? installedEntries[0].version : undefined,
-          installedAt: isInstalled ? installedEntries[0].installedAt : undefined,
+          version: isInstalled ? installedEntries[0]?.version : undefined,
+          installedAt: isInstalled ? installedEntries[0]?.installedAt : undefined,
           type: 'official',
         })
       }
@@ -157,8 +158,8 @@ async function listPlugins(): Promise<ClaudePlugin[]> {
           description: getReadmeDescription(path.join(externalDir, pluginName)),
           installed: isInstalled,
           enabled: isEnabled,
-          version: isInstalled ? installedEntries[0].version : undefined,
-          installedAt: isInstalled ? installedEntries[0].installedAt : undefined,
+          version: isInstalled ? installedEntries[0]?.version : undefined,
+          installedAt: isInstalled ? installedEntries[0]?.installedAt : undefined,
           type: 'external',
         })
       }
