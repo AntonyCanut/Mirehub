@@ -73,12 +73,32 @@ export const TYPE_CONFIG: Record<KanbanTaskType, { color: string; labelFr: strin
 }
 
 // --- Predefined task templates ---
+export type TemplateConditionId = 'no-git' | 'no-makefile' | 'no-readme'
+export type TemplateActionId = 'git-init'
+
 export interface PredefinedTaskTemplate {
   id: string
   titleKey: string
   descriptionKey: string
   priority: 'low' | 'medium' | 'high'
   type: KanbanTaskType
+  condition?: TemplateConditionId
+  action?: TemplateActionId
+  projectScoped?: boolean
+}
+
+export interface TemplateConditionResult {
+  templateId: string
+  projectId: string
+  projectName: string
+  projectPath: string
+}
+
+export interface VisiblePredefinedEntry {
+  template: PredefinedTaskTemplate
+  projectId?: string
+  projectName?: string
+  projectPath?: string
 }
 
 export const PREDEFINED_TASKS: PredefinedTaskTemplate[] = [
@@ -88,6 +108,9 @@ export const PREDEFINED_TASKS: PredefinedTaskTemplate[] = [
     descriptionKey: 'kanban.predefined.git.description',
     priority: 'high',
     type: 'feature',
+    condition: 'no-git',
+    action: 'git-init',
+    projectScoped: true,
   },
   {
     id: 'predefined-makefile',
@@ -95,6 +118,8 @@ export const PREDEFINED_TASKS: PredefinedTaskTemplate[] = [
     descriptionKey: 'kanban.predefined.makefile.description',
     priority: 'medium',
     type: 'feature',
+    condition: 'no-makefile',
+    projectScoped: true,
   },
   {
     id: 'predefined-readme',
@@ -102,6 +127,8 @@ export const PREDEFINED_TASKS: PredefinedTaskTemplate[] = [
     descriptionKey: 'kanban.predefined.readme.description',
     priority: 'medium',
     type: 'doc',
+    condition: 'no-readme',
+    projectScoped: true,
   },
   {
     id: 'predefined-testing',
@@ -138,10 +165,15 @@ export function getDismissedPredefined(workspaceId: string): string[] {
   }
 }
 
-export function dismissPredefined(workspaceId: string, predefinedId: string): void {
+/** Build the dismissed key: `templateId` for workspace-scoped, `templateId:projectId` for project-scoped */
+export function buildDismissedKey(templateId: string, projectId?: string): string {
+  return projectId ? `${templateId}:${projectId}` : templateId
+}
+
+export function dismissPredefined(workspaceId: string, dismissedKey: string): void {
   const dismissed = getDismissedPredefined(workspaceId)
-  if (!dismissed.includes(predefinedId)) {
-    dismissed.push(predefinedId)
+  if (!dismissed.includes(dismissedKey)) {
+    dismissed.push(dismissedKey)
     localStorage.setItem(getPredefinedDismissedKey(workspaceId), JSON.stringify(dismissed))
   }
 }

@@ -1013,6 +1013,25 @@
   background: var(--error-soft);
 }
 
+.kanban-card-project-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(75, 156, 255, 0.15);
+  color: #4B9CFF;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.kanban-card-auto-badge {
+  font-size: 11px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  cursor: help;
+}
+
 /* Disabled card */
 .kanban-card--disabled {
   opacity: 0.45;

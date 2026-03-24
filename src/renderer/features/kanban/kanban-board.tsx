@@ -15,9 +15,10 @@ import {
   PREDEFINED_TASKS,
   getDismissedPredefined,
   dismissPredefined,
+  buildDismissedKey,
   formatTicketNumber,
 } from './kanban-constants'
-import type { PendingClipboardImage, PredefinedTaskTemplate } from './kanban-constants'
+import type { PendingClipboardImage, TemplateConditionResult, VisiblePredefinedEntry } from './kanban-constants'
 import { TaskDetailPanel } from './task-detail-panel'
 import { KanbanCreateModal } from './kanban-create-modal'
 import { KanbanEditModal } from './kanban-edit-modal'
@@ -89,6 +90,7 @@ export function KanbanBoard() {
 
   // Predefined tasks state
   const [dismissedPredefined, setDismissedPredefined] = useState<string[]>([])
+  const [conditionResults, setConditionResults] = useState<TemplateConditionResult[]>([])
   const [editingPredefinedId, setEditingPredefinedId] = useState<string | null>(null)
 
   const workspaceProjects = projects.filter((p) => p.workspaceId === activeWorkspaceId)
@@ -100,34 +102,120 @@ export function KanbanBoard() {
     }
   }, [activeWorkspaceId])
 
-  // Visible predefined tasks (not dismissed)
-  const visiblePredefined = useMemo(() => {
+  // Evaluate template conditions for project-scoped templates
+  useEffect(() => {
+    if (!activeWorkspaceId) return
+    window.kanbai.kanban.evaluateTemplateConditions(activeWorkspaceId)
+      .then(setConditionResults)
+      .catch(() => setConditionResults([]))
+  }, [activeWorkspaceId, workspaceProjects.length])
+
+  // Visible predefined tasks: condition-aware + project-scoped
+  const visiblePredefined = useMemo((): VisiblePredefinedEntry[] => {
     if (!activeWorkspaceId) return []
-    return PREDEFINED_TASKS.filter((pt) => !dismissedPredefined.includes(pt.id))
-  }, [activeWorkspaceId, dismissedPredefined])
+    const entries: VisiblePredefinedEntry[] = []
 
-  const handleAddPredefined = useCallback(async (template: PredefinedTaskTemplate) => {
+    for (const template of PREDEFINED_TASKS) {
+      if (template.projectScoped && template.condition) {
+        // Project-scoped: one entry per matching project
+        const matches = conditionResults.filter((cr) => cr.templateId === template.id)
+        for (const match of matches) {
+          const key = buildDismissedKey(template.id, match.projectId)
+          if (!dismissedPredefined.includes(key)) {
+            entries.push({
+              template,
+              projectId: match.projectId,
+              projectName: match.projectName,
+              projectPath: match.projectPath,
+            })
+          }
+        }
+      } else {
+        // Workspace-scoped: single entry
+        const key = buildDismissedKey(template.id)
+        if (!dismissedPredefined.includes(key)) {
+          entries.push({ template })
+        }
+      }
+    }
+
+    return entries
+  }, [activeWorkspaceId, dismissedPredefined, conditionResults])
+
+  const handleAddPredefined = useCallback(async (entry: VisiblePredefinedEntry) => {
     if (!activeWorkspaceId) return
-    await createTask(activeWorkspaceId, t(template.titleKey), t(template.descriptionKey), template.priority, template.type)
-    dismissPredefined(activeWorkspaceId, template.id)
+    const { template, projectId, projectName, projectPath } = entry
+
+    if (template.action && projectPath && projectId) {
+      // Skip-AI template: create task as WORKING + disabled, execute action directly
+      const titleWithProjectKey = `${template.titleKey}WithProject` as Parameters<typeof t>[0]
+      const title = projectName ? t(titleWithProjectKey, { project: projectName }) : t(template.titleKey)
+      const description = t(template.descriptionKey)
+
+      const createResult = await window.kanbai.kanban.create({
+        workspaceId: activeWorkspaceId,
+        targetProjectId: projectId,
+        title,
+        description,
+        status: 'WORKING' as KanbanStatus,
+        priority: template.priority,
+        type: template.type,
+        disabled: true,
+      })
+
+      // Add to store immediately
+      const newTasks = [createResult.task]
+      if (createResult.memoryRefactorTask) newTasks.push(createResult.memoryRefactorTask)
+      useKanbanStore.setState((state) => ({ tasks: [...state.tasks, ...newTasks] }))
+
+      // Execute the action
+      const result = await window.kanbai.kanban.executeTemplateAction(
+        createResult.task.id, activeWorkspaceId, template.action, projectPath, projectId,
+      )
+
+      // Refresh tasks to pick up the status change made by the main process
+      await loadTasks(activeWorkspaceId)
+
+      // Re-evaluate conditions since the action may have changed project state
+      window.kanbai.kanban.evaluateTemplateConditions(activeWorkspaceId)
+        .then(setConditionResults)
+        .catch(() => {})
+
+      if (!result.success) {
+        console.error('[kanban-board] Template action failed:', result.error)
+      }
+    } else {
+      // Normal AI-driven template: create via store (triggers prequalify/auto-send)
+      const titleWithProjectKey = `${template.titleKey}WithProject` as Parameters<typeof t>[0]
+      const title = projectName ? t(titleWithProjectKey, { project: projectName }) : t(template.titleKey)
+      await createTask(activeWorkspaceId, title, t(template.descriptionKey), template.priority, template.type, projectId || undefined)
+    }
+
+    // Dismiss this template entry
+    const dismissKey = buildDismissedKey(template.id, projectId)
+    dismissPredefined(activeWorkspaceId, dismissKey)
     setDismissedPredefined(getDismissedPredefined(activeWorkspaceId))
-  }, [activeWorkspaceId, createTask, t])
+  }, [activeWorkspaceId, createTask, loadTasks, t])
 
-  const handleDismissPredefined = useCallback((predefinedId: string) => {
+  const handleDismissPredefined = useCallback((entry: VisiblePredefinedEntry) => {
     if (!activeWorkspaceId) return
-    dismissPredefined(activeWorkspaceId, predefinedId)
+    const dismissKey = buildDismissedKey(entry.template.id, entry.projectId)
+    dismissPredefined(activeWorkspaceId, dismissKey)
     setDismissedPredefined(getDismissedPredefined(activeWorkspaceId))
   }, [activeWorkspaceId])
 
-  const handleEditPredefined = useCallback((template: PredefinedTaskTemplate) => {
-    setNewTitle(t(template.titleKey))
+  const handleEditPredefined = useCallback((entry: VisiblePredefinedEntry) => {
+    const { template, projectId, projectName } = entry
+    const titleWithProjectKey = `${template.titleKey}WithProject` as Parameters<typeof t>[0]
+    const title = projectName ? t(titleWithProjectKey, { project: projectName }) : t(template.titleKey)
+    setNewTitle(title)
     setNewDesc(t(template.descriptionKey))
     setNewPriority(template.priority)
     setNewType(template.type)
-    setNewTargetProjectId('')
+    setNewTargetProjectId(projectId || '')
     setNewAiProvider('')
     setNewIsCtoMode(false)
-    setEditingPredefinedId(template.id)
+    setEditingPredefinedId(buildDismissedKey(template.id, projectId))
     setShowCreateForm(true)
   }, [t])
 

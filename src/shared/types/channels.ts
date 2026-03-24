@@ -62,6 +62,8 @@ export const IPC_CHANNELS = {
   KANBAN_SET_CONFIG: 'kanban:setConfig',
   KANBAN_GET_DEFAULT_CONFIG: 'kanban:getDefaultConfig',
   KANBAN_SET_DEFAULT_CONFIG: 'kanban:setDefaultConfig',
+  KANBAN_EVALUATE_TEMPLATE_CONDITIONS: 'kanban:evaluateTemplateConditions',
+  KANBAN_EXECUTE_TEMPLATE_ACTION: 'kanban:executeTemplateAction',
 
   // Updates
   UPDATE_CHECK: 'update:check',

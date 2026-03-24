@@ -2,7 +2,7 @@ import React from 'react'
 import { useI18n } from '../../lib/i18n'
 import type { KanbanStatus, KanbanTask } from '../../../shared/types/index'
 import type { AiProviderId } from '../../../shared/types/ai-provider'
-import type { PredefinedTaskTemplate } from './kanban-constants'
+import type { VisiblePredefinedEntry } from './kanban-constants'
 import { ACTIVE_COLUMNS, formatTicketNumber } from './kanban-constants'
 import { KanbanCard } from './kanban-card'
 import { PredefinedTaskCard } from './predefined-task-card'
@@ -40,7 +40,7 @@ export function KanbanColumns({
   doneTasks: KanbanTask[]
   archivedTasks: KanbanTask[]
   selectedTaskId: string | undefined
-  visiblePredefined: PredefinedTaskTemplate[]
+  visiblePredefined: VisiblePredefinedEntry[]
   workspaceProjects: Array<{ id: string; name: string; aiProvider?: AiProviderId | null; aiDefaults?: import('../../../shared/types/index').AiDefaults }>
   workspaceDefaultAiProvider: AiProviderId
   isPaused: boolean
@@ -53,9 +53,9 @@ export function KanbanColumns({
   onContextMenu: (e: React.MouseEvent, task: KanbanTask) => void
   onDoubleClickTask: (task: KanbanTask) => void
   onGoToTerminal: (taskId: string) => (() => void) | null
-  onAddPredefined: (template: PredefinedTaskTemplate) => void
-  onDismissPredefined: (predefinedId: string) => void
-  onEditPredefined: (template: PredefinedTaskTemplate) => void
+  onAddPredefined: (entry: VisiblePredefinedEntry) => void
+  onDismissPredefined: (entry: VisiblePredefinedEntry) => void
+  onEditPredefined: (entry: VisiblePredefinedEntry) => void
   onArchiveTask: (task: KanbanTask) => void
   onRestoreFromArchive: (task: KanbanTask) => void
   onToggleArchive: () => void
@@ -94,13 +94,14 @@ export function KanbanColumns({
             ))}
             {col.status === 'TODO' && visiblePredefined.length > 0 && (
               <>
-                {visiblePredefined.map((pt) => (
+                {visiblePredefined.map((entry) => (
                   <PredefinedTaskCard
-                    key={pt.id}
-                    template={pt}
-                    onAdd={() => onAddPredefined(pt)}
-                    onDismiss={() => onDismissPredefined(pt.id)}
-                    onDoubleClick={() => onEditPredefined(pt)}
+                    key={`${entry.template.id}:${entry.projectId ?? 'ws'}`}
+                    template={entry.template}
+                    projectName={entry.projectName}
+                    onAdd={() => onAddPredefined(entry)}
+                    onDismiss={() => onDismissPredefined(entry)}
+                    onDoubleClick={() => onEditPredefined(entry)}
                   />
                 ))}
               </>
