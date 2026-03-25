@@ -190,14 +190,19 @@ describe('Namespace IPC Handlers', () => {
     expect(afterDelete).toHaveLength(2)
     expect(afterDelete.find((ns) => ns.id === personal.id)).toBeUndefined()
 
-    // 6. Default namespace survives attempted deletion
+    // 6. Default namespace can be deleted when another exists — remaining one becomes default
     await mockIpcMain._invoke('namespace:delete', { id: defaultId })
     const afterDefaultDelete = await mockIpcMain._invoke<Namespace[]>('namespace:list')
-    expect(afterDefaultDelete.find((ns) => ns.id === defaultId)).toBeDefined()
+    expect(afterDefaultDelete).toHaveLength(1)
+    expect(afterDefaultDelete.find((ns) => ns.id === defaultId)).toBeUndefined()
+    expect(afterDefaultDelete[0].id).toBe(work.id)
+    expect(afterDefaultDelete[0].isDefault).toBe(true)
 
-    // 7. Ensure default still returns the original default
-    const ensured = await mockIpcMain._invoke<Namespace>('namespace:ensureDefault')
-    expect(ensured.id).toBe(defaultId)
+    // 7. Last namespace cannot be deleted
+    await mockIpcMain._invoke('namespace:delete', { id: work.id })
+    const afterLastDelete = await mockIpcMain._invoke<Namespace[]>('namespace:list')
+    expect(afterLastDelete).toHaveLength(1)
+    expect(afterLastDelete[0].id).toBe(work.id)
   })
 
   it('persiste les donnees sur disque', async () => {

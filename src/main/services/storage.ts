@@ -391,8 +391,28 @@ export class StorageService {
 
   deleteNamespace(id: string): void {
     const ns = this.data.namespaces.find((n) => n.id === id)
-    if (!ns || ns.isDefault) return // Cannot delete default namespace
-    this.data.namespaces = this.data.namespaces.filter((n) => n.id !== id)
+    if (!ns) return
+
+    const otherNamespaces = this.data.namespaces.filter((n) => n.id !== id)
+    // Cannot delete the last namespace
+    if (otherNamespaces.length === 0) return
+
+    // If deleting the default namespace, promote the oldest remaining one
+    if (ns.isDefault) {
+      const newDefault = otherNamespaces.reduce((oldest, n) =>
+        n.createdAt < oldest.createdAt ? n : oldest,
+      )
+      newDefault.isDefault = true
+      newDefault.updatedAt = Date.now()
+      // Reassign workspaces from deleted namespace to new default
+      for (const ws of this.data.workspaces) {
+        if (ws.namespaceId === id) {
+          ws.namespaceId = newDefault.id
+        }
+      }
+    }
+
+    this.data.namespaces = otherNamespaces
     // Also remove the git profile associated with this namespace
     this.data.gitProfiles = this.data.gitProfiles.filter((p) => p.namespaceId !== id)
     this.save()

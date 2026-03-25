@@ -331,7 +331,7 @@ export function Sidebar() {
                         </svg>
                         <span className="namespace-item-name">{ns.name}</span>
                       </button>
-                      {!ns.isDefault && (
+                      {namespaces.length > 1 && (
                         <>
                           <button
                             className="namespace-rename-btn"

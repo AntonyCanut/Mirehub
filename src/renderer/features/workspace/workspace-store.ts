@@ -148,13 +148,19 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   deleteNamespace: async (id: string) => {
     const { namespaces, activeNamespaceId } = get()
     const ns = namespaces.find((n) => n.id === id)
-    if (!ns || ns.isDefault) return
+    if (!ns) return
+    // Cannot delete the last namespace
+    if (namespaces.length <= 1) return
     await window.kanbai.namespace.delete(id)
-    const defaultNs = namespaces.find((n) => n.isDefault)!
-    set((state) => ({
-      namespaces: state.namespaces.filter((n) => n.id !== id),
-      activeNamespaceId: activeNamespaceId === id ? defaultNs.id : activeNamespaceId,
-    }))
+    // Reload from main process to get updated isDefault and workspaces
+    const updatedNamespaces: Namespace[] = await window.kanbai.namespace.list()
+    const updatedWorkspaces: Workspace[] = await window.kanbai.workspace.list()
+    const newDefault = updatedNamespaces.find((n) => n.isDefault)!
+    set({
+      namespaces: updatedNamespaces,
+      workspaces: updatedWorkspaces,
+      activeNamespaceId: activeNamespaceId === id ? newDefault.id : activeNamespaceId,
+    })
   },
 
   setActiveNamespace: (id: string | null) => {
