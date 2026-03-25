@@ -14,6 +14,6 @@ permissions:
 
 jobs:
   deploy:
-    uses: MeteorFactory/Pipelines/.github/workflows/deploy-pages.yml@main
+    uses: MeteorFactory/Orbit/.github/workflows/deploy-pages.yml@main
     with:
       path: website

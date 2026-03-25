@@ -143,9 +143,9 @@ export interface TemplateRepository {
 
 export const DEFAULT_TEMPLATE_REPOSITORIES: TemplateRepository[] = [
   {
-    id: 'meteorfactory-pipelines',
-    name: 'Pipelines',
-    url: 'https://github.com/MeteorFactory/Pipelines',
+    id: 'meteorfactory-orbit',
+    name: 'Orbit',
+    url: 'https://github.com/MeteorFactory/Orbit',
     description: 'MeteorFactory reusable workflow templates with Azure Key Vault integration',
     provider: 'github',
   },

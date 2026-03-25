@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   ci:
-    uses: MeteorFactory/Pipelines/.github/workflows/ci-electron.yml@main
+    uses: MeteorFactory/Orbit/.github/workflows/ci-electron.yml@main
     with:
       node-version: "22"
       os-matrix: '["macos-latest", "windows-latest"]'
@@ -20,7 +20,7 @@ jobs:
   release:
     needs: [ci]
     if: github.ref == 'refs/heads/main'
-    uses: MeteorFactory/Pipelines/.github/workflows/release-electron.yml@main
+    uses: MeteorFactory/Orbit/.github/workflows/release-electron.yml@main
     with:
       node-version: "22"
     secrets:
