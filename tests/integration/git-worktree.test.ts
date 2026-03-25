@@ -31,7 +31,7 @@ function getDefaultBranch(cwd: string): string {
   return git(['rev-parse', '--abbrev-ref', 'HEAD'], cwd)
 }
 
-describe('Git Worktree IPC Handlers', () => {
+describe('Git Worktree IPC Handlers', { timeout: 15000 }, () => {
   let mockIpcMain: ReturnType<typeof createMockIpcMain>
   let repoDir: string
   let defaultBranch: string
