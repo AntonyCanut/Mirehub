@@ -3,6 +3,9 @@ import type { AppSettings, ClaudePlugin } from '../../../../shared/types'
 import { useI18n } from '../../../lib/i18n'
 import { useAppUpdateStore } from '../../updates/app-update-store'
 import { useUpdateStore } from '../../updates/update-store'
+import { useTerminalTabStore } from '../../terminal/terminal-store'
+import { useWorkspaceStore } from '../../workspace/workspace-store'
+import { useViewStore } from '../../../shared/stores/view-store'
 
 interface ToolsSettingsProps {
   settings: AppSettings
@@ -122,6 +125,32 @@ export function ToolsSettings({ settings, updateSetting, appVersion }: ToolsSett
 
   const handleToolUninstall = (tool: string): void => {
     uninstallToolUpdate(tool)
+  }
+
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
+  const createTab = useTerminalTabStore((s) => s.createTab)
+  const setViewMode = useViewStore((s) => s.setViewMode)
+
+  const getToolDir = (binaryPath: string): string => {
+    const lastSlash = binaryPath.lastIndexOf('/')
+    if (lastSlash === -1) {
+      const lastBackslash = binaryPath.lastIndexOf('\\')
+      return lastBackslash > 0 ? binaryPath.substring(0, lastBackslash) : binaryPath
+    }
+    return binaryPath.substring(0, lastSlash)
+  }
+
+  const handleOpenTerminal = (binaryPath: string, toolName: string): void => {
+    if (!activeWorkspaceId || !binaryPath) return
+    const dir = getToolDir(binaryPath)
+    createTab(activeWorkspaceId, dir, toolName)
+    setViewMode('terminal')
+  }
+
+  const handleOpenFolder = (binaryPath: string): void => {
+    if (!binaryPath) return
+    const dir = getToolDir(binaryPath)
+    window.kanbai.shell.openPath(dir)
   }
 
   return (
@@ -265,6 +294,24 @@ export function ToolsSettings({ settings, updateSetting, appVersion }: ToolsSett
                     )}
                   </div>
                   <div className="notification-item-actions">
+                    {update.installed && update.binaryPath && (
+                      <>
+                        <button
+                          className="notification-item-btn notification-item-btn--subtle"
+                          onClick={() => handleOpenTerminal(update.binaryPath!, update.tool)}
+                          title={t('updates.openTerminalHere')}
+                        >
+                          {'>_'}
+                        </button>
+                        <button
+                          className="notification-item-btn notification-item-btn--subtle"
+                          onClick={() => handleOpenFolder(update.binaryPath!)}
+                          title={t('updates.openFolderHere')}
+                        >
+                          {'\uD83D\uDCC2'}
+                        </button>
+                      </>
+                    )}
                     {update.installed && update.updateAvailable && (
                       <button
                         className="notification-item-btn"

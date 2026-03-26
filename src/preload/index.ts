@@ -475,6 +475,8 @@ const api = {
   shell: {
     openExternal: (url: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke(IPC_CHANNELS.SHELL_OPEN_EXTERNAL, { url }),
+    openPath: (folderPath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SHELL_OPEN_PATH, { folderPath }),
   },
 
   // Settings

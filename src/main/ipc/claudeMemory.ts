@@ -590,4 +590,20 @@ export function registerClaudeMemoryHandlers(ipcMain: IpcMain): void {
       return { success: true }
     },
   )
+
+  // Open a local folder in the system file manager (Finder / Explorer)
+  ipcMain.handle(
+    IPC_CHANNELS.SHELL_OPEN_PATH,
+    async (_event, { folderPath }: { folderPath: string }) => {
+      if (typeof folderPath !== 'string' || !folderPath) {
+        return { success: false, error: 'Invalid path' }
+      }
+      const fs = await import('fs')
+      if (!fs.existsSync(folderPath)) {
+        return { success: false, error: 'Path does not exist' }
+      }
+      await shell.openPath(folderPath)
+      return { success: true }
+    },
+  )
 }

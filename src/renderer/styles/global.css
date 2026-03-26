@@ -785,6 +785,20 @@ body {
   color: var(--bg-tertiary);
 }
 
+.notification-item-btn--subtle {
+  color: var(--text-muted);
+  border-color: transparent;
+  font-size: 11px;
+  padding: 2px 6px;
+  min-width: unset;
+}
+
+.notification-item-btn--subtle:hover {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  background: var(--bg-tertiary);
+}
+
 .notification-item-description {
   width: 100%;
   font-size: 11px;

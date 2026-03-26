@@ -1515,6 +1515,8 @@ export const en = {
   'updates.openToolsSettings': 'View applications',
   'updates.missingToolsLabel': 'Missing tools',
   'updates.availableUpdatesLabel': 'Available updates',
+  'updates.openTerminalHere': 'Terminal here',
+  'updates.openFolderHere': 'Open folder',
 
   // Claude Plugins
   'plugins.title': 'Claude Plugins',
