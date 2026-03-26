@@ -854,8 +854,32 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
         }
       }
 
-      const installResolution = await resolveToolInstallSource(result.name)
+      const [installResolution, binaryPath] = await Promise.all([
+        resolveToolInstallSource(result.name),
+        getCommandPath(
+          TOOLS_TO_CHECK.find((t) => t.name === result.name)?.checkCommand ?? result.name,
+        ),
+      ])
       const latestVersion = await getLatestVersionForTool(result.name, result.version, installResolution)
+
+      const sourceToManager: Record<ToolInstallSource, string> = {
+        'brew-formula': 'brew',
+        'brew-cask': 'brew',
+        'npm-global': 'npm',
+        'winget': 'winget',
+        'rustup': 'rustup',
+        'cargo': 'cargo',
+        'internal': 'internal',
+        'system': 'system',
+        'unknown': 'unknown',
+      }
+      const packageManager = sourceToManager[installResolution.source] ?? 'unknown'
+
+      // Tools installed via brew or npm can be uninstalled
+      const resolvedCanUninstall = canUninstall
+        || installResolution.source === 'brew-formula'
+        || installResolution.source === 'brew-cask'
+        || installResolution.source === 'npm-global'
 
       return {
         tool: result.name,
@@ -865,8 +889,10 @@ async function checkToolUpdates(): Promise<UpdateInfo[]> {
         installed: true,
         scope: 'global' as const,
         installSource: installResolution.source,
+        packageManager,
+        binaryPath: binaryPath ?? undefined,
         canInstall: canInstallTool(result.name),
-        canUninstall,
+        canUninstall: resolvedCanUninstall,
       }
     }),
   )
