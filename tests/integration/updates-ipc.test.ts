@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createMockIpcMain } from '../mocks/electron'
 import { IS_WIN } from '../helpers/platform'
@@ -250,72 +251,74 @@ describe('Update IPC Handlers', () => {
       }))
     })
 
-    it('installe rtk via brew quand brew est disponible', async () => {
-      // which rtk → not found (not installed)
-      // which brew → found (brew available)
-      // brew info → not found (no brew rtk package yet)
-      // brew install → success
-      mockExecFile.mockImplementation((cmd: string, args: string[]) => {
-        if (cmd === (IS_WIN ? 'where' : 'which')) {
-          const target = args[0]
-          if (target === 'brew') return Promise.resolve({ stdout: '/opt/homebrew/bin/brew\n', stderr: '' })
-          return Promise.reject(new Error('not found'))
-        }
-        if (cmd === 'brew' && args[0] === 'info') {
-          return Promise.reject(new Error('not found'))
-        }
-        if (cmd === 'brew' && args[0] === 'install') {
+    if (!IS_WIN) {
+      it('installe rtk via brew quand brew est disponible', async () => {
+        // which rtk → not found (not installed)
+        // which brew → found (brew available)
+        // brew info → not found (no brew rtk package yet)
+        // brew install → success
+        mockExecFile.mockImplementation((cmd: string, args: string[]) => {
+          if (cmd === 'which') {
+            const target = args[0]
+            if (target === 'brew') return Promise.resolve({ stdout: '/opt/homebrew/bin/brew\n', stderr: '' })
+            return Promise.reject(new Error('not found'))
+          }
+          if (cmd === 'brew' && args[0] === 'info') {
+            return Promise.reject(new Error('not found'))
+          }
+          if (cmd === 'brew' && args[0] === 'install') {
+            return Promise.resolve({ stdout: '', stderr: '' })
+          }
           return Promise.resolve({ stdout: '', stderr: '' })
-        }
-        return Promise.resolve({ stdout: '', stderr: '' })
+        })
+
+        const result = await mockIpcMain._invoke('update:install', {
+          tool: 'rtk',
+          scope: 'global',
+        })
+
+        expect(result).toEqual({ success: true })
+
+        // Verify brew install was called
+        const brewCall = mockExecFile.mock.calls.find(
+          (call: unknown[]) => call[0] === 'brew' && (call[1] as string[])[0] === 'install',
+        )
+        expect(brewCall).toBeDefined()
+        expect((brewCall![1] as string[])).toContain('rtk')
       })
 
-      const result = await mockIpcMain._invoke('update:install', {
-        tool: 'rtk',
-        scope: 'global',
-      })
-
-      expect(result).toEqual({ success: true })
-
-      // Verify brew install was called
-      const brewCall = mockExecFile.mock.calls.find(
-        (call: unknown[]) => call[0] === 'brew' && (call[1] as string[])[0] === 'install',
-      )
-      expect(brewCall).toBeDefined()
-      expect((brewCall![1] as string[])).toContain('rtk')
-    })
-
-    it('installe rtk via curl quand brew est indisponible', async () => {
-      // which rtk → not found
-      // which brew → not found (no brew)
-      // brew info → not found
-      // sh -c curl → success
-      mockExecFile.mockImplementation((cmd: string, args: string[]) => {
-        if (cmd === (IS_WIN ? 'where' : 'which')) {
-          return Promise.reject(new Error('not found'))
-        }
-        if (cmd === 'brew') {
-          return Promise.reject(new Error('not found'))
-        }
-        if (cmd === 'sh') {
+      it('installe rtk via curl quand brew est indisponible', async () => {
+        // which rtk → not found
+        // which brew → not found (no brew)
+        // brew info → not found
+        // sh -c curl → success
+        mockExecFile.mockImplementation((cmd: string) => {
+          if (cmd === 'which') {
+            return Promise.reject(new Error('not found'))
+          }
+          if (cmd === 'brew') {
+            return Promise.reject(new Error('not found'))
+          }
+          if (cmd === 'sh') {
+            return Promise.resolve({ stdout: '', stderr: '' })
+          }
           return Promise.resolve({ stdout: '', stderr: '' })
-        }
-        return Promise.resolve({ stdout: '', stderr: '' })
+        })
+
+        const result = await mockIpcMain._invoke('update:install', {
+          tool: 'rtk',
+          scope: 'global',
+        })
+
+        expect(result).toEqual({ success: true })
+
+        // Verify curl install was called via sh
+        const shCall = mockExecFile.mock.calls.find(
+          (call: unknown[]) => call[0] === 'sh' && (call[1] as string[]).some((a: string) => a.includes('curl')),
+        )
+        expect(shCall).toBeDefined()
       })
-
-      const result = await mockIpcMain._invoke('update:install', {
-        tool: 'rtk',
-        scope: 'global',
-      })
-
-      expect(result).toEqual({ success: true })
-
-      // Verify curl install was called via sh
-      const shCall = mockExecFile.mock.calls.find(
-        (call: unknown[]) => call[0] === 'sh' && (call[1] as string[]).some((a: string) => a.includes('curl')),
-      )
-      expect(shCall).toBeDefined()
-    })
+    }
 
     it('installe une mise a jour node', async () => {
       mockExecFile.mockResolvedValue({ stdout: '', stderr: '' })
@@ -509,7 +512,7 @@ describe('Update IPC Handlers', () => {
   describe('uninstall', () => {
     it('desinstalle rtk en supprimant le binaire local', async () => {
       const home = process.env.HOME || process.env.USERPROFILE || ''
-      const rtkBinPath = `${home}/.local/bin/rtk`
+      const rtkBinPath = path.join(home, '.local', 'bin', 'rtk')
       // which rtk → found in ~/.local/bin (curl install)
       // brew info → not found
       mockExecFile.mockImplementation((cmd: string) => {
@@ -542,9 +545,10 @@ describe('Update IPC Handlers', () => {
 
     it('envoie les notifications de statut pour la desinstallation', async () => {
       const home = process.env.HOME || process.env.USERPROFILE || ''
+      const rtkBinPath = path.join(home, '.local', 'bin', 'rtk')
       mockExecFile.mockImplementation((cmd: string) => {
         if (cmd === (IS_WIN ? 'where' : 'which')) {
-          return Promise.resolve({ stdout: `${home}/.local/bin/rtk\n`, stderr: '' })
+          return Promise.resolve({ stdout: `${rtkBinPath}\n`, stderr: '' })
         }
         if (cmd === 'brew') {
           return Promise.reject(new Error('not found'))

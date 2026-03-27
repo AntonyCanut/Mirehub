@@ -1466,14 +1466,17 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
               const rtkPath = await getCommandPath('rtk')
               if (rtkPath) {
                 const home = process.env.HOME || process.env.USERPROFILE || ''
+                const normalizedRtkPath = path.normalize(rtkPath)
+                const localBinDir = path.normalize(path.join(home, '.local', 'bin'))
+                const cargoBinDir = path.normalize(path.join(home, '.cargo', 'bin'))
                 // Only remove if in user-controlled locations (~/.local/bin or ~/.cargo/bin)
-                if (rtkPath.startsWith(path.join(home, '.local', 'bin')) || rtkPath.startsWith(path.join(home, '.cargo', 'bin'))) {
+                if (normalizedRtkPath.startsWith(localBinDir) || normalizedRtkPath.startsWith(cargoBinDir)) {
                   await fs.rm(rtkPath, { force: true })
                   sendStatus('completed')
                   return { success: true }
                 }
                 // If installed via cargo, use cargo uninstall
-                if (rtkPath.startsWith(path.join(home, '.cargo', 'bin'))) {
+                if (normalizedRtkPath.startsWith(cargoBinDir)) {
                   command = 'cargo'
                   args = ['uninstall', 'rtk']
                 } else {
