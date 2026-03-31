@@ -117,7 +117,7 @@ export function createHandleTabClosed(get: Get, set: Set) {
 }
 
 export function createReactivateIfDone(get: Get, set: Set) {
-  return (tabId: string, message?: string, options?: { skipGracePeriod?: boolean }) => {
+  return (tabId: string, message?: string, options?: { skipGracePeriod?: boolean; alreadySent?: boolean }) => {
     const { kanbanTabIds } = get()
     const taskId = Object.keys(kanbanTabIds).find((id) => kanbanTabIds[id] === tabId)
     if (!taskId || reactivatingTaskIds.has(taskId)) return
@@ -182,8 +182,10 @@ export function createReactivateIfDone(get: Get, set: Set) {
 
     const termStore = useTerminalTabStore.getState()
 
-    // Write the message to the terminal if provided
-    if (commentText) {
+    // Write the message to the terminal if provided and not already sent
+    // (when triggered from the terminal's onData handler, the message was already
+    // written by xterm — sending it again would duplicate it)
+    if (commentText && !options?.alreadySent) {
       const tab = termStore.tabs.find((t) => t.id === tabId)
       if (tab) {
         const sessionId = tab.paneTree.type === 'leaf' ? tab.paneTree.sessionId : null
