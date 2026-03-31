@@ -180,7 +180,7 @@ function FlatPaneView({
 
   const reactivateIfDone = useKanbanStore((s) => s.reactivateIfDone)
   const handleUserInput = useCallback((message: string) => {
-    reactivateIfDone(tabId, message)
+    reactivateIfDone(tabId, message, { alreadySent: true })
   }, [tabId, reactivateIfDone])
 
   // Gap for dividers (2px on each side = 1px effective divider)
