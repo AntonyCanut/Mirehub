@@ -12,6 +12,7 @@ import {
 import { TaskDetailAttachments } from './task-detail-attachments'
 import {
   TaskDetailSplitSuggestions,
+  TaskDetailWorktreeInfo,
   TaskDetailAiInfo,
   TaskDetailQuestion,
   TaskDetailResult,
@@ -218,6 +219,9 @@ export function TaskDetailPanel({
 
       {/* Split Suggestions */}
       <TaskDetailSplitSuggestions task={task} onClose={onClose} />
+
+      {/* Worktree info (project, branch, merge status) */}
+      <TaskDetailWorktreeInfo task={task} />
 
       {/* AI Agent info */}
       <TaskDetailAiInfo task={task} />

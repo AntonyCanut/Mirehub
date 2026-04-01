@@ -1,4 +1,4 @@
-import type { KanbanTask, KanbanTaskType } from '../../../shared/types/index'
+import type { KanbanTask, KanbanTaskType, WorktreeEntry } from '../../../shared/types/index'
 import { useWorkspaceStore } from '../workspace/workspace-store'
 import { useI18n } from '../../lib/i18n'
 import { pushNotification } from '../../shared/stores/notification-store'
@@ -58,11 +58,21 @@ export async function autoMergeWorktree(
       ticketLabel,
       task.worktreeBaseBranch,
     )
-    if (result?.success && task.worktreeEnvPath) {
-      const workspace = useWorkspaceStore.getState().workspaces.find((w) => w.id === workspaceId)
-      if (workspace) {
-        const worktreeId = task.id.slice(0, 8)
-        await window.kanbai.workspaceEnv.delete(workspace.name, worktreeId).catch(() => { /* best-effort */ })
+    if (result?.success) {
+      // Mark the matching worktreeHistory entry as merged
+      const updatedHistory = markWorktreeEntryMerged(task.worktreeHistory, task.worktreeBranch!)
+      await window.kanbai.kanban.update({
+        id: task.id,
+        workspaceId,
+        ...(updatedHistory ? { worktreeHistory: updatedHistory } : {}),
+      }).catch(() => { /* best-effort */ })
+
+      if (task.worktreeEnvPath) {
+        const workspace = useWorkspaceStore.getState().workspaces.find((w) => w.id === workspaceId)
+        if (workspace) {
+          const worktreeId = task.id.slice(0, 8)
+          await window.kanbai.workspaceEnv.delete(workspace.name, worktreeId).catch(() => { /* best-effort */ })
+        }
       }
     }
     if (!result?.success) {
@@ -106,6 +116,96 @@ export async function autoMergeWorktree(
     }
   } catch {
     // Auto-merge is best-effort — do not block task completion
+  }
+}
+
+/** Mark a specific branch entry as merged in the worktreeHistory array. */
+function markWorktreeEntryMerged(history: WorktreeEntry[] | undefined, branch: string): WorktreeEntry[] | undefined {
+  if (!history?.length) return undefined
+  return history.map((e) => e.branch === branch && !e.merged ? { ...e, merged: true } : e)
+}
+
+/** Check if any worktreeHistory entry is not yet merged. */
+export function hasUnmergedWorktreeEntries(task: KanbanTask): boolean {
+  if (!task.worktreeHistory?.length) {
+    // Fallback for tasks without worktreeHistory (legacy) — check current worktree
+    return !!(task.worktreeBranch && task.worktreePath)
+  }
+  return task.worktreeHistory.some((e) => !e.merged)
+}
+
+/**
+ * Verify that DONE tasks with worktree info have actually been merged.
+ * Checks both legacy single-worktree fields and the new worktreeHistory array.
+ * For any unmerged entry, retries the merge. This catches cases where
+ * the auto-merge was skipped (race condition, lock, process exit, etc.).
+ */
+export async function verifyAndRetryWorktreeMerges(
+  tasks: KanbanTask[],
+  workspaceId: string,
+): Promise<void> {
+  try {
+    const kanbanConfig = await window.kanbai.kanban.getConfig(workspaceId)
+    if (!kanbanConfig?.autoMergeWorktrees) return
+
+    // Find DONE tasks that have unmerged worktree entries
+    const unmergedDone = tasks.filter(
+      (t) => t.status === 'DONE' && hasUnmergedWorktreeEntries(t),
+    )
+    if (unmergedDone.length === 0) return
+
+    for (const task of unmergedDone) {
+      try {
+        if (task.worktreeHistory?.length) {
+          // Check each unmerged entry in the history
+          let historyChanged = false
+          const updatedHistory = [...task.worktreeHistory]
+          for (let i = 0; i < updatedHistory.length; i++) {
+            const entry = updatedHistory[i]!
+            if (entry.merged) continue
+            const repoPath = repoPathFromWorktree(entry.worktreePath)
+            try {
+              const isMerged = await window.kanbai.git.branchIsMerged(repoPath, entry.branch)
+              if (isMerged) {
+                updatedHistory[i] = { ...entry, merged: true }
+                historyChanged = true
+                // Cleanup leftover worktree and branch
+                await window.kanbai.git.worktreeRemove(repoPath, entry.worktreePath, true).catch(() => { /* best-effort */ })
+                await window.kanbai.git.deleteBranch(repoPath, entry.branch).catch(() => { /* best-effort */ })
+              } else {
+                // Branch not merged — retry using the current worktree fields if they match
+                if (task.worktreePath === entry.worktreePath) {
+                  await autoMergeWorktree(task, workspaceId)
+                }
+              }
+            } catch {
+              // Per-entry verification is best-effort
+            }
+          }
+          if (historyChanged) {
+            await window.kanbai.kanban.update({
+              id: task.id,
+              workspaceId,
+              worktreeHistory: updatedHistory,
+            }).catch(() => { /* best-effort */ })
+          }
+        } else {
+          // Legacy task without worktreeHistory — use single worktree fields
+          const repoPath = repoPathFromWorktree(task.worktreePath!)
+          const isMerged = await window.kanbai.git.branchIsMerged(repoPath, task.worktreeBranch!)
+          if (isMerged) {
+            await window.kanbai.git.worktreeRemove(repoPath, task.worktreePath!, true).catch(() => { /* best-effort */ })
+            await window.kanbai.git.deleteBranch(repoPath, task.worktreeBranch!).catch(() => { /* best-effort */ })
+          } else {
+            await autoMergeWorktree(task, workspaceId)
+          }
+        }
+      } catch {
+        // Per-task verification is best-effort — continue with others
+      }
+    }
+  } catch {
+    // Global verification failure — do not block startup
   }
 }
 

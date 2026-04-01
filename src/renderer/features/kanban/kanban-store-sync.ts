@@ -7,6 +7,7 @@ import { pushNotification } from '../../shared/stores/notification-store'
 import {
   formatTicketLabel, pickNextTask,
   isChildOfCto, autoMergeWorktree, relaunchedTaskIds,
+  verifyAndRetryWorktreeMerges,
 } from './kanban-store-utils'
 
 export function createLoadTasks(get: Get, set: Set) {
@@ -63,6 +64,9 @@ export function createLoadTasks(get: Get, set: Set) {
           }
         }).catch(() => { /* best-effort */ })
       }
+
+      // Verify that DONE tasks with worktrees have actually been merged — retry if not
+      verifyAndRetryWorktreeMerges(tasks, workspaceId).catch(() => { /* best-effort */ })
 
       // Scheduling: resume WORKING without terminal, or pick next TODO (respecting concurrency limit)
       const capturedWorkspaceId = workspaceId
@@ -315,6 +319,11 @@ export function createSyncTasksFromFile(get: Get, set: Set) {
       }
 
       set({ tasks: newTasks })
+
+      // Verify that DONE tasks with worktrees have actually been merged — retry if not
+      if (currentWorkspaceId) {
+        verifyAndRetryWorktreeMerges(newTasks, currentWorkspaceId).catch(() => { /* best-effort */ })
+      }
 
       // Launch Claude terminals for tasks manually moved to WORKING
       for (const task of tasksToLaunch) {

@@ -61,6 +61,75 @@ export function TaskDetailSplitSuggestions({
   )
 }
 
+export function TaskDetailWorktreeInfo({ task }: { task: KanbanTask }) {
+  const { t } = useI18n()
+
+  // Show worktreeHistory if available, otherwise fall back to legacy single fields
+  const entries = task.worktreeHistory?.length
+    ? task.worktreeHistory
+    : task.worktreeBranch
+      ? [{
+          projectName: task.worktreePath?.split('/').slice(-3, -2)[0] ?? '',
+          projectPath: '',
+          branch: task.worktreeBranch,
+          baseBranch: task.worktreeBaseBranch ?? '',
+          worktreePath: task.worktreePath ?? '',
+          createdAt: task.createdAt,
+        }]
+      : []
+
+  if (entries.length === 0) return null
+
+  return (
+    <div className="kanban-detail-section">
+      <span className="kanban-detail-section-title">
+        {t('kanban.worktreeInfo')} ({entries.length})
+      </span>
+      <div className="kanban-detail-worktree-info">
+        {entries.map((entry, i) => (
+          <div key={`${entry.branch}-${i}`} className="kanban-detail-worktree-entry">
+            {entry.projectName && (
+              <div className="kanban-detail-worktree-row">
+                <span className="kanban-detail-worktree-label">{t('kanban.worktreeProject')}</span>
+                <span className="kanban-detail-worktree-value">{entry.projectName}</span>
+              </div>
+            )}
+            <div className="kanban-detail-worktree-row">
+              <span className="kanban-detail-worktree-label">{t('kanban.worktreeBranch')}</span>
+              <span className="kanban-detail-worktree-value kanban-detail-worktree-branch">{entry.branch}</span>
+            </div>
+            {entry.baseBranch && (
+              <div className="kanban-detail-worktree-row">
+                <span className="kanban-detail-worktree-label">{t('kanban.worktreeBaseBranch')}</span>
+                <span className="kanban-detail-worktree-value">{entry.baseBranch}</span>
+              </div>
+            )}
+            {entry.worktreePath && (
+              <div className="kanban-detail-worktree-row">
+                <span className="kanban-detail-worktree-label">{t('kanban.worktreePath')}</span>
+                <span className="kanban-detail-worktree-value kanban-detail-worktree-path" title={entry.worktreePath}>
+                  {entry.worktreePath.split('/').slice(-2).join('/')}
+                </span>
+              </div>
+            )}
+            {task.status === 'DONE' && (
+              <div className="kanban-detail-worktree-row">
+                <span className="kanban-detail-worktree-label">Status</span>
+                <span className={`kanban-detail-worktree-merge-status${entry.merged ? ' kanban-detail-worktree-merge-status--merged' : ' kanban-detail-worktree-merge-status--pending'}`}>
+                  {entry.merged ? t('kanban.worktreeMerged') : t('kanban.worktreeNotMerged')}
+                </span>
+              </div>
+            )}
+            {entries.length > 1 && i < entries.length - 1 && (
+              <hr className="kanban-detail-worktree-separator" />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function TaskDetailAiInfo({ task }: { task: KanbanTask }) {
   const { t } = useI18n()
 

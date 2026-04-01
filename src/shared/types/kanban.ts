@@ -27,6 +27,16 @@ export interface KanbanSplitSuggestion {
   priority: 'low' | 'medium' | 'high'
 }
 
+export interface WorktreeEntry {
+  projectName: string
+  projectPath: string
+  branch: string
+  baseBranch: string
+  worktreePath: string
+  merged?: boolean
+  createdAt: number
+}
+
 export interface PrequalifyError {
   error: true
   code: 'PREQUALIFY_ERROR' | 'PREQUALIFY_PARSE_ERROR'
@@ -71,6 +81,7 @@ export interface KanbanTask {
   worktreeBranch?: string
   worktreeBaseBranch?: string
   worktreeEnvPath?: string
+  worktreeHistory?: WorktreeEntry[]
   splitFromId?: string
   createdAt: number
   updatedAt: number

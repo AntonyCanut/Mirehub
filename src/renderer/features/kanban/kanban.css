@@ -1539,6 +1539,69 @@
   box-shadow: 0 0 0 2px var(--accent-soft);
 }
 
+.kanban-detail-worktree-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.kanban-detail-worktree-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kanban-detail-worktree-label {
+  color: var(--text-muted);
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.kanban-detail-worktree-value {
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kanban-detail-worktree-branch {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+.kanban-detail-worktree-path {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.kanban-detail-worktree-merge-status {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.kanban-detail-worktree-merge-status--merged {
+  color: var(--success);
+}
+
+.kanban-detail-worktree-merge-status--pending {
+  color: var(--warning);
+}
+
+.kanban-detail-worktree-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kanban-detail-worktree-separator {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 4px 0;
+}
+
 .kanban-detail-agent {
   display: flex;
   flex-direction: column;
