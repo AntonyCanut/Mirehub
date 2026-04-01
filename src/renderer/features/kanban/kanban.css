@@ -1590,6 +1590,18 @@
   color: var(--warning);
 }
 
+.kanban-detail-worktree-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kanban-detail-worktree-separator {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 4px 0;
+}
+
 .kanban-detail-agent {
   display: flex;
   flex-direction: column;

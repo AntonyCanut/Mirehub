@@ -161,9 +161,17 @@ export function createSendToAi(get: Get, set: Set) {
                 }
               }
 
-              // Derive project name from path for display in ticket details
-              const worktreeProjectName = projectPath.split('/').pop() ?? projectPath
-              const worktreeProjectPath = projectPath
+              // Append to worktreeHistory so we track every project/branch touched
+              const newEntry: import('../../../shared/types/kanban').WorktreeEntry = {
+                projectName: projectPath.split('/').pop() ?? projectPath,
+                projectPath,
+                branch: ticketBranch,
+                baseBranch,
+                worktreePath: worktreeDir,
+                createdAt: Date.now(),
+              }
+              const existingHistory = task.worktreeHistory ?? []
+              const worktreeHistory = [...existingHistory, newEntry]
 
               // Persist worktree info on the task
               await window.kanbai.kanban.update({
@@ -172,13 +180,12 @@ export function createSendToAi(get: Get, set: Set) {
                 worktreePath: worktreeDir,
                 worktreeBranch: ticketBranch,
                 worktreeBaseBranch: baseBranch,
-                worktreeProjectName,
-                worktreeProjectPath,
+                worktreeHistory,
                 ...(worktreeEnvPath ? { worktreeEnvPath } : {}),
               })
               set((state) => ({
                 tasks: state.tasks.map((t) =>
-                  t.id === task.id ? { ...t, worktreePath: worktreeDir, worktreeBranch: ticketBranch, worktreeBaseBranch: baseBranch, worktreeProjectName, worktreeProjectPath, ...(worktreeEnvPath ? { worktreeEnvPath } : {}) } : t,
+                  t.id === task.id ? { ...t, worktreePath: worktreeDir, worktreeBranch: ticketBranch, worktreeBaseBranch: baseBranch, worktreeHistory, ...(worktreeEnvPath ? { worktreeEnvPath } : {}) } : t,
                 ),
               }))
             }
