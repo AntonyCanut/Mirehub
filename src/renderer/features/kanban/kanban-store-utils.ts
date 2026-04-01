@@ -58,11 +58,20 @@ export async function autoMergeWorktree(
       ticketLabel,
       task.worktreeBaseBranch,
     )
-    if (result?.success && task.worktreeEnvPath) {
-      const workspace = useWorkspaceStore.getState().workspaces.find((w) => w.id === workspaceId)
-      if (workspace) {
-        const worktreeId = task.id.slice(0, 8)
-        await window.kanbai.workspaceEnv.delete(workspace.name, worktreeId).catch(() => { /* best-effort */ })
+    if (result?.success) {
+      // Mark the task as merged so we can skip it in future verification passes
+      await window.kanbai.kanban.update({
+        id: task.id,
+        workspaceId,
+        worktreeMerged: true,
+      }).catch(() => { /* best-effort */ })
+
+      if (task.worktreeEnvPath) {
+        const workspace = useWorkspaceStore.getState().workspaces.find((w) => w.id === workspaceId)
+        if (workspace) {
+          const worktreeId = task.id.slice(0, 8)
+          await window.kanbai.workspaceEnv.delete(workspace.name, worktreeId).catch(() => { /* best-effort */ })
+        }
       }
     }
     if (!result?.success) {
@@ -106,6 +115,54 @@ export async function autoMergeWorktree(
     }
   } catch {
     // Auto-merge is best-effort — do not block task completion
+  }
+}
+
+/**
+ * Verify that DONE tasks with worktree info have actually been merged.
+ * For any that haven't, retry the auto-merge. This catches cases where
+ * the auto-merge was skipped (race condition, lock, process exit, etc.).
+ */
+export async function verifyAndRetryWorktreeMerges(
+  tasks: KanbanTask[],
+  workspaceId: string,
+): Promise<void> {
+  try {
+    const kanbanConfig = await window.kanbai.kanban.getConfig(workspaceId)
+    if (!kanbanConfig?.autoMergeWorktrees) return
+
+    const unmergedDone = tasks.filter(
+      (t) => t.status === 'DONE' && t.worktreeBranch && t.worktreePath && !t.worktreeMerged,
+    )
+    if (unmergedDone.length === 0) return
+
+    for (const task of unmergedDone) {
+      const repoPath = repoPathFromWorktree(task.worktreePath!)
+      try {
+        // Check if the branch still exists — if not, it was already merged and cleaned up
+        const isMerged = await window.kanbai.git.branchIsMerged(repoPath, task.worktreeBranch!)
+        if (isMerged) {
+          // Branch is merged but worktreeMerged flag wasn't set — fix it and cleanup
+          await window.kanbai.kanban.update({
+            id: task.id,
+            workspaceId,
+            worktreeMerged: true,
+          }).catch(() => { /* best-effort */ })
+          // Cleanup leftover worktree directory if it still exists
+          if (task.worktreePath) {
+            await window.kanbai.git.worktreeRemove(repoPath, task.worktreePath, true).catch(() => { /* best-effort */ })
+            await window.kanbai.git.deleteBranch(repoPath, task.worktreeBranch!).catch(() => { /* best-effort */ })
+          }
+          continue
+        }
+        // Branch exists but is not merged — retry the merge
+        await autoMergeWorktree(task, workspaceId)
+      } catch {
+        // Verification is best-effort per task — continue with others
+      }
+    }
+  } catch {
+    // Global verification failure — do not block startup
   }
 }
 

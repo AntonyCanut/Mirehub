@@ -161,6 +161,10 @@ export function createSendToAi(get: Get, set: Set) {
                 }
               }
 
+              // Derive project name from path for display in ticket details
+              const worktreeProjectName = projectPath.split('/').pop() ?? projectPath
+              const worktreeProjectPath = projectPath
+
               // Persist worktree info on the task
               await window.kanbai.kanban.update({
                 id: task.id,
@@ -168,11 +172,13 @@ export function createSendToAi(get: Get, set: Set) {
                 worktreePath: worktreeDir,
                 worktreeBranch: ticketBranch,
                 worktreeBaseBranch: baseBranch,
+                worktreeProjectName,
+                worktreeProjectPath,
                 ...(worktreeEnvPath ? { worktreeEnvPath } : {}),
               })
               set((state) => ({
                 tasks: state.tasks.map((t) =>
-                  t.id === task.id ? { ...t, worktreePath: worktreeDir, worktreeBranch: ticketBranch, worktreeBaseBranch: baseBranch, ...(worktreeEnvPath ? { worktreeEnvPath } : {}) } : t,
+                  t.id === task.id ? { ...t, worktreePath: worktreeDir, worktreeBranch: ticketBranch, worktreeBaseBranch: baseBranch, worktreeProjectName, worktreeProjectPath, ...(worktreeEnvPath ? { worktreeEnvPath } : {}) } : t,
                 ),
               }))
             }

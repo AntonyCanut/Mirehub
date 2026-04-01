@@ -71,6 +71,9 @@ export interface KanbanTask {
   worktreeBranch?: string
   worktreeBaseBranch?: string
   worktreeEnvPath?: string
+  worktreeProjectName?: string
+  worktreeProjectPath?: string
+  worktreeMerged?: boolean
   splitFromId?: string
   createdAt: number
   updatedAt: number

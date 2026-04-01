@@ -61,6 +61,52 @@ export function TaskDetailSplitSuggestions({
   )
 }
 
+export function TaskDetailWorktreeInfo({ task }: { task: KanbanTask }) {
+  const { t } = useI18n()
+
+  if (!task.worktreeBranch) return null
+
+  return (
+    <div className="kanban-detail-section">
+      <span className="kanban-detail-section-title">{t('kanban.worktreeInfo')}</span>
+      <div className="kanban-detail-worktree-info">
+        {task.worktreeProjectName && (
+          <div className="kanban-detail-worktree-row">
+            <span className="kanban-detail-worktree-label">{t('kanban.worktreeProject')}</span>
+            <span className="kanban-detail-worktree-value">{task.worktreeProjectName}</span>
+          </div>
+        )}
+        <div className="kanban-detail-worktree-row">
+          <span className="kanban-detail-worktree-label">{t('kanban.worktreeBranch')}</span>
+          <span className="kanban-detail-worktree-value kanban-detail-worktree-branch">{task.worktreeBranch}</span>
+        </div>
+        {task.worktreeBaseBranch && (
+          <div className="kanban-detail-worktree-row">
+            <span className="kanban-detail-worktree-label">{t('kanban.worktreeBaseBranch')}</span>
+            <span className="kanban-detail-worktree-value">{task.worktreeBaseBranch}</span>
+          </div>
+        )}
+        {task.worktreePath && (
+          <div className="kanban-detail-worktree-row">
+            <span className="kanban-detail-worktree-label">{t('kanban.worktreePath')}</span>
+            <span className="kanban-detail-worktree-value kanban-detail-worktree-path" title={task.worktreePath}>
+              {task.worktreePath.split('/').slice(-2).join('/')}
+            </span>
+          </div>
+        )}
+        {task.status === 'DONE' && (
+          <div className="kanban-detail-worktree-row">
+            <span className="kanban-detail-worktree-label">Status</span>
+            <span className={`kanban-detail-worktree-merge-status${task.worktreeMerged ? ' kanban-detail-worktree-merge-status--merged' : ' kanban-detail-worktree-merge-status--pending'}`}>
+              {task.worktreeMerged ? t('kanban.worktreeMerged') : t('kanban.worktreeNotMerged')}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function TaskDetailAiInfo({ task }: { task: KanbanTask }) {
   const { t } = useI18n()
 
