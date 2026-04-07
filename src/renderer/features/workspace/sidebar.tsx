@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
+import { CaretDown, CaretRight, FolderSimple, PencilSimple, Plus, X } from '@phosphor-icons/react'
 import { useWorkspaceStore, useFilteredWorkspaces } from './workspace-store'
 import { useViewStore } from '../../lib/stores/viewStore'
 import { useI18n } from '../../lib/i18n'
@@ -285,16 +286,12 @@ export function Sidebar() {
           <button
             className="sidebar-namespace-trigger"
           >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-              <path d="M2 3.5C2 2.67 2.67 2 3.5 2H6.29a1.5 1.5 0 011.06.44L8.41 3.5H12.5c.83 0 1.5.67 1.5 1.5V12c0 .83-.67 1.5-1.5 1.5h-9A1.5 1.5 0 012 12V3.5z" stroke="currentColor" strokeWidth="1.2" fill="none" />
-            </svg>
+            <FolderSimple size={16} weight="fill" style={{ flexShrink: 0, opacity: 0.8 }} />
             <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {activeNamespace?.name ?? t('sidebar.title')}
             </span>
             <span className={`namespace-chevron${showNamespaceDropdown ? ' namespace-chevron--open' : ''}`}>
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                <path d="M1 2.5L4 5.5L7 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <CaretDown size={10} weight="bold" />
             </span>
           </button>
           {showNamespaceDropdown && (
@@ -326,9 +323,7 @@ export function Sidebar() {
                           setShowNamespaceDropdown(false)
                         }}
                       >
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-                          <path d="M2 3.5C2 2.67 2.67 2 3.5 2H6.29a1.5 1.5 0 011.06.44L8.41 3.5H12.5c.83 0 1.5.67 1.5 1.5V12c0 .83-.67 1.5-1.5 1.5h-9A1.5 1.5 0 012 12V3.5z" stroke="currentColor" strokeWidth="1.2" fill="none" />
-                        </svg>
+                        <FolderSimple size={16} weight="fill" style={{ flexShrink: 0, opacity: 0.8 }} />
                         <span className="namespace-item-name">{ns.name}</span>
                       </button>
                       {namespaces.length > 1 && (
@@ -341,9 +336,7 @@ export function Sidebar() {
                             }}
                             title={t('namespace.rename')}
                           >
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                              <path d="M7 1L9 3M0.5 9.5L1 7L7.5 0.5C7.8 0.2 8.3 0.2 8.6 0.5L9.5 1.4C9.8 1.7 9.8 2.2 9.5 2.5L3 9L0.5 9.5Z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+                            <PencilSimple size={12} weight="bold" />
                           </button>
                           <button
                             className="namespace-delete-btn"
@@ -353,9 +346,7 @@ export function Sidebar() {
                             }}
                             title={t('common.delete')}
                           >
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                              <path d="M2 2L8 8M8 2L2 8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                            </svg>
+                            <X size={12} weight="bold" />
                           </button>
                         </>
                       )}
@@ -541,9 +532,7 @@ export function Sidebar() {
         <div className="sidebar-section">
           <button className="sidebar-section-header" onClick={() => setShowBookmarks((v) => !v)}>
             <span className={`sidebar-section-chevron${showBookmarks ? ' sidebar-section-chevron--expanded' : ''}`}>
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                <path d="M2.5 1L5.5 4L2.5 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <CaretRight size={10} weight="bold" />
             </span>
             <span className="sidebar-section-title">{'\u2605'} {t('sidebar.favorites', { count: String(bookmarks.length) })}</span>
           </button>
@@ -569,9 +558,7 @@ export function Sidebar() {
         <div className="sidebar-section">
           <button className="sidebar-section-header" onClick={() => setShowRecent((v) => !v)}>
             <span className={`sidebar-section-chevron${showRecent ? ' sidebar-section-chevron--expanded' : ''}`}>
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                <path d="M2.5 1L5.5 4L2.5 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <CaretRight size={10} weight="bold" />
             </span>
             <span className="sidebar-section-title">{t('sidebar.recentFiles', { count: String(recentFiles.length) })}</span>
           </button>
@@ -597,9 +584,7 @@ export function Sidebar() {
           className="sidebar-new-workspace-btn"
           onClick={() => setShowCreateMenu((prev) => !prev)}
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+          <Plus size={16} weight="bold" />
           {t('sidebar.newWorkspace')}
         </button>
       </div>

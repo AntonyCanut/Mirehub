@@ -1489,11 +1489,11 @@ body {
   padding: 7px 10px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .workspace-item-header:hover {
-  background: var(--bg-surface);
+  background: var(--accent-soft);
 }
 
 .workspace-item-chevron {
@@ -1507,9 +1507,13 @@ body {
   color: var(--text-muted);
   cursor: pointer;
   padding: 0;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease, color 0.12s ease;
   transform: rotate(0deg);
   flex-shrink: 0;
+}
+
+.workspace-item-header:hover .workspace-item-chevron {
+  color: var(--text-secondary);
 }
 
 .workspace-item-chevron--expanded {
@@ -1544,6 +1548,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 /* IA Working/Finish tag */
@@ -1652,6 +1657,7 @@ body {
   border: 1px solid var(--accent);
   border-radius: 4px;
   outline: none;
+  box-shadow: 0 0 0 1px var(--accent-soft);
 }
 
 .workspace-item-add-wrapper {
@@ -1714,7 +1720,7 @@ body {
 }
 
 .workspace-add-menu-item:hover {
-  background: var(--bg-surface);
+  background: var(--accent-soft);
   color: var(--text-primary);
 }
 
@@ -1761,13 +1767,13 @@ body {
 }
 
 .workspace-icon-swatch:hover {
-  background: var(--bg-surface);
+  background: var(--accent-soft);
   color: var(--text-primary);
 }
 
 .workspace-icon-swatch--active {
   border-color: var(--accent);
-  background: rgba(151, 71, 255, 0.1);
+  background: var(--accent-soft);
   color: var(--accent);
 }
 
@@ -1840,9 +1846,9 @@ body {
 }
 
 .workspace-item-empty-btn:hover {
-  border-color: var(--text-secondary);
+  border-color: var(--accent);
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--accent-soft);
 }
 
 /* Workspace DB Connection Items */
@@ -1854,11 +1860,13 @@ body {
   cursor: pointer;
   font-size: 12px;
   color: var(--text-secondary);
-  transition: background 0.1s ease;
+  border-radius: 6px;
+  margin: 0 4px;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .workspace-db-item:hover {
-  background: var(--bg-hover);
+  background: var(--accent-soft);
   color: var(--text-primary);
 }
 
@@ -1926,8 +1934,12 @@ body {
   color: var(--text-muted);
   cursor: pointer;
   padding: 0;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease, color 0.12s ease;
   flex-shrink: 0;
+}
+
+.project-item:hover .project-item-chevron {
+  color: var(--text-secondary);
 }
 
 .project-item-chevron--expanded {
@@ -1944,7 +1956,7 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.12s ease, color 0.12s ease;
   text-align: left;
   font-family: inherit;
 }
@@ -1959,7 +1971,7 @@ body {
 }
 
 .project-item:hover {
-  background: var(--bg-surface);
+  background: var(--accent-soft);
 }
 
 .project-item--active {
@@ -2002,9 +2014,9 @@ body {
   padding: 1px 5px;
   border-radius: 3px;
   flex-shrink: 0;
-  color: var(--text-muted);
+  color: rgba(180, 170, 200, 0.7);
   background: transparent;
-  border: 1px solid var(--text-muted);
+  border: 1px solid rgba(180, 170, 200, 0.3);
   font-family: var(--font-mono);
   max-width: 100px;
   overflow: hidden;
@@ -2012,16 +2024,6 @@ body {
   white-space: nowrap;
   position: absolute;
   right: 10px;
-}
-
-.project-item--active .project-branch-tag {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.project-item--git .project-branch-tag {
-  color: var(--warning);
-  border-color: var(--warning);
 }
 
 .project-item-claude-badge {

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import { CaretRight, Cube, FolderSimple, Plus } from '@phosphor-icons/react'
 import type { Project } from '../../../../../shared/types/index'
 import { useWorkspaceStore } from '../../workspace-store'
 import { useTerminalTabStore } from '../../../../lib/stores/terminalTabStore'
@@ -188,30 +189,13 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
         title={project.path}
       >
         <span className={`project-item-chevron${expanded ? ' project-item-chevron--expanded' : ''}`}>
-          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-            <path d="M2.5 1L5.5 4L2.5 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <CaretRight size={10} weight="bold" />
         </span>
         <span className="project-item-icon">
           {project.hasClaude ? (
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M2 3.5A1.5 1.5 0 013.5 2h9A1.5 1.5 0 0114 3.5v9a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5v-9z"
-                stroke="var(--claude-color)"
-                strokeWidth="1.2"
-                fill="none"
-              />
-              <circle cx="8" cy="8" r="2" fill="var(--claude-color)" />
-            </svg>
+            <Cube size={16} weight="fill" style={{ color: 'var(--claude-color)' }} />
           ) : (
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M2 4a2 2 0 012-2h3l1 1.5h4a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V4z"
-                stroke="var(--text-muted)"
-                strokeWidth="1.2"
-                fill="none"
-              />
-            </svg>
+            <FolderSimple size={16} weight="fill" style={{ color: 'var(--text-muted)', opacity: 0.8 }} />
           )}
         </span>
         <span className="project-item-name">{folderName}</span>
@@ -224,11 +208,7 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
             onClick={(e) => { e.stopPropagation(); handleDeployClaude() }}
             title={t('project.deployClaudeOnProject')}
           >
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-              <path d="M2 3.5A1.5 1.5 0 013.5 2h9A1.5 1.5 0 0114 3.5v9a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5v-9z"
-                stroke="currentColor" strokeWidth="1.2" fill="none" />
-              <path d="M8 5v6M5 8h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-            </svg>
+            <Plus size={14} weight="bold" />
           </button>
         )}
       </div>

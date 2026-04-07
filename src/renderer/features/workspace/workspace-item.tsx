@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import { CaretRight } from '@phosphor-icons/react'
 import type { Workspace, Project, DbEnvironmentTag } from '../../../shared/types/index'
 import { useWorkspaceStore } from './workspace-store'
 import { useClaudeStore } from '../claude'
@@ -370,9 +371,7 @@ export function WorkspaceItem({ workspace, projects, isActive }: WorkspaceItemPr
             handleToggle()
           }}
         >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M3 2L7 5L3 8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <CaretRight size={12} weight="bold" />
         </button>
 
         {workspace.icon ? (
