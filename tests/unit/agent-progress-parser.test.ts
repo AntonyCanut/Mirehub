@@ -206,5 +206,24 @@ describe('AgentProgressParser', () => {
       const result = parser.feed('term-1', '● Running 2 Explore agents…\n')
       expect(result!.activity.type).toBe('subagent')
     })
+
+    it('spinner cannot replace active subagents', () => {
+      parser.feed('term-1', '● Running 2 Explore agents…\n')
+      parser.feed('term-1', '├─ Agent A · 5 tool uses\n')
+      // Even after hold time, spinner should not replace subagents
+      const state = (parser as any).terminals.get('term-1')
+      state.activitySetAt = Date.now() - 10000
+      const result = parser.feed('term-1', '✶ Perambulating…\n')
+      expect(result!.activity.type).toBe('subagent')
+    })
+
+    it('subagents cleared on Done, then spinner takes over', () => {
+      parser.feed('term-1', '● Running 2 Explore agents…\n')
+      parser.feed('term-1', '├─ Agent A · Done\n')
+      parser.feed('term-1', '⎿ Done\n')
+      const result = parser.feed('term-1', '✶ Thinking…\n')
+      expect(result!.activity.type).toBe('thinking')
+      expect(result!.subagents).toHaveLength(0)
+    })
   })
 })

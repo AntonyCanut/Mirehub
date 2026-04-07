@@ -256,6 +256,14 @@ export class AgentProgressParser {
       return true
     }
 
+    // 5c. Subagent completion — "⎿ Done" clears subagent lock
+    if (state.subagents.length > 0 && /^[⎿└]\s*Done/.test(clean)) {
+      state.subagents = []
+      state.activity = { type: 'idle', label: '' }
+      state.activitySetAt = 0
+      return true
+    }
+
     // 6. Generic bullet + tool call (e.g. "⏺ Update(...)")
     const genericMatch = clean.match(/[⏺●]\s*([A-Z]\w+)\s*\(/)
     if (genericMatch && !clean.includes('bypass permissions') && !clean.includes('accept edits')) {
@@ -297,8 +305,17 @@ export class AgentProgressParser {
     const currentPriority = ACTIVITY_PRIORITY[state.activity.type] ?? 0
     const elapsed = now - state.activitySetAt
 
-    // Always accept higher or equal priority, or if hold time has elapsed
+    // While subagents are running, only subagent-level updates can change activity
+    if (state.subagents.length > 0 && newPriority < ACTIVITY_PRIORITY.subagent) {
+      return false
+    }
+
+    // Accept higher or equal priority, or if hold time has elapsed
     if (newPriority >= currentPriority || elapsed >= ACTIVITY_HOLD_MS) {
+      // Clear subagents when a non-subagent activity replaces them
+      if (activity.type !== 'subagent' && state.subagents.length > 0) {
+        state.subagents = []
+      }
       state.activity = activity
       state.activitySetAt = now
       return true
