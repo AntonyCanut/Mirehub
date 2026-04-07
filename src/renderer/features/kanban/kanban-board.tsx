@@ -122,7 +122,7 @@ export function KanbanBoard() {
         return {
           agentProgress: {
             ...s.agentProgress,
-            [data.taskId]: { progress: data.progress, message: data.message },
+            [data.taskId]: { progress: data.progress, message: data.message, items: data.items },
           },
         }
       })
@@ -567,6 +567,7 @@ export function KanbanBoard() {
             onAttachFromClipboard={(dataBase64, filename, mimeType) => attachFromClipboard(selectedTask.id, dataBase64, filename, mimeType)}
             onRemoveAttachment={(attachmentId) => removeAttachment(selectedTask.id, attachmentId)}
             projects={workspaceProjects}
+            agentProgress={agentProgress[selectedTask.id]}
           />
         )}
       </div>

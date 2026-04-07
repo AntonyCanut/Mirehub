@@ -27,7 +27,7 @@ describe('AgentProgressParser', () => {
     expect(result).toBeNull()
   })
 
-  it('extracts progress from TodoWrite', () => {
+  it('extracts progress from TodoWrite with items', () => {
     const line = toolUseEvent('t1', 'TodoWrite', {
       todos: [
         { content: 'Setup project', status: 'completed' },
@@ -40,20 +40,29 @@ describe('AgentProgressParser', () => {
       taskId: 'task-abc',
       progress: '1/3',
       message: 'Write parser',
+      items: [
+        { label: 'Setup project', status: 'completed' },
+        { label: 'Write parser', status: 'in_progress' },
+        { label: 'Add UI', status: 'pending' },
+      ],
     })
   })
 
-  it('extracts progress from TaskCreate', () => {
+  it('extracts progress from TaskCreate with items', () => {
     parser.feed('term-1', toolUseEvent('t1', 'TaskCreate', { subject: 'First task' }) + '\n')
     const result = parser.feed('term-1', toolUseEvent('t2', 'TaskCreate', { subject: 'Second task' }) + '\n')
     expect(result).toEqual({
       taskId: 'task-abc',
       progress: '0/2',
       message: 'Second task',
+      items: [
+        { label: 'First task', status: 'pending' },
+        { label: 'Second task', status: 'pending' },
+      ],
     })
   })
 
-  it('extracts progress from TaskUpdate completed', () => {
+  it('extracts progress from TaskUpdate completed with items', () => {
     parser.feed('term-1', toolUseEvent('t1', 'TaskCreate', { subject: 'Task A' }) + '\n')
     parser.feed('term-1', toolUseEvent('t2', 'TaskCreate', { subject: 'Task B' }) + '\n')
 
@@ -62,17 +71,24 @@ describe('AgentProgressParser', () => {
       taskId: 'task-abc',
       progress: '1/2',
       message: 'Task A',
+      items: [
+        { label: 'Task A', status: 'completed' },
+        { label: 'Task B', status: 'pending' },
+      ],
     })
   })
 
-  it('extracts progress from TaskUpdate in_progress', () => {
+  it('extracts progress from TaskUpdate in_progress with items', () => {
     parser.feed('term-1', toolUseEvent('t1', 'TaskCreate', { subject: 'Task A' }) + '\n')
 
-    const result = parser.feed('term-1', toolUseEvent('t4', 'TaskUpdate', { taskId: '1', status: 'in_progress', subject: 'Working on A' }) + '\n')
+    const result = parser.feed('term-1', toolUseEvent('t4', 'TaskUpdate', { taskId: '1', status: 'in_progress', subject: 'Task A' }) + '\n')
     expect(result).toEqual({
       taskId: 'task-abc',
       progress: '0/1',
-      message: 'Working on A',
+      message: 'Task A',
+      items: [
+        { label: 'Task A', status: 'in_progress' },
+      ],
     })
   })
 
@@ -87,10 +103,15 @@ describe('AgentProgressParser', () => {
     const half2 = fullLine.slice(50) + '\n'
 
     expect(parser.feed('term-1', half1)).toBeNull()
-    expect(parser.feed('term-1', half2)).toEqual({
+    const result = parser.feed('term-1', half2)
+    expect(result).toEqual({
       taskId: 'task-abc',
       progress: '1/2',
       message: 'Next',
+      items: [
+        { label: 'Done', status: 'completed' },
+        { label: 'Next', status: 'in_progress' },
+      ],
     })
   })
 

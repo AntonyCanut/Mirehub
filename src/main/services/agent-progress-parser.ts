@@ -3,18 +3,25 @@ interface TodoItem {
   status: string
 }
 
+export interface AgentTaskItem {
+  label: string
+  status: 'pending' | 'in_progress' | 'completed'
+}
+
 interface TerminalState {
   taskId: string
   lineBuffer: string
   seenToolIds: Set<string>
   taskCount: number
   completedTasks: number
+  items: AgentTaskItem[]
 }
 
 export interface ProgressUpdate {
   taskId: string
   progress: string
   message: string
+  items: AgentTaskItem[]
 }
 
 export class AgentProgressParser {
@@ -27,6 +34,7 @@ export class AgentProgressParser {
       seenToolIds: new Set(),
       taskCount: 0,
       completedTasks: 0,
+      items: [],
     })
   }
 
@@ -92,20 +100,29 @@ export class AgentProgressParser {
       if (!Array.isArray(todos) || todos.length === 0) return null
       const completed = todos.filter((t) => t.status === 'completed').length
       const active = todos.find((t) => t.status === 'in_progress')
+      state.items = todos.map((t) => ({
+        label: t.content,
+        status: t.status === 'completed' ? 'completed' as const
+          : t.status === 'in_progress' ? 'in_progress' as const
+          : 'pending' as const,
+      }))
       return {
         taskId: state.taskId,
         progress: `${completed}/${todos.length}`,
         message: active?.content ?? '',
+        items: [...state.items],
       }
     }
 
     if (name === 'TaskCreate') {
       state.taskCount++
       const subject = (input.subject as string) ?? ''
+      state.items.push({ label: subject, status: 'pending' })
       return {
         taskId: state.taskId,
         progress: `${state.completedTasks}/${state.taskCount}`,
         message: subject,
+        items: [...state.items],
       }
     }
 
@@ -114,17 +131,23 @@ export class AgentProgressParser {
       const title = (input.subject as string) ?? (input.title as string) ?? ''
       if (status === 'completed') {
         state.completedTasks++
+        const item = state.items.find((i) => i.label === title || i.status !== 'completed')
+        if (item) item.status = 'completed'
         return {
           taskId: state.taskId,
           progress: `${state.completedTasks}/${Math.max(state.taskCount, state.completedTasks)}`,
           message: title,
+          items: [...state.items],
         }
       }
       if (status === 'in_progress') {
+        const item = state.items.find((i) => i.label === title)
+        if (item) item.status = 'in_progress'
         return {
           taskId: state.taskId,
           progress: `${state.completedTasks}/${Math.max(state.taskCount, state.completedTasks)}`,
           message: title,
+          items: [...state.items],
         }
       }
     }
