@@ -14973,3 +14973,35 @@ body {
   font-size: 12px;
   font-style: italic;
 }
+
+/* Meteor Panel */
+.meteor-panel {
+  padding: 20px;
+  overflow-y: auto;
+  max-width: 700px;
+}
+
+.meteor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meteor-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.meteor-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.meteor-btn-update-all {
+  background: var(--accent) !important;
+  color: #fff !important;
+}

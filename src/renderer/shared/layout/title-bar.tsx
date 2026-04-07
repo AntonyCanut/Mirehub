@@ -253,6 +253,15 @@ export function TitleBar(_props: TitleBarProps) {
           </button>
         )}
 
+        {isTabVisible('meteor') && (
+          <button
+            className={`view-btn${viewMode === 'meteor' ? ' view-btn--active' : ''}`}
+            onClick={() => setViewMode('meteor')}
+          >
+            {t('view.meteor')}
+          </button>
+        )}
+
         {isTabVisible('ai') && (
           <button
             className={`view-btn${viewMode === 'claude' || viewMode === 'ai' ? ' view-btn--active' : ''}`}

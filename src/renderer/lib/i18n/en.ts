@@ -1445,6 +1445,7 @@ export const en = {
   'command.showPrompts': 'Show Prompts',
   'command.showShortcuts': 'Show Shortcuts',
   'command.showNotes': 'Show Notes',
+  'command.showMeteor': 'Show Meteor',
   'command.globalSearch': 'Global Search',
 
   // Shortcuts
@@ -2139,6 +2140,11 @@ export const en = {
   'multiAgent.promptPlaceholder': 'Prompt for the agent (optional)...',
   'multiAgent.launch': 'Launch',
   'multiAgent.cancel': 'Cancel',
+
+  // Meteor
+  'view.meteor': 'Meteor',
+  'meteor.title': 'Meteor',
+  'meteor.updatePrefix': 'Update',
 
   // Notes
   'view.notes': 'Notes',
