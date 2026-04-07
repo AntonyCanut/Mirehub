@@ -26,6 +26,7 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
   const [showNotes, setShowNotes] = useState(false)
   const [notes, setNotes] = useState('')
   const [notesLoaded, setNotesLoaded] = useState(false)
+  const [branchName, setBranchName] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isActive) {
@@ -39,6 +40,15 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
       clearPendingClaudeImport()
     }
   }, [pendingClaudeImport, project.id, clearPendingClaudeImport])
+
+  useEffect(() => {
+    if (!project.hasGit) return
+    let cancelled = false
+    window.kanbai.git.status(project.path).then((status) => {
+      if (!cancelled && status?.branch) setBranchName(status.branch)
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [project.hasGit, project.path])
 
   const handleClick = useCallback(() => {
     if (isActive) {
@@ -205,6 +215,9 @@ export function ProjectItem({ project, isActive }: ProjectItemProps) {
           )}
         </span>
         <span className="project-item-name">{folderName}</span>
+        {branchName && (
+          <span className="project-branch-tag" title={branchName}>{branchName}</span>
+        )}
         {!project.hasClaude && (
           <button
             className="project-item-deploy-btn"

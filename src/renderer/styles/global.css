@@ -1983,6 +1983,33 @@ body {
   color: var(--warning);
 }
 
+.project-branch-tag {
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: none;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  font-family: var(--font-mono);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-item--active .project-branch-tag {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.project-item--git .project-branch-tag {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
 .project-item-claude-badge {
   display: flex;
   align-items: center;
