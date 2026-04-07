@@ -1521,4 +1521,105 @@ export function registerUpdateHandlers(ipcMain: IpcMain): void {
       }
     },
   )
+
+  ipcMain.handle(
+    IPC_CHANNELS.UPDATE_RESOLVE_COMMAND,
+    async (_event, { tool }: { tool: string }): Promise<{ command: string } | null> => {
+      try {
+        const toolCheck = TOOLS_TO_CHECK.find((entry) => entry.name === tool)
+        const isInstalled = tool === 'pixel-agents'
+          ? await isPixelAgentsInstalled()
+          : Boolean(toolCheck && await getVersion(toolCheck.checkCommand, toolCheck.checkArgs)) ||
+            (tool === 'rtk' && await isRtkInstalled())
+        const installResolution = await resolveToolInstallSource(tool)
+        const brewInstalled = !isInstalled && installResolution.brew?.installed
+
+        let command: string
+        let args: string[]
+
+        switch (tool) {
+          case 'brew':
+            if (IS_WIN) return null
+            if (isInstalled) { command = 'brew'; args = ['update'] }
+            else return null // brew install is multi-step
+            break
+          case 'node':
+            if (IS_WIN) {
+              command = 'winget'; args = [isInstalled ? 'upgrade' : 'install', '--id', 'OpenJS.NodeJS.LTS', '--silent', '--accept-source-agreements', '--accept-package-agreements']
+            } else if (installResolution.source.startsWith('brew') || !isInstalled) {
+              command = 'brew'; args = [isInstalled ? 'upgrade' : 'install', installResolution.brew?.name || 'node']
+            } else return null
+            break
+          case 'npm':
+            if (!isInstalled) {
+              if (IS_WIN) { command = 'winget'; args = ['install', '--id', 'OpenJS.NodeJS.LTS', '--silent', '--accept-source-agreements', '--accept-package-agreements'] }
+              else { command = 'brew'; args = ['install', 'node'] }
+            } else if (IS_WIN || !installResolution.source.startsWith('brew')) {
+              command = 'npm'; args = ['install', '-g', 'npm@latest']
+            } else {
+              command = 'brew'; args = ['upgrade', installResolution.brew?.name || 'node']
+            }
+            break
+          case 'pnpm':
+          case 'yarn':
+          case 'claude':
+          case 'codex':
+          case 'copilot': {
+            const meta = TOOL_METADATA[tool]
+            if (installResolution.source.startsWith('brew') && installResolution.brew?.name) {
+              command = 'brew'
+              args = installResolution.brew.kind === 'cask'
+                ? [(isInstalled || brewInstalled) ? 'upgrade' : 'install', '--cask', installResolution.brew.name]
+                : [(isInstalled || brewInstalled) ? 'upgrade' : 'install', installResolution.brew.name]
+            } else if (meta?.npmPackage) {
+              command = 'npm'; args = ['install', '-g', `${meta.npmPackage}@latest`]
+            } else return null
+            break
+          }
+          case 'git':
+          case 'go':
+          case 'python':
+          case 'make':
+            if (IS_WIN) {
+              const wingetIds: Record<string, string> = { git: 'Git.Git', go: 'GoLang.Go', python: 'Python.Python.3.13', make: 'GnuWin32.Make' }
+              command = 'winget'; args = [isInstalled ? 'upgrade' : 'install', '--id', wingetIds[tool]!, '--silent', '--accept-source-agreements', '--accept-package-agreements']
+            } else if (installResolution.source.startsWith('brew') || !isInstalled) {
+              command = 'brew'; args = [isInstalled ? 'upgrade' : 'install', installResolution.brew?.name || tool]
+            } else return null
+            break
+          case 'pip':
+            if (!IS_WIN && installResolution.source.startsWith('brew')) {
+              command = 'brew'; args = ['upgrade', installResolution.brew?.name || 'python']
+            } else {
+              command = IS_WIN ? 'python' : 'python3'; args = ['-m', 'pip', 'install', '--upgrade', 'pip']
+            }
+            break
+          case 'cargo':
+            if (IS_WIN && !isInstalled) {
+              command = 'winget'; args = ['install', '--id', 'Rustlang.Rustup', '--silent', '--accept-source-agreements', '--accept-package-agreements']
+            } else if (!IS_WIN && !isInstalled) {
+              command = 'brew'; args = ['install', installResolution.brew?.name || 'rustup']
+            } else if (installResolution.source.startsWith('brew') && installResolution.brew?.name) {
+              command = 'brew'; args = ['upgrade', installResolution.brew.name]
+            } else {
+              command = 'rustup'; args = ['update']
+            }
+            break
+          case 'rtk':
+            if (installResolution.source.startsWith('brew') || !IS_WIN) {
+              command = 'brew'; args = [isInstalled ? 'upgrade' : 'install', 'rtk']
+            } else {
+              command = 'cargo'; args = ['install', '--git', 'https://github.com/rtk-ai/rtk']
+            }
+            break
+          default:
+            return null
+        }
+
+        return { command: [command, ...args].join(' ') }
+      } catch {
+        return null
+      }
+    },
+  )
 }

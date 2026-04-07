@@ -46,6 +46,7 @@ export function useCommandPalette(open: boolean, onClose: () => void) {
       { mode: 'stats', label: t('command.showStats'), shortcut: '' },
       { mode: 'shortcuts', label: t('command.showShortcuts'), shortcut: '' },
       { mode: 'notes', label: t('command.showNotes'), shortcut: '' },
+      { mode: 'meteor', label: t('command.showMeteor'), shortcut: '' },
     ]
 
     for (const v of views) {

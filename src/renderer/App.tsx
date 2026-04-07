@@ -20,6 +20,7 @@ import { CodeAnalysisPanel } from './features/code-analysis'
 import { DevOpsPanel } from './features/devops'
 import { NotesPanel } from './features/notes'
 import { MultiAgentView } from './features/multi-agent'
+import { MeteorPanel } from './features/meteor'
 import { useAppUpdateStore } from './features/updates'
 import { SetupWizard } from './features/installer'
 import { useI18n } from './lib/i18n'
@@ -30,7 +31,7 @@ const TUTORIAL_VIEWS = new Set([
   'kanban', 'terminal', 'git', 'database', 'packages',
   'analysis', 'todos', 'stats', 'prompts', 'api', 'healthcheck',
   'settings', 'search', 'shortcuts', 'claude', 'ai', 'devops', 'notes',
-  'multi-agent',
+  'multi-agent', 'meteor',
 ])
 
 export function App() {
@@ -488,6 +489,11 @@ export function App() {
             {viewMode === 'multi-agent' && (
               <div className="view-panel" style={{ display: 'flex' }}>
                 <MultiAgentView />
+              </div>
+            )}
+            {viewMode === 'meteor' && (
+              <div className="view-panel" style={{ display: 'flex' }}>
+                <MeteorPanel />
               </div>
             )}
           </div>
