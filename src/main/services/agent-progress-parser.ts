@@ -59,9 +59,6 @@ function stripAnsi(text: string): string {
 // Claude Code spinner verbs — fancy animated thinking indicators
 const SPINNER_PATTERN = /[✶✻✽✳✢✺✵❋✿⊹⋆]\s*(\S+…)/
 
-// Bullet chars used by Claude Code CLI — ⏺ (U+23FA) and ● (U+25CF)
-const BULLET = '[⏺●]'
-
 // Tool use patterns — bullet prefix in Claude Code CLI output
 const TOOL_PATTERNS: Array<{
   pattern: RegExp
@@ -130,9 +127,6 @@ const TOOL_PATTERNS: Array<{
 const TASK_COMPLETED = /[✔✓]\s+(.+)/
 const TASK_IN_PROGRESS = /[◐◑◒◓⏳]\s+(.+)/
 const TASK_PENDING = /[◼○◻]\s+(.+)/
-
-// Generic ⏺ tool call fallback
-const GENERIC_TOOL = /[⏺●]\s*(\S+)/
 
 // Subagent patterns — "● Running 2 Explore agents…" header + "├─ Name · stats" details
 const RUNNING_AGENTS = /Running\s+(\d+)\s+(\w+)\s+agents?…/
