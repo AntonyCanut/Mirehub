@@ -1384,37 +1384,45 @@ body {
 
 /* Sidebar File Tree Nodes */
 .sidebar-ft-tree {
-  /* container */
+  padding: 2px 0;
 }
 
 .sidebar-ft-row {
   display: flex;
   align-items: center;
-  gap: 3px;
-  height: 22px;
+  gap: 6px;
+  height: 24px;
   padding-right: 8px;
   cursor: pointer;
   font-size: 11px;
   color: var(--text-secondary);
-  transition: background 0.1s ease;
+  border-radius: 4px;
+  margin: 0 4px;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .sidebar-ft-row:hover {
-  background: var(--bg-surface);
+  background: var(--accent-soft);
+  color: var(--text-primary);
 }
 
 .sidebar-ft-row--dir {
   color: var(--text-primary);
+  font-weight: 500;
 }
 
 .sidebar-ft-chevron {
-  width: 10px;
+  width: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, color 0.12s ease;
   flex-shrink: 0;
+}
+
+.sidebar-ft-row:hover .sidebar-ft-chevron {
+  color: var(--text-secondary);
 }
 
 .sidebar-ft-chevron--expanded {
@@ -1422,14 +1430,14 @@ body {
 }
 
 .sidebar-ft-chevron-spacer {
-  width: 10px;
+  width: 12px;
   flex-shrink: 0;
 }
 
 .sidebar-ft-icon {
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1441,16 +1449,18 @@ body {
   white-space: nowrap;
   flex: 1;
   min-width: 0;
+  letter-spacing: 0.01em;
 }
 
 .sidebar-ft-loading {
   font-size: 10px;
   color: var(--text-muted);
   font-style: italic;
-  height: 22px;
+  height: 24px;
   display: flex;
   align-items: center;
   padding: 0 12px;
+  opacity: 0.7;
 }
 
 /* Workspace Item */
@@ -1995,9 +2005,12 @@ body {
   border: 1px solid var(--text-muted);
   font-family: var(--font-mono);
   max-width: 100px;
+  min-width: 40px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-left: auto;
+  text-align: center;
 }
 
 .project-item--active .project-branch-tag {
@@ -4487,22 +4500,23 @@ body {
 
 /* ===== Sidebar File Tree - Selected & Rename ===== */
 .sidebar-ft-row--selected {
-  background: rgba(151, 71, 255, 0.15);
-  color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-primary);
 }
 
 .sidebar-ft-rename-input {
   flex: 1;
   min-width: 0;
   height: 18px;
-  padding: 0 4px;
+  padding: 0 6px;
   font-size: 11px;
   font-family: inherit;
   background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--accent);
-  border-radius: 3px;
+  border-radius: 4px;
   outline: none;
+  box-shadow: 0 0 0 1px var(--accent-soft);
 }
 
 /* ===== File Diff Viewer ===== */
@@ -7319,8 +7333,9 @@ body {
 /* ========= Sidebar File Tree: Highlighted file ========= */
 
 .sidebar-ft-row--highlighted {
-  background: rgba(151, 71, 255, 0.12) !important;
-  border-right: 2px solid var(--accent);
+  background: var(--accent-soft) !important;
+  color: var(--text-primary);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 /* ========= Workspace: Orange flash animation ========= */

@@ -199,7 +199,7 @@ function FileTreeNode({ entry, depth, sortField, onRename, onRefreshParent: _onR
           <span className="file-tree-chevron-spacer" />
         )}
         <span className="file-tree-icon">
-          {entry.isDirectory ? <FolderIcon /> : getFileIcon(entry.name)}
+          {entry.isDirectory ? <FolderIcon isOpen={expanded} /> : getFileIcon(entry.name)}
         </span>
         {isRenaming ? (
           <input
@@ -234,7 +234,7 @@ function FileTreeNode({ entry, depth, sortField, onRename, onRefreshParent: _onR
                   style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }}
                 >
                   <span className="file-tree-icon">
-                    {isCreating === 'folder' ? <FolderIcon /> : getFileIcon(createValue)}
+                    {isCreating === 'folder' ? <FolderIcon isOpen /> : getFileIcon(createValue)}
                   </span>
                   <input
                     className="file-tree-rename"
@@ -427,7 +427,7 @@ export function FileExplorer() {
             {isCreating && (
               <div className="file-tree-row file-tree-row--creating" style={{ paddingLeft: '8px' }}>
                 <span className="file-tree-icon">
-                  {isCreating === 'folder' ? <FolderIcon /> : getFileIcon(createValue)}
+                  {isCreating === 'folder' ? <FolderIcon isOpen /> : getFileIcon(createValue)}
                 </span>
                 <input
                   className="file-tree-rename"

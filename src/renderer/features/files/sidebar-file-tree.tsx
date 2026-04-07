@@ -3,6 +3,7 @@ import type { FileEntry } from '../../../shared/types'
 import { useViewStore } from '../../lib/stores/viewStore'
 import { ContextMenu, type ContextMenuItem } from '../../shared/ui/context-menu'
 import { FolderIcon, getFileIcon } from './file-icons'
+import '../files/fileexplorer.css'
 
 interface SidebarFileTreeProps {
   projectPath: string
@@ -214,7 +215,7 @@ function FileNode({ entry, depth, onRefresh }: FileNodeProps) {
           <span className="sidebar-ft-chevron-spacer" />
         )}
         <span className="sidebar-ft-icon">
-          {entry.isDirectory ? <FolderIcon /> : getFileIcon(entry.name)}
+          {entry.isDirectory ? <FolderIcon isOpen={expanded} /> : getFileIcon(entry.name)}
         </span>
         {isRenaming ? (
           <input
