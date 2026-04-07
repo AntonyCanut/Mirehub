@@ -191,13 +191,21 @@ export class AgentProgressParser {
     // 1. Spinner (thinking) — ✶ Hyperspacing… (2m24s · ↓ 4.1k tokens)
     const spinnerMatch = clean.match(SPINNER_PATTERN)
     if (spinnerMatch) {
-      this.setActivity(state, { type: 'thinking', label: spinnerMatch[1]! })
+      const spinnerLabel = spinnerMatch[1]!
+      // Use "Réflexion..." for very short/partial labels (e.g. "t…", "I…")
+      const label = spinnerLabel.replace(/…$/, '').length >= 4 ? spinnerLabel : 'Réflexion...'
+      this.setActivity(state, { type: 'thinking', label })
       return true
     }
 
     // Standalone thinking word — e.g. "Pollinating…" or "Mulling…"
-    if (/^\w+…$/.test(clean)) {
+    // Must be at least 4 chars before ellipsis to avoid partial PTY fragments like "t…" or "I…"
+    if (/^\w{4,}…$/.test(clean)) {
       this.setActivity(state, { type: 'thinking', label: clean })
+      return true
+    }
+    if (/^\w{1,3}…$/.test(clean)) {
+      this.setActivity(state, { type: 'thinking', label: 'Réflexion...' })
       return true
     }
 
@@ -266,7 +274,7 @@ export class AgentProgressParser {
     }
 
     // 6. Generic bullet + tool call (e.g. "⏺ Update(...)")
-    const genericMatch = clean.match(/[⏺●]\s*([A-Z]\w+)\s*\(/)
+    const genericMatch = clean.match(/[⏺●]\s*([A-Z]\w{2,})\s*\(/)
     if (genericMatch && !clean.includes('bypass permissions') && !clean.includes('accept edits')) {
       this.setActivity(state, { type: 'tool', label: genericMatch[1]! })
       return true
