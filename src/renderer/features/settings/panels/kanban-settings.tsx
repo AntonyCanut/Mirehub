@@ -73,21 +73,6 @@ export function KanbanSettings() {
             <>
             <div className="settings-row">
               <div className="settings-row-info">
-                <label className="settings-label">{t('kanban.autoMergeWorktrees')}</label>
-                <span className="settings-hint">{t('kanban.autoMergeWorktreesHint')}</span>
-              </div>
-              <button
-                className={`settings-toggle${kanbanDefaultConfig.autoMergeWorktrees ? ' settings-toggle--active' : ''}`}
-                onClick={async () => {
-                  const updated = await window.kanbai.kanban.setDefaultConfig({ autoMergeWorktrees: !kanbanDefaultConfig.autoMergeWorktrees })
-                  setKanbanDefaultConfig(updated)
-                }}
-              >
-                <span className="settings-toggle-knob" />
-              </button>
-            </div>
-            <div className="settings-row">
-              <div className="settings-row-info">
                 <label className="settings-label">{t('kanban.maxConcurrentWorktrees')}</label>
                 <span className="settings-hint">{t('kanban.maxConcurrentWorktreesHint')}</span>
               </div>
@@ -170,21 +155,6 @@ export function KanbanSettings() {
           )}
           {kanbanProjectConfig.useWorktrees && (
             <>
-            <div className="settings-row">
-              <div className="settings-row-info">
-                <label className="settings-label">{t('kanban.autoMergeWorktrees')}</label>
-                <span className="settings-hint">{t('kanban.autoMergeWorktreesHint')}</span>
-              </div>
-              <button
-                className={`settings-toggle${kanbanProjectConfig.autoMergeWorktrees ? ' settings-toggle--active' : ''}`}
-                onClick={async () => {
-                  const updated = await window.kanbai.kanban.setConfig(activeWorkspaceId, { autoMergeWorktrees: !kanbanProjectConfig.autoMergeWorktrees })
-                  setKanbanProjectConfig(updated)
-                }}
-              >
-                <span className="settings-toggle-knob" />
-              </button>
-            </div>
             <div className="settings-row">
               <div className="settings-row-info">
                 <label className="settings-label">{t('kanban.maxConcurrentWorktrees')}</label>

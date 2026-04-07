@@ -221,7 +221,7 @@ try {
 # - PENDING + CTO → auto-approve: revert to TODO (unblock CTO cycle)
 # - PENDING + regular → activity "waiting" (double bell in Electron)
 # - FAILED  → activity "failed" (quad bell in Electron)
-# - DONE    → auto-commit + auto-merge worktree if enabled
+# - DONE    → auto-commit worktree (merge is handled by the renderer on tab close)
 ACTIVITY_SCRIPT="$HOME/.kanbai/hooks/kanbai-activity.sh"
 
 [ -z "$KANBAI_KANBAN_TASK_ID" ] && exit 0

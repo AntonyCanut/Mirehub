@@ -36,7 +36,7 @@ export function repoPathFromWorktree(worktreePath: string): string {
  * Auto-merge a completed task's worktree branch into the working branch,
  * then remove the worktree and delete the branch.
  * Uses worktreeBaseBranch to merge into the branch that was active at worktree creation.
- * Only runs if the task has worktree info and autoMergeWorktrees is enabled.
+ * Always runs when the task has worktree info — merge is mandatory when worktrees are used.
  *
  * On merge conflict: aborts the merge, preserves the worktree and branch,
  * sets the task to PENDING with conflict details, and notifies the user.
@@ -47,8 +47,6 @@ export async function autoMergeWorktree(
 ): Promise<void> {
   if (!task.worktreePath || !task.worktreeBranch) return
   try {
-    const kanbanConfig = await window.kanbai.kanban.getConfig(workspaceId)
-    if (!kanbanConfig?.autoMergeWorktrees) return
     const repoPath = repoPathFromWorktree(task.worktreePath)
     const ticketLabel = formatTicketLabel(task)
     const result = await window.kanbai.git.worktreeMergeAndCleanup(
@@ -145,9 +143,6 @@ export async function verifyAndRetryWorktreeMerges(
   workspaceId: string,
 ): Promise<void> {
   try {
-    const kanbanConfig = await window.kanbai.kanban.getConfig(workspaceId)
-    if (!kanbanConfig?.autoMergeWorktrees) return
-
     // Find DONE tasks that have unmerged worktree entries
     const unmergedDone = tasks.filter(
       (t) => t.status === 'DONE' && hasUnmergedWorktreeEntries(t),
