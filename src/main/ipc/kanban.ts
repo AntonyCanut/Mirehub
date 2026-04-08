@@ -120,11 +120,14 @@ function ensureKanbanHook(projectPath: string): void {
 
   if (IS_WIN) {
     const hookScript = `# Kanbai - Kanban task completion hook (auto-generated, PowerShell)
-# Checks the kanban ticket status and writes the appropriate activity status.
-# DONE/FAILED -> auto-commit uncommitted worktree changes, merge branch if enabled (worktree cleanup deferred to terminal close)
-# PENDING + CTO -> auto-approve: revert to TODO (unblock CTO cycle)
-# PENDING + regular -> activity "waiting" (double bell in Electron)
-# WORKING -> block Claude from stopping and remind ticket update
+# Runs on Claude Code Stop event to check if the kanban ticket was updated.
+#
+# Behavior:
+# - WORKING -> BLOCK Claude from stopping, remind to update the ticket
+# - PENDING + CTO -> auto-approve: revert to TODO (unblock CTO cycle)
+# - PENDING + regular -> activity "waiting" (double bell in Electron)
+# - FAILED  -> activity "failed" (quad bell in Electron)
+# - DONE    -> auto-commit worktree, then block AI to merge worktree branch (if not yet merged)
 $ActivityScript = "$env:USERPROFILE\\.kanbai\\hooks\\kanbai-activity.ps1"
 
 if (-not $env:KANBAI_KANBAN_TASK_ID) { exit 0 }
@@ -140,11 +143,16 @@ function Auto-CommitWorktree {
   git commit -m "chore(kanban): auto-commit $ticketLabel worktree changes" 2>$null
 }
 
-function Merge-WorktreeBranch($wtPath, $wtBranch, $repoPath) {
-  if (-not $wtPath -or -not $wtBranch -or -not $repoPath) { return }
-  try { git -C $repoPath merge $wtBranch -m "Merge branch '$wtBranch'" 2>$null } catch { return }
-  # Worktree directory and branch are kept alive until the terminal is closed.
-  # Cleanup is handled by the Electron app on terminal tab close (handleTabClosed).
+function Get-RepoPathFromWorktree($wtPath) {
+  if ($wtPath -match '(.*?)[\\\\/]\\.kanbai-worktrees[\\\\/]') { return $Matches[1] }
+  return $wtPath
+}
+
+function Test-BranchMerged($repoPath, $branch, $target) {
+  try {
+    git -C $repoPath merge-base --is-ancestor $branch $target 2>$null
+    return ($LASTEXITCODE -eq 0)
+  } catch { return $false }
 }
 
 $nodeOutput = node -e "
@@ -158,9 +166,14 @@ try {
   const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
   const task = tasks.find(t => t.id === taskId);
   if (task) {
-    const isCto = task.isCtoTicket ? 'true' : 'false';
+    let isCto = task.isCtoTicket || false;
+    if (!isCto && task.parentTicketId) {
+      const parent = tasks.find(t => t.id === task.parentTicketId);
+      if (parent && parent.isCtoTicket) isCto = true;
+    }
     const wtPath = task.worktreePath || '';
     const wtBranch = task.worktreeBranch || '';
+    const wtBaseBranch = task.worktreeBaseBranch || '';
     let autoMerge = 'false';
     if (wsId) {
       try {
@@ -171,28 +184,48 @@ try {
         }
       } catch(e2) { /* ignore */ }
     }
-    process.stdout.write(task.status + ' ' + isCto + ' ' + wtPath + ' ' + wtBranch + ' ' + autoMerge);
+    process.stdout.write([task.status, isCto ? 'true' : 'false', wtPath, wtBranch, wtBaseBranch, autoMerge].join('\\t'));
   }
 } catch(e) { /* ignore */ }
 "
-$parts = ($nodeOutput -split ' ')
+$parts = ($nodeOutput -split '\\t')
 $TicketStatus = $parts[0]
 $IsCto = $parts[1]
 $WorktreePath = $parts[2]
 $WorktreeBranch = $parts[3]
-$AutoMerge = $parts[4]
-
-$RepoPath = ""
-if ($WorktreePath) {
-  $RepoPath = $WorktreePath -replace '[\\\\/]\\.kanbai-worktrees[\\\\/][^\\\\/]*$', ''
-}
+$WorktreeBaseBranch = $parts[4]
+$AutoMerge = $parts[5]
 
 switch ($TicketStatus) {
   "DONE" {
     Auto-CommitWorktree
-    if ($AutoMerge -eq "true" -and $WorktreePath -and $WorktreeBranch) {
-      Merge-WorktreeBranch $WorktreePath $WorktreeBranch $RepoPath
+
+    # If this task has a worktree, ask the AI to merge instead of auto-merging.
+    if ($WorktreePath -and $WorktreeBranch) {
+      $RepoPath = Get-RepoPathFromWorktree $WorktreePath
+      $MergeTarget = if ($WorktreeBaseBranch) { $WorktreeBaseBranch } else { "main" }
+
+      if (-not (Test-BranchMerged $RepoPath $WorktreeBranch $MergeTarget)) {
+        $TicketLabel = if ($env:KANBAI_KANBAN_TICKET) { $env:KANBAI_KANBAN_TICKET } else { "unknown" }
+        node -e "
+const reason = 'MERGE WORKTREE REQUIS avant de terminer !\\n\\n'
+  + 'Tu travailles dans un worktree. Tes commits sont sur la branche: $WorktreeBranch\\n'
+  + 'Tu dois merger cette branche dans la branche cible: $MergeTarget\\n'
+  + 'Repo principal: $RepoPath\\n\\n'
+  + 'Execute ces commandes :\\n'
+  + '  git -C \\\"$RepoPath\\\" checkout $MergeTarget\\n'
+  + '  git -C \\\"$RepoPath\\\" merge $WorktreeBranch --no-edit\\n\\n'
+  + 'Si il y a des conflits de merge :\\n'
+  + '  1. Resous les conflits dans les fichiers du repo principal ($RepoPath)\\n'
+  + '  2. git -C \\\"$RepoPath\\\" add -A\\n'
+  + '  3. git -C \\\"$RepoPath\\\" commit -m \\\"feat(kanban): $TicketLabel - merge worktree\\\"\\n\\n'
+  + 'Une fois le merge fait, tu peux terminer normalement.\\n'
+  + 'Le ticket kanban doit rester DONE — ne change pas son status.';
+process.stdout.write(JSON.stringify({ decision: 'block', reason: reason }));
+"
+      }
     }
+    # Worktree removal/cleanup is deferred to the renderer (handleTabClosed)
   }
   "FAILED" {
     Auto-CommitWorktree
@@ -243,45 +276,47 @@ process.stdout.write(JSON.stringify({ decision: 'block', reason: reason }));
   } else {
     const hookScript = `#!/bin/bash
 # Kanbai - Kanban task completion hook (auto-generated)
-# Checks the kanban ticket status and writes the appropriate activity status.
-# DONE/FAILED → auto-commit uncommitted worktree changes, merge branch if enabled (worktree cleanup deferred to terminal close)
-# PENDING + CTO → auto-approve: revert to TODO (unblock CTO cycle)
-# PENDING + regular → activity "waiting" (double bell in Electron)
-# WORKING → block Claude from stopping and remind ticket update
+# Runs on Claude Code Stop event to check if the kanban ticket was updated.
+#
+# Behavior:
+# - WORKING → BLOCK Claude from stopping, remind to update the ticket
+# - PENDING + CTO → auto-approve: revert to TODO (unblock CTO cycle)
+# - PENDING + regular → activity "waiting" (double bell in Electron)
+# - FAILED  → activity "failed" (quad bell in Electron)
+# - DONE    → auto-commit worktree, then block AI to merge worktree branch (if not yet merged)
 ACTIVITY_SCRIPT="$HOME/.kanbai/hooks/kanbai-activity.sh"
 
 [ -z "$KANBAI_KANBAN_TASK_ID" ] && exit 0
 [ -z "$KANBAI_KANBAN_FILE" ] && exit 0
 
+# Derive the main repo path from the worktree path (strip /.kanbai-worktrees/{id})
+repo_path_from_worktree() {
+  local wt_path="$1"
+  echo "\${wt_path%%/.kanbai-worktrees/*}"
+}
+
+# Check if the worktree branch has been merged into the target branch
+is_branch_merged() {
+  local repo_path="$1"
+  local branch="$2"
+  local target="$3"
+  git -C "$repo_path" merge-base --is-ancestor "$branch" "$target" 2>/dev/null
+}
+
 # Auto-commit uncommitted worktree changes (runs in the worktree CWD)
 auto_commit_worktree() {
-  # Only proceed if we are inside a git repo
   git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
-  # Check for uncommitted changes (staged or unstaged or untracked)
   local status
   status=$(git status --porcelain 2>/dev/null)
   [ -z "$status" ] && return 0
-  # Stage all and commit
   local ticket_label="\${KANBAI_KANBAN_TICKET:-unknown}"
   git add -A 2>/dev/null
   git commit -m "chore(kanban): auto-commit \${ticket_label} worktree changes" 2>/dev/null
 }
 
-# Merge worktree branch into the target branch (worktree cleanup deferred to terminal close)
-# Arguments: $1=worktreePath $2=worktreeBranch $3=repoPath
-merge_worktree_branch() {
-  local wt_path="$1" wt_branch="$2" repo_path="$3"
-  [ -z "$wt_path" ] || [ -z "$wt_branch" ] || [ -z "$repo_path" ] && return 0
-
-  # Merge the worktree branch into the target branch
-  git -C "$repo_path" merge "$wt_branch" -m "Merge branch '$wt_branch'" 2>/dev/null || return 0
-
-  # Worktree directory and branch are kept alive until the terminal is closed.
-  # Cleanup is handled by the Electron app on terminal tab close (handleTabClosed).
-}
-
-# Read ticket status, isCtoTicket flag, worktree info, and autoMerge config
-read -r TICKET_STATUS IS_CTO WORKTREE_PATH WORKTREE_BRANCH AUTO_MERGE <<< $(node -e "
+# Read ticket status, isCtoTicket flag, worktree info, base branch, and autoMerge config
+# Use tab separator to handle paths with spaces correctly
+IFS=$'\\t' read -r TICKET_STATUS IS_CTO WORKTREE_PATH WORKTREE_BRANCH WORKTREE_BASE_BRANCH AUTO_MERGE <<< $(node -e "
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -292,9 +327,14 @@ try {
   const tasks = JSON.parse(fs.readFileSync(file, 'utf-8'));
   const task = tasks.find(t => t.id === taskId);
   if (task) {
-    const isCto = task.isCtoTicket ? 'true' : 'false';
+    let isCto = task.isCtoTicket || false;
+    if (!isCto && task.parentTicketId) {
+      const parent = tasks.find(t => t.id === task.parentTicketId);
+      if (parent && parent.isCtoTicket) isCto = true;
+    }
     const wtPath = task.worktreePath || '';
     const wtBranch = task.worktreeBranch || '';
+    const wtBaseBranch = task.worktreeBaseBranch || '';
     let autoMerge = 'false';
     if (wsId) {
       try {
@@ -305,23 +345,47 @@ try {
         }
       } catch(e2) { /* ignore */ }
     }
-    process.stdout.write(task.status + ' ' + isCto + ' ' + wtPath + ' ' + wtBranch + ' ' + autoMerge);
+    process.stdout.write([task.status, isCto ? 'true' : 'false', wtPath, wtBranch, wtBaseBranch, autoMerge].join('\\t'));
   }
 } catch(e) { /* ignore */ }
 ")
 
-# Derive repo path from worktree path (strip .kanbai-worktrees/<id>)
-REPO_PATH=""
-if [ -n "$WORKTREE_PATH" ]; then
-  REPO_PATH=$(echo "$WORKTREE_PATH" | sed 's|/\\.kanbai-worktrees/[^/]*$||')
-fi
-
 case "$TICKET_STATUS" in
   DONE)
     auto_commit_worktree
-    if [ "$AUTO_MERGE" = "true" ] && [ -n "$WORKTREE_PATH" ] && [ -n "$WORKTREE_BRANCH" ]; then
-      merge_worktree_branch "$WORKTREE_PATH" "$WORKTREE_BRANCH" "$REPO_PATH"
+
+    # If this task has a worktree, ask the AI to merge instead of auto-merging.
+    # The AI can handle merge conflicts, while the auto-merge would just abort.
+    if [ -n "$WORKTREE_PATH" ] && [ -n "$WORKTREE_BRANCH" ]; then
+      REPO_PATH=$(repo_path_from_worktree "$WORKTREE_PATH")
+      MERGE_TARGET="\${WORKTREE_BASE_BRANCH:-main}"
+
+      # Check if the branch is already merged — if so, let through
+      if is_branch_merged "$REPO_PATH" "$WORKTREE_BRANCH" "$MERGE_TARGET"; then
+        # Branch already merged — worktree cleanup will happen in the renderer
+        :
+      else
+        # Branch NOT merged — block and ask the AI to merge
+        TICKET_LABEL="\${KANBAI_KANBAN_TICKET:-unknown}"
+        node -e "
+const reason = 'MERGE WORKTREE REQUIS avant de terminer !\\n\\n'
+  + 'Tu travailles dans un worktree. Tes commits sont sur la branche: \${WORKTREE_BRANCH}\\n'
+  + 'Tu dois merger cette branche dans la branche cible: \${MERGE_TARGET}\\n'
+  + 'Repo principal: \${REPO_PATH}\\n\\n'
+  + 'Execute ces commandes :\\n'
+  + '  git -C \\\"$REPO_PATH\\\" checkout \${MERGE_TARGET}\\n'
+  + '  git -C \\\"$REPO_PATH\\\" merge \${WORKTREE_BRANCH} --no-edit\\n\\n'
+  + 'Si il y a des conflits de merge :\\n'
+  + '  1. Resous les conflits dans les fichiers du repo principal (\${REPO_PATH})\\n'
+  + '  2. git -C \\\"$REPO_PATH\\\" add -A\\n'
+  + '  3. git -C \\\"$REPO_PATH\\\" commit -m \\\"feat(kanban): \${TICKET_LABEL} - merge worktree\\\"\\n\\n'
+  + 'Une fois le merge fait, tu peux terminer normalement.\\n'
+  + 'Le ticket kanban doit rester DONE — ne change pas son status.';
+process.stdout.write(JSON.stringify({ decision: 'block', reason: reason }));
+"
+      fi
     fi
+    # Worktree removal/cleanup is deferred to the renderer (handleTabClosed)
     ;;
   FAILED)
     auto_commit_worktree
